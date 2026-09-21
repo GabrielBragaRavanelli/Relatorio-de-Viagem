@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
     margin: 0;
@@ -20,11 +20,8 @@ body {
     --azul-ajborges-medio: #4a4aa8;
     --azul-ajborges-claro: #5c5cb8;
     --azul-ajborges-suave: #eef2ff;
-    --azul-ajborges-alpha: rgba(61, 61, 144, 0.12);
-    --azul-ajborges-glow: rgba(61, 61, 144, 0.25);
     --branco: #ffffff;
     --preto: #000000;
-    --cinza: #aeaeae;
     --cinza-escuro: #1e293b;
     --cinza-medio: #64748b;
     --cinza-texto: #475569;
@@ -33,46 +30,17 @@ body {
     --cinza-borda: #e2e8f0;
     --cinza-borda-hover: #cbd5e1;
     --cinza-placeholder: #94a3b8;
-    --cinza-fundo-muted: #f8f9fa;
-    --fundo-principal: #f4f6fb;
-    --card-background: #ffffff;
-    --card-header-bg: #f8fafc;
     --verde-sucesso: #10b981;
     --verde-sucesso-escuro: #065f46;
     --verde-sucesso-fundo: #ecfdf5;
     --verde-sucesso-borda: #a7f3d0;
     --vermelho-perigo: #ef4444;
-    --vermelho-perigo-escuro: #b91c1c;
     --vermelho-perigo-fundo: #fef2f2;
-    --vermelho-perigo-borda: #fecaca;
-    --amarelo-alerta: #f59e0b;
-    --amarelo-alerta-escuro: #b45309;
-    --amarelo-alerta-fundo: #fffbeb;
-    --amarelo-alerta-borda: #fde68a;
     --azul-info: #3b82f6;
-    --azul-info-escuro: #1d4ed8;
-    --azul-info-fundo: #eff6ff;
-    --azul-info-borda: #bfdbfe;
-    --cor-pedagio: #0284c7;
-    --cor-pedagio-escuro: #0369a1;
-    --cor-pedagio-bg: #f0f9ff;
-    --cor-pedagio-border: #bae6fd;
-    --cor-imposto-federal: #dc2626;
-    --cor-imposto-federal-escuro: #991b1b;
-    --cor-imposto-federal-bg: #fef2f2;
-    --cor-imposto-federal-border: #fecaca;
-    --cor-ml-amarelo: #eab308;
-    --cor-ml-amarelo-suave: #fef9c3;
-    --cor-comissao-roxo: #8b5cf6;
-    --cor-comissao-roxo-escuro: #5b21b6;
-    --cor-comissao-roxo-bg: #f5f3ff;
-    --cor-comissao-roxo-border: #ddd6fe;
-    --sombra-card: 0 4px 18px rgba(0, 0, 0, 0.06);
-    --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.04);
-    --sombra-elevada: 0 10px 25px rgba(61, 61, 144, 0.15);
+    --sombra-card: 0 16px 40px rgba(61, 61, 144, 0.1), 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
-/* --- Header--- */
+/* --- HEADER FIXO --- */
 
 header {
     width: 100%;
@@ -150,20 +118,21 @@ header {
     color: var(--branco);
     transform: translateY(-1px);
 }
-/* --- Main & Login Container --- */
 
-main.login-main {
+/* --- MAIN & CADASTRO CONTAINER --- */
+
+main.cadastro-main {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 110px 20px 60px;
+    padding: 110px 20px 70px;
     position: relative;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 20%, rgba(61, 61, 144, 0.08) 0%, rgba(244, 246, 251, 1) 70%);
+    background: radial-gradient(circle at 50% 15%, rgba(61, 61, 144, 0.08) 0%, rgba(244, 246, 251, 1) 70%);
 }
 
-/* Formas decorativas de fundo com blur */
+/* Formas decorativas com blur no fundo */
 .bg-shape {
     position: absolute;
     border-radius: 50%;
@@ -174,60 +143,96 @@ main.login-main {
 }
 
 .shape-1 {
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, rgba(61, 61, 144, 0.18) 0%, rgba(61, 61, 144, 0) 70%);
-    top: -60px;
-    left: 10%;
-    animation: pulsarSuave 8s ease-in-out infinite alternate;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(61, 61, 144, 0.16) 0%, rgba(61, 61, 144, 0) 70%);
+    top: -80px;
+    left: 5%;
+    animation: pulsarSuave 9s ease-in-out infinite alternate;
 }
 
 .shape-2 {
-    width: 380px;
-    height: 380px;
-    background: radial-gradient(circle, rgba(92, 92, 184, 0.14) 0%, rgba(92, 92, 184, 0) 70%);
-    bottom: -40px;
-    right: 12%;
-    animation: pulsarSuave 9s ease-in-out infinite alternate-reverse;
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(92, 92, 184, 0.13) 0%, rgba(92, 92, 184, 0) 70%);
+    bottom: -60px;
+    right: 8%;
+    animation: pulsarSuave 10s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes pulsarSuave {
     0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.1) translate(15px, 15px); }
+    100% { transform: scale(1.08) translate(15px, 15px); }
 }
 
-.login-container {
+.cadastro-container {
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 460px;
+    max-width: 680px;
     margin: 0 auto;
 }
 
-/* --- Card de Login com Glassmorphism --- */
+/* Navegação Topo (Botão Voltar) */
+.topo-navegacao {
+    margin-bottom: 16px;
+}
 
-.login-card {
+.btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--azul-ajborges);
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(61, 61, 144, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(8px);
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-voltar svg {
+    width: 17px;
+    height: 17px;
+    transition: transform 0.2s ease;
+}
+
+.btn-voltar:hover {
+    background-color: var(--azul-ajborges);
+    color: var(--branco);
+    transform: translateX(-3px);
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.2);
+}
+
+.btn-voltar:hover svg {
+    transform: translateX(-2px);
+}
+
+/* --- CARD DE CADASTRO --- */
+
+.cadastro-card {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(61, 61, 144, 0.12);
-    border-radius: 20px;
-    padding: 38px 34px 34px;
-    box-shadow: 0 16px 40px rgba(61, 61, 144, 0.1), 0 4px 12px rgba(0, 0, 0, 0.03);
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-    min-height: 635px;
-    display: flex;
-    flex-direction: column;
+    border-radius: 22px;
+    padding: 40px 38px 36px;
+    box-shadow: var(--sombra-card);
+    transition: box-shadow 0.3s ease;
 }
 
-.login-card:hover {
+.cadastro-card:hover {
     box-shadow: 0 22px 50px rgba(61, 61, 144, 0.14), 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
 /* Cabeçalho do Card */
-.login-card-header {
+.cadastro-card-header {
     text-align: center;
-    margin-bottom: 26px;
+    margin-bottom: 30px;
 }
 
 .card-badge {
@@ -245,7 +250,7 @@ main.login-main {
 }
 
 .card-title {
-    font-size: 25px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--cinza-escuro);
     letter-spacing: -0.4px;
@@ -253,147 +258,88 @@ main.login-main {
 }
 
 .card-subtitle {
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--cinza-medio);
     font-weight: 400;
     line-height: 1.5;
+    max-width: 520px;
+    margin: 0 auto;
 }
 
-/* --- Abas de Alternância (Segmented Control) --- */
+/* --- SEÇÕES DO FORMULÁRIO --- */
 
-.tabs-wrapper {
-    margin-bottom: 24px;
+.form-secao {
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #edf2f7;
 }
 
-.tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    background-color: #f1f5f9;
-    padding: 5px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    position: relative;
-}
-
-.tab-btn {
+.secao-titulo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 9px;
-    padding: 11px 14px;
-    border: none;
-    background: transparent;
-    border-radius: 9px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--cinza-texto);
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-    outline: none;
-}
-
-.tab-btn .tab-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    stroke: currentColor;
-    transition: transform 0.2s ease;
-}
-
-.tab-btn:hover:not(.active) {
-    color: var(--azul-ajborges);
-    background-color: rgba(255, 255, 255, 0.7);
-}
-
-.tab-btn.active {
-    background-color: var(--azul-ajborges);
-    color: var(--branco);
-    box-shadow: 0 4px 14px rgba(61, 61, 144, 0.28);
-    transform: translateY(-1px);
-}
-
-.tab-btn.active .tab-icon {
-    stroke: var(--branco);
-    transform: scale(1.08);
-}
-
-/* --- Conteúdo dos Formulários --- */
-
-.tab-content {
-    display: none;
-    flex-direction: column;
-    flex: 1;
-    min-height: 380px;
-}
-
-.tab-content.active {
-    display: flex;
-    animation: animacaoAba 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes animacaoAba {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Instrução contextual do perfil */
-.form-instruction {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--cinza-texto);
-    background-color: #f8fafc;
-    border-left: 3px solid var(--azul-ajborges);
-    padding: 9px 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-.form-instruction.admin-instruction {
-    border-left-color: #4a4aa8;
-}
-
-.dot-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.motorista-dot {
-    background-color: var(--verde-sucesso);
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
-}
-
-.admin-dot {
-    background-color: var(--azul-ajborges-medio);
-    box-shadow: 0 0 6px rgba(74, 74, 168, 0.6);
-}
-
-/* Grupos de Formulário e Inputs */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+    gap: 12px;
     margin-bottom: 18px;
 }
 
-.form-group label {
+.secao-numero {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--azul-ajborges);
+    color: var(--branco);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.secao-titulo h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--cinza-escuro);
+    letter-spacing: -0.2px;
+}
+
+/* Grid de Campos */
+.grid-campos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.campo-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.campo-full {
+    grid-column: 1 / -1;
+}
+
+.campo-grupo label {
     font-size: 13.5px;
     font-weight: 600;
     color: var(--cinza-escuro);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
+.obrigatorio {
+    color: var(--vermelho-perigo);
+    font-weight: 700;
+}
+
+.opcional {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--cinza-placeholder);
+}
+
+/* Inputs e Ícones */
 .input-wrapper {
     position: relative;
     display: flex;
@@ -442,7 +388,38 @@ main.login-main {
     font-size: 14px;
 }
 
-/* Botão de Exibir/Ocultar Senha */
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+/* Custom Select para Categoria CNH */
+.select-wrapper {
+    position: relative;
+}
+
+.form-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 14px;
+    width: 18px;
+    height: 18px;
+    color: var(--cinza-medio);
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.input-wrapper:focus-within .select-arrow {
+    color: var(--azul-ajborges);
+    transform: rotate(180deg);
+}
+
+/* Botão Exibir/Ocultar Senha */
 .btn-toggle-password {
     position: absolute;
     right: 8px;
@@ -473,20 +450,32 @@ main.login-main {
     display: none;
 }
 
-/* Opções de Formulário (Lembrar / Esqueci senha) */
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-    font-size: 13px;
-    gap: 8px;
+/* Feedback de Senhas Coincidentes */
+.senha-feedback {
+    margin-top: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    min-height: 18px;
+    transition: all 0.2s ease;
+}
+
+.senha-feedback.erro {
+    color: var(--vermelho-perigo);
+}
+
+.senha-feedback.sucesso {
+    color: var(--verde-sucesso-escuro);
+}
+
+/* Termos de Aceite */
+.termos-container {
+    margin-top: 18px;
 }
 
 .checkbox-container {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 10px;
     cursor: pointer;
     user-select: none;
     color: var(--cinza-texto);
@@ -502,14 +491,16 @@ main.login-main {
 }
 
 .custom-checkbox {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border: 1.5px solid var(--cinza-borda-hover);
     border-radius: 5px;
     background-color: var(--branco);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
     transition: all 0.2s ease;
 }
 
@@ -533,110 +524,84 @@ main.login-main {
 
 .checkbox-label {
     font-size: 13px;
-    font-weight: 500;
+    line-height: 1.5;
 }
 
-.link-recuperar {
-    color: var(--azul-ajborges);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.link-recuperar:hover {
-    color: var(--azul-ajborges-escuro);
-    text-decoration: underline;
-}
-
-/* Botões de Acesso (Submit) */
-.btn-submit {
+/* Botão de Conclusão de Cadastro */
+.btn-submit-cadastro {
     width: 100%;
-    height: 48px;
+    height: 50px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: linear-gradient(135deg, var(--azul-ajborges) 0%, var(--azul-ajborges-medio) 100%);
     color: var(--branco);
     font-family: inherit;
-    font-size: 15px;
+    font-size: 15.5px;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(61, 61, 144, 0.24);
+    box-shadow: 0 8px 20px rgba(61, 61, 144, 0.25);
     transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
     outline: none;
+    margin-top: 6px;
 }
 
-.btn-submit:hover {
+.btn-submit-cadastro:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(61, 61, 144, 0.35);
+    box-shadow: 0 12px 26px rgba(61, 61, 144, 0.35);
     background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 100%);
 }
 
-.btn-submit:active {
+.btn-submit-cadastro:active {
     transform: translateY(0) scale(0.99);
 }
 
-.btn-submit .btn-icon {
-    width: 18px;
-    height: 18px;
+.btn-submit-cadastro .btn-icon {
+    width: 19px;
+    height: 19px;
+    stroke-width: 2.5;
     transition: transform 0.2s ease;
 }
 
-.btn-submit:hover .btn-icon {
-    transform: translateX(3px);
-}
-
-.btn-submit-admin {
-    background: linear-gradient(135deg, #2b2b6d 0%, #3d3d90 100%);
-}
-
-.btn-submit-admin:hover .btn-icon {
+.btn-submit-cadastro:hover .btn-icon {
     transform: scale(1.1);
 }
 
-/* Rodapé do Formulário */
-.form-footer {
+/* Rodapé do Card */
+.card-rodape {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 6px;
-    margin-top: 22px;
-    font-size: 13.5px;
+    margin-top: 24px;
+    font-size: 14px;
     color: var(--cinza-medio);
     text-align: center;
     flex-wrap: wrap;
 }
 
-.link-cadastro {
+.link-login {
     color: var(--azul-ajborges);
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
-.link-cadastro:hover {
+.link-login:hover {
     color: var(--azul-ajborges-escuro);
     text-decoration: underline;
 }
 
-/* Espaçador para manter altura e simetria 100% idênticas entre os dois perfis */
-.form-footer-placeholder {
-    margin-top: 22px;
-    min-height: 20px;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-/* --- Toast de Notificação Dinâmica --- */
-.login-toast {
+/* --- TOAST DE NOTIFICAÇÃO --- */
+.cadastro-toast {
     position: fixed;
     top: 90px;
     right: 24px;
     z-index: 2000;
-    max-width: 360px;
+    max-width: 380px;
     background: var(--cinza-escuro);
     color: var(--branco);
     padding: 14px 18px;
@@ -651,23 +616,18 @@ main.login-main {
     pointer-events: none;
 }
 
-.login-toast.show {
+.cadastro-toast.show {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
 }
 
-.login-toast.toast-success {
+.cadastro-toast.toast-success {
     background-color: var(--azul-ajborges-escuro);
     border-left: 4px solid var(--verde-sucesso);
 }
 
-.login-toast.toast-info {
-    background-color: var(--azul-ajborges);
-    border-left: 4px solid var(--azul-info);
-}
-
-.login-toast.toast-error {
+.cadastro-toast.toast-error {
     background-color: #7f1d1d;
     border-left: 4px solid var(--vermelho-perigo);
 }
@@ -688,54 +648,7 @@ main.login-main {
     line-height: 1.4;
 }
 
-/* --- Responsividade Mobile --- */
-@media (max-width: 540px) {
-    .login-main {
-        padding: 95px 16px 40px;
-    }
-
-    .login-card {
-        padding: 28px 20px 24px;
-        border-radius: 16px;
-        min-height: 610px;
-    }
-
-    .tab-content {
-        min-height: 385px;
-    }
-
-    .card-title {
-        font-size: 22px;
-    }
-
-    .tab-btn {
-        padding: 10px 10px;
-        font-size: 13px;
-        gap: 6px;
-    }
-
-    .tab-btn .tab-icon {
-        width: 16px;
-        height: 16px;
-    }
-
-    .form-options {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .login-toast {
-        left: 16px;
-        right: 16px;
-        max-width: none;
-        top: 80px;
-    }
-}
-
-/* --- Footer --- */
+/* --- FOOTER --- */
 
 footer {
     width: 100%;
@@ -921,4 +834,37 @@ footer {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0.2px;
+}
+
+/* --- RESPONSIVIDADE MOBILE --- */
+@media (max-width: 680px) {
+    .cadastro-main {
+        padding: 95px 16px 40px;
+    }
+
+    .cadastro-card {
+        padding: 28px 20px 24px;
+        border-radius: 18px;
+    }
+
+    .card-title {
+        font-size: 23px;
+    }
+
+    .grid-campos {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .bloco-footer {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .cadastro-toast {
+        left: 16px;
+        right: 16px;
+        max-width: none;
+        top: 80px;
+    }
 }
