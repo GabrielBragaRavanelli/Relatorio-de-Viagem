@@ -15,7 +15,6 @@ body {
 }
 
 :root {
-    /* Cores Institucionais AJBorges */
     --azul-ajborges: #3d3d90;
     --azul-ajborges-escuro: #2b2b6d;
     --azul-ajborges-medio: #4a4aa8;
@@ -23,8 +22,6 @@ body {
     --azul-ajborges-suave: #eef2ff;
     --azul-ajborges-alpha: rgba(61, 61, 144, 0.12);
     --azul-ajborges-glow: rgba(61, 61, 144, 0.25);
-
-    /* Cores Neutras e Estruturais */
     --branco: #ffffff;
     --preto: #000000;
     --cinza: #aeaeae;
@@ -40,8 +37,6 @@ body {
     --fundo-principal: #f4f6fb;
     --card-background: #ffffff;
     --card-header-bg: #f8fafc;
-
-    /* Cores de Status e Indicadores */
     --verde-sucesso: #10b981;
     --verde-sucesso-escuro: #065f46;
     --verde-sucesso-fundo: #ecfdf5;
@@ -58,8 +53,6 @@ body {
     --azul-info-escuro: #1d4ed8;
     --azul-info-fundo: #eff6ff;
     --azul-info-borda: #bfdbfe;
-
-    /* Cores Específicas do Formulário de Relatório e ML */
     --cor-pedagio: #0284c7;
     --cor-pedagio-escuro: #0369a1;
     --cor-pedagio-bg: #f0f9ff;
@@ -74,13 +67,10 @@ body {
     --cor-comissao-roxo-escuro: #5b21b6;
     --cor-comissao-roxo-bg: #f5f3ff;
     --cor-comissao-roxo-border: #ddd6fe;
-
-    /* Sombras e Elevações */
     --sombra-card: 0 4px 18px rgba(0, 0, 0, 0.06);
     --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.04);
     --sombra-elevada: 0 10px 25px rgba(61, 61, 144, 0.15);
 }
-
 
 /* --- Header--- */
 header {
