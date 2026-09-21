@@ -247,11 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Formatação de Litros com 3 casas decimais (ex: 457,996)
+    // Formatação de Litros: números inteiros (ex: 445675 -> 445.675) sem zeros extras no final (,000);
+    // decimais digitados com vírgula mantêm suas casas decimais (ex: 445,675 -> 445,675).
     function formatarLitros(num) {
-        if (isNaN(num) || num === null || num === undefined) return '0,000';
+        if (isNaN(num) || num === null || num === undefined || num === 0) return '0';
+        if (Number.isInteger(num)) {
+            return num.toLocaleString('pt-BR');
+        }
         return num.toLocaleString('pt-BR', {
-            minimumFractionDigits: 3,
+            minimumFractionDigits: 0,
             maximumFractionDigits: 3
         });
     }
@@ -263,9 +267,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return isNaN(n) ? 0 : n;
     }
 
+    function formatarTextoLitros(val) {
+        if (!val) return '';
+        const texto = val.toString().trim();
+        if (!texto) return '';
+
+        // Se contém vírgula, o usuário informou casas decimais explicitamente
+        if (texto.includes(',')) {
+            const partes = texto.split(',');
+            const parteInteiraLimpa = partes[0].replace(/\D/g, '');
+            const parteDecimal = partes.slice(1).join('').replace(/\D/g, '').substring(0, 3);
+
+            const numInteiro = parseInt(parteInteiraLimpa, 10);
+            const parteInteiraFormatada = isNaN(numInteiro) ? '0' : numInteiro.toLocaleString('pt-BR');
+
+            return parteDecimal.length > 0 ? `${parteInteiraFormatada},${parteDecimal}` : `${parteInteiraFormatada},`;
+        }
+
+        // Sem vírgula: número inteiro puro ou com pontos de milhar
+        const digitos = texto.replace(/\D/g, '');
+        if (!digitos) return '';
+        const num = parseInt(digitos, 10);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('pt-BR');
+    }
+
     function aplicarMascaraLitros(input, callback) {
         if (!input) return;
 
+        // Ao focar, remove pontos de milhar para facilitar a edição pelo usuário
+        input.addEventListener('focus', (e) => {
+            if (e.target.value) {
+                if (e.target.value.includes(',')) {
+                    const partes = e.target.value.split(',');
+                    e.target.value = partes[0].replace(/\./g, '') + ',' + partes[1];
+                } else {
+                    e.target.value = e.target.value.replace(/\./g, '');
+                }
+            }
+        });
+
+        // Durante a digitação: aceita dígitos e até 1 separador decimal (vírgula ou ponto convertido)
         input.addEventListener('input', (e) => {
             let val = e.target.value.replace(/[^0-9,\.]/g, '');
             const partes = val.split(/[,.]/);
@@ -278,14 +320,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (callback) callback();
         });
 
+        // Ao perder o foco (blur): formata com separador de milhar e preserva decimais se houver vírgula
         input.addEventListener('blur', (e) => {
-            if (e.target.value.trim() !== '') {
-                const num = parseLitros(e.target.value);
-                if (num > 0) {
-                    e.target.value = formatarLitros(num);
-                }
-                if (callback) callback();
+            if (e.target.value && e.target.value.trim() !== '') {
+                e.target.value = formatarTextoLitros(e.target.value);
             }
+            if (callback) callback();
         });
     }
 
@@ -480,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseLitrosEl = document.getElementById('calc-base-litros');
 
         if (baseKmEl) baseKmEl.textContent = kmTotal > 0 ? formatarMilhar(kmTotal) : '0';
-        if (baseLitrosEl) baseLitrosEl.textContent = totalLitros > 0 ? formatarLitros(totalLitros) : '0,000';
+        if (baseLitrosEl) baseLitrosEl.textContent = totalLitros > 0 ? formatarLitros(totalLitros) : '0';
 
         if (cardMedia) {
             if (kmTotal > 0 && totalLitros > 0) {

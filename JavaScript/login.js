@@ -99,6 +99,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
+    // Preenche automaticamente o CPF caso o motorista tenha acabado de redefinir sua senha
+    const cpfRecemRecuperado = sessionStorage.getItem('ajborges_cpf_recuperado');
+    if (cpfRecemRecuperado && inputCpf) {
+        inputCpf.value = cpfRecemRecuperado;
+        sessionStorage.removeItem('ajborges_cpf_recuperado');
+        showToast('Senha redefinida com sucesso! Entre com sua nova senha.', 'success', 5000);
+        setTimeout(() => {
+            const senhaInput = document.getElementById('senha-motorista');
+            if (senhaInput) senhaInput.focus();
+        }, 300);
+    }
+
     // =========================================================================
     // 2. MÁSCARA AUTOMÁTICA DE CPF (MOTORISTA)
     // =========================================================================
