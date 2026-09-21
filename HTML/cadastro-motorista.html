@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="apple-touch-icon" href="../Imagens/Favicon - AJBorges branca.png">
     <title>Cadastro de Motorista - AJBorges Transportes</title>
 </head>
+
 <body>
     <header>
         <div class="header-AJBorges">
@@ -38,7 +40,8 @@
             <!-- Botão Voltar ao Login -->
             <div class="topo-navegacao">
                 <a href="Login.html" class="btn-voltar">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
@@ -51,7 +54,11 @@
                 <div class="cadastro-card-header">
                     <div class="card-badge">Portal do Motorista</div>
                     <h1 class="card-title">Cadastro de Motorista</h1>
-                    <p class="card-subtitle">Preencha suas informações para solicitar seu acesso operacional à AJBorges</p>
+                    <div class="legenda-obrigatorio-wrapper">
+                        <div class="legenda-obrigatorio">
+                            <span class="asterisco-tag">*</span> Campos obrigatórios
+                        </div>
+                    </div>
                 </div>
 
                 <form id="form-cadastro-motorista" novalidate>
@@ -67,11 +74,14 @@
                             <div class="campo-grupo campo-full">
                                 <label for="nome-motorista">Nome Completo <span class="obrigatorio">*</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <input type="text" id="nome-motorista" name="nome" class="form-input" placeholder="Ex: Jean Gomes da Silva" autocomplete="name" required>
+                                    <input type="text" id="nome-motorista" name="nome" class="form-input"
+                                        placeholder="Ex: Jean Gomes da Silva" autocomplete="name" required>
                                 </div>
                             </div>
 
@@ -79,23 +89,33 @@
                             <div class="campo-grupo">
                                 <label for="cpf-cadastro">CPF <span class="obrigatorio">*</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <rect x="3" y="4" width="18" height="16" rx="3"></rect>
                                         <line x1="7" y1="9" x2="17" y2="9"></line>
                                         <line x1="7" y1="13" x2="13" y2="13"></line>
                                     </svg>
-                                    <input type="text" id="cpf-cadastro" name="cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="username" required>
+                                    <input type="text" id="cpf-cadastro" name="cpf" class="form-input"
+                                        placeholder="000.000.000-00" maxlength="14" inputmode="numeric"
+                                        autocomplete="username" required>
                                 </div>
                             </div>
 
                             <!-- WhatsApp / Telefone -->
                             <div class="campo-grupo">
-                                <label for="telefone-motorista">WhatsApp / Telefone <span class="obrigatorio">*</span></label>
+                                <label for="telefone-motorista">WhatsApp / Telefone <span
+                                        class="opcional">(opcional)</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                        </path>
                                     </svg>
-                                    <input type="tel" id="telefone-motorista" name="telefone" class="form-input" placeholder="(00) 00000-0000" maxlength="15" inputmode="tel" autocomplete="tel" required>
+                                    <input type="tel" id="telefone-motorista" name="telefone" class="form-input"
+                                        placeholder="(00) 00000-0000" maxlength="15" inputmode="tel" autocomplete="tel">
                                 </div>
                             </div>
 
@@ -103,97 +123,92 @@
                             <div class="campo-grupo campo-full">
                                 <label for="email-motorista">E-mail <span class="opcional">(opcional)</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <circle cx="12" cy="12" r="4"></circle>
                                         <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
                                     </svg>
-                                    <input type="email" id="email-motorista" name="email" class="form-input" placeholder="seuemail@exemplo.com" autocomplete="email">
+                                    <input type="email" id="email-motorista" name="email" class="form-input"
+                                        placeholder="seuemail@exemplo.com" autocomplete="email">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SEÇÃO 2: Dados Profissionais e Veículo -->
+                    <!-- SEÇÃO 2: Segurança da Conta -->
                     <div class="form-secao">
                         <div class="secao-titulo">
                             <div class="secao-numero">2</div>
-                            <h2>Habilitação e Veículo</h2>
-                        </div>
-
-                        <div class="grid-campos">
-                            <!-- Número CNH -->
-                            <div class="campo-grupo">
-                                <label for="cnh-motorista">Número da CNH <span class="obrigatorio">*</span></label>
-                                <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="2" y="3" width="20" height="14" rx="2"></rect>
-                                        <line x1="2" y1="8" x2="22" y2="8"></line>
-                                        <line x1="6" y1="13" x2="10" y2="13"></line>
-                                    </svg>
-                                    <input type="text" id="cnh-motorista" name="cnh" class="form-input" placeholder="00000000000" maxlength="11" inputmode="numeric" required>
-                                </div>
-                            </div>
-
-                            <!-- Categoria CNH -->
-                            <div class="campo-grupo">
-                                <label for="categoria-cnh">Categoria CNH <span class="obrigatorio">*</span></label>
-                                <div class="input-wrapper select-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
-                                    <select id="categoria-cnh" name="categoria_cnh" class="form-input form-select" required>
-                                        <option value="" disabled selected>Selecione a categoria</option>
-                                        <option value="E">Categoria E (Carreta / Articulado)</option>
-                                        <option value="D">Categoria D (Caminhão Pesado / Ônibus)</option>
-                                        <option value="C">Categoria C (Caminhão Toco / Truck)</option>
-                                        <option value="B">Categoria B (Utilitários)</option>
-                                    </select>
-                                    <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Placa do Veículo -->
-                            <div class="campo-grupo campo-full">
-                                <label for="placa-veiculo">Placa do Veículo Principal <span class="obrigatorio">*</span></label>
-                                <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="1" y="3" width="15" height="13"></rect>
-                                        <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
-                                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                                    </svg>
-                                    <input type="text" id="placa-veiculo" name="placa" class="form-input text-uppercase" placeholder="Ex: MHU-9157 ou BRA2E19" maxlength="8" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SEÇÃO 3: Segurança da Conta -->
-                    <div class="form-secao">
-                        <div class="secao-titulo">
-                            <div class="secao-numero">3</div>
                             <h2>Criação de Senha</h2>
                         </div>
 
+                        <!-- Bloco de Dica/Sugestão de Senha -->
+                        <div class="dica-senha-card">
+                            <div class="dica-senha-header">
+                                <svg class="dica-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <strong>Dica para facilitar sua senha:</strong>
+                            </div>
+                            <p class="dica-senha-texto">
+                                Para facilitar a memorização, sugerimos usar os <strong>6 primeiros dígitos do seu
+                                    CPF</strong> combinados com um <strong>caractere especial obrigatório</strong> (como
+                                <code>@</code>, <code>#</code>, <code>$</code> ou <code>!</code>). Você tem total
+                                liberdade para colocar o caractere especial no <strong>início</strong>, no
+                                <strong>meio</strong> ou no <strong>final</strong>, e acrescentar outras informações ou
+                                palavras.
+                            </p>
+                            <div class="dica-senha-exemplos-container">
+                                <div class="exemplo-item">
+                                    <span class="exemplo-tag">Exemplo 1:</span>
+                                    <span class="exemplo-codigo" id="exemplo-senha-1">@123456viagem</span>
+                                    <span class="exemplo-nota">Caractere no início + CPF + algo mais</span>
+                                </div>
+                                <div class="exemplo-item">
+                                    <span class="exemplo-tag">Exemplo 2:</span>
+                                    <span class="exemplo-codigo" id="exemplo-senha-2">123456#2026</span>
+                                    <span class="exemplo-nota">CPF + caractere no meio + algo mais</span>
+                                </div>
+                                <div class="exemplo-item">
+                                    <span class="exemplo-tag">Exemplo 3:</span>
+                                    <span class="exemplo-codigo" id="exemplo-senha-3">123456viagem@</span>
+                                    <span class="exemplo-nota">CPF + algo mais + caractere no final</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="grid-campos">
-                            <!-- Senha -->
                             <div class="campo-grupo">
                                 <label for="senha-cadastro">Criar Senha <span class="obrigatorio">*</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                     </svg>
-                                    <input type="password" id="senha-cadastro" name="senha" class="form-input input-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required minlength="6">
-                                    <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha" aria-label="Mostrar ou ocultar senha">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <input type="password" id="senha-cadastro" name="senha"
+                                        class="form-input input-password" placeholder="Mínimo 6 caracteres"
+                                        autocomplete="new-password" required minlength="6">
+                                    <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha"
+                                        aria-label="Mostrar ou ocultar senha">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                             <circle cx="12" cy="12" r="3"></circle>
                                         </svg>
-                                        <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                            </path>
                                             <line x1="1" y1="1" x2="23" y2="23"></line>
                                         </svg>
                                     </button>
@@ -202,20 +217,32 @@
 
                             <!-- Confirmar Senha -->
                             <div class="campo-grupo">
-                                <label for="confirmar-senha-cadastro">Confirmar Senha <span class="obrigatorio">*</span></label>
+                                <label for="confirmar-senha-cadastro">Confirmar Senha <span
+                                        class="obrigatorio">*</span></label>
                                 <div class="input-wrapper">
-                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                     </svg>
-                                    <input type="password" id="confirmar-senha-cadastro" name="confirmar_senha" class="form-input input-password" placeholder="Repita a senha" autocomplete="new-password" required minlength="6">
-                                    <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha" aria-label="Mostrar ou ocultar senha">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <input type="password" id="confirmar-senha-cadastro" name="confirmar_senha"
+                                        class="form-input input-password" placeholder="Repita a senha"
+                                        autocomplete="new-password" required minlength="6">
+                                    <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha"
+                                        aria-label="Mostrar ou ocultar senha">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                             <circle cx="12" cy="12" r="3"></circle>
                                         </svg>
-                                        <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                            </path>
                                             <line x1="1" y1="1" x2="23" y2="23"></line>
                                         </svg>
                                     </button>
@@ -231,7 +258,8 @@
                             <label class="checkbox-container">
                                 <input type="checkbox" name="termos" id="termos-aceite" required>
                                 <span class="custom-checkbox"></span>
-                                <span class="checkbox-label">Declaro que os dados fornecidos são verídicos e concordo com a Política de Privacidade e Termos de Uso da AJBorges.</span>
+                                <span class="checkbox-label">Declaro que os dados fornecidos são verídicos e concordo
+                                    com a Política de Privacidade e Termos de Uso da AJBorges.</span>
                             </label>
                         </div>
                     </div>
@@ -239,7 +267,8 @@
                     <!-- Botão de Ação Principal -->
                     <button type="submit" class="btn-submit-cadastro">
                         <span>Concluir Cadastro de Motorista</span>
-                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </button>
@@ -269,35 +298,50 @@
                     <div class="footer-coluna-header">
                         <h3>Redes Sociais</h3>
                     </div>
-                    <p class="footer-descricao">Siga a AJBorges nas redes sociais e fique conectado com nossos serviços e novidades.</p>
+                    <p class="footer-descricao">Siga a AJBorges nas redes sociais e fique conectado com nossos serviços
+                        e novidades.</p>
                     <div class="links-redessociais">
-                        <a href="https://www.instagram.com/ajborgestransp/" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <a href="https://www.instagram.com/ajborgestransp/" target="_blank" rel="noopener noreferrer"
+                            title="Instagram" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                             </svg>
                         </a>
-                        <a href="https://www.facebook.com/ajborgestransp" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <a href="https://www.facebook.com/ajborgestransp" target="_blank" rel="noopener noreferrer"
+                            title="Facebook" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                             </svg>
                         </a>
-                        <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer" title="WhatsApp"
+                            aria-label="WhatsApp">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                                </path>
                             </svg>
                         </a>
-                        <a href="https://www.linkedin.com/company/ajborges" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <a href="https://www.linkedin.com/company/ajborges" target="_blank" rel="noopener noreferrer"
+                            title="LinkedIn" aria-label="LinkedIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
+                                </path>
                                 <rect x="2" y="9" width="4" height="12"></rect>
                                 <circle cx="4" cy="4" r="2"></circle>
                             </svg>
                         </a>
                         <a href="mailto:faleconosco@ajborges.com" title="E-mail" aria-label="E-mail">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
                         </a>
@@ -310,8 +354,12 @@
                     </div>
                     <ul class="links-contatos-lista">
                         <li>
-                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                </path>
                             </svg>
                             <div class="contato-info">
                                 <span class="contato-tipo">Telefone</span>
@@ -319,8 +367,11 @@
                             </div>
                         </li>
                         <li>
-                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
                                 <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
                             <div class="contato-info">
@@ -329,12 +380,17 @@
                             </div>
                         </li>
                         <li>
-                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                                </path>
                             </svg>
                             <div class="contato-info">
                                 <span class="contato-tipo">WhatsApp</span>
-                                <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer">(14) 98203-0597</a>
+                                <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer">(14)
+                                    98203-0597</a>
                             </div>
                         </li>
                     </ul>
@@ -345,7 +401,8 @@
                         <h3>Endereço</h3>
                     </div>
                     <div class="conteudo-endereco">
-                        <svg class="icone-endereco" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="icone-endereco" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                             <circle cx="12" cy="10" r="3"></circle>
                         </svg>
@@ -368,4 +425,5 @@
     <!-- Script de Máscaras e Validação do Cadastro -->
     <script src="../JavaScript/cadastro-motorista.js" defer></script>
 </body>
+
 </html>

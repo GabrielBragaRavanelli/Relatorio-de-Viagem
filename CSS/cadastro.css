@@ -266,6 +266,33 @@ main.cadastro-main {
     margin: 0 auto;
 }
 
+/* Legenda de Campos Obrigatórios */
+.legenda-obrigatorio-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.legenda-obrigatorio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(225, 29, 72, 0.08);
+}
+
+.asterisco-tag {
+    color: #e11d48;
+    font-size: 16px;
+    font-weight: 800;
+}
+
 /* --- SEÇÕES DO FORMULÁRIO --- */
 
 .form-secao {
@@ -448,6 +475,109 @@ main.cadastro-main {
 
 .btn-toggle-password .hidden {
     display: none;
+}
+
+/* Dica e Sugestão de Senha */
+.dica-senha-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+}
+
+.dica-senha-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--azul-ajborges);
+    margin-bottom: 6px;
+}
+
+.dica-icone {
+    width: 18px;
+    height: 18px;
+    color: var(--azul-info);
+    flex-shrink: 0;
+}
+
+.dica-senha-texto {
+    font-size: 13px;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.dica-senha-texto code {
+    background: rgba(61, 61, 144, 0.1);
+    color: var(--azul-ajborges);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dica-senha-exemplos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.exemplo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--branco);
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #dbeafe;
+    flex-wrap: wrap;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.exemplo-item:hover {
+    border-color: var(--azul-ajborges-claro);
+    transform: translateX(2px);
+}
+
+.exemplo-tag {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--azul-ajborges);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+}
+
+.exemplo-codigo {
+    font-family: monospace;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--azul-ajborges-escuro);
+    letter-spacing: 1px;
+    background: var(--azul-ajborges-suave);
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px dashed rgba(61, 61, 144, 0.3);
+}
+
+.exemplo-nota {
+    font-size: 12px;
+    color: var(--cinza-medio);
+    margin-left: auto;
+}
+
+@media (max-width: 580px) {
+    .exemplo-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .exemplo-nota {
+        margin-left: 0;
+    }
 }
 
 /* Feedback de Senhas Coincidentes */
