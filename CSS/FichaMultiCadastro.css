@@ -1,17 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
-    font-family: "Poppins", sans-serif;
-    background-color: var(--branco);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
 :root {
@@ -20,11 +12,8 @@ body {
     --azul-ajborges-medio: #4a4aa8;
     --azul-ajborges-claro: #5c5cb8;
     --azul-ajborges-suave: #eef2ff;
-    --azul-ajborges-alpha: rgba(61, 61, 144, 0.12);
-    --azul-ajborges-glow: rgba(61, 61, 144, 0.25);
     --branco: #ffffff;
     --preto: #000000;
-    --cinza: #aeaeae;
     --cinza-escuro: #1e293b;
     --cinza-medio: #64748b;
     --cinza-texto: #475569;
@@ -33,47 +22,24 @@ body {
     --cinza-borda: #e2e8f0;
     --cinza-borda-hover: #cbd5e1;
     --cinza-placeholder: #94a3b8;
-    --cinza-fundo-muted: #f8f9fa;
-    --fundo-principal: #f4f6fb;
-    --card-background: #ffffff;
-    --card-header-bg: #f8fafc;
     --verde-sucesso: #10b981;
     --verde-sucesso-escuro: #065f46;
     --verde-sucesso-fundo: #ecfdf5;
     --verde-sucesso-borda: #a7f3d0;
     --vermelho-perigo: #ef4444;
-    --vermelho-perigo-escuro: #b91c1c;
     --vermelho-perigo-fundo: #fef2f2;
-    --vermelho-perigo-borda: #fecaca;
-    --amarelo-alerta: #f59e0b;
-    --amarelo-alerta-escuro: #b45309;
-    --amarelo-alerta-fundo: #fffbeb;
-    --amarelo-alerta-borda: #fde68a;
     --azul-info: #3b82f6;
-    --azul-info-escuro: #1d4ed8;
-    --azul-info-fundo: #eff6ff;
-    --azul-info-borda: #bfdbfe;
-    --cor-pedagio: #0284c7;
-    --cor-pedagio-escuro: #0369a1;
-    --cor-pedagio-bg: #f0f9ff;
-    --cor-pedagio-border: #bae6fd;
-    --cor-imposto-federal: #dc2626;
-    --cor-imposto-federal-escuro: #991b1b;
-    --cor-imposto-federal-bg: #fef2f2;
-    --cor-imposto-federal-border: #fecaca;
-    --cor-ml-amarelo: #eab308;
-    --cor-ml-amarelo-suave: #fef9c3;
-    --cor-comissao-roxo: #8b5cf6;
-    --cor-comissao-roxo-escuro: #5b21b6;
-    --cor-comissao-roxo-bg: #f5f3ff;
-    --cor-comissao-roxo-border: #ddd6fe;
-    --sombra-card: 0 4px 18px rgba(0, 0, 0, 0.06);
-    --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.04);
-    --sombra-elevada: 0 10px 25px rgba(61, 61, 144, 0.15);
+    --sombra-card: 0 16px 40px rgba(61, 61, 144, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--cinza-claro);
+    color: var(--cinza-escuro);
+    line-height: 1.5;
+}
 
-/* --- HEADER --- */
+/* --- HEADER  --- */
 
 header {
     width: 100%;
@@ -152,7 +118,7 @@ header {
     transform: translateY(-1px);
 }
 
-/* --- DROPDOWN NO HEADER (Exclusivo index.html) --- */
+/* --- DROPDOWN NO HEADER --- */
 .dropdown-item {
     position: relative;
     list-style: none;
@@ -314,201 +280,482 @@ header {
 }
 
 /* --- MAIN --- */
-
-main {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 105px 20px 50px;
-    margin-top: 60px;
-    margin-bottom: 60px;
-
+.main-container {
+    max-width: 1080px;
+    margin: 100px auto 60px auto;
+    padding: 0 20px;
 }
 
-.bloco-central {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    width: 100%;
-    max-width: 420px;
-}
-
-.bloco-portalmotorista,
-.bloco-semlogin,
-.bloco-comlogin,
-.bloco-multicadastro {
-    width: 100%;
-    height: 165px;
-    background-color: var(--branco);
-    border: 1px solid rgba(61, 61, 144, 0.12);
+.welcome-section {
+    background: var(--branco);
     border-radius: 12px;
+    padding: 32px;
+    box-shadow: var(--sombra-card);
+    border: 1px solid var(--cinza-borda);
+    margin-bottom: 28px;
+}
+
+.welcome-title {
+    font-family: "Montserrat", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--azul-ajborges-escuro);
+    margin-bottom: 12px;
+}
+
+.welcome-description {
+    font-size: 1rem;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.attention-box {
+    background: var(--azul-ajborges-suave);
+    border: 1px solid rgba(61, 61, 144, 0.18);
+    border-left: 5px solid var(--azul-ajborges);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 0.92rem;
+    color: var(--azul-ajborges-escuro);
+    line-height: 1.6;
+}
+
+.attention-label {
+    font-weight: 700;
+    color: var(--azul-ajborges);
+}
+
+.type-selector-section {
+    margin-bottom: 28px;
+}
+
+.type-selector-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--azul-ajborges-escuro);
+    margin-bottom: 14px;
+}
+
+.type-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.type-card {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
-    gap: 10px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.03);
-    transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    gap: 16px;
+    background: var(--branco);
+    border: 2px solid var(--cinza-borda);
+    border-radius: 12px;
+    padding: 22px 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    user-select: none;
 }
 
-
-.bloco-portalmotorista {
-    animation: flutuar 4.2s ease-in-out infinite;
+.type-card:hover {
+    border-color: var(--azul-ajborges-claro);
+    background: var(--cinza-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(61, 61, 144, 0.08);
 }
 
-.bloco-semlogin {
-    animation: flutuar 4.2s ease-in-out infinite 0.7s;
-}
-
-.bloco-comlogin {
-    animation: flutuar 4.2s ease-in-out infinite 1.4s;
-}
-
-.bloco-multicadastro {
-    animation: flutuar 4.2s ease-in-out infinite 2.1s;
-}
-
-.bloco-portalmotorista:hover,
-.bloco-semlogin:hover,
-.bloco-comlogin:hover,
-.bloco-multicadastro:hover {
-    animation-play-state: paused;
-    transform: translateY(-10px);
+.type-card.active {
     border-color: var(--azul-ajborges);
-    box-shadow: 0 20px 35px rgba(61, 61, 144, 0.16), 0 8px 16px rgba(0, 0, 0, 0.06);
+    background: var(--azul-ajborges-suave);
+    box-shadow: 0 8px 24px rgba(61, 61, 144, 0.14);
 }
 
-.bloco-cabecalho {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.icone-bloco {
+.card-radio {
     width: 22px;
     height: 22px;
-    color: var(--azul-ajborges);
-    stroke-width: 2.2;
+    border-radius: 50%;
+    border: 2px solid var(--cinza-medio);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    transition: border-color 0.2s;
 }
 
-.bloco-portalmotorista h1,
-.bloco-semlogin h1,
-.bloco-comlogin h1,
-.bloco-multicadastro h1 {
-    font-size: 18px;
+.type-card.active .card-radio {
+    border-color: var(--azul-ajborges);
+}
+
+.radio-inner {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.type-card.active .radio-inner {
+    background: var(--azul-ajborges);
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    transition: color 0.2s;
+}
+
+.type-card.active .card-title {
+    color: var(--azul-ajborges-escuro);
+}
+
+.card-subtitle {
+    font-size: 0.84rem;
+    color: var(--cinza-texto);
+    margin-top: 3px;
+}
+
+.registration-form {
+    display: block;
+}
+
+.registration-form.hidden {
+    display: none;
+}
+
+.form-step {
+    background: var(--branco);
+    border-radius: 12px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: var(--sombra-card);
+    padding: 26px 30px;
+    margin-bottom: 26px;
+}
+
+.step-header {
+    background-color: var(--verde-sucesso-fundo);
+    border: 1px solid var(--verde-sucesso-borda);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+}
+
+.step-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-bar {
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background-color: var(--verde-sucesso-escuro);
+    border-radius: 2px;
+}
+
+.step-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--verde-sucesso-escuro);
+}
+
+.step-subtitle {
+    font-size: 0.92rem;
+    color: var(--cinza-texto);
+    margin-top: 5px;
+    padding-left: 12px;
+}
+
+.step-subtitle strong {
+    color: var(--cinza-escuro);
+}
+
+.step-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-row.col-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.form-row.col-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row.col-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.mb-2 {
+    margin-bottom: 18px;
+}
+
+label {
+    font-size: 0.92rem;
     font-weight: 600;
-    color: var(--preto);
+    color: var(--cinza-escuro);
+    margin-bottom: 7px;
 }
 
-.bloco-portalmotorista p,
-.bloco-semlogin p,
-.bloco-comlogin p,
-.bloco-multicadastro p {
-    font-size: 14px;
-    font-weight: 400;
-    color: #555;
+.required-asterisk {
+    color: var(--verde-sucesso-escuro);
+    font-weight: 700;
+    margin-left: 2px;
 }
 
-.bloco-semlogin button {
-    width: 75%;
-    height: 36px;
-    border: 1.5px solid var(--azul-ajborges);
-    border-radius: 6px;
+input[type="text"],
+input[type="tel"],
+input[type="date"],
+select {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.92rem;
+    color: var(--cinza-escuro);
+    background-color: var(--branco);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus {
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px rgba(61, 61, 144, 0.12);
+}
+
+input::placeholder {
+    color: var(--cinza-placeholder);
+}
+
+select {
     cursor: pointer;
-    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.41 0L6 4.58L10.59 0L12 1.41l-6 6l-6-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 11px;
+    appearance: none;
+    padding-right: 36px;
+}
+
+.field-subtext {
+    font-size: 0.8rem;
+    color: var(--cinza-medio);
+    margin-top: 5px;
+}
+
+.subfield-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.field-sublabel {
+    font-size: 0.8rem;
+    color: var(--cinza-medio);
+    margin-top: 5px;
+}
+
+.phone-input-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 8px;
+    background-color: var(--branco);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.bloco-semlogin button a {
-    font-size: 14px;
-    font-weight: 500;
+.phone-input-wrapper:focus-within {
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px rgba(61, 61, 144, 0.12);
+}
+
+.phone-prefix {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-right: 1px solid var(--cinza-borda);
+    height: 42px;
+    background-color: var(--cinza-claro);
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
+    user-select: none;
+}
+
+.flag-icon {
+    display: inline-block;
+    border-radius: 2px;
+}
+
+.prefix-arrow {
+    font-size: 0.72rem;
+    color: var(--cinza-medio);
+}
+
+.phone-input-wrapper input {
+    border: none;
+    height: 42px;
+    border-radius: 0 7px 7px 0;
+    box-shadow: none !important;
+}
+
+.pending-notice {
+    background: var(--azul-ajborges-suave);
+    border: 2px dashed var(--azul-ajborges-claro);
+    border-radius: 10px;
+    padding: 36px 20px;
+    text-align: center;
+}
+
+.pending-notice-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--azul-ajborges-escuro);
+    margin-bottom: 8px;
+}
+
+.pending-notice-text {
+    font-size: 0.95rem;
+    color: var(--cinza-texto);
+}
+
+.upload-dropzone {
+    border: 1.5px dashed var(--cinza-borda);
+    border-radius: 8px;
+    background-color: var(--cinza-claro);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background-color 0.2s;
+    cursor: pointer;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.dragover {
+    border-color: var(--azul-ajborges);
+    background-color: var(--azul-ajborges-suave);
+}
+
+.upload-inner-card {
+    border: 1px dashed var(--cinza-borda-hover);
+    border-radius: 6px;
+    background: var(--branco);
+    padding: 14px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+}
+
+.upload-icon {
+    margin-bottom: 6px;
+}
+
+.upload-text {
+    font-size: 0.85rem;
+    color: var(--cinza-texto);
+}
+
+.upload-action-link {
     color: var(--azul-ajborges);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    transition: color 0.3s ease;
-}
-
-.bloco-semlogin button:hover {
-    background-color: var(--azul-ajborges);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(61, 61, 144, 0.25);
-}
-
-.bloco-semlogin button:hover a {
-    color: var(--branco);
-}
-
-.bloco-semlogin button:active {
-    transform: translateY(0) scale(0.60);
-}
-
-.bloco-comlogin button,
-.bloco-multicadastro button {
-    width: 75%;
-    height: 36px;
-    border: 1.5px solid var(--azul-ajborges);
-    border-radius: 6px;
-    background-color: var(--azul-ajborges);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(61, 61, 144, 0.2);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.bloco-comlogin button a,
-.bloco-multicadastro button a {
-    font-size: 14px;
+    text-decoration: underline;
     font-weight: 500;
-    color: var(--branco);
-    text-decoration: none;
+    cursor: pointer;
+}
+
+.upload-subtext {
+    font-size: 0.75rem;
+    color: var(--cinza-placeholder);
+    margin-top: 4px;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.file-preview-list {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
     width: 100%;
-    height: 100%;
-    transition: color 0.3s ease;
+    justify-content: center;
 }
 
-.bloco-comlogin button:hover,
-.bloco-multicadastro button:hover {
-    background-color: #2b2b6d;
-    border-color: #2b2b6d;
+.file-preview-item {
+    background: var(--azul-ajborges-suave);
+    border: 1px solid var(--azul-ajborges-claro);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--azul-ajborges-escuro);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-submit-row {
+    margin: 32px 0 44px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-submit {
+    background-color: var(--azul-ajborges);
+    color: var(--branco);
+    border: none;
+    border-radius: 30px;
+    padding: 14px 64px;
+    font-family: "Poppins", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(61, 61, 144, 0.28);
+    min-width: 240px;
+}
+
+.btn-submit:hover {
+    background-color: var(--azul-ajborges-escuro);
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(61, 61, 144, 0.35);
+    box-shadow: 0 10px 28px rgba(43, 43, 109, 0.38);
 }
 
-.bloco-comlogin button:active,
-.bloco-multicadastro button:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* --- ANIMAÇÕES --- */
-
-@keyframes flutuar {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-5px);
-    }
+.btn-submit:active {
+    transform: translateY(0);
 }
 
 /* --- FOOTER --- */
@@ -699,12 +946,24 @@ footer {
     letter-spacing: 0.2px;
 }
 
-/* --- RESPONSIVIDADE --- */
 
+/* --- RESPONSIVIDADE --- */
 @media (max-width: 900px) {
     .bloco-footer {
         grid-template-columns: repeat(2, 1fr);
         gap: 32px;
+    }
+
+    .type-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row.col-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-row.col-3 {
+        grid-template-columns: 1fr 1fr;
     }
 }
 
@@ -748,8 +1007,32 @@ footer {
         transform: translateX(-50%) translateY(0);
     }
 
-    main {
-        padding: 130px 16px 40px;
+    .main-container {
+        margin: 130px auto 40px auto;
+        padding: 0 14px;
+    }
+
+    .welcome-section {
+        padding: 20px 16px;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .form-step {
+        padding: 18px 16px;
+    }
+
+    .form-row.col-2,
+    .form-row.col-3,
+    .form-row.col-4 {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .type-card {
+        padding: 16px 18px;
     }
 
     .bloco-footer {

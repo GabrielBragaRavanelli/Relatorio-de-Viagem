@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+    <link rel="shortcut icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+    <link rel="apple-touch-icon" href="../Imagens/Favicon - AJBorges branca.png">
+    <title>Ficha de Multi Cadastro - AJ Borges</title>
+    <link rel="stylesheet" href="../CSS/FichaMultiCadastro.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-AJBorges">
+            <div class="logotipo-AJBorges">
+                <a href="index.html" class="logo-link">
+                    <img src="../Imagens/Favicon - AJBorges branca.png" alt="AJBorges Transportes">
+                </a>
+            </div>
+            <nav class="header-links" aria-label="Navegação principal">
+                <ul class="lista-links">
+                    <li class="dropdown-item" id="dropdown-portais">
+                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false" aria-haspopup="true">
+                            <span>Portais &amp; Cadastros</span>
+                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu" aria-labelledby="dropdown-menu-btn">
+                            <a href="index.html" class="dropdown-link" role="menuitem">
+                                <div class="dropdown-icon-box">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="3" width="15" height="13"></rect>
+                                        <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
+                                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                    </svg>
+                                </div>
+                                <div class="dropdown-text">
+                                    <strong>Portal do Motorista</strong>
+                                    <span>Acesse com login ou envie sem conta</span>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="FichaMultiCadastro.html" class="dropdown-link" role="menuitem">
+                                <div class="dropdown-icon-box">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <div class="dropdown-text">
+                                    <strong>Ficha Multi Cadastro</strong>
+                                    <span>Pessoa Jurídica (CNPJ) e Física (PF)</span>
+                                </div>
+                            </a>
+                        </div>
+                    </li>
+                    <li><a href="#">Nossos Fretes</a></li>
+                    <li><a href="#">Sobre-nós</a></li>
+                    <li><a href="#">Contato</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <main class="main-container">
+
+        <section class="welcome-section">
+            <h1 class="welcome-title">Bem-vindo(a)!</h1>
+            <p class="welcome-description">
+                Este formulário atualiza o cadastro de motoristas e empresas parceiras da Modern Logistics para manter conformidade operacional, segurança e comunicação.
+            </p>
+            <div class="attention-box">
+                <span class="attention-label">Atenção:</span> ao final você precisará anexar CNH (frente/verso), comprovante de residência, documentos do(s) veículo(s) e RNTRC/ANTT (quando aplicável). Tenha os arquivos digitalizados (PDF/JPG/PNG) no seu celular ou computador para agilizar.
+            </div>
+        </section>
+
+        <section class="type-selector-section">
+            <h2 class="type-selector-title">Selecione o tipo de cadastro:</h2>
+            <div class="type-cards-grid">
+                <div class="type-card" id="card-pj" role="button" tabindex="0">
+                    <div class="card-radio">
+                        <span class="radio-inner"></span>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-title">PESSOA JURÍDICA (CNPJ)</span>
+                        <span class="card-subtitle">Empresas transportadoras, cooperativas e frotistas</span>
+                    </div>
+                </div>
+
+                <div class="type-card" id="card-pf" role="button" tabindex="0">
+                    <div class="card-radio">
+                        <span class="radio-inner"></span>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-title">PESSOA FÍSICA (sem CNPJ)</span>
+                        <span class="card-subtitle">Motoristas autônomos e agregados individuais</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <form id="form-pj" class="registration-form hidden">
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">01 - Dados da Empresa</h3>
+                    </div>
+                    <p class="step-subtitle">Preencha os dados da <strong>transportadora</strong> responsável.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-nome-empresa">Nome da Empresa: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-nome-empresa" name="nome_empresa" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cnpj">CNPJ: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
+                            <span class="field-subtext">Dica: use o CNPJ principal da transportadora.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-telefone-empresa">Telefone da Empresa: <span class="required-asterisk">*</span></label>
+                            <div class="phone-input-wrapper">
+                                <div class="phone-prefix">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                        <rect width="20" height="14" fill="#009c3b" />
+                                        <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
+                                        <circle cx="10" cy="7" r="3.2" fill="#002776" />
+                                    </svg>
+                                    <span class="prefix-arrow">▾</span>
+                                </div>
+                                <input type="tel" id="pj-telefone-empresa" name="telefone_empresa" placeholder="(11) 96123-4567" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-responsavel">Responsável pelo Contato: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-responsavel" name="responsavel_contato" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">02 - Dados do Motorista</h3>
+                    </div>
+                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista vinculado(a).</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label>Nome do Motorista: <span class="required-asterisk">*</span></label>
+                        <div class="form-row col-2">
+                            <div class="subfield-group">
+                                <input type="text" id="pj-motorista-nome" name="motorista_nome" required>
+                                <span class="field-sublabel">Nome</span>
+                            </div>
+                            <div class="subfield-group">
+                                <input type="text" id="pj-motorista-sobrenome" name="motorista_sobrenome" required>
+                                <span class="field-sublabel">Sobrenome</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pj-nascimento" name="data_nascimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cpf">CPF: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-cpf" name="cpf" placeholder="000.000.000-00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-rg">RG: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-rg" name="rg" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-rg-uf">Estado Emissor do RG: <span class="required-asterisk">*</span></label>
+                            <select id="pj-rg-uf" name="rg_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-cidade-nasc" name="cidade_estado_nascimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-celular">Celular: <span class="required-asterisk">*</span></label>
+                            <div class="phone-input-wrapper">
+                                <div class="phone-prefix">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                        <rect width="20" height="14" fill="#009c3b" />
+                                        <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
+                                        <circle cx="10" cy="7" r="3.2" fill="#002776" />
+                                    </svg>
+                                    <span class="prefix-arrow">▾</span>
+                                </div>
+                                <input type="tel" id="pj-celular" name="celular" placeholder="(11) 96123-4567" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-mae" name="nome_mae" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-cnh-registro" name="cnh_registro" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-cnh-emissao">Data de Emissão (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pj-cnh-emissao" name="cnh_emissao" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cnh-primeira">Data da 1ª CNH: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pj-cnh-primeira" name="cnh_primeira" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-cnh-uf">UF emissor (CNH): <span class="required-asterisk">*</span></label>
+                            <select id="pj-cnh-uf" name="cnh_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cnh-validade">Validade (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pj-cnh-validade" name="cnh_validade" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-cnh-categoria">Categoria (CNH): <span class="required-asterisk">*</span></label>
+                            <select id="pj-cnh-categoria" name="cnh_categoria" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="AC">AC</option>
+                                <option value="AD">AD</option>
+                                <option value="AE">AE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-cnh-seguranca" name="cnh_codigo_seguranca" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">03 - Endereço do Motorista</h3>
+                    </div>
+                    <p class="step-subtitle">Informe o endereço completo do motorista.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label for="pj-mot-endereco">Endereço <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pj-mot-endereco" name="mot_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-mot-cidade" name="mot_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pj-mot-estado" name="mot_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-mot-cep" name="mot_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">04 - Cadastro do Cavalo Mecânico</h3>
+                    </div>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-3">
+                        <div class="form-group">
+                            <label for="pj-veic-placa">Placa: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-marca">Marca: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-marca" name="veic_marca" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-modelo">Modelo: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-modelo" name="veic_modelo" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pj-veic-cor">Cor: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-cor" name="veic_cor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-ano">Ano: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-ano" name="veic_ano" placeholder="AAAA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-cidade-emp" name="veic_cidade_emplacamento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-uf">Estado: <span class="required-asterisk">*</span></label>
+                            <select id="pj-veic-uf" name="veic_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-veic-tipologia">Tipologia do Veículo: <span class="required-asterisk">*</span></label>
+                            <select id="pj-veic-tipologia" name="veic_tipologia" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="VUC/¾">VUC/¾</option>
+                                <option value="Toco (4×2)">Toco (4×2)</option>
+                                <option value="Truck (6×2)">Truck (6×2)</option>
+                                <option value="Bitruck (8×2)">Bitruck (8×2)</option>
+                                <option value="Cavalo 4×2">Cavalo 4×2</option>
+                                <option value="Cavalo 6×2">Cavalo 6×2</option>
+                                <option value="Cavalo 6×4">Cavalo 6×4</option>
+                                <option value="Carreta simples (2e)">Carreta simples (2e)</option>
+                                <option value="Carreta LS 3e">Carreta LS 3e</option>
+                                <option value="Romeu e Julieta">Romeu e Julieta</option>
+                                <option value="Bitrem (7 eixos)">Bitrem (7 eixos)</option>
+                                <option value="Rodotrem (9 eixos)">Rodotrem (9 eixos)</option>
+                                <option value="Treminhão/Tritrem">Treminhão/Tritrem</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-carroceria">Tipo de Carroceria: <span class="required-asterisk">*</span></label>
+                            <select id="pj-veic-carroceria" name="veic_carroceria" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="00 – Não aplicável">00 – Não aplicável</option>
+                                <option value="01 – Aberta">01 – Aberta</option>
+                                <option value="02 – Baú/Fechada">02 – Baú/Fechada</option>
+                                <option value="03 – Granelera">03 – Granelera</option>
+                                <option value="04 – Porta-contêiner">04 – Porta-contêiner</option>
+                                <option value="05 – Sider">05 – Sider</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-veic-renavam">RENAVAM: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-renavam" name="veic_renavam" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-veic-chassi">Chassi: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-veic-chassi" name="veic_chassi" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-rastreador-pri">Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-rastreador-pri" name="veic_rastreador_primario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-id-rastreador-pri">ID Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-id-rastreador-pri" name="veic_id_rastreador_primario" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-rastreador-sec">Rastreador Secundário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-rastreador-sec" name="veic_rastreador_secundario" value="NA" required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-id-rastreador-sec">ID Rastreador Secundário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA" required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-rntrc">RNTRC/ANTT: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-rntrc" name="veic_rntrc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-val-rntrc">Validade RNTRC: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pj-val-rntrc" name="veic_validade_rntrc" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">05 - Proprietário</h3>
+                    </div>
+                    <p class="step-subtitle">Preencha os dados do proprietário do cavalo mecanico.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-prop-doc">CPF/CNPJ Proprietário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-prop-doc" name="prop_documento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-prop-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-prop-mae" name="prop_mae" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label for="pj-prop-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pj-prop-endereco" name="prop_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-cidade" name="prop_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-estado" name="prop_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-cep" name="prop_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">06 - Cadastro da Carreta</h3>
+                    </div>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pj-carreta-placa">Placa: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-placa" name="carreta_placa" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-marca">Marca: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-marca" name="carreta_marca" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-modelo">Modelo: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-modelo" name="carreta_modelo" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-cor">Cor: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-cor" name="carreta_cor" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pj-carreta-ano">Ano: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-ano" name="carreta_ano" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-chassi">Chassi: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-chassi" name="carreta_chassi" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-renavam">RENAVAM: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-renavam" name="carreta_renavam" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-carreta-uf">Estado: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-uf" name="carreta_uf" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-carreta-rntrc">RNTRC/ANTT: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-rntrc" name="carreta_rntrc" value="NA" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">07 - Proprietário</h3>
+                    </div>
+                    <p class="step-subtitle">Preencha os dados do proprietário da carreta.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pj-prop-carreta-doc">CPF/CNPJ do Proprietário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-prop-carreta-doc" name="prop_carreta_documento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pj-prop-carreta-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-prop-carreta-mae" name="prop_carreta_mae" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label for="pj-prop-carreta-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pj-prop-carreta-endereco" name="prop_carreta_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-carreta-cidade" name="prop_carreta_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-carreta-estado" name="prop_carreta_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pj-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">08 - Envio de Documentos</h3>
+                    </div>
+                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou PNG</strong> (máx. 5MB por arquivo).</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label>CNH (frente e verso): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-cnh">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-subtext">Você pode enviar até 2 arquivos.</span>
+                                <input type="file" id="file-doc-cnh" name="doc_cnh" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-cnh"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Comprovante de Residência (atual): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-residencia">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-residencia" name="doc_residencia" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-residencia"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>CRLV do Cavalo Mecânico: <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-crlv-cavalo">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-cavalo" name="doc_crlv_cavalo" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-crlv-cavalo"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>CRLV da Carreta: <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-crlv-carreta">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-carreta" name="doc_crlv_carreta" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-crlv-carreta"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>RNTRC/ANTT (se aplicável): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-rntrc">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-rntrc" name="doc_rntrc" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-rntrc"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Outros Documentos Complementares (Opcional):</label>
+                        <div class="upload-dropzone" data-target="file-doc-complementares">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-subtext">Você pode enviar até 3 arquivos.</span>
+                                <input type="file" id="file-doc-complementares" name="doc_complementares" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-complementares"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-submit-row">
+                <button type="submit" class="btn-submit">Enviar</button>
+            </div>
+
+        </form>
+
+        <form id="form-pf" class="registration-form hidden">
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">02 - Dados do Motorista</h3>
+                    </div>
+                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista vinculado(a).</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label>Nome do Motorista: <span class="required-asterisk">*</span></label>
+                        <div class="form-row col-2">
+                            <div class="subfield-group">
+                                <input type="text" id="pf-motorista-nome" name="motorista_nome" required>
+                                <span class="field-sublabel">Nome</span>
+                            </div>
+                            <div class="subfield-group">
+                                <input type="text" id="pf-motorista-sobrenome" name="motorista_sobrenome" required>
+                                <span class="field-sublabel">Sobrenome</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pf-nascimento" name="data_nascimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-cpf">CPF: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-cpf" name="cpf" placeholder="000.000.000-00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-rg">RG: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-rg" name="rg" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-rg-uf">Estado Emissor do RG: <span class="required-asterisk">*</span></label>
+                            <select id="pf-rg-uf" name="rg_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-cidade-nasc" name="cidade_estado_nascimento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-celular">Celular: <span class="required-asterisk">*</span></label>
+                            <div class="phone-input-wrapper">
+                                <div class="phone-prefix">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                        <rect width="20" height="14" fill="#009c3b" />
+                                        <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
+                                        <circle cx="10" cy="7" r="3.2" fill="#002776" />
+                                    </svg>
+                                    <span class="prefix-arrow">▾</span>
+                                </div>
+                                <input type="tel" id="pf-celular" name="celular" placeholder="(11) 96123-4567" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-mae" name="nome_mae" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-cnh-registro" name="cnh_registro" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-cnh-emissao">Data de Emissão (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pf-cnh-emissao" name="cnh_emissao" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-cnh-primeira">Data da 1ª CNH: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pf-cnh-primeira" name="cnh_primeira" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-cnh-uf">UF emissor (CNH): <span class="required-asterisk">*</span></label>
+                            <select id="pf-cnh-uf" name="cnh_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-cnh-validade">Validade (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pf-cnh-validade" name="cnh_validade" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-cnh-categoria">Categoria (CNH): <span class="required-asterisk">*</span></label>
+                            <select id="pf-cnh-categoria" name="cnh_categoria" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="AC">AC</option>
+                                <option value="AD">AD</option>
+                                <option value="AE">AE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-cnh-seguranca" name="cnh_codigo_seguranca" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">03 - Endereço do Motorista</h3>
+                    </div>
+                    <p class="step-subtitle">Informe o endereço completo do motorista.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label for="pf-mot-endereco">Endereço <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pf-mot-endereco" name="mot_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-mot-cidade" name="mot_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pf-mot-estado" name="mot_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-mot-cep" name="mot_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">04 - Cadastro do Cavalo Mecânico</h3>
+                    </div>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-3">
+                        <div class="form-group">
+                            <label for="pf-veic-placa">Placa: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-marca">Marca: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-marca" name="veic_marca" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-modelo">Modelo: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-modelo" name="veic_modelo" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pf-veic-cor">Cor: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-cor" name="veic_cor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-ano">Ano: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-ano" name="veic_ano" placeholder="AAAA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-cidade-emp" name="veic_cidade_emplacamento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-uf">Estado: <span class="required-asterisk">*</span></label>
+                            <select id="pf-veic-uf" name="veic_uf" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="Acre (AC)">Acre (AC)</option>
+                                <option value="Alagoas (AL)">Alagoas (AL)</option>
+                                <option value="Amapá (AP)">Amapá (AP)</option>
+                                <option value="Amazonas (AM)">Amazonas (AM)</option>
+                                <option value="Bahia (BA)">Bahia (BA)</option>
+                                <option value="Ceará (CE)">Ceará (CE)</option>
+                                <option value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                                <option value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                                <option value="Goiás (GO)">Goiás (GO)</option>
+                                <option value="Maranhão (MA)">Maranhão (MA)</option>
+                                <option value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                                <option value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                                <option value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                                <option value="Pará (PA)">Pará (PA)</option>
+                                <option value="Paraíba (PB)">Paraíba (PB)</option>
+                                <option value="Paraná (PR)">Paraná (PR)</option>
+                                <option value="Pernambuco (PE)">Pernambuco (PE)</option>
+                                <option value="Piauí (PI)">Piauí (PI)</option>
+                                <option value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                                <option value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                                <option value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                                <option value="Rondônia (RO)">Rondônia (RO)</option>
+                                <option value="Roraima (RR)">Roraima (RR)</option>
+                                <option value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                                <option value="São Paulo (SP)">São Paulo (SP)</option>
+                                <option value="Sergipe (SE)">Sergipe (SE)</option>
+                                <option value="Tocantins (TO)">Tocantins (TO)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-veic-tipologia">Tipologia do Veículo: <span class="required-asterisk">*</span></label>
+                            <select id="pf-veic-tipologia" name="veic_tipologia" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="VUC/¾">VUC/¾</option>
+                                <option value="Toco (4×2)">Toco (4×2)</option>
+                                <option value="Truck (6×2)">Truck (6×2)</option>
+                                <option value="Bitruck (8×2)">Bitruck (8×2)</option>
+                                <option value="Cavalo 4×2">Cavalo 4×2</option>
+                                <option value="Cavalo 6×2">Cavalo 6×2</option>
+                                <option value="Cavalo 6×4">Cavalo 6×4</option>
+                                <option value="Carreta simples (2e)">Carreta simples (2e)</option>
+                                <option value="Carreta LS 3e">Carreta LS 3e</option>
+                                <option value="Romeu e Julieta">Romeu e Julieta</option>
+                                <option value="Bitrem (7 eixos)">Bitrem (7 eixos)</option>
+                                <option value="Rodotrem (9 eixos)">Rodotrem (9 eixos)</option>
+                                <option value="Treminhão/Tritrem">Treminhão/Tritrem</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-carroceria">Tipo de Carroceria: <span class="required-asterisk">*</span></label>
+                            <select id="pf-veic-carroceria" name="veic_carroceria" required>
+                                <option value="">--- Selecione a escolha ---</option>
+                                <option value="00 – Não aplicável">00 – Não aplicável</option>
+                                <option value="01 – Aberta">01 – Aberta</option>
+                                <option value="02 – Baú/Fechada">02 – Baú/Fechada</option>
+                                <option value="03 – Granelera">03 – Granelera</option>
+                                <option value="04 – Porta-contêiner">04 – Porta-contêiner</option>
+                                <option value="05 – Sider">05 – Sider</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-veic-renavam">RENAVAM: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-renavam" name="veic_renavam" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-veic-chassi">Chassi: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-veic-chassi" name="veic_chassi" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-rastreador-pri">Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-rastreador-pri" name="veic_rastreador_primario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-id-rastreador-pri">ID Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-id-rastreador-pri" name="veic_id_rastreador_primario" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-rastreador-sec">Rastreador Secundário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-rastreador-sec" name="veic_rastreador_secundario" value="NA" required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-id-rastreador-sec">ID Rastreador Secundário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA" required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-rntrc">RNTRC/ANTT: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-rntrc" name="veic_rntrc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-val-rntrc">Validade RNTRC: <span class="required-asterisk">*</span></label>
+                            <input type="date" id="pf-val-rntrc" name="veic_validade_rntrc" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">05 - Proprietário</h3>
+                    </div>
+                    <p class="step-subtitle">Preencha os dados do proprietário do cavalo mecanico.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-prop-doc">CPF/CNPJ Proprietário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-prop-doc" name="prop_documento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-prop-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-prop-mae" name="prop_mae" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label for="pf-prop-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pf-prop-endereco" name="prop_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-cidade" name="prop_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-estado" name="prop_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-cep" name="prop_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">06 - Cadastro da Carreta</h3>
+                    </div>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pf-carreta-placa">Placa: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-placa" name="carreta_placa" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-marca">Marca: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-marca" name="carreta_marca" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-modelo">Modelo: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-modelo" name="carreta_modelo" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-cor">Cor: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-cor" name="carreta_cor" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-4">
+                        <div class="form-group">
+                            <label for="pf-carreta-ano">Ano: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-ano" name="carreta_ano" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-chassi">Chassi: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-chassi" name="carreta_chassi" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-renavam">RENAVAM: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-renavam" name="carreta_renavam" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-carreta-uf">Estado: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-uf" name="carreta_uf" value="NA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-carreta-rntrc">RNTRC/ANTT: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-rntrc" name="carreta_rntrc" value="NA" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">07 - Proprietário</h3>
+                    </div>
+                    <p class="step-subtitle">Preencha os dados do proprietário da carreta.</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-row col-2">
+                        <div class="form-group">
+                            <label for="pf-prop-carreta-doc">CPF/CNPJ do Proprietário: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-prop-carreta-doc" name="prop_carreta_documento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pf-prop-carreta-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-prop-carreta-mae" name="prop_carreta_mae" value="NA" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label for="pf-prop-carreta-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <input type="text" id="pf-prop-carreta-endereco" name="prop_carreta_endereco" required>
+                        <span class="field-sublabel">Endereço linha 1</span>
+                    </div>
+
+                    <div class="form-row col-2 mb-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-carreta-cidade" name="prop_carreta_cidade" required>
+                            <span class="field-sublabel">Cidade</span>
+                        </div>
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-carreta-estado" name="prop_carreta_estado" required>
+                            <span class="field-sublabel">Estado</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row col-2">
+                        <div class="subfield-group">
+                            <input type="text" id="pf-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000" required>
+                            <span class="field-sublabel">Código Postal</span>
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step">
+                <div class="step-header">
+                    <div class="step-title-row">
+                        <span class="step-bar"></span>
+                        <h3 class="step-title">08 - Envio de Documentos</h3>
+                    </div>
+                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou PNG</strong> (máx. 5MB por arquivo).</p>
+                </div>
+
+                <div class="step-body">
+                    <div class="form-group mb-2">
+                        <label>CNH (frente e verso): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-cnh-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-subtext">Você pode enviar até 2 arquivos.</span>
+                                <input type="file" id="file-doc-cnh-pf" name="doc_cnh" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-cnh-pf"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Comprovante de Residência (atual): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-residencia-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-residencia-pf" name="doc_residencia" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-residencia-pf"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>CRLV do Cavalo Mecânico: <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-crlv-cavalo-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-cavalo-pf" name="doc_crlv_cavalo" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-crlv-cavalo-pf"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>CRLV da Carreta: <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-crlv-carreta-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-carreta-pf" name="doc_crlv_carreta" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-crlv-carreta-pf"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>RNTRC/ANTT (se aplicável): <span class="required-asterisk">*</span></label>
+                        <div class="upload-dropzone" data-target="file-doc-rntrc-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-rntrc-pf" name="doc_rntrc" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-rntrc-pf"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Outros Documentos Complementares (Opcional):</label>
+                        <div class="upload-dropzone" data-target="file-doc-complementares-pf">
+                            <div class="upload-inner-card">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-subtext">Você pode enviar até 3 arquivos.</span>
+                                <input type="file" id="file-doc-complementares-pf" name="doc_complementares" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-preview-list" id="preview-file-doc-complementares-pf"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-submit-row">
+                <button type="submit" class="btn-submit">Enviar</button>
+            </div>
+
+        </form>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="bloco-footer">
+
+                <div class="footer-coluna bloco-redessociais">
+                    <div class="footer-coluna-header">
+                        <h3>Redes Sociais</h3>
+                    </div>
+                    <p class="footer-descricao">Siga a AJBorges nas redes sociais e fique conectado com nossos serviços
+                        e novidades.</p>
+                    <div class="links-redessociais">
+                        <a href="https://www.instagram.com/ajborgestransp/" target="_blank" rel="noopener noreferrer"
+                            title="Instagram" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                        <a href="https://www.facebook.com/ajborgestransp" target="_blank" rel="noopener noreferrer"
+                            title="Facebook" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                            </svg>
+                        </a>
+                        <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer" title="WhatsApp"
+                            aria-label="WhatsApp">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                                </path>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/company/ajborges" target="_blank" rel="noopener noreferrer"
+                            title="LinkedIn" aria-label="LinkedIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
+                                </path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                        </a>
+                        <a href="mailto:faleconosco@ajborges.com" title="E-mail" aria-label="E-mail">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-coluna bloco-contatos">
+                    <div class="footer-coluna-header">
+                        <h3>Contatos</h3>
+                    </div>
+                    <ul class="links-contatos-lista">
+                        <li>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                </path>
+                            </svg>
+                            <div class="contato-info">
+                                <span class="contato-tipo">Telefone</span>
+                                <a href="tel:1434251419">(14) 3425-1419</a>
+                            </div>
+                        </li>
+                        <li>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <div class="contato-info">
+                                <span class="contato-tipo">E-mail</span>
+                                <a href="mailto:faleconosco@ajborges.com">faleconosco@ajborges.com</a>
+                            </div>
+                        </li>
+                        <li>
+                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                                </path>
+                            </svg>
+                            <div class="contato-info">
+                                <span class="contato-tipo">WhatsApp</span>
+                                <a href="https://wa.me/5514982030597" target="_blank" rel="noopener noreferrer">(14)
+                                    98203-0597</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-coluna bloco-endereco">
+                    <div class="footer-coluna-header">
+                        <h3>Endereço</h3>
+                    </div>
+                    <div class="conteudo-endereco">
+                        <svg class="icone-endereco" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <div class="endereco-texto">
+                            <p class="endereco-empresa">Granja Xereta</p>
+                            <p>Rod. Marília / Bauru, SN - KM 449</p>
+                            <p>Área Rural de Marília, Marília - SP</p>
+                            <p class="endereco-cep">CEP: 17539-899</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 AJBorges Transporte &amp; Logística. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="../JavaScript/FichaMultiCadastro.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownItem = document.getElementById('dropdown-portais');
+            const dropdownBtn = document.getElementById('dropdown-menu-btn');
+
+            if (dropdownItem && dropdownBtn) {
+                dropdownBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const isOpen = dropdownItem.classList.toggle('active');
+                    dropdownBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!dropdownItem.contains(e.target)) {
+                        dropdownItem.classList.remove('active');
+                        dropdownBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        dropdownItem.classList.remove('active');
+                        dropdownBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
