@@ -2169,25 +2169,26 @@
                                         </div>
                                     </div>
 
-                                    <!-- 3. BLOCO: IMPOSTO FEDERAL, PEDÁGIO E OUTRAS DESPESAS (SEM ARLA) -->
+                                    <!-- 3. BLOCO: OUTRAS DESPESAS E PEDÁGIOS -->
                                     <div class="bloco-formulario-interno">
                                         <div class="subbloco-cabecalho-linha">
                                             <div class="subbloco-titulo">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                     stroke-linejoin="round">
-                                                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                                                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                                                    <line x1="8" y1="12" x2="16" y2="12"></line>
                                                 </svg>
                                                 <div>
-                                                    <h3>Despesas Operacionais (Imposto Federal, Pedágio e Outras)</h3>
-                                                    <p>Lance o Imposto Federal obrigatório, Pedágio e demais despesas
-                                                        com comprovante.</p>
+                                                    <h3>Outras Despesas e Pedágios</h3>
+                                                    <p>Lance os pedágios, outras despesas (com Imposto Federal
+                                                        obrigatório) e anexe comprovantes.</p>
                                                 </div>
                                             </div>
                                             <div class="subbloco-acoes-limpeza">
                                                 <button type="button" class="btn-lixeira-bloco"
-                                                    id="btn-lixeira-despesas-ml" title="Opções para limpar despesas"
+                                                    id="btn-lixeira-despesas-ml" title="Limpar pedágios e outras despesas"
                                                     aria-expanded="false">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
                                                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2202,31 +2203,52 @@
                                                     <span>Limpar</span>
                                                 </button>
 
+                                                <!-- Popover com opções de limpeza de despesas e pedágios ML -->
                                                 <div class="popover-limpeza oculto" id="popover-limpar-despesas-ml">
                                                     <div class="popover-limpeza-header">
-                                                        <span>Opções de Limpeza</span>
+                                                        <span>Limpar Despesas e Pedágios</span>
                                                         <button type="button" class="btn-fechar-popover"
-                                                            id="fechar-popover-despesas-ml"
-                                                            title="Fechar">&times;</button>
+                                                            id="fechar-popover-despesas-ml" title="Fechar">&times;</button>
                                                     </div>
                                                     <div class="popover-limpeza-corpo">
                                                         <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-despesas-ml-preenchidas">
+                                                            id="btn-limpar-apenas-pedagios-ml">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <rect x="1" y="3" width="15" height="13"></rect>
+                                                                <polygon points="16 8 20 8 23 11 23 16 16 8">
+                                                                </polygon>
+                                                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                                            </svg>
+                                                            <div>
+                                                                <strong>Limpar apenas pedágios</strong>
+                                                                <small>Apaga os 3 campos de pedágio</small>
+                                                            </div>
+                                                        </button>
+                                                        <button type="button" class="opcao-limpeza-item"
+                                                            id="btn-limpar-apenas-outras-despesas-ml">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
                                                                 stroke-linecap="round" stroke-linejoin="round">
                                                                 <path
-                                                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                                                                </path>
+                                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                                <line x1="16" y1="17" x2="8" y2="17"></line>
                                                             </svg>
                                                             <div>
-                                                                <strong>Limpar despesas preenchidas</strong>
-                                                                <small>Apaga os valores digitados (mantém Imposto
-                                                                    Federal e Pedágio)</small>
+                                                                <strong>Limpar apenas outras despesas</strong>
+                                                                <small>Apaga os valores e descrições livres (mantém
+                                                                    Imposto Federal)</small>
                                                             </div>
                                                         </button>
                                                         <button type="button" class="opcao-limpeza-item item-perigo"
-                                                            id="btn-limpar-despesas-ml-todas">
+                                                            id="btn-limpar-todas-despesas-pedagios-ml">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
                                                                 height="16" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2"
@@ -2238,8 +2260,9 @@
                                                                 <line x1="14" y1="11" x2="14" y2="17" />
                                                             </svg>
                                                             <div>
-                                                                <strong>Limpar tudo (Impostos e Despesas)</strong>
-                                                                <small>Redefine todos os campos deste bloco</small>
+                                                                <strong>Limpar tudo (pedágios e despesas)</strong>
+                                                                <small>Apaga todos os pedágios e outras despesas
+                                                                    preenchidas</small>
                                                             </div>
                                                         </button>
                                                     </div>
@@ -2247,200 +2270,158 @@
                                             </div>
                                         </div>
 
-                                        <div class="tabela-abastecimento-wrapper">
-                                            <table class="tabela-abastecimento tabela-despesas-ml-composta">
-                                                <colgroup>
-                                                    <col class="col-ml-imp-pedagio" style="width: 26%;">
-                                                    <col class="col-ml-descricao" style="width: 54%;">
-                                                    <col class="col-ml-valor" style="width: 20%;">
-                                                </colgroup>
-                                                <thead>
-                                                    <tr class="tr-cabecalho-agrupado">
-                                                        <th class="th-grupo th-grupo-imposto">IMP. FEDERAL / PEDÁGIO
-                                                        </th>
-                                                        <th colspan="2" class="th-grupo th-grupo-outras">OUTRAS DESPESAS
-                                                        </th>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="width: 26%;">IMP. FEDERAL / PEDÁGIO</th>
-                                                        <th style="width: 54%;">DESCRIÇÃO</th>
-                                                        <th style="width: 20%;">VALOR EM R$</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Linha 1 -->
-                                                    <tr>
-                                                        <td>
-                                                            <div class="linha-tabela-identificada">
-                                                                <span class="tag-bloqueada"
-                                                                    title="Campo obrigatório fixado">IMPOSTO FEDERAL
-                                                                    *</span>
-                                                                <div class="tabela-moeda-wrap">
-                                                                    <span class="tabela-moeda-prefixo">R$</span>
-                                                                    <input type="text" inputmode="numeric"
-                                                                        id="ml-imp-federal-valor"
-                                                                        name="ml_imp_federal_valor" required
-                                                                        class="input-tabela input-moeda-destaque"
-                                                                        placeholder="0,00">
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td><input type="text" name="ml_outra_desc_1"
-                                                                class="input-tabela"
-                                                                placeholder="Descrição da despesa..."></td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
-                                                                    name="ml_outra_valor_1"
-                                                                    class="input-tabela input-valor-outra-ml"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                        <div class="grid-despesas-dupla">
+                                            <!-- Coluna Pedágio (3 linhas) -->
+                                            <div class="card-secao-despesa card-pedagio">
+                                                <div class="card-despesa-topo">
+                                                    <div class="card-despesa-ident">
+                                                        <span class="badge-mini-tag">3 Linhas</span>
+                                                        <h4>Pedágios</h4>
+                                                    </div>
+                                                    <span class="card-despesa-sub">Valor de cada pedágio</span>
+                                                </div>
 
-                                                    <!-- Linha 2 -->
-                                                    <tr>
-                                                        <td>
-                                                            <div class="linha-tabela-identificada">
-                                                                <span class="tag-complementar">Adicional</span>
-                                                                <div class="tabela-moeda-wrap">
-                                                                    <span class="tabela-moeda-prefixo">R$</span>
-                                                                    <input type="text" inputmode="numeric"
-                                                                        id="ml-imp-adic-valor" name="ml_imp_adic_valor"
-                                                                        class="input-tabela" placeholder="0,00">
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td><input type="text" name="ml_outra_desc_2"
-                                                                class="input-tabela"
-                                                                placeholder="Descrição da despesa..."></td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
-                                                                    name="ml_outra_valor_2"
-                                                                    class="input-tabela input-valor-outra-ml"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                <div class="linhas-despesas-lista">
+                                                    <div class="linha-despesa-item">
+                                                        <label for="ml-pedagio-1">Pedágio 1</label>
+                                                        <div class="input-wrapper input-moeda">
+                                                            <span class="input-prefixo">R$</span>
+                                                            <input type="text" id="ml-pedagio-1" name="ml_pedagio_1"
+                                                                placeholder="0,00" class="input-pedagio"
+                                                                inputmode="numeric">
+                                                        </div>
+                                                    </div>
+                                                    <div class="linha-despesa-item">
+                                                        <label for="ml-pedagio-2">Pedágio 2</label>
+                                                        <div class="input-wrapper input-moeda">
+                                                            <span class="input-prefixo">R$</span>
+                                                            <input type="text" id="ml-pedagio-2" name="ml_pedagio_2"
+                                                                placeholder="0,00" class="input-pedagio"
+                                                                inputmode="numeric">
+                                                        </div>
+                                                    </div>
+                                                    <div class="linha-despesa-item">
+                                                        <label for="ml-pedagio-3">Pedágio 3</label>
+                                                        <div class="input-wrapper input-moeda">
+                                                            <span class="input-prefixo">R$</span>
+                                                            <input type="text" id="ml-pedagio-3" name="ml_pedagio_3"
+                                                                placeholder="0,00" class="input-pedagio"
+                                                                inputmode="numeric">
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                    <!-- Linha 3: PEDÁGIO FIXO OBRIGATÓRIO -->
-                                                    <tr class="tr-linha-destaque-pedagio">
-                                                        <td>
-                                                            <div class="linha-tabela-identificada">
-                                                                <span class="tag-pedagio-fixo">PEDÁGIO *</span>
-                                                                <div class="tabela-moeda-wrap">
-                                                                    <span class="tabela-moeda-prefixo">R$</span>
-                                                                    <input type="text" inputmode="numeric"
-                                                                        id="ml-pedagio-valor-1"
-                                                                        name="ml_pedagio_valor_1"
-                                                                        class="input-tabela input-moeda-pedagio"
-                                                                        placeholder="0,00">
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td><input type="text" name="ml_outra_desc_3"
-                                                                class="input-tabela"
-                                                                placeholder="Descrição da despesa..."></td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
-                                                                    name="ml_outra_valor_3"
-                                                                    class="input-tabela input-valor-outra-ml"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                <div class="total-despesa-barra">
+                                                    <span class="total-despesa-label">TOTAL PEDÁGIO &gt;&gt;</span>
+                                                    <div class="input-wrapper input-moeda total-mini-wrap">
+                                                        <span class="input-prefixo">R$</span>
+                                                        <input type="text" id="ml-total-pedagio" readonly value="0,00"
+                                                            class="input-campo-total">
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                                    <!-- Linha 4 -->
-                                                    <tr>
-                                                        <td>
-                                                            <div class="linha-tabela-identificada">
-                                                                <span class="tag-complementar">Pedágio 2</span>
-                                                                <div class="tabela-moeda-wrap">
-                                                                    <span class="tabela-moeda-prefixo">R$</span>
-                                                                    <input type="text" inputmode="numeric"
-                                                                        id="ml-pedagio-valor-2"
-                                                                        name="ml_pedagio_valor_2" class="input-tabela"
-                                                                        placeholder="0,00">
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td><input type="text" name="ml_outra_desc_4"
-                                                                class="input-tabela"
-                                                                placeholder="Descrição da despesa..."></td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
-                                                                    name="ml_outra_valor_4"
-                                                                    class="input-tabela input-valor-outra-ml"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                            <!-- Coluna Outras Despesas (3 linhas com Imposto Federal Fixo) -->
+                                            <div class="card-secao-despesa card-outras-despesas">
+                                                <div class="card-despesa-topo">
+                                                    <div class="card-despesa-ident">
+                                                        <span class="badge-mini-tag badge-alerta-tag">Obrigatório: Linha
+                                                            1</span>
+                                                        <h4>Outras Despesas</h4>
+                                                    </div>
+                                                    <span class="card-despesa-sub">Descrição e Valor</span>
+                                                </div>
 
-                                                    <!-- Linha 5 -->
-                                                    <tr>
-                                                        <td>
-                                                            <div class="linha-tabela-identificada">
-                                                                <span class="tag-complementar">Pedágio 3</span>
-                                                                <div class="tabela-moeda-wrap">
-                                                                    <span class="tabela-moeda-prefixo">R$</span>
-                                                                    <input type="text" inputmode="numeric"
-                                                                        id="ml-pedagio-valor-3"
-                                                                        name="ml_pedagio_valor_3" class="input-tabela"
-                                                                        placeholder="0,00">
-                                                                </div>
+                                                <div class="linhas-despesas-lista">
+                                                    <!-- Linha 1: IMPOSTO FEDERAL (Bloqueado / Obrigatório) -->
+                                                    <div class="linha-despesa-composta">
+                                                        <div class="desc-com-trava">
+                                                            <label for="ml-despesa-desc-1">
+                                                                Descrição 1 <span class="tag-bloqueada"
+                                                                    title="Campo bloqueado: Imposto Federal"><svg
+                                                                        xmlns="http://www.w3.org/2000/svg" width="11"
+                                                                        height="11" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2">
+                                                                        <rect x="3" y="11" width="18" height="11" rx="2"
+                                                                            ry="2"></rect>
+                                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                                                    </svg> Obrigatório</span>
+                                                            </label>
+                                                            <div class="input-wrapper input-bloqueado-wrapper">
+                                                                <input type="text" id="ml-despesa-desc-1"
+                                                                    name="ml_despesa_desc_1" value="Imposto Federal"
+                                                                    readonly class="input-bloqueado-campo"
+                                                                    title="Campo fixo obrigatório: Imposto Federal">
                                                             </div>
-                                                        </td>
-                                                        <td><input type="text" name="ml_outra_desc_5"
-                                                                class="input-tabela"
-                                                                placeholder="Descrição da despesa..."></td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
-                                                                    name="ml_outra_valor_5"
-                                                                    class="input-tabela input-valor-outra-ml"
-                                                                    placeholder="0,00">
+                                                        </div>
+                                                        <div class="valor-com-rotulo">
+                                                            <label for="ml-imp-federal-valor">Valor (R$) <span
+                                                                    class="asterisco">*</span></label>
+                                                            <div class="input-wrapper input-moeda">
+                                                                <span class="input-prefixo">R$</span>
+                                                                <input type="text" id="ml-imp-federal-valor"
+                                                                    name="ml_imp_federal_valor" placeholder="0,00"
+                                                                    class="input-outra-despesa" inputmode="numeric">
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr class="linha-totais-abast">
-                                                        <td class="td-total-valor">
-                                                            <div class="tabela-moeda-wrap wrap-total-destaque">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" id="ml-total-imposto-pedagio"
-                                                                    readonly value="0,00"
-                                                                    class="input-tabela input-total-campo">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Linha 2: Outra Despesa -->
+                                                    <div class="linha-despesa-composta">
+                                                        <div class="desc-com-trava">
+                                                            <label for="ml-despesa-desc-2">Descrição 2</label>
+                                                            <div class="input-wrapper">
+                                                                <input type="text" id="ml-despesa-desc-2"
+                                                                    name="ml_despesa_desc_2"
+                                                                    placeholder="Ex: Chapa / Descarga...">
                                                             </div>
-                                                        </td>
-                                                        <td class="td-totais-label">
-                                                            <span class="tag-auto-pequena">Soma Automática</span>
-                                                            <strong>TOTAL OUTRAS &gt;&gt;</strong>
-                                                        </td>
-                                                        <td class="td-total-valor">
-                                                            <div class="tabela-moeda-wrap wrap-total-destaque">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" id="ml-total-outras-despesas"
-                                                                    readonly value="0,00"
-                                                                    class="input-tabela input-total-campo">
+                                                        </div>
+                                                        <div class="valor-com-rotulo">
+                                                            <label for="ml-despesa-valor-2">Valor (R$)</label>
+                                                            <div class="input-wrapper input-moeda">
+                                                                <span class="input-prefixo">R$</span>
+                                                                <input type="text" id="ml-despesa-valor-2"
+                                                                    name="ml_despesa_valor_2" placeholder="0,00"
+                                                                    class="input-outra-despesa" inputmode="numeric">
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Linha 3: Outra Despesa -->
+                                                    <div class="linha-despesa-composta">
+                                                        <div class="desc-com-trava">
+                                                            <label for="ml-despesa-desc-3">Descrição 3</label>
+                                                            <div class="input-wrapper">
+                                                                <input type="text" id="ml-despesa-desc-3"
+                                                                    name="ml_despesa_desc_3"
+                                                                    placeholder="Ex: Borracharia / Manutenção...">
+                                                            </div>
+                                                        </div>
+                                                        <div class="valor-com-rotulo">
+                                                            <label for="ml-despesa-valor-3">Valor (R$)</label>
+                                                            <div class="input-wrapper input-moeda">
+                                                                <span class="input-prefixo">R$</span>
+                                                                <input type="text" id="ml-despesa-valor-3"
+                                                                    name="ml_despesa_valor_3" placeholder="0,00"
+                                                                    class="input-outra-despesa" inputmode="numeric">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="total-despesa-barra">
+                                                    <span class="total-despesa-label">TOTAL OUTRAS DESPESAS
+                                                        &gt;&gt;</span>
+                                                    <div class="input-wrapper input-moeda total-mini-wrap">
+                                                        <span class="input-prefixo">R$</span>
+                                                        <input type="text" id="ml-total-outras-despesas" readonly
+                                                            value="0,00" class="input-campo-total">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- 4. BLOCO: UPLOAD DE COMPROVANTES (ML) -->
-                                    <div class="bloco-formulario-interno">
+                                        <!-- Bloco de Inserção de Arquivos de Comprovação ML -->
                                         <div class="bloco-upload-comprovantes">
                                             <div class="upload-cabecalho">
                                                 <div class="upload-titulo-area">
@@ -2452,36 +2433,33 @@
                                                         </path>
                                                     </svg>
                                                     <div>
-                                                        <h4>Comprovantes da Operação ML</h4>
-                                                        <p>Anexe canhotos de fretes, notas fiscais de combustível,
-                                                            comprovantes de pedágio e outras despesas.</p>
+                                                        <h4>Comprovantes de Outras Despesas</h4>
+                                                        <p>Insira recibos, fotos de notas fiscais ou PDFs para
+                                                            comprovação das despesas.</p>
                                                     </div>
                                                 </div>
                                                 <span class="upload-badge-contador" id="contador-anexos-ml">0
-                                                    arquivos</span>
+                                                    arquivo(s)</span>
                                             </div>
 
                                             <div class="dropzone-box" id="dropzone-comprovantes-ml">
-                                                <input type="file" id="input-arquivos-despesas-ml"
-                                                    class="input-file-oculto" multiple
-                                                    accept=".pdf,image/png,image/jpeg,image/jpg">
+                                                <input type="file" id="input-arquivos-despesas-ml" multiple
+                                                    accept=".pdf,image/png,image/jpeg,image/jpg"
+                                                    class="input-file-oculto">
                                                 <div class="dropzone-conteudo">
                                                     <div class="dropzone-icone">
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                             fill="none" stroke="currentColor" stroke-width="2"
                                                             stroke-linecap="round" stroke-linejoin="round">
-                                                            <polyline points="16 16 12 12 8 16"></polyline>
-                                                            <line x1="12" y1="12" x2="12" y2="21"></line>
-                                                            <path
-                                                                d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3">
-                                                            </path>
-                                                            <polyline points="16 16 12 12 8 16"></polyline>
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                                            <line x1="12" y1="3" x2="12" y2="15"></line>
                                                         </svg>
                                                     </div>
                                                     <p class="dropzone-texto-principal"><strong>Clique aqui</strong> ou
                                                         arraste os arquivos dos comprovantes</p>
                                                     <p class="dropzone-texto-secundario">Formatos aceitos: PDF, PNG, JPG
-                                                        ou JPEG (máx. 15MB por arquivo)</p>
+                                                        ou JPEG (máx. 10MB por arquivo)</p>
                                                 </div>
                                             </div>
 
@@ -2489,7 +2467,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 5. BLOCO: RESUMO OPERACIONAL E INDICADORES DA VIAGEM ML -->
+                                    <!-- 4. BLOCO: RESUMO OPERACIONAL E INDICADORES DA VIAGEM ML -->
                                     <div class="bloco-formulario-interno bloco-fechamento-viagem">
                                         <div class="subbloco-titulo">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"

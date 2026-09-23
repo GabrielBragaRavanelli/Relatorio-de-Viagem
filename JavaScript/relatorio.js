@@ -1345,23 +1345,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return { valor: somaValor, litros: somaLitros };
     }
 
-    // 15.3. Imposto Federal, Pedágio e Outras Despesas ML (Sem Arla)
-    const inputMlImpFederal = document.getElementById('ml-imp-federal-valor');
-    const inputMlImpAdic = document.getElementById('ml-imp-adic-valor');
-    const inputMlPedagio1 = document.getElementById('ml-pedagio-valor-1');
-    const inputMlPedagio2 = document.getElementById('ml-pedagio-valor-2');
-    const inputMlPedagio3 = document.getElementById('ml-pedagio-valor-3');
-    const inputTotalImpostoPedagio = document.getElementById('ml-total-imposto-pedagio');
-
-    const inputsImpostoPedagioMl = [
-        inputMlImpFederal,
-        inputMlImpAdic,
-        inputMlPedagio1,
-        inputMlPedagio2,
-        inputMlPedagio3
+    // 15.3. Pedágios e Outras Despesas ML (Idêntico ao Relatório Padrão)
+    const inputsPedagioMl = [
+        document.getElementById('ml-pedagio-1'),
+        document.getElementById('ml-pedagio-2'),
+        document.getElementById('ml-pedagio-3')
     ];
 
-    inputsImpostoPedagioMl.forEach(input => {
+    inputsPedagioMl.forEach(input => {
         if (input) {
             aplicarMascaraMoeda(input, () => {
                 calcularTotaisDespesasMl();
@@ -1371,51 +1362,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Outras Despesas ML
-    const inputsValorOutrasMl = [];
-    const inputTotalOutrasDespesas = document.getElementById('ml-total-outras-despesas');
+    function calcularTotalPedagioMl() {
+        let total = 0;
+        inputsPedagioMl.forEach(input => {
+            if (input && input.value) {
+                total += parseMoeda(input.value);
+            }
+        });
 
-    for (let i = 1; i <= 5; i++) {
-        const descOutra = document.querySelector(`input[name="ml_outra_desc_${i}"]`);
-        const valOutra = document.querySelector(`input[name="ml_outra_valor_${i}"]`);
-
-        if (descOutra) {
-            descOutra.addEventListener('input', salvarProgressoMl);
+        const totalPedagioEl = document.getElementById('ml-total-pedagio');
+        if (totalPedagioEl) {
+            totalPedagioEl.value = formatarDecimal(total, 2);
         }
+        return total;
+    }
 
-        if (valOutra) {
-            inputsValorOutrasMl.push(valOutra);
-            aplicarMascaraMoeda(valOutra, () => {
+    const inputMlImpFederal = document.getElementById('ml-imp-federal-valor');
+    const inputMlDespesaValor2 = document.getElementById('ml-despesa-valor-2');
+    const inputMlDespesaValor3 = document.getElementById('ml-despesa-valor-3');
+
+    const inputsOutrasDespesasValorMl = [
+        inputMlImpFederal,
+        inputMlDespesaValor2,
+        inputMlDespesaValor3
+    ];
+
+    inputsOutrasDespesasValorMl.forEach(input => {
+        if (input) {
+            aplicarMascaraMoeda(input, () => {
                 calcularTotaisDespesasMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
             });
         }
+    });
+
+    const inputMlDespesaDesc2 = document.getElementById('ml-despesa-desc-2');
+    const inputMlDespesaDesc3 = document.getElementById('ml-despesa-desc-3');
+    if (inputMlDespesaDesc2) inputMlDespesaDesc2.addEventListener('input', salvarProgressoMl);
+    if (inputMlDespesaDesc3) inputMlDespesaDesc3.addEventListener('input', salvarProgressoMl);
+
+    function calcularTotalOutrasDespesasMl() {
+        let total = 0;
+        inputsOutrasDespesasValorMl.forEach(input => {
+            if (input && input.value) {
+                total += parseMoeda(input.value);
+            }
+        });
+
+        const totalOutrasEl = document.getElementById('ml-total-outras-despesas');
+        if (totalOutrasEl) {
+            totalOutrasEl.value = formatarDecimal(total, 2);
+        }
+        return total;
     }
 
     function calcularTotaisDespesasMl() {
-        // Total Imposto e Pedágio
-        let totalImpPed = 0;
-        inputsImpostoPedagioMl.forEach(input => {
-            if (input) totalImpPed += parseMoeda(input.value);
-        });
-        if (inputTotalImpostoPedagio) {
-            inputTotalImpostoPedagio.value = formatarMoedaSemPrefixo(totalImpPed);
-        }
-
-        // Total Outras Despesas
-        let totalOutras = 0;
-        inputsValorOutrasMl.forEach(input => {
-            totalOutras += parseMoeda(input.value);
-        });
-        if (inputTotalOutrasDespesas) {
-            inputTotalOutrasDespesas.value = formatarMoedaSemPrefixo(totalOutras);
-        }
+        const totalPedagio = calcularTotalPedagioMl();
+        const totalOutras = calcularTotalOutrasDespesasMl();
 
         return {
-            impostoPedagio: totalImpPed,
+            pedagio: totalPedagio,
             outras: totalOutras,
-            totalGeralDespesas: totalImpPed + totalOutras
+            totalGeralDespesas: totalPedagio + totalOutras
         };
     }
 
@@ -1601,8 +1610,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLixeiraDespesasMl = document.getElementById('btn-lixeira-despesas-ml');
     const popoverLimparDespesasMl = document.getElementById('popover-limpar-despesas-ml');
     const fecharPopoverDespesasMl = document.getElementById('fechar-popover-despesas-ml');
-    const btnLimparDespesasMlPreenchidas = document.getElementById('btn-limpar-despesas-ml-preenchidas');
-    const btnLimparDespesasMlTodas = document.getElementById('btn-limpar-despesas-ml-todas');
+    const btnLimparApenasPedagiosMl = document.getElementById('btn-limpar-apenas-pedagios-ml');
+    const btnLimparApenasOutrasDespesasMl = document.getElementById('btn-limpar-apenas-outras-despesas-ml');
+    const btnLimparTodasDespesasPedagiosMl = document.getElementById('btn-limpar-todas-despesas-pedagios-ml');
 
     // Popover Fretes ML
     if (btnLixeiraFretesMl && popoverLimparFretesMl) {
@@ -1777,44 +1787,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ações de Limpeza de Despesas ML (Sem Arla)
-    if (btnLimparDespesasMlPreenchidas) {
-        btnLimparDespesasMlPreenchidas.addEventListener('click', () => {
-            inputsImpostoPedagioMl.forEach(input => {
+    // Ações de Limpeza de Despesas e Pedágios ML
+    if (btnLimparApenasPedagiosMl) {
+        btnLimparApenasPedagiosMl.addEventListener('click', () => {
+            inputsPedagioMl.forEach(input => {
                 if (input) input.value = '';
             });
-            for (let i = 1; i <= 5; i++) {
-                const desc = document.querySelector(`input[name="ml_outra_desc_${i}"]`);
-                const vl = document.querySelector(`input[name="ml_outra_valor_${i}"]`);
-                if (desc) desc.value = '';
-                if (vl) vl.value = '';
-            }
 
             if (popoverLimparDespesasMl) popoverLimparDespesasMl.classList.add('oculto');
             calcularTotaisDespesasMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
-            exibirToast('Despesas preenchidas foram limpas!', 'sucesso');
+            exibirToast('Campos de pedágio ML limpos!', 'sucesso');
         });
     }
 
-    if (btnLimparDespesasMlTodas) {
-        btnLimparDespesasMlTodas.addEventListener('click', () => {
-            inputsImpostoPedagioMl.forEach(input => {
-                if (input) input.value = '';
-            });
-            for (let i = 1; i <= 5; i++) {
-                const desc = document.querySelector(`input[name="ml_outra_desc_${i}"]`);
-                const vl = document.querySelector(`input[name="ml_outra_valor_${i}"]`);
-                if (desc) desc.value = '';
-                if (vl) vl.value = '';
-            }
+    if (btnLimparApenasOutrasDespesasMl) {
+        btnLimparApenasOutrasDespesasMl.addEventListener('click', () => {
+            if (inputMlDespesaDesc2) inputMlDespesaDesc2.value = '';
+            if (inputMlDespesaValor2) inputMlDespesaValor2.value = '';
+            if (inputMlDespesaDesc3) inputMlDespesaDesc3.value = '';
+            if (inputMlDespesaValor3) inputMlDespesaValor3.value = '';
 
             if (popoverLimparDespesasMl) popoverLimparDespesasMl.classList.add('oculto');
             calcularTotaisDespesasMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
-            exibirToast('Todas as despesas operacionais ML foram redefinidas!', 'sucesso');
+            exibirToast('Campos de outras despesas ML limpos (mantido Imposto Federal)!', 'sucesso');
+        });
+    }
+
+    if (btnLimparTodasDespesasPedagiosMl) {
+        btnLimparTodasDespesasPedagiosMl.addEventListener('click', () => {
+            inputsPedagioMl.forEach(input => {
+                if (input) input.value = '';
+            });
+            if (inputMlImpFederal) inputMlImpFederal.value = '';
+            if (inputMlDespesaDesc2) inputMlDespesaDesc2.value = '';
+            if (inputMlDespesaValor2) inputMlDespesaValor2.value = '';
+            if (inputMlDespesaDesc3) inputMlDespesaDesc3.value = '';
+            if (inputMlDespesaValor3) inputMlDespesaValor3.value = '';
+
+            if (popoverLimparDespesasMl) popoverLimparDespesasMl.classList.add('oculto');
+            calcularTotaisDespesasMl();
+            calcularIndicadoresViagemMl();
+            salvarProgressoMl();
+            exibirToast('Pedágios e outras despesas ML foram totalmente limpos!', 'sucesso');
         });
     }
 
@@ -1844,22 +1862,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            const outrasDespesasMl = [];
-            for (let i = 1; i <= 5; i++) {
-                outrasDespesasMl.push({
-                    desc: document.querySelector(`input[name="ml_outra_desc_${i}"]`)?.value || '',
-                    valor: document.querySelector(`input[name="ml_outra_valor_${i}"]`)?.value || ''
-                });
-            }
+            const outrasDespesasMl = [
+                { desc: 'Imposto Federal', valor: inputMlImpFederal?.value || '' },
+                { desc: inputMlDespesaDesc2?.value || '', valor: inputMlDespesaValor2?.value || '' },
+                { desc: inputMlDespesaDesc3?.value || '', valor: inputMlDespesaValor3?.value || '' }
+            ];
 
             const dadosMl = {
                 fretes: fretesMl,
                 abastecimentos: abastecimentosMl,
+                pedagios: [
+                    document.getElementById('ml-pedagio-1')?.value || '',
+                    document.getElementById('ml-pedagio-2')?.value || '',
+                    document.getElementById('ml-pedagio-3')?.value || ''
+                ],
                 impFederal: inputMlImpFederal?.value || '',
-                impAdic: inputMlImpAdic?.value || '',
-                pedagio1: inputMlPedagio1?.value || '',
-                pedagio2: inputMlPedagio2?.value || '',
-                pedagio3: inputMlPedagio3?.value || '',
                 outrasDespesas: outrasDespesasMl,
                 anexos: arquivosComprovantesMl
             };
@@ -1941,22 +1958,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // Restaurar Impostos e Pedágios
-                if (inputMlImpFederal && dados.impFederal) inputMlImpFederal.value = dados.impFederal;
-                if (inputMlImpAdic && dados.impAdic) inputMlImpAdic.value = dados.impAdic;
-                if (inputMlPedagio1 && dados.pedagio1) inputMlPedagio1.value = dados.pedagio1;
-                if (inputMlPedagio2 && dados.pedagio2) inputMlPedagio2.value = dados.pedagio2;
-                if (inputMlPedagio3 && dados.pedagio3) inputMlPedagio3.value = dados.pedagio3;
+                // Restaurar Pedágios ML
+                if (Array.isArray(dados.pedagios)) {
+                    if (inputsPedagioMl[0] && dados.pedagios[0]) inputsPedagioMl[0].value = dados.pedagios[0];
+                    if (inputsPedagioMl[1] && dados.pedagios[1]) inputsPedagioMl[1].value = dados.pedagios[1];
+                    if (inputsPedagioMl[2] && dados.pedagios[2]) inputsPedagioMl[2].value = dados.pedagios[2];
+                } else {
+                    if (inputsPedagioMl[0] && dados.pedagio1) inputsPedagioMl[0].value = dados.pedagio1;
+                    if (inputsPedagioMl[1] && dados.pedagio2) inputsPedagioMl[1].value = dados.pedagio2;
+                    if (inputsPedagioMl[2] && dados.pedagio3) inputsPedagioMl[2].value = dados.pedagio3;
+                }
 
-                // Restaurar Outras Despesas
+                // Restaurar Imposto Federal ML
+                if (inputMlImpFederal && dados.impFederal) inputMlImpFederal.value = dados.impFederal;
+
+                // Restaurar Outras Despesas ML
                 if (Array.isArray(dados.outrasDespesas)) {
-                    dados.outrasDespesas.forEach((od, idx) => {
-                        const i = idx + 1;
-                        const desc = document.querySelector(`input[name="ml_outra_desc_${i}"]`);
-                        const vl = document.querySelector(`input[name="ml_outra_valor_${i}"]`);
-                        if (desc && od.desc) desc.value = od.desc;
-                        if (vl && od.valor) vl.value = od.valor;
-                    });
+                    if (dados.outrasDespesas[0] && inputMlImpFederal && dados.outrasDespesas[0].valor) {
+                        inputMlImpFederal.value = dados.outrasDespesas[0].valor;
+                    }
+                    if (dados.outrasDespesas[1]) {
+                        if (inputMlDespesaDesc2 && dados.outrasDespesas[1].desc) inputMlDespesaDesc2.value = dados.outrasDespesas[1].desc;
+                        if (inputMlDespesaValor2 && dados.outrasDespesas[1].valor) inputMlDespesaValor2.value = dados.outrasDespesas[1].valor;
+                    }
+                    if (dados.outrasDespesas[2]) {
+                        if (inputMlDespesaDesc3 && dados.outrasDespesas[2].desc) inputMlDespesaDesc3.value = dados.outrasDespesas[2].desc;
+                        if (inputMlDespesaValor3 && dados.outrasDespesas[2].valor) inputMlDespesaValor3.value = dados.outrasDespesas[2].valor;
+                    }
                 }
 
                 // Restaurar Anexos
