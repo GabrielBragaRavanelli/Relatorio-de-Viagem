@@ -182,8 +182,183 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Aplica máscara de milhar aos campos de KM do cabeçalho
-    aplicarMascaraMilhar(inputKmSaida, () => calcularKmTotal());
-    aplicarMascaraMilhar(inputKmChegada, () => calcularKmTotal());
+    aplicarMascaraMilhar(inputKmSaida, () => {
+        calcularKmTotal();
+        if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+    });
+    aplicarMascaraMilhar(inputKmChegada, () => {
+        calcularKmTotal();
+        if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+    });
+
+    // ------------------------------------------
+    // 2.1. Máscara de Data Inteligente (DD/MM/AAAA) e Sincronização com Calendário
+    // ------------------------------------------
+    function normalizarDataExibicao(val) {
+        if (!val) return '';
+        const str = String(val).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            const [y, m, d] = str.split('-');
+            return `${d}/${m}/${y}`;
+        }
+        return str;
+    }
+
+    function aplicarMascaraDataComPicker(inputTexto, pickerNativo, btnCalendario, callback) {
+        if (!inputTexto) return;
+
+        function sincronizarComPickerNativo() {
+            if (!pickerNativo) return;
+            const val = inputTexto.value.trim();
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+                const [d, m, y] = val.split('/');
+                pickerNativo.value = `${y}-${m}-${d}`;
+            }
+        }
+
+        function abrirSeletorNativo() {
+            if (!pickerNativo) return;
+            sincronizarComPickerNativo();
+            if (typeof pickerNativo.showPicker === 'function') {
+                try {
+                    pickerNativo.showPicker();
+                } catch (err) {
+                    pickerNativo.click();
+                }
+            } else {
+                pickerNativo.click();
+            }
+        }
+
+        if (pickerNativo) {
+            pickerNativo.addEventListener('change', () => {
+                if (pickerNativo.value) {
+                    const partes = pickerNativo.value.split('-');
+                    if (partes.length === 3) {
+                        inputTexto.value = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                        inputTexto.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (callback) callback();
+                    }
+                }
+            });
+        }
+
+        if (btnCalendario) {
+            btnCalendario.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                abrirSeletorNativo();
+            });
+        }
+
+        inputTexto.addEventListener('dblclick', () => {
+            abrirSeletorNativo();
+        });
+
+        inputTexto.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.altKey || e.metaKey || [
+                'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
+            ].includes(e.key)) {
+                return;
+            }
+
+            if (e.key === 'Backspace') {
+                const val = inputTexto.value;
+                const selStart = inputTexto.selectionStart;
+                const selEnd = inputTexto.selectionEnd;
+                if (selStart === selEnd && (selStart === 3 || selStart === 6) && val[selStart - 1] === '/') {
+                    e.preventDefault();
+                    const novoVal = val.slice(0, selStart - 2) + val.slice(selStart);
+                    inputTexto.value = novoVal;
+                    inputTexto.setSelectionRange(selStart - 2, selStart - 2);
+                    inputTexto.dispatchEvent(new Event('input', { bubbles: true }));
+                    return;
+                }
+                return;
+            }
+
+            if (e.key === '/') {
+                return;
+            }
+
+            if (!/^\d$/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        inputTexto.addEventListener('input', (e) => {
+            let digitos = inputTexto.value.replace(/\D/g, '').slice(0, 8);
+            let formatado = '';
+
+            if (digitos.length > 0) {
+                if (digitos.length < 2) {
+                    formatado = digitos;
+                } else if (digitos.length === 2) {
+                    formatado = (e.inputType === 'deleteContentBackward') ? digitos : digitos + '/';
+                } else if (digitos.length < 4) {
+                    formatado = digitos.slice(0, 2) + '/' + digitos.slice(2);
+                } else if (digitos.length === 4) {
+                    formatado = digitos.slice(0, 2) + '/' + digitos.slice(2, 4);
+                    if (e.inputType !== 'deleteContentBackward') {
+                        formatado += '/';
+                    }
+                } else {
+                    formatado = digitos.slice(0, 2) + '/' + digitos.slice(2, 4) + '/' + digitos.slice(4);
+                }
+            }
+
+            inputTexto.value = formatado;
+
+            if (pickerNativo && digitos.length === 8) {
+                const d = digitos.slice(0, 2);
+                const m = digitos.slice(2, 4);
+                const y = digitos.slice(4, 8);
+                pickerNativo.value = `${y}-${m}-${d}`;
+            }
+
+            if (callback) callback();
+        });
+
+        inputTexto.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+            const digitos = texto.replace(/\D/g, '').slice(0, 8);
+            if (!digitos) return;
+
+            let formatado = '';
+            if (digitos.length <= 2) {
+                formatado = digitos;
+            } else if (digitos.length <= 4) {
+                formatado = digitos.slice(0, 2) + '/' + digitos.slice(2);
+            } else {
+                formatado = digitos.slice(0, 2) + '/' + digitos.slice(2, 4) + '/' + digitos.slice(4);
+            }
+            inputTexto.value = formatado;
+
+            if (pickerNativo && digitos.length === 8) {
+                const d = digitos.slice(0, 2);
+                const m = digitos.slice(2, 4);
+                const y = digitos.slice(4, 8);
+                pickerNativo.value = `${y}-${m}-${d}`;
+            }
+
+            inputTexto.dispatchEvent(new Event('input', { bubbles: true }));
+            if (callback) callback();
+        });
+    }
+
+    // Aplica máscara e sincronização com calendário às datas do cabeçalho
+    const btnPickerDataSaida = inputDataSaida && inputDataSaida.parentElement ? inputDataSaida.parentElement.querySelector('.btn-picker-data') : null;
+    const pickerNativoDataSaida = document.getElementById('data-saida-picker');
+    aplicarMascaraDataComPicker(inputDataSaida, pickerNativoDataSaida, btnPickerDataSaida, () => {
+        if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+    });
+
+    const btnPickerDataChegada = inputDataChegada && inputDataChegada.parentElement ? inputDataChegada.parentElement.querySelector('.btn-picker-data') : null;
+    const pickerNativoDataChegada = document.getElementById('data-chegada-picker');
+    aplicarMascaraDataComPicker(inputDataChegada, pickerNativoDataChegada, btnPickerDataChegada, () => {
+        if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+    });
 
     // ------------------------------------------
     // 3. Validação de Destino (Proíbe Números e Caracteres Especiais)
@@ -321,8 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Formatação de Litros: números inteiros (ex: 445675 -> 445.675) sem zeros extras no final (,000);
-    // decimais digitados com vírgula mantêm suas casas decimais (ex: 445,675 -> 445,675).
+    // Formatação de Litros: números inteiros (ex: 500 -> 500) ou decimais (ex: 1802.336 -> 1.802,336).
     function formatarLitros(num) {
         if (isNaN(num) || num === null || num === undefined || num === 0) return '0';
         if (Number.isInteger(num)) {
@@ -336,52 +510,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function parseLitros(str) {
         if (!str) return 0;
-        const s = str.toString().trim().replace(/\./g, '').replace(',', '.');
-        const n = parseFloat(s);
-        return isNaN(n) ? 0 : n;
+        let s = str.toString().trim();
+        if (!s) return 0;
+
+        // Se contém vírgula e ponto (ex: "1.802,336" ou "1,802.336")
+        if (s.includes(',') && s.includes('.')) {
+            const lastComma = s.lastIndexOf(',');
+            const lastDot = s.lastIndexOf('.');
+            if (lastComma > lastDot) {
+                // Padrão brasileiro: milhar com ponto, decimal com vírgula (ex: 1.802,336)
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else {
+                // Padrão americano: milhar com vírgula, decimal com ponto (ex: 1,802.336)
+                s = s.replace(/,/g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
+        // Se contém vírgula (ex: "1802,336" ou "500,5")
+        if (s.includes(',')) {
+            const partes = s.split(',');
+            const intPart = partes[0].replace(/\D/g, '');
+            const decPart = partes.slice(1).join('').replace(/\D/g, '');
+            const n = parseFloat((intPart || '0') + '.' + decPart);
+            return isNaN(n) ? 0 : n;
+        }
+
+        // Se contém múltiplos pontos (ex: "1.802.336") - comum se foi formatado como milhar
+        const partesPonto = s.split('.');
+        if (partesPonto.length > 2) {
+            const digitos = s.replace(/\D/g, '');
+            if (digitos.length >= 4) {
+                // Últimos 3 dígitos são os mililitros/decimais (ex: 1802336 -> 1802.336)
+                const intPart = digitos.substring(0, digitos.length - 3);
+                const decPart = digitos.substring(digitos.length - 3);
+                const n = parseFloat(intPart + '.' + decPart);
+                return isNaN(n) ? 0 : n;
+            } else {
+                const n = parseFloat(digitos);
+                return isNaN(n) ? 0 : n;
+            }
+        }
+
+        // Se contém um único ponto (ex: "1802.336" ou "1.500" ou "500.5")
+        if (partesPonto.length === 2) {
+            const antes = partesPonto[0].replace(/\D/g, '');
+            const depois = partesPonto[1].replace(/\D/g, '');
+            // Se tem mais de 3 dígitos antes do ponto (ex: 1802.336), ou casas decimais != 3, é decimal
+            if (antes.length >= 4 || depois.length !== 3) {
+                const n = parseFloat((antes || '0') + '.' + depois);
+                return isNaN(n) ? 0 : n;
+            }
+            // Se tem <= 3 dígitos antes e exatamente 3 depois (ex: "1.500")
+            const n = parseFloat(antes + depois);
+            return isNaN(n) ? 0 : n;
+        }
+
+        // Somente dígitos numéricos sem separador
+        const digitos = s.replace(/\D/g, '');
+        if (!digitos) return 0;
+        const numInt = parseInt(digitos, 10);
+        // Se o valor for muito grande sem separador (ex: 1802336 Litros), os últimos 3 dígitos são ml
+        if (digitos.length >= 6 && numInt > 10000) {
+            const intPart = digitos.substring(0, digitos.length - 3);
+            const decPart = digitos.substring(digitos.length - 3);
+            return parseFloat(intPart + '.' + decPart);
+        }
+        return numInt;
     }
 
     function formatarTextoLitros(val) {
         if (!val) return '';
-        const texto = val.toString().trim();
-        if (!texto) return '';
-
-        // Se contém vírgula, o usuário informou casas decimais explicitamente
-        if (texto.includes(',')) {
-            const partes = texto.split(',');
-            const parteInteiraLimpa = partes[0].replace(/\D/g, '');
-            const parteDecimal = partes.slice(1).join('').replace(/\D/g, '').substring(0, 3);
-
-            const numInteiro = parseInt(parteInteiraLimpa, 10);
-            const parteInteiraFormatada = isNaN(numInteiro) ? '0' : numInteiro.toLocaleString('pt-BR');
-
-            return parteDecimal.length > 0 ? `${parteInteiraFormatada},${parteDecimal}` : `${parteInteiraFormatada},`;
-        }
-
-        // Sem vírgula: número inteiro puro ou com pontos de milhar
-        const digitos = texto.replace(/\D/g, '');
-        if (!digitos) return '';
-        const num = parseInt(digitos, 10);
-        if (isNaN(num)) return '';
-        return num.toLocaleString('pt-BR');
+        const num = parseLitros(val);
+        if (num === 0) return '';
+        return formatarLitros(num);
     }
 
     function aplicarMascaraLitros(input, callback) {
         if (!input) return;
 
-        // Ao focar, remove pontos de milhar para facilitar a edição pelo usuário
+        // Ao focar, desformata mantendo a precisão correta
         input.addEventListener('focus', (e) => {
             if (e.target.value) {
                 if (e.target.value.includes(',')) {
                     const partes = e.target.value.split(',');
                     e.target.value = partes[0].replace(/\./g, '') + ',' + partes[1];
-                } else {
-                    e.target.value = e.target.value.replace(/\./g, '');
+                } else if (e.target.value.includes('.')) {
+                    const valNum = parseLitros(e.target.value);
+                    if (Number.isInteger(valNum)) {
+                        e.target.value = valNum.toString();
+                    } else {
+                        e.target.value = valNum.toString().replace('.', ',');
+                    }
                 }
             }
         });
 
-        // Durante a digitação: aceita dígitos e até 1 separador decimal (vírgula ou ponto convertido)
+        // Durante a digitação: aceita dígitos e converte ponto em vírgula para manter padrão decimal pt-BR
         input.addEventListener('input', (e) => {
             let val = e.target.value.replace(/[^0-9,\.]/g, '');
             const partes = val.split(/[,.]/);
@@ -394,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (callback) callback();
         });
 
-        // Ao perder o foco (blur): formata com separador de milhar e preserva decimais se houver vírgula
+        // Ao perder o foco (blur): formata com separador de milhar e decimais corretos
         input.addEventListener('blur', (e) => {
             if (e.target.value && e.target.value.trim() !== '') {
                 e.target.value = formatarTextoLitros(e.target.value);
@@ -415,6 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
     camposMoedaTopo.forEach(campo => {
         if (campo) {
             aplicarMascaraMoeda(campo, () => {
+                if (typeof calcularIndicadoresViagemMl === 'function') {
+                    calcularIndicadoresViagemMl();
+                }
                 if (typeof salvarProgressoMl === 'function') {
                     salvarProgressoMl();
                 }
@@ -462,9 +691,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15.1. Relação de Fretes ML (8 Linhas)
     const inputsValorFreteMl = [];
     const inputsComissaoFreteMl = [];
+    const inputsDescargaFreteMl = [];
     const selectsClienteFreteMl = [];
     const inputTotalRelacaoFrete = document.getElementById('ml-total-relacao-frete');
     const inputTotalRelacaoComissao = document.getElementById('ml-total-relacao-comissao');
+    const inputTotalRelacaoDescarga = document.getElementById('ml-total-relacao-descarga');
 
     function atualizarLinhaFreteMl(index, acaoDisparadaPorSelect = false) {
         const selectCli = document.querySelector(`select[name="cliente_frete_ml_${index}"]`);
@@ -475,15 +706,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tipoOperacao = selectCli.value;
 
+        // O campo VALOR FRETE é SEMPRE livre para digitação manual em todas as operações
+        inputValFrete.removeAttribute('readonly');
+
         if (tipoOperacao === 'mercado_livre') {
-            inputValFrete.value = '400,00';
-            inputValFrete.setAttribute('readonly', 'readonly');
+            // Apenas a comissão é fixa em R$ 400,00 e bloqueada; frete livre
+            inputComissao.setAttribute('readonly', 'true');
+            inputComissao.dataset.editadoManual = '';
             inputComissao.value = '400,00';
-        } else if (tipoOperacao === 'alimenticio' || tipoOperacao === 'shopee') {
-            inputValFrete.removeAttribute('readonly');
-            if (acaoDisparadaPorSelect && inputValFrete.value === '400,00') {
-                inputValFrete.value = '';
-            }
+        } else if (tipoOperacao === 'shopee') {
+            // Shopee: comissão bloqueada (readonly), calculada automaticamente a 11%
+            inputComissao.setAttribute('readonly', 'true');
+            inputComissao.dataset.editadoManual = '';
             const valorNum = parseMoeda(inputValFrete.value);
             if (valorNum > 0) {
                 const comissao11 = valorNum * 0.11;
@@ -491,9 +725,17 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 inputComissao.value = '';
             }
+        } else if (tipoOperacao === 'alimenticio') {
+            // Alimentício: 11% retirado! Frete e comissão livres para preenchimento manual
+            inputComissao.removeAttribute('readonly');
+            inputComissao.dataset.editadoManual = '';
+            if (acaoDisparadaPorSelect) {
+                inputComissao.value = '';
+            }
         } else {
             // Vazio / Desmarcado
-            inputValFrete.removeAttribute('readonly');
+            inputComissao.setAttribute('readonly', 'true');
+            inputComissao.dataset.editadoManual = '';
             if (acaoDisparadaPorSelect) {
                 inputValFrete.value = '';
             }
@@ -504,6 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 1; i <= 8; i++) {
         const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
         const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+        const inputDescarga = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
         const selectCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
         const inputDataFrete = document.querySelector(`input[name="data_frete_ml_${i}"]`);
         const inputOrigemFrete = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
@@ -516,6 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 calcularTotaisFreteMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
             });
         }
 
@@ -526,27 +772,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 calcularTotaisFreteMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
             });
         }
 
         if (inputComissao) {
             inputsComissaoFreteMl.push(inputComissao);
+            aplicarMascaraMoeda(inputComissao, () => {
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
+                salvarProgressoMl();
+            });
+        }
+
+        if (inputDescarga) {
+            inputsDescargaFreteMl.push(inputDescarga);
+            aplicarMascaraMoeda(inputDescarga, () => {
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+            });
         }
 
         if (inputDataFrete) {
-            inputDataFrete.addEventListener('input', salvarProgressoMl);
+            const btnPickerData = inputDataFrete.parentElement ? inputDataFrete.parentElement.querySelector('.btn-picker-data') : null;
+            const pickerNativo = inputDataFrete.parentElement ? inputDataFrete.parentElement.querySelector('.input-picker-data-nativo') : null;
+            aplicarMascaraDataComPicker(inputDataFrete, pickerNativo, btnPickerData, () => {
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+            });
         }
         if (inputOrigemFrete) {
-            inputOrigemFrete.addEventListener('input', salvarProgressoMl);
+            inputOrigemFrete.addEventListener('input', () => {
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+            });
         }
         if (inputDestinoFrete) {
-            inputDestinoFrete.addEventListener('input', salvarProgressoMl);
+            inputDestinoFrete.addEventListener('input', () => {
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+            });
+        }
+
+        // Botão inline na coluna de numeração para apagar a linha específica
+        const btnLimparInline = document.querySelector(`.btn-limpar-linha-inline[data-linha="${i}"]`);
+        if (btnLimparInline) {
+            btnLimparInline.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof limparLinhaFrete === 'function') {
+                    limparLinhaFrete(i);
+                }
+            });
         }
     }
 
     function calcularTotaisFreteMl() {
         let somaFrete = 0;
         let somaComissao = 0;
+        let somaDescarga = 0;
 
         inputsValorFreteMl.forEach(input => {
             somaFrete += parseMoeda(input.value);
@@ -556,12 +852,20 @@ document.addEventListener('DOMContentLoaded', () => {
             somaComissao += parseMoeda(input.value);
         });
 
+        inputsDescargaFreteMl.forEach(input => {
+            somaDescarga += parseMoeda(input.value);
+        });
+
         if (inputTotalRelacaoFrete) {
             inputTotalRelacaoFrete.value = formatarMoedaSemPrefixo(somaFrete);
         }
 
         if (inputTotalRelacaoComissao) {
             inputTotalRelacaoComissao.value = formatarMoedaSemPrefixo(somaComissao);
+        }
+
+        if (inputTotalRelacaoDescarga) {
+            inputTotalRelacaoDescarga.value = formatarMoedaSemPrefixo(somaDescarga);
         }
 
         // Sincroniza automaticamente a soma total de comissões com o campo "VR COMISSÃO" do cabeçalho
@@ -574,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inputTotalFrete.value = somaFrete > 0 ? formatarMoedaSemPrefixo(somaFrete) : '';
         }
 
-        return { frete: somaFrete, comissao: somaComissao };
+        return { frete: somaFrete, comissao: somaComissao, descarga: somaDescarga };
     }
 
     // 15.2. Abastecimento ML (10 Linhas - Sem Média)
@@ -590,16 +894,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputValor = document.querySelector(`input[name="valor_ml_${i}"]`);
         const inputLitros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-        if (inputPosto) inputPosto.addEventListener('input', salvarProgressoMl);
+        if (inputPosto) {
+            inputPosto.addEventListener('input', () => {
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
+            });
+        }
 
         if (inputNf) {
-            aplicarMascaraMilhar(inputNf, salvarProgressoMl);
+            aplicarMascaraMilhar(inputNf, () => {
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
+            });
         }
 
         if (inputKm) {
             aplicarMascaraMilhar(inputKm, () => {
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
             });
         }
 
@@ -609,6 +928,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 calcularTotaisAbastecimentoMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
             });
         }
 
@@ -618,6 +940,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 calcularTotaisAbastecimentoMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
+            });
+        }
+
+        // Botão inline na coluna de numeração para apagar a linha específica de abastecimento
+        const btnLimparInline = document.querySelector(`.btn-limpar-linha-inline[data-linha-abast="${i}"]`);
+        if (btnLimparInline) {
+            btnLimparInline.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof limparLinhaAbast === 'function') {
+                    limparLinhaAbast(i);
+                }
             });
         }
     }
@@ -739,7 +1076,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mlIndicadorMedia) {
             if (totaisCombustivel.litros > 0 && kmTotalNum > 0) {
                 const mediaGeral = kmTotalNum / totaisCombustivel.litros;
-                mlIndicadorMedia.innerHTML = `${formatarDecimal(mediaGeral, 2)} <span class="indicador-unidade">km/l</span>`;
+                if (isFinite(mediaGeral) && !isNaN(mediaGeral)) {
+                    mlIndicadorMedia.innerHTML = `${formatarDecimal(mediaGeral, 2)} <span class="indicador-unidade">km/l</span>`;
+                } else {
+                    mlIndicadorMedia.innerHTML = `0,00 <span class="indicador-unidade">km/l</span>`;
+                }
             } else {
                 mlIndicadorMedia.innerHTML = `0,00 <span class="indicador-unidade">km/l</span>`;
             }
@@ -747,12 +1088,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mlCalcBaseKm) mlCalcBaseKm.textContent = kmTotalNum > 0 ? formatarMilhar(kmTotalNum) : '0';
         if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(totaisCombustivel.litros);
 
-        // 2. Despesa Total = Combustível + Impostos/Pedágios + Outras Despesas + Vr Comissão
+        // 2. Despesa Total = Combustível + Impostos/Pedágios + Outras Despesas + Vr Comissão + Descarga
         const vrComissaoNum = parseMoeda(inputVrComissao ? inputVrComissao.value : '');
+        const totalDescargaNum = totalFreteRelacao && totalFreteRelacao.descarga ? totalFreteRelacao.descarga : 0;
 
         const despesaTotalCalculada = totaisCombustivel.valor +
             totaisDespesas.totalGeralDespesas +
-            vrComissaoNum;
+            vrComissaoNum +
+            totalDescargaNum;
 
         if (mlIndicadorDespesa) {
             mlIndicadorDespesa.textContent = formatarMoeda(despesaTotalCalculada);
@@ -766,19 +1109,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const resultadoViagemCalculado = totalFreteFinal - despesaTotalCalculada;
         if (mlIndicadorResultado) {
-            mlIndicadorResultado.textContent = formatarMoeda(resultadoViagemCalculado);
-            if (resultadoViagemCalculado >= 0) {
-                mlIndicadorResultado.style.color = '#065f46';
-            } else {
+            if (resultadoViagemCalculado < 0) {
+                mlIndicadorResultado.textContent = '- R$ ' + formatarMoedaSemPrefixo(Math.abs(resultadoViagemCalculado));
                 mlIndicadorResultado.style.color = '#b91c1c';
+            } else {
+                mlIndicadorResultado.textContent = formatarMoeda(resultadoViagemCalculado);
+                mlIndicadorResultado.style.color = '#065f46';
             }
         }
 
-        // 4. Saldo de Comissão ML = VR Comissão
-        const saldoComissao = vrComissaoNum;
+        // 4. Saldo de Comissão = VR Comissão - Valor do Adiantamento
+        const adiantamentoNum = parseMoeda(inputAdiantamento ? inputAdiantamento.value : '');
+        const saldoComissao = vrComissaoNum - adiantamentoNum;
 
         if (mlIndicadorSaldoComissao) {
-            mlIndicadorSaldoComissao.textContent = formatarMoeda(saldoComissao);
+            if (saldoComissao < 0) {
+                mlIndicadorSaldoComissao.textContent = '- R$ ' + formatarMoedaSemPrefixo(Math.abs(saldoComissao));
+                mlIndicadorSaldoComissao.style.color = '#b91c1c';
+            } else {
+                mlIndicadorSaldoComissao.textContent = formatarMoeda(saldoComissao);
+                mlIndicadorSaldoComissao.style.color = '';
+            }
         }
     }
 
@@ -891,13 +1242,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLixeiraFretesMl = document.getElementById('btn-lixeira-fretes-ml');
     const popoverLimparFretesMl = document.getElementById('popover-limpar-fretes-ml');
     const fecharPopoverFretesMl = document.getElementById('fechar-popover-fretes-ml');
-    const btnLimparFretesMlPreenchidas = document.getElementById('btn-limpar-fretes-ml-preenchidas');
+    const popoverListaLinhasPreenchidas = document.getElementById('popover-lista-linhas-preenchidas');
     const btnLimparFretesMlTodas = document.getElementById('btn-limpar-fretes-ml-todas');
 
     const btnLixeiraAbastMl = document.getElementById('btn-lixeira-abast-ml');
     const popoverLimparAbastMl = document.getElementById('popover-limpar-abast-ml');
     const fecharPopoverAbastMl = document.getElementById('fechar-popover-abast-ml');
-    const btnLimparAbastMlPreenchidas = document.getElementById('btn-limpar-abast-ml-preenchidas');
+    const popoverListaLinhasAbastPreenchidas = document.getElementById('popover-lista-linhas-abast-preenchidas');
     const btnLimparAbastMlTodas = document.getElementById('btn-limpar-abast-ml-todas');
 
     const btnLixeiraDespesasMl = document.getElementById('btn-lixeira-despesas-ml');
@@ -913,6 +1264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             if (popoverLimparAbastMl) popoverLimparAbastMl.classList.add('oculto');
             if (popoverLimparDespesasMl) popoverLimparDespesasMl.classList.add('oculto');
+            atualizarListaLinhasPreenchidasPopover();
             popoverLimparFretesMl.classList.toggle('oculto');
         });
     }
@@ -929,6 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             if (popoverLimparFretesMl) popoverLimparFretesMl.classList.add('oculto');
             if (popoverLimparDespesasMl) popoverLimparDespesasMl.classList.add('oculto');
+            atualizarListaLinhasAbastPreenchidasPopover();
             popoverLimparAbastMl.classList.toggle('oculto');
         });
     }
@@ -968,37 +1321,134 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ações de Limpeza de Fretes
-    if (btnLimparFretesMlPreenchidas) {
-        btnLimparFretesMlPreenchidas.addEventListener('click', () => {
-            let limpos = 0;
-            for (let i = 1; i <= 8; i++) {
-                const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
-                const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
-                const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
-                const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
-                const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
-                const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+    // ------------------------------------------
+    // Ações de Limpeza de Fretes (Individual e Coletiva)
+    // ------------------------------------------
+    function verificarLinhaFretePreenchida(i) {
+        const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+        const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+        const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
+        const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+        const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+        const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+        const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
 
-                if ((dt && dt.value) || (selCli && selCli.value) || (og && og.value) || (dst && dst.value) || (vl && vl.value) || (com && com.value)) {
-                    if (dt) dt.value = '';
-                    if (selCli) selCli.value = '';
-                    if (og) og.value = '';
-                    if (dst) dst.value = '';
-                    if (vl) {
-                        vl.value = '';
-                        vl.removeAttribute('readonly');
-                    }
-                    if (com) com.value = '';
-                    limpos++;
-                }
+        return !!((dt && dt.value.trim() !== '') ||
+            (selCli && selCli.value.trim() !== '') ||
+            (og && og.value.trim() !== '') ||
+            (dst && dst.value.trim() !== '') ||
+            (vl && vl.value.trim() !== '') ||
+            (com && com.value.trim() !== '') ||
+            (desc && desc.value.trim() !== ''));
+    }
+
+    function obterResumoLinhaFrete(i) {
+        const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+        const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+        const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+        const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+        const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
+
+        const partes = [];
+        if (selCli && selCli.value) {
+            const rotulosOp = {
+                'alimenticio': 'Alimentício',
+                'shopee': 'Shopee',
+                'mercado_livre': 'Mercado Livre'
+            };
+            partes.push(rotulosOp[selCli.value] || selCli.value);
+        }
+        if (dst && dst.value.trim()) {
+            partes.push(dst.value.trim());
+        }
+        if (vl && vl.value.trim()) {
+            partes.push(`Frete R$ ${vl.value.trim()}`);
+        } else if (dt && dt.value.trim()) {
+            partes.push(dt.value.trim());
+        }
+        if (desc && desc.value.trim()) {
+            partes.push(`Descarga R$ ${desc.value.trim()}`);
+        }
+
+        if (partes.length === 0) {
+            return `Linha ${i}`;
+        }
+        return partes.join(' • ');
+    }
+
+    function limparLinhaFrete(i) {
+        const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+        const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+        const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
+        const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+        const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+        const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+        const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
+        const pickerNativo = dt && dt.parentElement ? dt.parentElement.querySelector('.input-picker-data-nativo') : null;
+
+        if (dt) dt.value = '';
+        if (pickerNativo) pickerNativo.value = '';
+        if (selCli) selCli.value = '';
+        if (og) og.value = '';
+        if (dst) dst.value = '';
+        if (vl) {
+            vl.value = '';
+            vl.removeAttribute('readonly');
+        }
+        if (com) {
+            com.value = '';
+            com.setAttribute('readonly', 'true');
+            com.dataset.editadoManual = '';
+        }
+        if (desc) desc.value = '';
+
+        calcularTotaisFreteMl();
+        calcularIndicadoresViagemMl();
+        salvarProgressoMl();
+        atualizarListaLinhasPreenchidasPopover();
+        exibirToast(`Linha ${i} da Relação de Fretes apagada com sucesso!`, 'info');
+    }
+
+    function atualizarListaLinhasPreenchidasPopover() {
+        const container = document.getElementById('popover-lista-linhas-preenchidas');
+        if (!container) return;
+
+        container.innerHTML = '';
+        let totalPreenchidas = 0;
+
+        for (let i = 1; i <= 8; i++) {
+            if (verificarLinhaFretePreenchida(i)) {
+                totalPreenchidas++;
+                const resumo = obterResumoLinhaFrete(i);
+
+                const itemBtn = document.createElement('button');
+                itemBtn.type = 'button';
+                itemBtn.className = 'btn-apagar-linha-especifica';
+                itemBtn.title = `Clique para apagar os dados da Linha ${i}`;
+                itemBtn.innerHTML = `
+                    <span class="badge-num-linha">L${i}</span>
+                    <span class="detalhe-linha" title="${resumo}">${resumo}</span>
+                    <span class="btn-apagar-icone-wrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>Apagar</span>
+                    </span>
+                `;
+
+                itemBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    limparLinhaFrete(i);
+                });
+
+                container.appendChild(itemBtn);
             }
-            if (popoverLimparFretesMl) popoverLimparFretesMl.classList.add('oculto');
-            calcularTotaisFreteMl();
-            calcularIndicadoresViagemMl();
-            salvarProgressoMl();
-            exibirToast(`${limpos} frete(s) limpo(s)!`, 'sucesso');
-        });
+        }
+
+        if (totalPreenchidas === 0) {
+            container.innerHTML = '<span class="texto-sem-linhas-preenchidas">Nenhuma linha preenchida</span>';
+        }
     }
 
     if (btnLimparFretesMlTodas) {
@@ -1010,8 +1460,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                 const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
                 const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+                const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
+                const pickerNativo = dt && dt.parentElement ? dt.parentElement.querySelector('.input-picker-data-nativo') : null;
 
                 if (dt) dt.value = '';
+                if (pickerNativo) pickerNativo.value = '';
                 if (selCli) selCli.value = '';
                 if (og) og.value = '';
                 if (dst) dst.value = '';
@@ -1019,42 +1472,123 @@ document.addEventListener('DOMContentLoaded', () => {
                     vl.value = '';
                     vl.removeAttribute('readonly');
                 }
-                if (com) com.value = '';
+                if (com) {
+                    com.value = '';
+                    com.setAttribute('readonly', 'true');
+                    com.dataset.editadoManual = '';
+                }
+                if (desc) desc.value = '';
             }
             if (popoverLimparFretesMl) popoverLimparFretesMl.classList.add('oculto');
             calcularTotaisFreteMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
+            atualizarListaLinhasPreenchidasPopover();
             exibirToast('Todas as 8 linhas de frete foram limpas!', 'sucesso');
         });
     }
 
     // Ações de Limpeza de Abastecimento ML
-    if (btnLimparAbastMlPreenchidas) {
-        btnLimparAbastMlPreenchidas.addEventListener('click', () => {
-            let limpos = 0;
-            for (let i = 1; i <= 10; i++) {
-                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
-                const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
-                const km = document.querySelector(`input[name="km_ml_${i}"]`);
-                const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
-                const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
+    function verificarLinhaAbastPreenchida(i) {
+        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
+        const km = document.querySelector(`input[name="km_ml_${i}"]`);
+        const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
+        const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-                if ((posto && posto.value) || (nf && nf.value) || (km && km.value) || (valor && valor.value) || (litros && litros.value)) {
-                    if (posto) posto.value = '';
-                    if (nf) nf.value = '';
-                    if (km) km.value = '';
-                    if (valor) valor.value = '';
-                    if (litros) litros.value = '';
-                    limpos++;
-                }
+        return !!((posto && posto.value.trim() !== '') ||
+            (nf && nf.value.trim() !== '') ||
+            (km && km.value.trim() !== '') ||
+            (valor && valor.value.trim() !== '') ||
+            (litros && litros.value.trim() !== ''));
+    }
+
+    function obterResumoLinhaAbast(i) {
+        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
+        const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
+        const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
+
+        const partes = [];
+        if (posto && posto.value.trim()) {
+            partes.push(posto.value.trim());
+        }
+        if (nf && nf.value.trim()) {
+            partes.push(`NF ${nf.value.trim()}`);
+        }
+        if (valor && valor.value.trim()) {
+            partes.push(`R$ ${valor.value.trim()}`);
+        }
+        if (litros && litros.value.trim()) {
+            partes.push(`${litros.value.trim()} L`);
+        }
+
+        if (partes.length === 0) {
+            return `Linha ${i}`;
+        }
+        return partes.join(' • ');
+    }
+
+    function limparLinhaAbast(i) {
+        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
+        const km = document.querySelector(`input[name="km_ml_${i}"]`);
+        const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
+        const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
+
+        if (posto) posto.value = '';
+        if (nf) nf.value = '';
+        if (km) km.value = '';
+        if (valor) valor.value = '';
+        if (litros) litros.value = '';
+
+        calcularTotaisAbastecimentoMl();
+        calcularIndicadoresViagemMl();
+        salvarProgressoMl();
+        atualizarListaLinhasAbastPreenchidasPopover();
+        exibirToast(`Linha ${i} do Abastecimento apagada com sucesso!`, 'info');
+    }
+
+    function atualizarListaLinhasAbastPreenchidasPopover() {
+        const container = document.getElementById('popover-lista-linhas-abast-preenchidas');
+        if (!container) return;
+
+        container.innerHTML = '';
+        let totalPreenchidas = 0;
+
+        for (let i = 1; i <= 10; i++) {
+            if (verificarLinhaAbastPreenchida(i)) {
+                totalPreenchidas++;
+                const resumo = obterResumoLinhaAbast(i);
+
+                const itemBtn = document.createElement('button');
+                itemBtn.type = 'button';
+                itemBtn.className = 'btn-apagar-linha-especifica';
+                itemBtn.title = `Clique para apagar os dados da Linha ${i}`;
+                itemBtn.innerHTML = `
+                    <span class="badge-num-linha">L${i}</span>
+                    <span class="detalhe-linha" title="${resumo}">${resumo}</span>
+                    <span class="btn-apagar-icone-wrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span>Apagar</span>
+                    </span>
+                `;
+
+                itemBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    limparLinhaAbast(i);
+                });
+
+                container.appendChild(itemBtn);
             }
-            if (popoverLimparAbastMl) popoverLimparAbastMl.classList.add('oculto');
-            calcularTotaisAbastecimentoMl();
-            calcularIndicadoresViagemMl();
-            salvarProgressoMl();
-            exibirToast(`${limpos} linha(s) de abastecimento ML limpa(s)!`, 'sucesso');
-        });
+        }
+
+        if (totalPreenchidas === 0) {
+            container.innerHTML = '<span class="texto-sem-linhas-preenchidas">Nenhuma linha preenchida</span>';
+        }
     }
 
     if (btnLimparAbastMlTodas) {
@@ -1076,6 +1610,7 @@ document.addEventListener('DOMContentLoaded', () => {
             calcularTotaisAbastecimentoMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
+            atualizarListaLinhasAbastPreenchidasPopover();
             exibirToast('Todas as 10 linhas de abastecimento ML foram limpas!', 'sucesso');
         });
     }
@@ -1159,7 +1694,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     origem: document.querySelector(`input[name="origem_frete_ml_${i}"]`)?.value || '',
                     destino: document.querySelector(`input[name="destino_frete_ml_${i}"]`)?.value || '',
                     valor: document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || '',
-                    comissao: document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || ''
+                    comissao: document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || '',
+                    descarga: document.querySelector(`input[name="descarga_frete_ml_${i}"]`)?.value || ''
                 });
             }
 
@@ -1210,8 +1746,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dados.cabecalho) {
                     if (inputMotorista && dados.cabecalho.motorista) inputMotorista.value = dados.cabecalho.motorista;
                     if (inputPlacas && dados.cabecalho.placas) inputPlacas.value = dados.cabecalho.placas;
-                    if (inputDataSaida && dados.cabecalho.dataSaida) inputDataSaida.value = dados.cabecalho.dataSaida;
-                    if (inputDataChegada && dados.cabecalho.dataChegada) inputDataChegada.value = dados.cabecalho.dataChegada;
+                    if (inputDataSaida && dados.cabecalho.dataSaida) inputDataSaida.value = normalizarDataExibicao(dados.cabecalho.dataSaida);
+                    if (inputDataChegada && dados.cabecalho.dataChegada) inputDataChegada.value = normalizarDataExibicao(dados.cabecalho.dataChegada);
                     if (inputKmSaida && dados.cabecalho.kmSaida) inputKmSaida.value = dados.cabecalho.kmSaida;
                     if (inputKmChegada && dados.cabecalho.kmChegada) inputKmChegada.value = dados.cabecalho.kmChegada;
                     if (inputKmTotal && dados.cabecalho.kmTotal) inputKmTotal.value = dados.cabecalho.kmTotal;
@@ -1237,30 +1773,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                         const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
                         const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+                        const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
 
-                        if (dt && f.data) dt.value = f.data;
+                        if (dt && f.data) dt.value = normalizarDataExibicao(f.data);
                         if (selCli && f.cliente !== undefined) selCli.value = f.cliente;
                         if (og && f.origem) og.value = f.origem;
                         if (dst && f.destino) dst.value = f.destino;
+                        if (desc && f.descarga) desc.value = f.descarga;
 
-                        if (f.cliente || f.valor || f.origem || f.destino) {
+                        if (f.cliente || f.valor || f.origem || f.destino || f.descarga) {
                             temFretePreenchido = true;
                         }
 
                         if (f.cliente === 'mercado_livre') {
                             if (vl) {
-                                vl.value = f.valor || '400,00';
-                                vl.setAttribute('readonly', 'readonly');
+                                vl.removeAttribute('readonly');
+                                if (f.valor) vl.value = f.valor;
                             }
                             if (com) {
-                                com.value = f.comissao || '400,00';
+                                com.setAttribute('readonly', 'true');
+                                com.dataset.editadoManual = '';
+                                com.value = '400,00';
                             }
-                        } else if (f.cliente === 'alimenticio' || f.cliente === 'shopee') {
+                        } else if (f.cliente === 'shopee') {
                             if (vl) {
                                 vl.removeAttribute('readonly');
                                 if (f.valor) vl.value = f.valor;
                             }
                             if (com) {
+                                com.setAttribute('readonly', 'true');
+                                com.dataset.editadoManual = '';
                                 if (f.comissao) {
                                     com.value = f.comissao;
                                 } else if (vl && vl.value) {
@@ -1268,12 +1810,26 @@ document.addEventListener('DOMContentLoaded', () => {
                                     com.value = vNum > 0 ? formatarMoedaSemPrefixo(vNum * 0.11) : '';
                                 }
                             }
+                        } else if (f.cliente === 'alimenticio') {
+                            if (vl) {
+                                vl.removeAttribute('readonly');
+                                if (f.valor) vl.value = f.valor;
+                            }
+                            if (com) {
+                                com.removeAttribute('readonly');
+                                com.dataset.editadoManual = '';
+                                if (f.comissao) com.value = f.comissao;
+                            }
                         } else {
                             if (vl) {
                                 vl.removeAttribute('readonly');
                                 if (f.valor) vl.value = f.valor;
                             }
-                            if (com && f.comissao) com.value = f.comissao;
+                            if (com) {
+                                com.setAttribute('readonly', 'true');
+                                com.dataset.editadoManual = '';
+                                if (f.comissao) com.value = f.comissao;
+                            }
                         }
                     });
                 }
@@ -1338,6 +1894,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 calcularTotaisAbastecimentoMl();
                 calcularTotaisDespesasMl();
                 calcularIndicadoresViagemMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                    atualizarListaLinhasAbastPreenchidasPopover();
+                }
 
                 // Se houver dados lançados nas seções operacionais, expande o formulário
                 if (temFretePreenchido || temAbastPreenchido || temDespesaPreenchida) {
@@ -1398,5 +1960,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    window.carregarProgressoMl = carregarProgressoMl;
     carregarProgressoMl();
 });

@@ -1352,6 +1352,19 @@ main {
     background: #ffffff;
 }
 
+.input-tabela[readonly] {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    cursor: not-allowed !important;
+    border-color: #e2e8f0 !important;
+}
+
+.input-tabela:not([readonly]) {
+    background-color: #ffffff;
+    color: #1e293b;
+    cursor: text;
+}
+
 .tabela-moeda-wrap,
 .tabela-litros-wrap {
     position: relative;
@@ -1467,37 +1480,42 @@ main {
     letter-spacing: 0.3px;
 }
 
+.td-total-valor {
+    min-width: 140px;
+}
+
 .wrap-total-destaque .input-total-campo {
     background: #ffffff;
     border: 1.5px solid #6366f1;
     color: #3730a3;
     font-weight: 800;
-    font-size: 14px;
+    font-size: 13.5px;
+    letter-spacing: -0.2px;
     box-shadow: 0 2px 6px rgba(99, 102, 241, 0.12);
     cursor: default;
     text-align: right;
-    padding-left: 36px !important;
-    padding-right: 12px !important;
+    padding-left: 28px !important;
+    padding-right: 8px !important;
 }
 
 .td-total-litros .wrap-total-destaque .input-total-campo {
-    padding-right: 28px !important;
-    padding-left: 10px !important;
+    padding-right: 24px !important;
+    padding-left: 8px !important;
 }
 
 .wrap-total-destaque .tabela-moeda-prefixo {
     color: #6366f1;
     font-weight: 800;
-    font-size: 11.5px;
-    left: 10px;
+    font-size: 11px;
+    left: 8px;
     z-index: 2;
 }
 
 .wrap-total-destaque .tabela-litros-sufixo {
     color: #6366f1;
     font-weight: 800;
-    font-size: 11.5px;
-    right: 10px;
+    font-size: 11px;
+    right: 8px;
     z-index: 2;
 }
 
@@ -2411,7 +2429,7 @@ footer {
 
 /* Tabela de Relação de Fretes */
 .tabela-fretes-ml {
-    min-width: 860px;
+    min-width: 960px;
 }
 
 .input-data-frete {
@@ -2462,6 +2480,224 @@ footer {
     background-color: #f8fafc;
     color: #0f172a;
     cursor: default;
+}
+
+/* ==========================================
+   Componente de Data com Calendário e Máscara
+   ========================================== */
+.input-wrapper-data {
+    position: relative;
+}
+
+.input-wrapper-data input {
+    padding-right: 42px !important;
+}
+
+.btn-picker-data {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #64748b;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.btn-picker-data:hover {
+    color: var(--azul-ajborges);
+    background-color: #f1f5f9;
+}
+
+.input-picker-data-nativo {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tabela-data-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.tabela-data-wrap .input-data-frete {
+    padding-left: 6px !important;
+    padding-right: 24px !important;
+    text-align: center;
+    font-size: 12.5px;
+    letter-spacing: -0.2px;
+}
+
+.tabela-data-wrap .btn-picker-data {
+    right: 2px;
+    padding: 3px;
+}
+
+/* ==========================================
+   Exclusão Específica de Linhas de Frete
+   ========================================= */
+.td-num {
+    position: relative;
+    text-align: center;
+    width: 48px;
+}
+
+.num-rotulo {
+    display: inline-block;
+    transition: opacity 0.15s ease;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.btn-limpar-linha-inline {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.tabela-fretes-ml tbody tr:hover .btn-limpar-linha-inline,
+.tabela-abastecimento tbody tr:hover .btn-limpar-linha-inline {
+    display: flex;
+}
+
+.tabela-fretes-ml tbody tr:hover .num-rotulo,
+.tabela-abastecimento tbody tr:hover .num-rotulo {
+    opacity: 0;
+}
+
+.btn-limpar-linha-inline:hover {
+    background: #dc2626;
+    color: #ffffff;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.popover-secao-apagar-linha {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.popover-secao-titulo {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.popover-linhas-preenchidas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 210px;
+    overflow-y: auto;
+}
+
+.btn-apagar-linha-especifica {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.btn-apagar-linha-especifica:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.btn-apagar-linha-especifica .linha-info-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.btn-apagar-linha-especifica .badge-num-linha {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.btn-apagar-linha-especifica .detalhe-linha {
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.btn-apagar-linha-especifica .btn-apagar-icone-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: #dc2626;
+    background: #fee2e2;
+    padding: 4px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.btn-apagar-linha-especifica:hover .btn-apagar-icone-wrap {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.texto-sem-linhas-preenchidas {
+    font-size: 12px;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 4px 0;
+    display: block;
+}
+
+.popover-divisor {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px 0;
 }
 
 /* Tabela Composta de Despesas (Impostos/Pedágios e Outras) */

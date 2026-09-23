@@ -183,7 +183,7 @@
                                 <label for="data-saida">
                                     DATA SAÍDA <span class="asterisco">*</span>
                                 </label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper input-wrapper-data">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -192,7 +192,17 @@
                                         <line x1="8" y1="2" x2="8" y2="6"></line>
                                         <line x1="3" y1="10" x2="21" y2="10"></line>
                                     </svg>
-                                    <input type="date" id="data-saida" name="data_saida" required>
+                                    <input type="text" id="data-saida" name="data_saida" required
+                                        placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                    <button type="button" class="btn-picker-data btn-picker-header" title="Abrir calendário" tabindex="-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    </button>
+                                    <input type="date" id="data-saida-picker" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
                                 </div>
                             </div>
 
@@ -201,7 +211,7 @@
                                 <label for="data-chegada">
                                     DATA CHEGADA <span class="asterisco">*</span>
                                 </label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper input-wrapper-data">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -210,7 +220,17 @@
                                         <line x1="8" y1="2" x2="8" y2="6"></line>
                                         <line x1="3" y1="10" x2="21" y2="10"></line>
                                     </svg>
-                                    <input type="date" id="data-chegada" name="data_chegada" required>
+                                    <input type="text" id="data-chegada" name="data_chegada" required
+                                        placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                    <button type="button" class="btn-picker-data btn-picker-header" title="Abrir calendário" tabindex="-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    </button>
+                                    <input type="date" id="data-chegada-picker" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
                                 </div>
                             </div>
                         </div>
@@ -455,6 +475,7 @@
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </div>
+                            </div>
                         </button>
                     </div>
 
@@ -520,21 +541,13 @@
                                                             title="Fechar">&times;</button>
                                                     </div>
                                                     <div class="popover-limpeza-corpo">
-                                                        <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-fretes-ml-preenchidas">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar linhas preenchidas</strong>
-                                                                <small>Apaga apenas as linhas de frete com dados
-                                                                    digitados</small>
+                                                        <div class="popover-secao-apagar-linha">
+                                                            <span class="popover-secao-titulo">Apagar Linha Específica</span>
+                                                            <div class="popover-linhas-preenchidas" id="popover-lista-linhas-preenchidas">
+                                                                <span class="texto-sem-linhas-preenchidas">Nenhuma linha preenchida</span>
                                                             </div>
-                                                        </button>
+                                                        </div>
+                                                        <div class="popover-divisor"></div>
                                                         <button type="button" class="opcao-limpeza-item item-perigo"
                                                             id="btn-limpar-fretes-ml-todas">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -562,20 +575,34 @@
                                                 <thead>
                                                     <tr>
                                                         <th class="th-num">#</th>
-                                                        <th style="width: 14%;">DATA</th>
-                                                        <th style="width: 16%;">OPERAÇÃO</th>
-                                                        <th style="width: 22%;">ORIGEM</th>
-                                                        <th style="width: 22%;">DESTINO</th>
-                                                        <th style="width: 13%;">VALOR FRETE</th>
-                                                        <th style="width: 13%;">COMISSÃO</th>
+                                                        <th style="width: 11%;">DATA</th>
+                                                        <th style="width: 14%;">OPERAÇÃO</th>
+                                                        <th style="width: 15%;">ORIGEM</th>
+                                                        <th style="width: 15%;">DESTINO</th>
+                                                        <th style="width: 15%;">VALOR FRETE</th>
+                                                        <th style="width: 15%;">COMISSÃO</th>
+                                                        <th style="width: 15%;">DESCARGA</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td class="td-num">1</td>
-                                                        <td><input type="text" name="data_frete_ml_1"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">1</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="1" title="Apagar Linha 1">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_1"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_1"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -608,12 +635,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_1"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">2</td>
-                                                        <td><input type="text" name="data_frete_ml_2"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">2</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="2" title="Apagar Linha 2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_2"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_2"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -646,12 +695,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_2"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">3</td>
-                                                        <td><input type="text" name="data_frete_ml_3"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">3</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="3" title="Apagar Linha 3">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_3"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_3"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -684,12 +755,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_3"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">4</td>
-                                                        <td><input type="text" name="data_frete_ml_4"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">4</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="4" title="Apagar Linha 4">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_4"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_4"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -722,12 +815,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_4"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">5</td>
-                                                        <td><input type="text" name="data_frete_ml_5"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">5</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="5" title="Apagar Linha 5">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_5"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_5"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -760,12 +875,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_5"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">6</td>
-                                                        <td><input type="text" name="data_frete_ml_6"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">6</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="6" title="Apagar Linha 6">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_6"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_6"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -798,12 +935,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_6"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">7</td>
-                                                        <td><input type="text" name="data_frete_ml_7"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">7</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="7" title="Apagar Linha 7">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_7"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_7"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -836,12 +995,34 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_7"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">8</td>
-                                                        <td><input type="text" name="data_frete_ml_8"
-                                                                class="input-tabela input-data-frete"
-                                                                placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">8</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha="8" title="Apagar Linha 8">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tabela-data-wrap">
+                                                                <input type="text" name="data_frete_ml_8"
+                                                                    class="input-tabela input-data-frete"
+                                                                    placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off">
+                                                                <button type="button" class="btn-picker-data" title="Abrir calendário" tabindex="-1">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                </button>
+                                                                <input type="date" class="input-picker-data-nativo" tabindex="-1" aria-hidden="true">
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <select name="cliente_frete_ml_8"
                                                                 class="input-tabela select-cliente-frete-ml">
@@ -874,6 +1055,15 @@
                                                                     placeholder="0,00" readonly>
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
+                                                                    name="descarga_frete_ml_8"
+                                                                    class="input-tabela input-descarga-frete-ml"
+                                                                    placeholder="0,00">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                                 <tfoot>
@@ -894,6 +1084,13 @@
                                                                 <span class="tabela-moeda-prefixo">R$</span>
                                                                 <input type="text" id="ml-total-relacao-comissao" readonly
                                                                     value="0,00" class="input-tabela input-total-campo" title="Total Comissão">
+                                                            </div>
+                                                        </td>
+                                                        <td class="td-total-valor">
+                                                            <div class="tabela-moeda-wrap wrap-total-destaque">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" id="ml-total-relacao-descarga" readonly
+                                                                    value="0,00" class="input-tabela input-total-campo" title="Total Descarga">
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -946,21 +1143,13 @@
                                                             id="fechar-popover-abast-ml" title="Fechar">&times;</button>
                                                     </div>
                                                     <div class="popover-limpeza-corpo">
-                                                        <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-abast-ml-preenchidas">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar linhas preenchidas</strong>
-                                                                <small>Apaga apenas as linhas com dados
-                                                                    digitados</small>
+                                                        <div class="popover-secao-apagar-linha">
+                                                            <span class="popover-secao-titulo">Apagar Linha Específica</span>
+                                                            <div class="popover-linhas-preenchidas" id="popover-lista-linhas-abast-preenchidas">
+                                                                <span class="texto-sem-linhas-preenchidas">Nenhuma linha preenchida</span>
                                                             </div>
-                                                        </button>
+                                                        </div>
+                                                        <div class="popover-divisor"></div>
                                                         <button type="button" class="opcao-limpeza-item item-perigo"
                                                             id="btn-limpar-abast-ml-todas">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16"
@@ -997,7 +1186,12 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td class="td-num">1</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">1</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="1" title="Apagar Linha 1">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_1"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1009,14 +1203,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_1"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_1"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_1"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1025,7 +1219,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">2</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">2</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="2" title="Apagar Linha 2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_2"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1037,14 +1236,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_2"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_2"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_2"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1053,7 +1252,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">3</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">3</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="3" title="Apagar Linha 3">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_3"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1065,14 +1269,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_3"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_3"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_3"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1081,7 +1285,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">4</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">4</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="4" title="Apagar Linha 4">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_4"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1093,14 +1302,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_4"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_4"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_4"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1109,7 +1318,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">5</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">5</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="5" title="Apagar Linha 5">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_5"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1121,14 +1335,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_5"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_5"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_5"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1137,7 +1351,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">6</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">6</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="6" title="Apagar Linha 6">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_6"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1149,14 +1368,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_6"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_6"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_6"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1165,7 +1384,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">7</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">7</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="7" title="Apagar Linha 7">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_7"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1177,14 +1401,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_7"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_7"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_7"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1193,7 +1417,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">8</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">8</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="8" title="Apagar Linha 8">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_8"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1205,14 +1434,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_8"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_8"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_8"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1221,7 +1450,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">9</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">9</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="9" title="Apagar Linha 9">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_9"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1233,14 +1467,14 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_ml_9"
+                                                                <input type="text" inputmode="numeric" autocomplete="off" name="valor_ml_9"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_9"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1249,7 +1483,12 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="td-num">10</td>
+                                                        <td class="td-num">
+                                                            <span class="num-rotulo">10</span>
+                                                            <button type="button" class="btn-limpar-linha-inline" data-linha-abast="10" title="Apagar Linha 10">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            </button>
+                                                        </td>
                                                         <td><input type="text" name="posto_ml_10"
                                                                 class="input-tabela input-posto"
                                                                 placeholder="Nome do posto..."></td>
@@ -1261,7 +1500,7 @@
                                                         <td>
                                                             <div class="tabela-moeda-wrap">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="numeric" autocomplete="off"
                                                                     name="valor_ml_10"
                                                                     class="input-tabela input-valor-abast-ml"
                                                                     placeholder="0,00">
@@ -1269,7 +1508,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric"
+                                                                <input type="text" inputmode="decimal" autocomplete="off"
                                                                     name="litros_ml_10"
                                                                     class="input-tabela input-litros-abast-ml"
                                                                     placeholder="0">
@@ -1664,7 +1903,7 @@
                                                     R$ 0,00
                                                 </div>
                                                 <div class="indicador-formula-base">
-                                                    Combustível + Impostos/Pedágios + Despesas + Comissão
+                                                    Combustível + Impostos/Pedágios + Despesas + Comissão + Descarga
                                                 </div>
                                             </div>
 
@@ -1709,7 +1948,7 @@
                                                     R$ 0,00
                                                 </div>
                                                 <div class="indicador-formula-base">
-                                                    VR Comissão
+                                                    VR Comissão - Adiantamento
                                                 </div>
                                             </div>
                                         </div>
