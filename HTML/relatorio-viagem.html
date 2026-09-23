@@ -1433,10 +1433,12 @@
                                                 <thead>
                                                     <tr>
                                                         <th class="th-num">#</th>
-                                                        <th style="width: 17%;">DATA</th>
-                                                        <th style="width: 31%;">ORIGEM</th>
-                                                        <th style="width: 32%;">DESTINO</th>
-                                                        <th style="width: 20%;">VALOR FRETE</th>
+                                                        <th style="width: 14%;">DATA</th>
+                                                        <th style="width: 16%;">OPERAÇÃO</th>
+                                                        <th style="width: 22%;">ORIGEM</th>
+                                                        <th style="width: 22%;">DESTINO</th>
+                                                        <th style="width: 13%;">VALOR FRETE</th>
+                                                        <th style="width: 13%;">COMISSÃO</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -1445,6 +1447,14 @@
                                                         <td><input type="text" name="data_frete_ml_1"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_1"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_1"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1460,12 +1470,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_1"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">2</td>
                                                         <td><input type="text" name="data_frete_ml_2"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_2"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_2"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1481,12 +1507,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_2"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">3</td>
                                                         <td><input type="text" name="data_frete_ml_3"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_3"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_3"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1502,12 +1544,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_3"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">4</td>
                                                         <td><input type="text" name="data_frete_ml_4"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_4"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_4"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1523,12 +1581,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_4"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">5</td>
                                                         <td><input type="text" name="data_frete_ml_5"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_5"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_5"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1544,12 +1618,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_5"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">6</td>
                                                         <td><input type="text" name="data_frete_ml_6"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_6"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_6"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1565,12 +1655,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_6"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">7</td>
                                                         <td><input type="text" name="data_frete_ml_7"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_7"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_7"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1586,12 +1692,28 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_7"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="td-num">8</td>
                                                         <td><input type="text" name="data_frete_ml_8"
                                                                 class="input-tabela input-data-frete"
                                                                 placeholder="DD/MM/AAAA" maxlength="10"></td>
+                                                        <td>
+                                                            <select name="cliente_frete_ml_8"
+                                                                class="input-tabela select-cliente-frete-ml">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="shopee">Shopee</option>
+                                                                <option value="mercado_livre">Mercado Livre</option>
+                                                            </select>
+                                                        </td>
                                                         <td><input type="text" name="origem_frete_ml_8"
                                                                 class="input-tabela" placeholder="Cidade/UF Origem...">
                                                         </td>
@@ -1607,19 +1729,34 @@
                                                                     placeholder="0,00">
                                                             </div>
                                                         </td>
+                                                        <td>
+                                                            <div class="tabela-moeda-wrap">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" name="comissao_frete_ml_8"
+                                                                    class="input-tabela input-comissao-frete-ml"
+                                                                    placeholder="0,00" readonly>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                                 <tfoot>
                                                     <tr class="linha-totais-abast">
-                                                        <td colspan="4" class="td-totais-label">
+                                                        <td colspan="5" class="td-totais-label">
                                                             <span class="tag-auto-pequena">Soma Automática</span>
-                                                            <strong>TOTAL FRETE &gt;&gt;</strong>
+                                                            <strong>TOTAIS &gt;&gt;</strong>
                                                         </td>
                                                         <td class="td-total-valor">
                                                             <div class="tabela-moeda-wrap wrap-total-destaque">
                                                                 <span class="tabela-moeda-prefixo">R$</span>
                                                                 <input type="text" id="ml-total-relacao-frete" readonly
-                                                                    value="0,00" class="input-tabela input-total-campo">
+                                                                    value="0,00" class="input-tabela input-total-campo" title="Total Frete">
+                                                            </div>
+                                                        </td>
+                                                        <td class="td-total-valor">
+                                                            <div class="tabela-moeda-wrap wrap-total-destaque">
+                                                                <span class="tabela-moeda-prefixo">R$</span>
+                                                                <input type="text" id="ml-total-relacao-comissao" readonly
+                                                                    value="0,00" class="input-tabela input-total-campo" title="Total Comissão">
                                                             </div>
                                                         </td>
                                                     </tr>

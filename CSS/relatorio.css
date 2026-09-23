@@ -2380,7 +2380,7 @@ footer {
 
 /* Tabela de Relação de Fretes */
 .tabela-fretes-ml {
-    min-width: 680px;
+    min-width: 860px;
 }
 
 .input-data-frete {
@@ -2388,10 +2388,49 @@ footer {
     font-weight: 600;
 }
 
+.select-cliente-frete-ml {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e293b;
+    background-color: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0 8px;
+    height: 38px;
+    width: 100%;
+    outline: none;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.select-cliente-frete-ml:hover {
+    border-color: #cbd5e1;
+}
+
+.select-cliente-frete-ml:focus {
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px rgba(61, 61, 144, 0.12);
+}
+
 .input-valor-frete-ml {
-    padding-left: 30px;
+    padding-left: 36px !important;
     font-weight: 600;
     text-align: right;
+}
+
+.input-valor-frete-ml[readonly] {
+    background-color: #f8fafc;
+    color: #475569;
+    cursor: not-allowed;
+}
+
+.input-comissao-frete-ml {
+    padding-left: 36px !important;
+    font-weight: 600;
+    text-align: right;
+    background-color: #f8fafc;
+    color: #0f172a;
+    cursor: default;
 }
 
 /* Tabela Composta de Despesas (Impostos/Pedágios e Outras) */

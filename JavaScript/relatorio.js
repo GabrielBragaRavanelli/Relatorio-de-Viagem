@@ -736,6 +736,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dispararToast) {
                 exibirToast('Opção selecionada: Relatório de viagem - ML', 'info');
             }
+            if (typeof calcularTotaisFreteMl === 'function') {
+                calcularTotaisFreteMl();
+            }
             if (typeof calcularIndicadoresViagemMl === 'function') {
                 calcularIndicadoresViagemMl();
             }
@@ -1152,21 +1155,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 15.1. Relação de Fretes ML (8 Linhas)
     const inputsValorFreteMl = [];
+    const inputsComissaoFreteMl = [];
+    const selectsClienteFreteMl = [];
     const inputTotalRelacaoFrete = document.getElementById('ml-total-relacao-frete');
+    const inputTotalRelacaoComissao = document.getElementById('ml-total-relacao-comissao');
+
+    function atualizarLinhaFreteMl(index, acaoDisparadaPorSelect = false) {
+        const selectCli = document.querySelector(`select[name="cliente_frete_ml_${index}"]`);
+        const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${index}"]`);
+        const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${index}"]`);
+
+        if (!selectCli || !inputValFrete || !inputComissao) return;
+
+        const tipoOperacao = selectCli.value;
+
+        if (tipoOperacao === 'mercado_livre') {
+            inputValFrete.value = '400,00';
+            inputValFrete.setAttribute('readonly', 'readonly');
+            inputComissao.value = '400,00';
+        } else if (tipoOperacao === 'shopee') {
+            inputValFrete.removeAttribute('readonly');
+            if (acaoDisparadaPorSelect && inputValFrete.value === '400,00') {
+                inputValFrete.value = '';
+            }
+            const valorNum = parseMoeda(inputValFrete.value);
+            if (valorNum > 0) {
+                const comissao11 = valorNum * 0.11;
+                inputComissao.value = formatarMoedaSemPrefixo(comissao11);
+            } else {
+                inputComissao.value = '';
+            }
+        } else {
+            // Vazio / Desmarcado
+            inputValFrete.removeAttribute('readonly');
+            if (acaoDisparadaPorSelect) {
+                inputValFrete.value = '';
+            }
+            inputComissao.value = '';
+        }
+    }
 
     for (let i = 1; i <= 8; i++) {
         const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+        const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+        const selectCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
         const inputDataFrete = document.querySelector(`input[name="data_frete_ml_${i}"]`);
         const inputOrigemFrete = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
         const inputDestinoFrete = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
 
-        if (inputValFrete) {
-            inputsValorFreteMl.push(inputValFrete);
-            aplicarMascaraMoeda(inputValFrete, () => {
+        if (selectCli) {
+            selectsClienteFreteMl.push(selectCli);
+            selectCli.addEventListener('change', () => {
+                atualizarLinhaFreteMl(i, true);
                 calcularTotaisFreteMl();
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
             });
+        }
+
+        if (inputValFrete) {
+            inputsValorFreteMl.push(inputValFrete);
+            aplicarMascaraMoeda(inputValFrete, () => {
+                atualizarLinhaFreteMl(i, false);
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
+                salvarProgressoMl();
+            });
+        }
+
+        if (inputComissao) {
+            inputsComissaoFreteMl.push(inputComissao);
         }
 
         if (inputDataFrete) {
@@ -1181,27 +1239,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calcularTotaisFreteMl() {
-        let soma = 0;
+        let somaFrete = 0;
+        let somaComissao = 0;
+
         inputsValorFreteMl.forEach(input => {
-            soma += parseMoeda(input.value);
+            somaFrete += parseMoeda(input.value);
+        });
+
+        inputsComissaoFreteMl.forEach(input => {
+            somaComissao += parseMoeda(input.value);
         });
 
         if (inputTotalRelacaoFrete) {
-            inputTotalRelacaoFrete.value = formatarMoedaSemPrefixo(soma);
+            inputTotalRelacaoFrete.value = formatarMoedaSemPrefixo(somaFrete);
+        }
+
+        if (inputTotalRelacaoComissao) {
+            inputTotalRelacaoComissao.value = formatarMoedaSemPrefixo(somaComissao);
+        }
+
+        // Sincroniza automaticamente a soma total de comissões com o campo "VR COMISSÃO" do cabeçalho
+        if (inputVrComissao) {
+            inputVrComissao.value = somaComissao > 0 ? formatarMoedaSemPrefixo(somaComissao) : '';
         }
 
         // Sincronizar com o total geral de frete se o campo de topo não estiver preenchido com retornos avulsos
-        if (soma > 0 && inputTotalFrete) {
+        if (somaFrete > 0 && inputTotalFrete) {
             const fretesTopo = parseMoeda(inputFreteOrigem ? inputFreteOrigem.value : '') +
                 parseMoeda(inputRetorno1 ? inputRetorno1.value : '') +
                 parseMoeda(inputRetorno2 ? inputRetorno2.value : '') +
                 parseMoeda(inputRetorno3 ? inputRetorno3.value : '');
             if (fretesTopo === 0) {
-                inputTotalFrete.value = formatarMoedaSemPrefixo(soma);
+                inputTotalFrete.value = formatarMoedaSemPrefixo(somaFrete);
             }
         }
 
-        return soma;
+        return { frete: somaFrete, comissao: somaComissao };
     }
 
     // 15.2. Abastecimento ML (10 Linhas - Sem Média)
@@ -1598,15 +1671,22 @@ document.addEventListener('DOMContentLoaded', () => {
             let limpos = 0;
             for (let i = 1; i <= 8; i++) {
                 const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+                const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
                 const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
                 const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                 const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+                const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
 
-                if ((dt && dt.value) || (og && og.value) || (dst && dst.value) || (vl && vl.value)) {
+                if ((dt && dt.value) || (selCli && selCli.value) || (og && og.value) || (dst && dst.value) || (vl && vl.value) || (com && com.value)) {
                     if (dt) dt.value = '';
+                    if (selCli) selCli.value = '';
                     if (og) og.value = '';
                     if (dst) dst.value = '';
-                    if (vl) vl.value = '';
+                    if (vl) {
+                        vl.value = '';
+                        vl.removeAttribute('readonly');
+                    }
+                    if (com) com.value = '';
                     limpos++;
                 }
             }
@@ -1622,14 +1702,21 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLimparFretesMlTodas.addEventListener('click', () => {
             for (let i = 1; i <= 8; i++) {
                 const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+                const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
                 const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
                 const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                 const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+                const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
 
                 if (dt) dt.value = '';
+                if (selCli) selCli.value = '';
                 if (og) og.value = '';
                 if (dst) dst.value = '';
-                if (vl) vl.value = '';
+                if (vl) {
+                    vl.value = '';
+                    vl.removeAttribute('readonly');
+                }
+                if (com) com.value = '';
             }
             if (popoverLimparFretesMl) popoverLimparFretesMl.classList.add('oculto');
             calcularTotaisFreteMl();
@@ -1738,9 +1825,11 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 1; i <= 8; i++) {
                 fretesMl.push({
                     data: document.querySelector(`input[name="data_frete_ml_${i}"]`)?.value || '',
+                    cliente: document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '',
                     origem: document.querySelector(`input[name="origem_frete_ml_${i}"]`)?.value || '',
                     destino: document.querySelector(`input[name="destino_frete_ml_${i}"]`)?.value || '',
-                    valor: document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || ''
+                    valor: document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || '',
+                    comissao: document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || ''
                 });
             }
 
@@ -1792,14 +1881,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     dados.fretes.forEach((f, idx) => {
                         const i = idx + 1;
                         const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+                        const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
                         const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
                         const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                         const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+                        const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
 
                         if (dt && f.data) dt.value = f.data;
+                        if (selCli && f.cliente !== undefined) selCli.value = f.cliente;
                         if (og && f.origem) og.value = f.origem;
                         if (dst && f.destino) dst.value = f.destino;
-                        if (vl && f.valor) vl.value = f.valor;
+
+                        if (f.cliente === 'mercado_livre') {
+                            if (vl) {
+                                vl.value = f.valor || '400,00';
+                                vl.setAttribute('readonly', 'readonly');
+                            }
+                            if (com) {
+                                com.value = f.comissao || '400,00';
+                            }
+                        } else if (f.cliente === 'shopee') {
+                            if (vl) {
+                                vl.removeAttribute('readonly');
+                                if (f.valor) vl.value = f.valor;
+                            }
+                            if (com) {
+                                if (f.comissao) {
+                                    com.value = f.comissao;
+                                } else if (vl && vl.value) {
+                                    const vNum = parseMoeda(vl.value);
+                                    com.value = vNum > 0 ? formatarMoedaSemPrefixo(vNum * 0.11) : '';
+                                }
+                            }
+                        } else {
+                            if (vl) {
+                                vl.removeAttribute('readonly');
+                                if (f.valor) vl.value = f.valor;
+                            }
+                            if (com && f.comissao) com.value = f.comissao;
+                        }
                     });
                 }
 
