@@ -104,8 +104,25 @@
                         <p class="subtitulo-relatorio">Preencha com atenção os dados operacionais da viagem e o resumo
                             financeiro dos fretes.</p>
                     </div>
-                    <div class="legenda-obrigatorio">
-                        <span class="asterisco-tag">*</span> Campos obrigatórios
+                    <div class="cabecalho-direita-status">
+                        <div class="legenda-obrigatorio">
+                            <span class="asterisco-tag">*</span> Campos obrigatórios
+                        </div>
+                        <div class="ficha-contador-box" id="ficha-contador-box" title="Identificador sequencial do relatório de viagem">
+                            <div class="ficha-contador-tag">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <span>Ficha Nº</span>
+                            </div>
+                            <span class="ficha-numero" id="numero-ficha-display">#0001</span>
+                        </div>
                     </div>
                 </div>
 
@@ -199,10 +216,10 @@
                         </div>
 
                         <div class="grid-campos grid-3-col">
-                            <!-- KM / HM Saída -->
+                            <!-- KM Saída -->
                             <div class="campo-grupo">
                                 <label for="km-saida">
-                                    KM / HM SAÍDA <span class="asterisco">*</span>
+                                    KM SAÍDA <span class="asterisco">*</span>
                                 </label>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -218,10 +235,10 @@
                                 </div>
                             </div>
 
-                            <!-- KM / HM Chegada -->
+                            <!-- KM Entrada -->
                             <div class="campo-grupo">
                                 <label for="km-chegada">
-                                    KM / HM CHEGADA <span class="asterisco">*</span>
+                                    KM ENTRADA <span class="asterisco">*</span>
                                 </label>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -237,7 +254,7 @@
                                 </div>
                             </div>
 
-                            <!-- KM / HM Total -->
+                            <!-- KM Total -->
                             <div class="campo-grupo campo-calculado">
                                 <div class="label-com-tag">
                                     <label for="km-total">
@@ -336,11 +353,11 @@
                             <!-- Frete Origem -->
                             <div class="frete-coluna frete-coluna-origem">
                                 <label for="frete-origem">
-                                    FRETE ORIGEM <span class="asterisco">*</span>
+                                    FRETE ORIGEM
                                 </label>
                                 <div class="input-wrapper input-moeda">
                                     <span class="input-prefixo">R$</span>
-                                    <input type="text" id="frete-origem" name="frete_origem" required placeholder="0,00"
+                                    <input type="text" id="frete-origem" name="frete_origem" placeholder="0,00"
                                         inputmode="numeric">
                                 </div>
                             </div>
@@ -348,11 +365,11 @@
                             <!-- Retorno (I) -->
                             <div class="frete-coluna">
                                 <label for="retorno-1">
-                                    RETORNO (I) <span class="asterisco">*</span>
+                                    RETORNO (I)
                                 </label>
                                 <div class="input-wrapper input-moeda">
                                     <span class="input-prefixo">R$</span>
-                                    <input type="text" id="retorno-1" name="retorno_1" required placeholder="0,00"
+                                    <input type="text" id="retorno-1" name="retorno_1" placeholder="0,00"
                                         inputmode="numeric">
                                 </div>
                             </div>
@@ -384,966 +401,78 @@
                             <!-- Total Frete -->
                             <div class="frete-coluna frete-destaque-total">
                                 <div class="label-com-tag">
-                                    <label for="total-frete">TOTAL FRETE <span class="asterisco">*</span></label>
+                                    <label for="total-frete">TOTAL FRETE</label>
                                     <span class="tag-auto">Soma</span>
                                 </div>
                                 <div class="input-wrapper input-moeda">
                                     <span class="input-prefixo">R$</span>
-                                    <input type="text" id="total-frete" name="total_frete" required placeholder="0,00"
-                                        inputmode="numeric">
+                                    <input type="text" id="total-frete" name="total_frete" placeholder="0,00"
+                                        inputmode="numeric" readonly>
                                 </div>
                             </div>
 
                             <!-- Vr Comissão -->
                             <div class="frete-coluna frete-destaque-comissao">
-                                <label for="vr-comissao">
-                                    VR COMISSÃO <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="vr-comissao">VR COMISSÃO</label>
+                                    <span class="tag-auto">Cálculo</span>
+                                </div>
                                 <div class="input-wrapper input-moeda">
                                     <span class="input-prefixo">R$</span>
-                                    <input type="text" id="vr-comissao" name="vr_comissao" required placeholder="0,00"
-                                        inputmode="numeric">
+                                    <input type="text" id="vr-comissao" name="vr_comissao" placeholder="0,00"
+                                        inputmode="numeric" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- BLOCO DE SELEÇÃO: Tipo de Relatório -->
-                    <div class="bloco-selecao-relatorio">
-                        <div class="selecao-relatorio-header">
-                            <div class="selecao-icone-tag">
+                    <!-- BLOCO DE ACIONAMENTO DO FORMULÁRIO UNIFICADO -->
+                    <div class="bloco-iniciar-relatorio" id="bloco-iniciar-relatorio">
+                        <button type="button" class="card-iniciar-relatorio" id="btn-iniciar-relatorio" aria-expanded="false">
+                            <div class="card-iniciar-icone">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <polyline points="9 11 12 14 22 4"></polyline>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                             </div>
-                            <div>
-                                <h3>Selecione o Tipo de Relatório para Continuar</h3>
-                                <p>Escolha a modalidade de operação para abrir o formulário correspondente:</p>
+                            <div class="card-iniciar-conteudo">
+                                <div class="card-iniciar-badge">
+                                    <span class="pulse-dot"></span>
+                                    <span>Formulário Oficial</span>
+                                </div>
+                                <h3 class="card-iniciar-titulo">Iniciar Preenchimento do Relatório de Viagem</h3>
+                                <p class="card-iniciar-desc">Clique aqui para abrir os lançamentos operacionais de fretes (Alimentício, Shopee e Mercado Livre), abastecimentos e despesas.</p>
                             </div>
-                        </div>
-
-                        <div class="opcoes-relatorio-grid">
-                            <!-- Opção 1: Relatório de Viagem -->
-                            <button type="button" class="card-opcao-relatorio" id="btn-opcao-padrao" data-tipo="padrao">
-                                <div class="opcao-topo">
-                                    <div class="opcao-radio-circulo">
-                                        <div class="radio-ponto"></div>
-                                    </div>
-                                    <span class="opcao-badge-tag">Padrão</span>
+                            <div class="card-iniciar-status">
+                                <span class="status-texto-iniciar" id="status-texto-iniciar">Clique para Abrir</span>
+                                <div class="card-iniciar-seta">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
                                 </div>
-                                <div class="opcao-conteudo">
-                                    <div class="opcao-icone">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <rect x="1" y="3" width="15" height="13"></rect>
-                                            <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
-                                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                                        </svg>
-                                    </div>
-                                    <div class="opcao-textos">
-                                        <h4 class="opcao-nome">Relatório de viagem</h4>
-                                        <p class="opcao-desc">Formulário operacional para viagens regulares da frota.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="opcao-rodape">
-                                    <span class="status-selecao">Clique para selecionar</span>
-                                </div>
-                            </button>
+                        </button>
+                    </div>
 
-                            <!-- Opção 2: Relatório de Viagem - ML -->
-                            <button type="button" class="card-opcao-relatorio" id="btn-opcao-ml" data-tipo="ml">
-                                <div class="opcao-topo">
-                                    <div class="opcao-radio-circulo">
-                                        <div class="radio-ponto"></div>
-                                    </div>
-                                    <span class="opcao-badge-tag badge-ml">E-commerce</span>
-                                </div>
-                                <div class="opcao-conteudo">
-                                    <div class="opcao-icone icone-ml">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10 9 9 9 8 9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="opcao-textos">
-                                        <h4 class="opcao-nome">Relatório de viagem - E-commerce</h4>
-                                        <p class="opcao-desc">Formulário específico para operações dedicadas ao E-commerce.</p>
-                                    </div>
-                                </div>
-                                <div class="opcao-rodape">
-                                    <span class="status-selecao">Clique para selecionar</span>
-                                </div>
-                            </button>
-                        </div>
+                    <!-- Container do Formulário Oficial Unificado -->
+                    <div class="containers-relatorios-especificos">
 
-                        <!-- Containers dos formulários que abrem após a escolha -->
-                        <div class="containers-relatorios-especificos">
-                            <!-- Container 1: Relatório de Viagem -->
-                            <div id="secao-formulario-padrao" class="secao-relatorio-especifico oculto">
-                                <div class="painel-relatorio-selecionado">
-                                    <div class="painel-header-selecionado">
-                                        <div class="painel-header-left">
-                                            <div class="badge-ativo">Formulário Ativo</div>
-                                            <h3>Relatório de viagem</h3>
-                                            <p class="painel-subtitulo">Preencha os abastecimentos de combustível,
-                                                pedágios, outras despesas e acompanhe os indicadores em tempo real.</p>
-                                        </div>
-                                        <div class="painel-header-right">
-                                            <span class="badge-documento">Modelo Padrão</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- 1. BLOCO: ABASTECIMENTOS DE COMBUSTÍVEL -->
-                                    <div class="bloco-formulario-interno">
-                                        <div class="subbloco-cabecalho-linha">
-                                            <div class="subbloco-titulo">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path d="M3 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"></path>
-                                                    <path
-                                                        d="M15 11h2a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L20.41 6.4a2 2 0 0 0-2.82 0l-.59.59">
-                                                    </path>
-                                                    <line x1="3" y1="22" x2="15" y2="22"></line>
-                                                    <path d="M6 7h6"></path>
-                                                </svg>
-                                                <div>
-                                                    <h3>Abastecimentos de Combustível</h3>
-                                                    <p>Lance os abastecimentos realizados na viagem (Posto, Nota Fiscal,
-                                                        KM, Valor e Litros).</p>
-                                                </div>
-                                            </div>
-                                            <div class="subbloco-acoes-limpeza">
-                                                <button type="button" class="btn-lixeira-bloco"
-                                                    id="btn-lixeira-abastecimento"
-                                                    title="Opções para limpar abastecimentos" aria-expanded="false">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                                        <path
-                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                                        </path>
-                                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                                                    </svg>
-                                                    <span>Limpar</span>
-                                                </button>
-
-                                                <!-- Popover com opções de limpeza -->
-                                                <div class="popover-limpeza oculto" id="popover-limpar-abast">
-                                                    <div class="popover-limpeza-header">
-                                                        <span>Opções de Limpeza</span>
-                                                        <button type="button" class="btn-fechar-popover"
-                                                            id="fechar-popover-abast" title="Fechar">&times;</button>
-                                                    </div>
-                                                    <div class="popover-limpeza-corpo">
-                                                        <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-abast-preenchidas">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar linhas preenchidas</strong>
-                                                                <small>Apaga apenas as linhas com dados
-                                                                    digitados</small>
-                                                            </div>
-                                                        </button>
-                                                        <button type="button" class="opcao-limpeza-item item-perigo"
-                                                            id="btn-limpar-abast-todas">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <polyline points="3 6 5 6 21 6" />
-                                                                <path
-                                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                                <line x1="10" y1="11" x2="10" y2="17" />
-                                                                <line x1="14" y1="11" x2="14" y2="17" />
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar todas as 10 linhas</strong>
-                                                                <small>Redefine toda a tabela de abastecimento</small>
-                                                            </div>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="tabela-abastecimento-wrapper">
-                                            <table class="tabela-abastecimento">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="th-num">#</th>
-                                                        <th class="th-posto">Posto Abastecimento</th>
-                                                        <th class="th-nf">Nota Fiscal</th>
-                                                        <th class="th-km">KM</th>
-                                                        <th class="th-valor">Valor (R$)</th>
-                                                        <th class="th-litros">Litros</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="td-num">1</td>
-                                                        <td><input type="text" name="posto_1"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_1" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_1"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_1"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_1"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">2</td>
-                                                        <td><input type="text" name="posto_2"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_2" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_2"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_2"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_2"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">3</td>
-                                                        <td><input type="text" name="posto_3"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_3" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_3"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_3"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_3"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">4</td>
-                                                        <td><input type="text" name="posto_4"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_4" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_4"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_4"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_4"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">5</td>
-                                                        <td><input type="text" name="posto_5"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_5" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_5"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_5"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_5"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">6</td>
-                                                        <td><input type="text" name="posto_6"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_6" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_6"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_6"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_6"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">7</td>
-                                                        <td><input type="text" name="posto_7"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_7" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_7"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_7"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_7"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">8</td>
-                                                        <td><input type="text" name="posto_8"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_8" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_8"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_8"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_8"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">9</td>
-                                                        <td><input type="text" name="posto_9"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_9" class="input-tabela input-nf"
-                                                                placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_9"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_9"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_9"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="td-num">10</td>
-                                                        <td><input type="text" name="posto_10"
-                                                                class="input-tabela input-posto"
-                                                                placeholder="Nome do posto..."></td>
-                                                        <td><input type="text" name="nf_10"
-                                                                class="input-tabela input-nf" placeholder="Nº NF"></td>
-                                                        <td><input type="text" inputmode="numeric" name="km_10"
-                                                                class="input-tabela input-km-abast" placeholder="KM">
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-moeda-wrap">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" inputmode="numeric" name="valor_10"
-                                                                    class="input-tabela input-valor-abast"
-                                                                    placeholder="0,00">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="tabela-litros-wrap">
-                                                                <input type="text" inputmode="numeric" name="litros_10"
-                                                                    class="input-tabela input-litros-abast"
-                                                                    placeholder="0">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr class="linha-totais-abast">
-                                                        <td colspan="4" class="td-totais-label">
-                                                            <span class="tag-auto-pequena">Soma Automática</span>
-                                                            <strong>TOTAL ABASTECIMENTO &gt;&gt;</strong>
-                                                        </td>
-                                                        <td class="td-total-valor">
-                                                            <div class="tabela-moeda-wrap wrap-total-destaque">
-                                                                <span class="tabela-moeda-prefixo">R$</span>
-                                                                <input type="text" id="total-valor-combustivel" readonly
-                                                                    value="0,00" class="input-tabela input-total-campo">
-                                                            </div>
-                                                        </td>
-                                                        <td class="td-total-litros">
-                                                            <div class="tabela-litros-wrap wrap-total-destaque">
-                                                                <input type="text" id="total-litros-combustivel"
-                                                                    readonly value="0"
-                                                                    class="input-tabela input-total-campo">
-                                                                <span class="tabela-litros-sufixo">L</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <!-- 2. BLOCO: OUTRAS DESPESAS E PEDÁGIOS -->
-                                    <div class="bloco-formulario-interno">
-                                        <div class="subbloco-cabecalho-linha">
-                                            <div class="subbloco-titulo">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                                                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                                                </svg>
-                                                <div>
-                                                    <h3>Outras Despesas e Pedágios</h3>
-                                                    <p>Lance os pedágios, outras despesas (com Imposto Federal
-                                                        obrigatório) e anexe comprovantes.</p>
-                                                </div>
-                                            </div>
-                                            <div class="subbloco-acoes-limpeza">
-                                                <button type="button" class="btn-lixeira-bloco"
-                                                    id="btn-lixeira-despesas" title="Limpar pedágios e outras despesas"
-                                                    aria-expanded="false">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                                        <path
-                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                                        </path>
-                                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                                                    </svg>
-                                                    <span>Limpar</span>
-                                                </button>
-
-                                                <!-- Popover com opções de limpeza de despesas e pedágios -->
-                                                <div class="popover-limpeza oculto" id="popover-limpar-despesas">
-                                                    <div class="popover-limpeza-header">
-                                                        <span>Limpar Despesas e Pedágios</span>
-                                                        <button type="button" class="btn-fechar-popover"
-                                                            id="fechar-popover-despesas" title="Fechar">&times;</button>
-                                                    </div>
-                                                    <div class="popover-limpeza-corpo">
-                                                        <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-apenas-pedagios">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <rect x="1" y="3" width="15" height="13"></rect>
-                                                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8">
-                                                                </polygon>
-                                                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar apenas pedágios</strong>
-                                                                <small>Apaga os 3 campos de pedágio</small>
-                                                            </div>
-                                                        </button>
-                                                        <button type="button" class="opcao-limpeza-item"
-                                                            id="btn-limpar-apenas-outras-despesas">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
-                                                                </path>
-                                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar apenas outras despesas</strong>
-                                                                <small>Apaga os valores e descrições livres (mantém
-                                                                    Imposto Federal)</small>
-                                                            </div>
-                                                        </button>
-                                                        <button type="button" class="opcao-limpeza-item item-perigo"
-                                                            id="btn-limpar-todas-despesas-pedagios">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                                height="16" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <polyline points="3 6 5 6 21 6" />
-                                                                <path
-                                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                                <line x1="10" y1="11" x2="10" y2="17" />
-                                                                <line x1="14" y1="11" x2="14" y2="17" />
-                                                            </svg>
-                                                            <div>
-                                                                <strong>Limpar tudo (pedágios e despesas)</strong>
-                                                                <small>Apaga todos os pedágios e outras despesas
-                                                                    preenchidas</small>
-                                                            </div>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid-despesas-dupla">
-                                            <!-- Coluna Pedágio (3 linhas) -->
-                                            <div class="card-secao-despesa card-pedagio">
-                                                <div class="card-despesa-topo">
-                                                    <div class="card-despesa-ident">
-                                                        <span class="badge-mini-tag">3 Linhas</span>
-                                                        <h4>Pedágios</h4>
-                                                    </div>
-                                                    <span class="card-despesa-sub">Valor de cada pedágio</span>
-                                                </div>
-
-                                                <div class="linhas-despesas-lista">
-                                                    <div class="linha-despesa-item">
-                                                        <label for="pedagio-1">Pedágio 1</label>
-                                                        <div class="input-wrapper input-moeda">
-                                                            <span class="input-prefixo">R$</span>
-                                                            <input type="text" id="pedagio-1" name="pedagio_1"
-                                                                placeholder="0,00" class="input-pedagio"
-                                                                inputmode="numeric">
-                                                        </div>
-                                                    </div>
-                                                    <div class="linha-despesa-item">
-                                                        <label for="pedagio-2">Pedágio 2</label>
-                                                        <div class="input-wrapper input-moeda">
-                                                            <span class="input-prefixo">R$</span>
-                                                            <input type="text" id="pedagio-2" name="pedagio_2"
-                                                                placeholder="0,00" class="input-pedagio"
-                                                                inputmode="numeric">
-                                                        </div>
-                                                    </div>
-                                                    <div class="linha-despesa-item">
-                                                        <label for="pedagio-3">Pedágio 3</label>
-                                                        <div class="input-wrapper input-moeda">
-                                                            <span class="input-prefixo">R$</span>
-                                                            <input type="text" id="pedagio-3" name="pedagio_3"
-                                                                placeholder="0,00" class="input-pedagio"
-                                                                inputmode="numeric">
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="total-despesa-barra">
-                                                    <span class="total-despesa-label">TOTAL PEDÁGIO &gt;&gt;</span>
-                                                    <div class="input-wrapper input-moeda total-mini-wrap">
-                                                        <span class="input-prefixo">R$</span>
-                                                        <input type="text" id="total-pedagio" readonly value="0,00"
-                                                            class="input-campo-total">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Coluna Outras Despesas (3 linhas com Imposto Federal Fixo) -->
-                                            <div class="card-secao-despesa card-outras-despesas">
-                                                <div class="card-despesa-topo">
-                                                    <div class="card-despesa-ident">
-                                                        <span class="badge-mini-tag badge-alerta-tag">Obrigatório: Linha
-                                                            1</span>
-                                                        <h4>Outras Despesas</h4>
-                                                    </div>
-                                                    <span class="card-despesa-sub">Descrição e Valor</span>
-                                                </div>
-
-                                                <div class="linhas-despesas-lista">
-                                                    <!-- Linha 1: IMPOSTO FEDERAL (Bloqueado / Obrigatório) -->
-                                                    <div class="linha-despesa-composta">
-                                                        <div class="desc-com-trava">
-                                                            <label for="despesa-desc-1">
-                                                                Descrição 1 <span class="tag-bloqueada"
-                                                                    title="Campo bloqueado: Imposto Federal"><svg
-                                                                        xmlns="http://www.w3.org/2000/svg" width="11"
-                                                                        height="11" viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2">
-                                                                        <rect x="3" y="11" width="18" height="11" rx="2"
-                                                                            ry="2"></rect>
-                                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                                                    </svg> Obrigatório</span>
-                                                            </label>
-                                                            <div class="input-wrapper input-bloqueado-wrapper">
-                                                                <input type="text" id="despesa-desc-1"
-                                                                    name="despesa_desc_1" value="Imposto Federal"
-                                                                    readonly class="input-bloqueado-campo"
-                                                                    title="Campo fixo obrigatório: Imposto Federal">
-                                                            </div>
-                                                        </div>
-                                                        <div class="valor-com-rotulo">
-                                                            <label for="despesa-valor-1">Valor (R$) <span
-                                                                    class="asterisco">*</span></label>
-                                                            <div class="input-wrapper input-moeda">
-                                                                <span class="input-prefixo">R$</span>
-                                                                <input type="text" id="despesa-valor-1"
-                                                                    name="despesa_valor_1" placeholder="0,00"
-                                                                    class="input-outra-despesa" inputmode="numeric">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Linha 2: Outra Despesa -->
-                                                    <div class="linha-despesa-composta">
-                                                        <div class="desc-com-trava">
-                                                            <label for="despesa-desc-2">Descrição 2</label>
-                                                            <div class="input-wrapper">
-                                                                <input type="text" id="despesa-desc-2"
-                                                                    name="despesa_desc_2"
-                                                                    placeholder="Ex: Chapa / Descarga...">
-                                                            </div>
-                                                        </div>
-                                                        <div class="valor-com-rotulo">
-                                                            <label for="despesa-valor-2">Valor (R$)</label>
-                                                            <div class="input-wrapper input-moeda">
-                                                                <span class="input-prefixo">R$</span>
-                                                                <input type="text" id="despesa-valor-2"
-                                                                    name="despesa_valor_2" placeholder="0,00"
-                                                                    class="input-outra-despesa" inputmode="numeric">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Linha 3: Outra Despesa -->
-                                                    <div class="linha-despesa-composta">
-                                                        <div class="desc-com-trava">
-                                                            <label for="despesa-desc-3">Descrição 3</label>
-                                                            <div class="input-wrapper">
-                                                                <input type="text" id="despesa-desc-3"
-                                                                    name="despesa_desc_3"
-                                                                    placeholder="Ex: Borracharia / Manutenção...">
-                                                            </div>
-                                                        </div>
-                                                        <div class="valor-com-rotulo">
-                                                            <label for="despesa-valor-3">Valor (R$)</label>
-                                                            <div class="input-wrapper input-moeda">
-                                                                <span class="input-prefixo">R$</span>
-                                                                <input type="text" id="despesa-valor-3"
-                                                                    name="despesa_valor_3" placeholder="0,00"
-                                                                    class="input-outra-despesa" inputmode="numeric">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="total-despesa-barra">
-                                                    <span class="total-despesa-label">TOTAL OUTRAS DESPESAS
-                                                        &gt;&gt;</span>
-                                                    <div class="input-wrapper input-moeda total-mini-wrap">
-                                                        <span class="input-prefixo">R$</span>
-                                                        <input type="text" id="total-outras-despesas" readonly
-                                                            value="0,00" class="input-campo-total">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Bloco de Inserção de Arquivos de Comprovação -->
-                                        <div class="bloco-upload-comprovantes">
-                                            <div class="upload-cabecalho">
-                                                <div class="upload-titulo-area">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                        fill="none" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round">
-                                                        <path
-                                                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
-                                                        </path>
-                                                    </svg>
-                                                    <div>
-                                                        <h4>Comprovantes de Outras Despesas</h4>
-                                                        <p>Insira recibos, fotos de notas fiscais ou PDFs para
-                                                            comprovação das despesas.</p>
-                                                    </div>
-                                                </div>
-                                                <span class="upload-badge-contador" id="contador-anexos">0
-                                                    arquivo(s)</span>
-                                            </div>
-
-                                            <div class="dropzone-box" id="dropzone-comprovantes">
-                                                <input type="file" id="input-arquivos-despesas" multiple
-                                                    accept=".pdf,image/png,image/jpeg,image/jpg"
-                                                    class="input-file-oculto">
-                                                <div class="dropzone-conteudo">
-                                                    <div class="dropzone-icone">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                            <polyline points="17 8 12 3 7 8"></polyline>
-                                                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                                                        </svg>
-                                                    </div>
-                                                    <p class="dropzone-texto-principal"><strong>Clique aqui</strong> ou
-                                                        arraste os arquivos dos comprovantes</p>
-                                                    <p class="dropzone-texto-secundario">Formatos aceitos: PDF, PNG, JPG
-                                                        ou JPEG (máx. 10MB por arquivo)</p>
-                                                </div>
-                                            </div>
-
-                                            <div id="lista-anexos-preview" class="lista-anexos-preview"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 3. BLOCO: RESUMO OPERACIONAL E INDICADORES DA VIAGEM -->
-                                    <div class="bloco-formulario-interno bloco-fechamento-viagem">
-                                        <div class="subbloco-titulo">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                                            </svg>
-                                            <div>
-                                                <h3>Resumo Operacional e Resultado da Viagem</h3>
-                                                <p>Cálculo automático de rendimento e fechamento financeiro consolidado
-                                                    da viagem.</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid-indicadores-viagem">
-                                            <!-- Card 1: Média de Combustível -->
-                                            <div class="card-indicador indicador-media">
-                                                <div class="card-indicador-cabecalho">
-                                                    <span class="indicador-rotulo">MÉDIA COMBUSTÍVEL</span>
-                                                    <div class="indicador-icone-tag">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <circle cx="12" cy="12" r="10"></circle>
-                                                            <polyline points="12 6 12 12 16 14"></polyline>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div class="indicador-valor-principal" id="indicador-media-combustivel">
-                                                    0,00 <span class="indicador-unidade">km/l</span>
-                                                </div>
-                                                <div class="indicador-formula-base">
-                                                    KM Total (<span id="calc-base-km">0</span>) / Litros (<span
-                                                        id="calc-base-litros">0</span>)
-                                                </div>
-                                            </div>
-
-                                            <!-- Card 2: Despesa Total -->
-                                            <div class="card-indicador indicador-despesa">
-                                                <div class="card-indicador-cabecalho">
-                                                    <span class="indicador-rotulo">DESPESA TOTAL</span>
-                                                    <div class="indicador-icone-tag">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6">
-                                                            </path>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div class="indicador-valor-principal" id="indicador-despesa-total">
-                                                    R$ 0,00
-                                                </div>
-                                                <div class="indicador-formula-base">
-                                                    Combustível + Pedágios + Outras Despesas
-                                                </div>
-                                            </div>
-
-                                            <!-- Card 3: Resultado da Viagem -->
-                                            <div class="card-indicador indicador-resultado">
-                                                <div class="card-indicador-cabecalho">
-                                                    <span class="indicador-rotulo">RESULTADO DA VIAGEM</span>
-                                                    <div class="indicador-icone-tag">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                                            <polyline points="17 6 23 6 23 12"></polyline>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div class="indicador-valor-principal" id="indicador-resultado-viagem">
-                                                    R$ 0,00
-                                                </div>
-                                                <div class="indicador-formula-base">
-                                                    Total Frete - Despesa Total
-                                                </div>
-                                            </div>
-
-                                            <!-- Card 4: Saldo de Comissão -->
-                                            <div class="card-indicador indicador-comissao">
-                                                <div class="card-indicador-cabecalho">
-                                                    <span class="indicador-rotulo">SALDO COMISSÃO</span>
-                                                    <div class="indicador-icone-tag">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                            <circle cx="12" cy="12" r="10"></circle>
-                                                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
-                                                            <line x1="12" y1="6" x2="12" y2="8"></line>
-                                                            <line x1="12" y1="16" x2="12" y2="18"></line>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div class="indicador-valor-principal" id="indicador-saldo-comissao">
-                                                    R$ 0,00
-                                                </div>
-                                                <div class="indicador-formula-base">
-                                                    VR Comissão - Adiantamento
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 4. BLOCO: AÇÕES DO FORMULÁRIO -->
-                                    <div class="bloco-acoes-relatorio">
-                                        <button type="button" id="btn-salvar-rascunho-completo"
-                                            class="btn-acao-secundario">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path
-                                                    d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
-                                                </path>
-                                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                                <polyline points="7 3 7 8 15 8"></polyline>
-                                            </svg>
-                                            Salvar Rascunho
-                                        </button>
-                                        <button type="submit" id="btn-finalizar-relatorio" class="btn-acao-primario">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                            </svg>
-                                            Finalizar e Enviar Relatório
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Container 2: Relatório de Viagem - E-commerce -->
                             <div id="secao-formulario-ml" class="secao-relatorio-especifico oculto">
                                 <div class="painel-relatorio-selecionado">
                                     <div class="painel-header-selecionado">
                                         <div class="painel-header-left">
-                                            <div class="badge-ativo badge-ml-ativo">Formulário Ativo</div>
-                                            <h3>Relatório de viagem - E-commerce</h3>
-                                            <p class="painel-subtitulo">Operação dedicada E-commerce: Relação de
+                                            <div class="badge-ativo">Formulário Oficial</div>
+                                            <h3>Relatório de Viagem</h3>
+                                            <p class="painel-subtitulo">Lançamento oficial da operação: Relação de
                                                 fretes por viagem, abastecimentos, imposto federal/pedágios e fechamento
                                                 com indicadores.</p>
                                         </div>
                                         <div class="painel-header-right">
-                                            <span class="badge-documento badge-ml">Modelo E-commerce</span>
+                                            <span class="badge-documento">Operação Unificada</span>
                                         </div>
                                     </div>
 
@@ -1451,6 +580,7 @@
                                                             <select name="cliente_frete_ml_1"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1488,6 +618,7 @@
                                                             <select name="cliente_frete_ml_2"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1525,6 +656,7 @@
                                                             <select name="cliente_frete_ml_3"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1562,6 +694,7 @@
                                                             <select name="cliente_frete_ml_4"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1599,6 +732,7 @@
                                                             <select name="cliente_frete_ml_5"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1636,6 +770,7 @@
                                                             <select name="cliente_frete_ml_6"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1673,6 +808,7 @@
                                                             <select name="cliente_frete_ml_7"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -1710,6 +846,7 @@
                                                             <select name="cliente_frete_ml_8"
                                                                 class="input-tabela select-cliente-frete-ml">
                                                                 <option value="">Selecione...</option>
+                                                                <option value="alimenticio">Alimentício</option>
                                                                 <option value="shopee">Shopee</option>
                                                                 <option value="mercado_livre">Mercado Livre</option>
                                                             </select>
@@ -2478,7 +1615,7 @@
                                                 <line x1="6" y1="20" x2="6" y2="14"></line>
                                             </svg>
                                             <div>
-                                                <h3>Resumo Operacional e Fechamento de Viagem do E-commerce</h3>
+                                                <h3>Resumo Operacional e Fechamento da Viagem</h3>
                                                 <p>Cálculo automático de rendimento e fechamento financeiro consolidado
                                                     da viagem.</p>
                                             </div>
@@ -2578,7 +1715,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 6. BLOCO: AÇÕES DO FORMULÁRIO E-COMMERCE -->
+                                    <!-- 6. BLOCO: AÇÕES DO FORMULÁRIO -->
                                     <div class="bloco-acoes-relatorio">
                                         <button type="button" id="btn-salvar-rascunho-ml" class="btn-acao-secundario">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -2590,7 +1727,7 @@
                                                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                                                 <polyline points="7 3 7 8 15 8"></polyline>
                                             </svg>
-                                            Salvar Rascunho E-commerce
+                                            Salvar Rascunho
                                         </button>
                                         <button type="submit" id="btn-finalizar-relatorio-ml" class="btn-acao-primario">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -2599,13 +1736,12 @@
                                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                             </svg>
-                                            Finalizar e Enviar Relatório do E-commerce
+                                            Finalizar e Enviar Relatório de Viagem
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </form>
             </div>
         </div>
