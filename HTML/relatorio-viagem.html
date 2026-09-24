@@ -41,7 +41,7 @@
                                     </svg>
                                 </div>
                                 <div class="dropdown-text">
-                                    <strong>Portal do Motorista</strong>
+                                    <strong>Portal da Frota</strong>
                                     <span>Acesse com login ou envie sem conta</span>
                                 </div>
                             </a>
@@ -57,7 +57,7 @@
                                     </svg>
                                 </div>
                                 <div class="dropdown-text">
-                                    <strong>Ficha Multi Cadastro</strong>
+                                    <strong>Seja um Agregado Conosco</strong>
                                     <span>Pessoa Jurídica (CNPJ) e Física (PF)</span>
                                 </div>
                             </a>
@@ -71,11 +71,55 @@
         </div>
     </header>
 
+    <!-- Barra de Ações Rápidas do Administrador (Ativada no modo admin) -->
+    <div class="barra-admin-operacional" id="barra-admin-operacional">
+        <div class="barra-admin-info">
+            <span class="tag-gestor-destaque">🛡️ Gestão Operacional</span>
+            <span class="titulo-admin-ficha" id="admin-banner-ficha-titulo">Conferência da Ficha: <strong>#0001</strong></span>
+            <span class="status-pill status-pendente" id="admin-banner-status">🟡 Pendente de Conferência</span>
+        </div>
+        <div class="barra-admin-acoes">
+            <a href="dashboard-admin.html#fichas" class="btn-voltar-gestao" title="Retornar à fila de conferência no Dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Voltar ao Dashboard</span>
+            </a>
+            <button type="button" class="btn-voltar-gestao" id="btn-admin-salvar-alteracoes">
+                💾 Salvar Alterações
+            </button>
+            <button type="button" class="btn-admin-aprovar-destaque" id="btn-admin-aprovar-concluir">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Aprovar e Concluir Relatório</span>
+            </button>
+        </div>
+    </div>
+
     <main>
         <div class="container-relatorio">
+            <!-- Barra Informativa do Modo Motorista -->
+            <div class="barra-motorista-info" id="barra-motorista-info">
+                <div class="motorista-info-left">
+                    <span class="motorista-icone-tag">📱</span>
+                    <div class="motorista-texto-aviso">
+                        <strong id="motorista-saudacao-texto">Portal da Frota • Envio Operacional de Viagem</strong><br>
+                        <span id="motorista-subtexto-aviso">Campos de cabeçalho e KM são conferidos pela Gestão. Preencha seus Fretes, Abastecimentos e Imposto Federal com comprovantes.</span>
+                    </div>
+                </div>
+                <div class="motorista-info-right" id="motorista-botoes-logado" style="display: none;">
+                    <button type="button" class="btn-minhas-viagens" id="btn-abrir-minhas-viagens">
+                        <span>Minhas Viagens</span>
+                        <span class="badge-contador-viagens" id="badge-total-minhas-viagens">0</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Botão Voltar -->
             <div class="navegacao-topo">
-                <a href="index.html" class="btn-voltar">
+                <a href="index.html" class="btn-voltar" id="btn-voltar-navegacao">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -1991,6 +2035,132 @@
             <span class="toast-mensagem"></span>
         </div>
     </main>
+
+    <!-- ====================================================================
+         MODAL 1: CONFIRMAÇÃO DE ENVIO - MOTORISTA SEM LOGIN
+         ==================================================================== -->
+    <div class="modal-overlay-custom" id="modal-protocolo-sem-login" aria-hidden="true" role="dialog">
+        <div class="modal-card-custom">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: #1e293b; margin-bottom: 6px;">
+                Relatório de Viagem Enviado!
+            </h2>
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 16px;">
+                Sua ficha foi transmitida com sucesso para a <strong>Gestão Operacional da AJBorges Transportes</strong>.
+            </p>
+
+            <div class="modal-protocolo-box">
+                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #4338ca;">
+                    Número do Protocolo da Ficha
+                </span>
+                <span class="modal-protocolo-numero" id="modal-num-protocolo-sem-login">AJB-2026-004</span>
+                <button type="button" class="btn-copiar-protocolo" id="btn-copiar-protocolo-sem-login">
+                    📋 Copiar Protocolo
+                </button>
+            </div>
+
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: left; font-size: 0.85rem; color: #334155; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Status na Gestão:</span>
+                    <strong style="color: #b45309;">🟡 Pendente de Conferência</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Horário do Envio:</span>
+                    <strong id="modal-data-envio-sem-login">24/09/2026 11:45</strong>
+                </div>
+                <p style="font-size: 0.78rem; color: #64748b; margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                    A gestão conferirá os comprovantes, odômetros e valores para homologação e acerto financeiro.
+                </p>
+            </div>
+
+            <div class="modal-acoes-row">
+                <a href="index.html" class="modal-btn-acao-secundario">Voltar ao Portal</a>
+                <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-sem-login">
+                    Novo Relatório de Viagem
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL 2: CONFIRMAÇÃO DE ENVIO - MOTORISTA COM LOGIN
+         ==================================================================== -->
+    <div class="modal-overlay-custom" id="modal-protocolo-com-login" aria-hidden="true" role="dialog">
+        <div class="modal-card-custom">
+            <div style="font-size: 3rem; margin-bottom: 12px;">✅</div>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: #1e293b; margin-bottom: 6px;">
+                Ficha Vinculada ao seu Cadastro!
+            </h2>
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 16px;">
+                O relatório foi registrado no seu perfil e enviado à Gestão AJBorges.
+            </p>
+
+            <div class="modal-protocolo-box">
+                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #4338ca;">
+                    Identificador da Ficha
+                </span>
+                <span class="modal-protocolo-numero" id="modal-num-protocolo-com-login">AJB-2026-004</span>
+                <div style="margin-top: 4px;">
+                    <span class="status-pill status-pendente">🟡 Pendente de Aprovação</span>
+                </div>
+            </div>
+
+            <div class="modal-acoes-row">
+                <button type="button" class="modal-btn-acao-secundario" id="btn-modal-ir-minhas-viagens">
+                    Ver em "Minhas Viagens"
+                </button>
+                <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-com-login">
+                    Preencher Novo Relatório
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL 3: "MINHAS VIAGENS" DO MOTORISTA LOGADO
+         ==================================================================== -->
+    <div class="modal-overlay-custom" id="modal-lista-minhas-viagens" aria-hidden="true" role="dialog">
+        <div class="modal-card-custom modal-minhas-viagens-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 16px;">
+                <div>
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #1e293b;">
+                        📱 Minhas Viagens • AJBorges
+                    </h3>
+                    <p style="font-size: 0.82rem; color: #64748b;" id="subtitulo-motorista-minhas-viagens">
+                        Histórico de relatórios enviados pelo motorista
+                    </p>
+                </div>
+                <button type="button" class="modal-close-btn" id="btn-fechar-minhas-viagens" style="font-size: 1.5rem; background: none; border: none; cursor: pointer; color: #64748b;">✕</button>
+            </div>
+
+            <div style="overflow-y: auto; max-height: 480px;">
+                <table class="tabela-minhas-viagens">
+                    <thead>
+                        <tr>
+                            <th>Nº Ficha</th>
+                            <th>Data Envio</th>
+                            <th>Rota</th>
+                            <th>Total Frete</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-minhas-viagens-body">
+                        <!-- Preenchido dinamicamente via relatorio.js -->
+                    </tbody>
+                </table>
+                <div id="minhas-viagens-empty" style="display: none; text-align: center; padding: 30px; color: #64748b;">
+                    Você ainda não enviou nenhum relatório com esta conta.
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 14px; text-align: right;">
+                <button type="button" class="modal-btn-acao-secundario" id="btn-fechar-minhas-viagens-rodape">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-container">

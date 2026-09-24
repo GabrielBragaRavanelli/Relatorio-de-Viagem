@@ -239,10 +239,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerHTML = `<span>Entrando no sistema...</span>`;
             }
 
+            // Salva dados da sessão do motorista logado
+            localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                role: 'motorista',
+                id: 'MOT-104',
+                nome: 'Carlos Eduardo Ferreira',
+                cpf: cpfVal
+            }));
+
             showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
 
             setTimeout(() => {
-                // Redireciona para o formulário de relatório de viagem
+                // Redireciona para o formulário de relatório de viagem vinculado
                 window.location.href = 'relatorio-viagem.html';
             }, 1200);
         });
@@ -272,21 +280,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerHTML = `<span>Autenticando gestão...</span>`;
             }
 
+            // Salva sessão administrativa
+            localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                role: 'admin',
+                nome: 'Administrador AJBorges',
+                email: emailVal || 'operacional@ajborges.com'
+            }));
+
             showToast('Autenticação de Administrador aprovada! Acessando painel...', 'success');
 
             setTimeout(() => {
-                // Se houver página de admin futura, redireciona ou avisa
-                showToast('Sessão administrativa iniciada. Bem-vindo ao AJBorges Gestão.', 'info', 4000);
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `
-                        <span>Acessar Painel Administrativo</span>
-                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                    `;
-                }
-            }, 1400);
+                // Redireciona diretamente para o Dashboard Administrativo da AJBorges
+                window.location.href = 'dashboard-admin.html';
+            }, 1000);
         });
     }
 });

@@ -1,0 +1,1 @@
+{"name":"relatorio-viagem","version":"1.0.0","main":"server.js","dependencies":{"cors":"^2.8.6","dotenv":"^18.0.3","express":"^5.2.1","pg":"^8.23.0"}}

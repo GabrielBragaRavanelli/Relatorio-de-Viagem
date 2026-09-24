@@ -43,30 +43,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast-notificacao');
 
     // ------------------------------------------
-    // 0. Identificador Sequencial da Ficha
+    // 0. Identificador Sequencial da Ficha (AJB-2026-XXX)
     // ------------------------------------------
-    function obterNumeroFichaAtual() {
-        const salvo = localStorage.getItem(STORAGE_FICHA_KEY);
-        const num = parseInt(salvo, 10);
-        return (!isNaN(num) && num > 0) ? num : 1;
+    const STORAGE_CENTRAL_FICHAS = 'ajborges_fichas_viagem';
+    const STORAGE_USER_ACTIVE = 'ajborges_usuario_ativo';
+
+    function obterProximoNumeroFicha() {
+        const dadosCentrais = localStorage.getItem(STORAGE_CENTRAL_FICHAS);
+        let maxNum = 0;
+        if (dadosCentrais) {
+            try {
+                const lista = JSON.parse(dadosCentrais);
+                if (Array.isArray(lista)) {
+                    lista.forEach(item => {
+                        if (item.id && typeof item.id === 'string') {
+                            const match = item.id.match(/\d+$/);
+                            if (match) {
+                                const val = parseInt(match[0], 10);
+                                if (val > maxNum) maxNum = val;
+                            }
+                        }
+                    });
+                }
+            } catch (e) {}
+        }
+        const salvoLocal = parseInt(localStorage.getItem(STORAGE_FICHA_KEY), 10);
+        if (!isNaN(salvoLocal) && salvoLocal > maxNum) {
+            maxNum = salvoLocal;
+        }
+        return maxNum > 0 ? (maxNum + 1) : 4;
     }
 
     function formatarNumeroFicha(num) {
-        return '#' + String(num).padStart(4, '0');
+        if (typeof num === 'string' && num.startsWith('AJB-')) return num;
+        const n = parseInt(num, 10) || 1;
+        return `AJB-2026-${String(n).padStart(3, '0')}`;
     }
 
-    function atualizarDisplayNumeroFicha() {
-        if (numeroFichaDisplay) {
-            numeroFichaDisplay.textContent = formatarNumeroFicha(obterNumeroFichaAtual());
+    let fichaNumeroAtual = formatarNumeroFicha(obterProximoNumeroFicha());
+
+    function atualizarDisplayNumeroFicha(idPersonalizado = null) {
+        if (idPersonalizado) {
+            fichaNumeroAtual = idPersonalizado;
         }
-    }
-
-    function incrementarNumeroFicha() {
-        const atual = obterNumeroFichaAtual();
-        const proximo = atual + 1;
-        localStorage.setItem(STORAGE_FICHA_KEY, proximo);
-        atualizarDisplayNumeroFicha();
-        return proximo;
+        if (numeroFichaDisplay) {
+            numeroFichaDisplay.textContent = fichaNumeroAtual;
+        }
     }
 
     atualizarDisplayNumeroFicha();
@@ -1920,37 +1942,798 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // CICLO DE VIDA DO RELATÓRIO DE VIAGEM (MOTORISTA <-> GESTÃO / ADMIN)
+    // =========================================================================
+
+    function coletarFretesAtuais() {
+        const fretes = [];
+        for (let i = 1; i <= 8; i++) {
+            const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`)?.value || '';
+            const cli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '';
+            const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`)?.value || '';
+            const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`)?.value || '';
+            const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || '';
+            const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || '';
+            const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`)?.value || '';
+
+            if (dt || cli || og || dst || vl || com) {
+                fretes.push({ data: dt, cliente: cli, origem: og, destino: dst, valor: vl, comissao: com, descarga: desc });
+            }
+        }
+        return fretes;
+    }
+
+    function coletarAbastecimentosAtuais() {
+        const abasts = [];
+        for (let i = 1; i <= 10; i++) {
+            const posto = document.querySelector(`input[name="posto_ml_${i}"]`)?.value || '';
+            const nf = document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '';
+            const km = document.querySelector(`input[name="km_ml_${i}"]`)?.value || '';
+            const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
+            const litros = document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '';
+
+            if (posto || nf || km || valor || litros) {
+                abasts.push({ posto, nf, km, valor, litros });
+            }
+        }
+        return abasts;
+    }
+
+    function coletarOutrasDespesasAtuais() {
+        return [
+            { desc: 'Imposto Federal', valor: inputMlImpFederal?.value || '' },
+            { desc: inputMlDespesaDesc2?.value || '', valor: inputMlDespesaValor2?.value || '' },
+            { desc: inputMlDespesaDesc3?.value || '', valor: inputMlDespesaValor3?.value || '' }
+        ];
+    }
+
+    function carregarFichaEmCampos(ficha) {
+        if (!ficha) return;
+
+        // Cabeçalho
+        if (inputMotorista && ficha.motorista) inputMotorista.value = ficha.motorista;
+        if (inputPlacas && ficha.placas) inputPlacas.value = ficha.placas;
+        if (inputDataSaida && ficha.dataSaida) inputDataSaida.value = normalizarDataExibicao(ficha.dataSaida);
+        if (inputDataChegada && ficha.dataChegada) inputDataChegada.value = normalizarDataExibicao(ficha.dataChegada);
+        if (inputKmSaida && ficha.kmSaida) inputKmSaida.value = ficha.kmSaida;
+        if (inputKmChegada && ficha.kmChegada) inputKmChegada.value = ficha.kmChegada;
+        if (inputKmTotal && ficha.kmTotal) inputKmTotal.value = ficha.kmTotal;
+        if (inputDestinoInicial && ficha.destinoInicial) inputDestinoInicial.value = ficha.destinoInicial;
+        if (inputDestinoFinal && ficha.destinoFinal) inputDestinoFinal.value = ficha.destinoFinal;
+        if (inputAdiantamento && ficha.valorAdiantamento) inputAdiantamento.value = ficha.valorAdiantamento;
+        if (inputFreteOrigem && ficha.freteOrigem) inputFreteOrigem.value = ficha.freteOrigem;
+        if (inputRetorno1 && ficha.retorno1) inputRetorno1.value = ficha.retorno1;
+        if (inputRetorno2 && ficha.retorno2) inputRetorno2.value = ficha.retorno2;
+        if (inputRetorno3 && ficha.retorno3) inputRetorno3.value = ficha.retorno3;
+        if (inputTotalFrete && ficha.totalFrete) inputTotalFrete.value = ficha.totalFrete;
+        if (inputVrComissao && ficha.vrComissao) inputVrComissao.value = ficha.vrComissao;
+
+        // Fretes Operacionais
+        if (Array.isArray(ficha.fretes)) {
+            ficha.fretes.forEach((f, idx) => {
+                const i = idx + 1;
+                const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+                const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+                const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
+                const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+                const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+                const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+                const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
+
+                if (dt && f.data) dt.value = normalizarDataExibicao(f.data);
+                if (selCli && f.cliente) selCli.value = f.cliente;
+                if (og && f.origem) og.value = f.origem;
+                if (dst && f.destino) dst.value = f.destino;
+                if (vl && f.valor) vl.value = f.valor;
+                if (com && f.comissao) com.value = f.comissao;
+                if (desc && f.descarga) desc.value = f.descarga;
+            });
+        }
+
+        // Abastecimentos
+        if (Array.isArray(ficha.abastecimentos)) {
+            ficha.abastecimentos.forEach((ab, idx) => {
+                const i = idx + 1;
+                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
+                const km = document.querySelector(`input[name="km_ml_${i}"]`);
+                const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
+                const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
+
+                if (posto && ab.posto) posto.value = ab.posto;
+                if (nf && ab.nf) nf.value = ab.nf;
+                if (km && ab.km) km.value = ab.km;
+                if (valor && ab.valor) valor.value = ab.valor;
+                if (litros && ab.litros) litros.value = ab.litros;
+            });
+        }
+
+        // Pedágios
+        if (Array.isArray(ficha.pedagios)) {
+            if (inputsPedagioMl[0] && ficha.pedagios[0]) inputsPedagioMl[0].value = ficha.pedagios[0];
+            if (inputsPedagioMl[1] && ficha.pedagios[1]) inputsPedagioMl[1].value = ficha.pedagios[1];
+            if (inputsPedagioMl[2] && ficha.pedagios[2]) inputsPedagioMl[2].value = ficha.pedagios[2];
+        }
+
+        // Imposto Federal
+        if (inputMlImpFederal && ficha.impFederal) {
+            inputMlImpFederal.value = ficha.impFederal;
+        }
+
+        // Anexos
+        if (Array.isArray(ficha.anexos)) {
+            arquivosComprovantesMl = ficha.anexos;
+            renderizarListaAnexosMl();
+        }
+
+        calcularKmTotal();
+        calcularTotaisFreteMl();
+        calcularTotaisAbastecimentoMl();
+        calcularTotaisDespesasMl();
+        calcularIndicadoresViagemMl();
+    }
+
+    function obterListaFichasCentral() {
+        const dados = localStorage.getItem(STORAGE_CENTRAL_FICHAS);
+        if (dados) {
+            try {
+                const lista = JSON.parse(dados);
+                if (Array.isArray(lista) && lista.length > 0) return lista;
+            } catch (e) {}
+        }
+        // Fallback para inicialização caso o banco esteja limpo
+        const seedPadrao = [
+            {
+                id: "AJB-2026-001",
+                protocolo: "AJB-2026-001",
+                dataEnvio: "23/09/2026 18:40",
+                dataSaida: "20/09/2026",
+                dataChegada: "23/09/2026",
+                motoristaId: "MOT-102",
+                motorista: "Marcos Antônio Silva",
+                origemEnvio: "motorista_com_login",
+                placas: "MHU-9157 / BRA-2E19",
+                destinoInicial: "Marília - SP",
+                destinoFinal: "São Paulo - SP",
+                kmSaida: "1569440",
+                kmChegada: "1573580",
+                kmTotal: "4140",
+                valorAdiantamento: "2.500,00",
+                freteOrigem: "8.900,00",
+                retorno1: "5.400,00",
+                totalFrete: "14.300,00",
+                vrComissao: "1.573,00",
+                fretes: [
+                    { data: "20/09/2026", cliente: "mercado_livre", origem: "Marília/SP", destino: "Cajamar/SP", valor: "8.900,00", comissao: "400,00", descarga: "0,00" },
+                    { data: "22/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Bauru/SP", valor: "5.400,00", comissao: "594,00", descarga: "0,00" }
+                ],
+                abastecimentos: [
+                    { posto: "Posto Graal Marília", nf: "84920", km: "1569450", valor: "3.850,00", litros: "650,00" },
+                    { posto: "Posto Sakamoto Guarulhos", nf: "99214", km: "1571400", valor: "4.200,00", litros: "700,00" },
+                    { posto: "Posto Castelo Branco Bauru", nf: "10452", km: "1573200", valor: "3.480,00", litros: "580,00" }
+                ],
+                totalAbastecimento: "11.530,00",
+                totalLitros: "1.930,00",
+                mediaKmL: "2.15",
+                pedagios: ["420,00", "380,00", "0,00"],
+                totalPedagio: "800,00",
+                impFederal: "450,00",
+                totalDespesas: "12.960,00",
+                resultadoViagem: "1.340,00",
+                saldoComissao: "-927,00",
+                status: "pendente",
+                observacoesMotorista: "Pneu dianteiro reparado em trânsito com recibo anexo. Consumo afetado por congestionamento na serra."
+            },
+            {
+                id: "AJB-2026-002",
+                protocolo: "AJB-2026-002",
+                dataEnvio: "24/09/2026 09:15",
+                dataSaida: "21/09/2026",
+                dataChegada: "24/09/2026",
+                motoristaId: "MOT-104",
+                motorista: "Carlos Eduardo Ferreira",
+                origemEnvio: "motorista_com_login",
+                placas: "GHR-4512 / QWE-9871",
+                destinoInicial: "Curitiba - PR",
+                destinoFinal: "Santos - SP",
+                kmSaida: "890200",
+                kmChegada: "893950",
+                kmTotal: "3750",
+                valorAdiantamento: "2.800,00",
+                freteOrigem: "11.200,00",
+                retorno1: "6.800,00",
+                totalFrete: "18.000,00",
+                vrComissao: "1.980,00",
+                fretes: [
+                    { data: "21/09/2026", cliente: "alimenticio", origem: "Curitiba/PR", destino: "São Paulo/SP", valor: "11.200,00", comissao: "1.232,00", descarga: "150,00" },
+                    { data: "23/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Santos/SP", valor: "6.800,00", comissao: "748,00", descarga: "0,00" }
+                ],
+                abastecimentos: [
+                    { posto: "Posto Shell Registro", nf: "55120", km: "891400", valor: "4.500,00", litros: "750,00" },
+                    { posto: "Posto Ipiranga Cubatão", nf: "88145", km: "893200", valor: "4.650,00", litros: "780,00" }
+                ],
+                totalAbastecimento: "9.150,00",
+                totalLitros: "1.530,00",
+                mediaKmL: "2.45",
+                pedagios: ["580,00", "420,00", "0,00"],
+                totalPedagio: "1.000,00",
+                impFederal: "520,00",
+                totalDespesas: "10.790,00",
+                resultadoViagem: "7.210,00",
+                saldoComissao: "-820,00",
+                status: "pendente"
+            },
+            {
+                id: "AJB-2026-003",
+                protocolo: "AJB-2026-003",
+                dataEnvio: "24/09/2026 10:50",
+                dataSaida: "22/09/2026",
+                dataChegada: "24/09/2026",
+                motoristaId: "anonimo",
+                motorista: "Jean Gomes de Oliveira",
+                origemEnvio: "motorista_sem_login",
+                placas: "JKL-7820 / MNO-3341",
+                destinoInicial: "Campinas - SP",
+                destinoFinal: "Belo Horizonte - MG",
+                kmSaida: "1124500",
+                kmChegada: "1127600",
+                kmTotal: "3100",
+                valorAdiantamento: "2.200,00",
+                freteOrigem: "9.500,00",
+                retorno1: "5.800,00",
+                totalFrete: "15.300,00",
+                vrComissao: "1.683,00",
+                fretes: [
+                    { data: "22/09/2026", cliente: "mercado_livre", origem: "Campinas/SP", destino: "Extrema/MG", valor: "9.500,00", comissao: "400,00", descarga: "0,00" },
+                    { data: "23/09/2026", cliente: "shopee", origem: "Extrema/MG", destino: "Betim/MG", valor: "5.800,00", comissao: "638,00", descarga: "0,00" }
+                ],
+                abastecimentos: [
+                    { posto: "Posto Fernandão Pouso Alegre", nf: "77189", km: "1125600", valor: "4.100,00", litros: "680,00" },
+                    { posto: "Posto Gauchão Oliveira", nf: "33912", km: "1127100", valor: "4.020,00", litros: "670,00" }
+                ],
+                totalAbastecimento: "8.120,00",
+                totalLitros: "1.350,00",
+                mediaKmL: "2.30",
+                pedagios: ["490,00", "390,00", "0,00"],
+                totalPedagio: "880,00",
+                impFederal: "480,00",
+                totalDespesas: "9.480,00",
+                resultadoViagem: "5.820,00",
+                saldoComissao: "-517,00",
+                status: "pendente"
+            }
+        ];
+        localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(seedPadrao));
+        return seedPadrao;
+    }
+
+    function salvarListaFichasCentral(lista) {
+        localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(lista));
+    }
+
+    // Configuração dos Modos (Admin vs Motorista)
+    function configurarCicloDeVidaViagem() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fichaIdUrl = urlParams.get('ficha');
+        const modeUrl = urlParams.get('mode');
+
+        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtivo = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+        }
+
+        const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && usuarioAtivo.role === 'admin' && modeUrl !== 'motorista');
+        const isModoView = (modeUrl === 'view');
+
+        const barraAdmin = document.getElementById('barra-admin-operacional');
+        const barraMotorista = document.getElementById('barra-motorista-info');
+        const adminTitulo = document.getElementById('admin-banner-ficha-titulo');
+        const adminStatus = document.getElementById('admin-banner-status');
+        const btnAdminAprovar = document.getElementById('btn-admin-aprovar-concluir');
+        const btnAdminSalvar = document.getElementById('btn-admin-salvar-alteracoes');
+
+        const camposGestaoAdm = [
+            inputPlacas, inputDataSaida, inputDataChegada,
+            inputKmSaida, inputKmChegada, inputKmTotal,
+            inputDestinoInicial, inputDestinoFinal, inputAdiantamento,
+            inputFreteOrigem, inputRetorno1, inputRetorno2, inputRetorno3
+        ];
+
+        // -------------------------------------------------------------
+        // CASO A: MODO ADMINISTRADOR (Conferência 100% Liberada)
+        // -------------------------------------------------------------
+        if (isModoAdmin) {
+            if (barraAdmin) barraAdmin.classList.add('ativa');
+            if (barraMotorista) barraMotorista.style.display = 'none';
+
+            // LIBERAÇÃO TOTAL DOS CAMPOS PARA O ADMINISTRADOR
+            camposGestaoAdm.forEach(input => {
+                if (input) {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                    const wrapper = input.closest('.campo-grupo') || input.parentElement;
+                    if (wrapper) {
+                        wrapper.classList.remove('campo-bloqueado-gestao');
+                        const tag = wrapper.querySelector('.tag-bloqueado-adm');
+                        if (tag) tag.remove();
+                    }
+                }
+            });
+
+            if (inputMotorista) {
+                inputMotorista.removeAttribute('readonly');
+            }
+
+            // Abre o formulário oficial automaticamente para conferência
+            toggleFormularioUnificado(true, false);
+
+            let fichaCarregada = null;
+            if (fichaIdUrl) {
+                const todas = obterListaFichasCentral();
+                fichaCarregada = todas.find(f => f.id === fichaIdUrl);
+                if (fichaCarregada) {
+                    atualizarDisplayNumeroFicha(fichaCarregada.id);
+                    carregarFichaEmCampos(fichaCarregada);
+
+                    if (adminTitulo) {
+                        adminTitulo.innerHTML = `Conferência da Ficha: <strong>${fichaCarregada.id}</strong>`;
+                    }
+                    if (adminStatus) {
+                        const aprovado = fichaCarregada.status === 'aprovado';
+                        adminStatus.className = `status-pill ${aprovado ? 'status-concluido' : 'status-pendente'}`;
+                        adminStatus.textContent = aprovado ? '🟢 Concluído / Aprovado' : '🟡 Pendente de Conferência';
+                    }
+                }
+            }
+
+            // Ação de Salvar Alterações pelo Administrador
+            if (btnAdminSalvar) {
+                btnAdminSalvar.addEventListener('click', () => {
+                    const idSalvar = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
+                    atualizarFichaNaBase(idSalvar, false);
+                    exibirToast(`Alterações da ficha ${idSalvar} salvas com sucesso!`, 'sucesso');
+                });
+            }
+
+            // Ação de "Aprovar e Concluir Relatório" pelo Administrador
+            if (btnAdminAprovar) {
+                btnAdminAprovar.addEventListener('click', () => {
+                    const idAprovar = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
+                    if (!confirm(`Confirmar a homologação e aprovação definitiva do Relatório de Viagem ${idAprovar}?`)) {
+                        return;
+                    }
+
+                    atualizarFichaNaBase(idAprovar, true);
+                    sessionStorage.setItem('ajborges_toast_mensagem', `Relatório ${idAprovar} APROVADO e CONCLUÍDO com sucesso!`);
+                    
+                    // Retorna suavemente ao Dashboard Administrativo na seção de fichas
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-admin.html#fichas';
+                    }, 500);
+                });
+            }
+
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // CASO B: MODO VISUALIZAÇÃO (Ficha Concluída)
+        // -------------------------------------------------------------
+        if (isModoView && fichaIdUrl) {
+            const todas = obterListaFichasCentral();
+            const fichaView = todas.find(f => f.id === fichaIdUrl);
+            if (fichaView) {
+                atualizarDisplayNumeroFicha(fichaView.id);
+                carregarFichaEmCampos(fichaView);
+                toggleFormularioUnificado(true, false);
+
+                // Bloqueia todos os inputs para leitura
+                document.querySelectorAll('#form-relatorio input, #form-relatorio select').forEach(el => {
+                    el.setAttribute('readonly', 'true');
+                    el.setAttribute('disabled', 'true');
+                });
+
+                if (barraMotorista) {
+                    barraMotorista.innerHTML = `
+                        <div class="motorista-info-left">
+                            <span class="motorista-icone-tag">🟢</span>
+                            <div class="motorista-texto-aviso">
+                                <strong>Relatório de Viagem Homologado e Concluído</strong><br>
+                                <span>Esta ficha (${fichaView.id}) já foi conferida e aprovada pela Gestão Operacional da AJBorges.</span>
+                            </div>
+                        </div>
+                        <div class="motorista-info-right">
+                            <button type="button" class="btn-minhas-viagens" onclick="window.history.back()">
+                                ⬅ Voltar
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // CASO C: MODO MOTORISTA (Envio Com ou Sem Login)
+        // -------------------------------------------------------------
+        if (barraAdmin) barraAdmin.classList.remove('ativa');
+        if (barraMotorista) barraMotorista.style.display = 'flex';
+
+        // BLOQUEIO DOS CAMPOS DO ADMINISTRADOR NO CABEÇALHO
+        camposGestaoAdm.forEach(input => {
+            if (input) {
+                input.setAttribute('readonly', 'true');
+                const wrapper = input.closest('.campo-grupo') || input.parentElement;
+                if (wrapper) {
+                    wrapper.classList.add('campo-bloqueado-gestao');
+                    const label = wrapper.querySelector('label');
+                    if (label && !label.querySelector('.tag-bloqueado-adm')) {
+                        const tag = document.createElement('span');
+                        tag.className = 'tag-bloqueado-adm';
+                        tag.innerHTML = '🔒 Gestão';
+                        label.appendChild(tag);
+                    }
+                }
+            }
+        });
+
+        // Abre automaticamente o formulário oficial para lançamento de fretes e diesel
+        toggleFormularioUnificado(true, false);
+
+        // Verifica estado do Motorista (Com Login ou Sem Login)
+        const motoristaSaudacao = document.getElementById('motorista-saudacao-texto');
+        const motoristaBotoesLogado = document.getElementById('motorista-botoes-logado');
+        const badgeTotalMinhas = document.getElementById('badge-total-minhas-viagens');
+        const btnAbrirMinhasViagens = document.getElementById('btn-abrir-minhas-viagens');
+
+        const isMotoristaLogado = usuarioAtivo && usuarioAtivo.role === 'motorista';
+
+        if (isMotoristaLogado) {
+            if (inputMotorista) {
+                inputMotorista.value = usuarioAtivo.nome || 'Carlos Eduardo Ferreira';
+                inputMotorista.setAttribute('readonly', 'true');
+            }
+            if (motoristaSaudacao) {
+                motoristaSaudacao.innerHTML = `Olá, <strong>${usuarioAtivo.nome || 'Motorista'}</strong> • Conectado via Portal`;
+            }
+            if (motoristaBotoesLogado) {
+                motoristaBotoesLogado.style.display = 'block';
+            }
+
+            // Atualiza contador de "Minhas Viagens"
+            atualizarContadorMinhasViagens();
+
+            if (btnAbrirMinhasViagens) {
+                btnAbrirMinhasViagens.addEventListener('click', abrirModalMinhasViagens);
+            }
+        } else {
+            if (motoristaSaudacao) {
+                motoristaSaudacao.innerHTML = `Portal da Frota • Preenchimento sem login`;
+            }
+            if (motoristaBotoesLogado) {
+                motoristaBotoesLogado.style.display = 'none';
+            }
+        }
+    }
+
+    function atualizarContadorMinhasViagens() {
+        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtivo = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+        }
+        if (!usuarioAtivo || usuarioAtivo.role !== 'motorista') return;
+
+        const todas = obterListaFichasCentral();
+        const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
+        const badge = document.getElementById('badge-total-minhas-viagens');
+        if (badge) badge.textContent = minhas.length;
+    }
+
+    function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
+        let todas = obterListaFichasCentral();
+        let index = todas.findIndex(f => f.id === idFicha);
+
+        const dadosAtualizados = {
+            id: idFicha,
+            protocolo: idFicha,
+            dataSaida: inputDataSaida?.value || '',
+            dataChegada: inputDataChegada?.value || '',
+            motorista: inputMotorista?.value.trim() || 'Motorista',
+            placas: inputPlacas?.value || '',
+            destinoInicial: inputDestinoInicial?.value || '',
+            destinoFinal: inputDestinoFinal?.value || '',
+            kmSaida: inputKmSaida?.value || '',
+            kmChegada: inputKmChegada?.value || '',
+            kmTotal: inputKmTotal?.value || '',
+            valorAdiantamento: inputAdiantamento?.value || '',
+            freteOrigem: inputFreteOrigem?.value || '',
+            retorno1: inputRetorno1?.value || '',
+            retorno2: inputRetorno2?.value || '',
+            retorno3: inputRetorno3?.value || '',
+            totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
+            vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+            fretes: coletarFretesAtuais(),
+            abastecimentos: coletarAbastecimentosAtuais(),
+            totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
+            totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+            mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+            pedagios: [
+                inputsPedagioMl[0]?.value || '',
+                inputsPedagioMl[1]?.value || '',
+                inputsPedagioMl[2]?.value || ''
+            ],
+            totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
+            impFederal: inputMlImpFederal?.value || '',
+            outrasDespesas: coletarOutrasDespesasAtuais(),
+            totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
+            resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
+            saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
+            anexos: arquivosComprovantesMl || []
+        };
+
+        if (marcarComoAprovado) {
+            dadosAtualizados.status = 'aprovado';
+            dadosAtualizados.dataAprovacao = new Date().toLocaleString('pt-BR');
+            dadosAtualizados.aprovadoPor = 'operacional@ajborges.com';
+        }
+
+        if (index >= 0) {
+            todas[index] = { ...todas[index], ...dadosAtualizados };
+        } else {
+            dadosAtualizados.dataEnvio = new Date().toLocaleString('pt-BR');
+            dadosAtualizados.status = marcarComoAprovado ? 'aprovado' : 'pendente';
+            todas.unshift(dadosAtualizados);
+        }
+
+        salvarListaFichasCentral(todas);
+    }
+
+    // Modal de Minhas Viagens do Motorista
+    function abrirModalMinhasViagens() {
+        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtivo = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+        }
+        if (!usuarioAtivo) return;
+
+        const todas = obterListaFichasCentral();
+        const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
+
+        const modal = document.getElementById('modal-lista-minhas-viagens');
+        const tbody = document.getElementById('tabela-minhas-viagens-body');
+        const empty = document.getElementById('minhas-viagens-empty');
+        const sub = document.getElementById('subtitulo-motorista-minhas-viagens');
+
+        if (sub) sub.textContent = `Relatórios de ${usuarioAtivo.nome || 'Motorista'}`;
+
+        if (tbody) {
+            tbody.innerHTML = '';
+            if (minhas.length === 0) {
+                if (empty) empty.style.display = 'block';
+            } else {
+                if (empty) empty.style.display = 'none';
+                minhas.forEach(m => {
+                    const isPendente = m.status === 'pendente';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${m.id}</strong></td>
+                        <td>${m.dataEnvio || m.dataSaida || '-'}</td>
+                        <td>${m.destinoInicial || '-'} ➔ ${m.destinoFinal || 'SP'}</td>
+                        <td><strong style="color: #047857;">R$ ${m.totalFrete || '0,00'}</strong></td>
+                        <td>
+                            <span class="status-pill ${isPendente ? 'status-pendente' : 'status-concluido'}">
+                                ${isPendente ? '🟡 Pendente de Aprovação' : '🟢 Concluído'}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="relatorio-viagem.html?ficha=${m.id}&mode=view" class="btn-minhas-viagens" style="padding: 4px 10px; font-size: 0.78rem;">
+                                Ver Ficha
+                            </a>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        if (modal) modal.classList.add('ativo');
+    }
+
+    // Fechar Modais
+    const btnFecharMinhasViagens = document.getElementById('btn-fechar-minhas-viagens');
+    const btnFecharMinhasViagensRodape = document.getElementById('btn-fechar-minhas-viagens-rodape');
+    if (btnFecharMinhasViagens) {
+        btnFecharMinhasViagens.addEventListener('click', () => {
+            document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
+        });
+    }
+    if (btnFecharMinhasViagensRodape) {
+        btnFecharMinhasViagensRodape.addEventListener('click', () => {
+            document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
+        });
+    }
+
+    // Modal Sem Login - Copiar Protocolo
+    const btnCopiarSemLogin = document.getElementById('btn-copiar-protocolo-sem-login');
+    if (btnCopiarSemLogin) {
+        btnCopiarSemLogin.addEventListener('click', () => {
+            const num = document.getElementById('modal-num-protocolo-sem-login')?.textContent || '';
+            navigator.clipboard.writeText(num).then(() => {
+                exibirToast(`Protocolo ${num} copiado para a área de transferência!`, 'sucesso');
+            });
+        });
+    }
+
+    // Modal Sem Login - Novo Envio
+    const btnNovoEnvioSemLogin = document.getElementById('btn-novo-envio-sem-login');
+    if (btnNovoEnvioSemLogin) {
+        btnNovoEnvioSemLogin.addEventListener('click', () => {
+            window.location.href = 'relatorio-viagem.html';
+        });
+    }
+
+    // Modal Com Login - Ir para Minhas Viagens
+    const btnModalIrMinhasViagens = document.getElementById('btn-modal-ir-minhas-viagens');
+    if (btnModalIrMinhasViagens) {
+        btnModalIrMinhasViagens.addEventListener('click', () => {
+            document.getElementById('modal-protocolo-com-login')?.classList.remove('ativo');
+            abrirModalMinhasViagens();
+        });
+    }
+
+    // Modal Com Login - Novo Envio
+    const btnNovoEnvioComLogin = document.getElementById('btn-novo-envio-com-login');
+    if (btnNovoEnvioComLogin) {
+        btnNovoEnvioComLogin.addEventListener('click', () => {
+            window.location.href = 'relatorio-viagem.html';
+        });
+    }
+
+    // Botões de ação do Formulário (Salvar Rascunho)
+    const btnSalvarRascunhoMl = document.getElementById('btn-salvar-rascunho-ml');
+    if (btnSalvarRascunhoMl) {
+        btnSalvarRascunhoMl.addEventListener('click', () => {
+            salvarProgressoMl();
+            exibirToast('Rascunho do Relatório de Viagem salvo com sucesso!', 'sucesso');
+        });
+    }
+
+    // =========================================================================
+    // FINALIZAR E ENVIAR RELATÓRIO DE VIAGEM (MOTORISTA)
+    // =========================================================================
     const btnFinalizarRelatorioMl = document.getElementById('btn-finalizar-relatorio-ml');
     if (btnFinalizarRelatorioMl) {
         btnFinalizarRelatorioMl.addEventListener('click', (e) => {
             e.preventDefault();
 
             const motoristaPreenchido = inputMotorista && inputMotorista.value.trim() !== '';
-            const placasPreenchida = inputPlacas && inputPlacas.value.trim() !== '';
             const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
 
-            if (!motoristaPreenchido || !placasPreenchida) {
-                exibirToast('Preencha os dados do motorista e placa no cabeçalho.', 'erro');
-                if (!motoristaPreenchido && inputMotorista) inputMotorista.focus();
-                else if (!placasPreenchida && inputPlacas) inputPlacas.focus();
+            // Valida identificação do motorista
+            if (!motoristaPreenchido) {
+                exibirToast('Por favor, informe o nome do Motorista.', 'erro');
+                if (inputMotorista) inputMotorista.focus();
                 return;
             }
 
+            // Valida Imposto Federal obrigatório
             if (!impostoFederalPreenchido) {
                 exibirToast('O valor do Imposto Federal é obrigatório no relatório.', 'erro');
                 if (inputMlImpFederal) inputMlImpFederal.focus();
                 return;
             }
 
-            salvarProgressoMl();
-            const fichaAtual = formatarNumeroFicha(obterNumeroFichaAtual());
-            const proximoNumero = incrementarNumeroFicha();
-            const proximaFicha = formatarNumeroFicha(proximoNumero);
-            exibirToast(`Relatório de Viagem ${fichaAtual} finalizado e enviado com sucesso! Próxima ficha: ${proximaFicha}.`, 'sucesso');
+            // Verifica se há pelo menos um frete ou abastecimento preenchido
+            const fretesAtuais = coletarFretesAtuais();
+            const abastsAtuais = coletarAbastecimentosAtuais();
+
+            if (fretesAtuais.length === 0 && abastsAtuais.length === 0) {
+                exibirToast('Lance pelo menos um frete ou abastecimento na operação.', 'erro');
+                return;
+            }
+
+            // Gera Identificador Único da Ficha (ex: AJB-2026-004)
+            const novoNumeroSeq = obterProximoNumeroFicha();
+            const novoIdFicha = formatarNumeroFicha(novoNumeroSeq);
+
+            // Recupera usuário ativo
+            const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+            let usuarioAtivo = null;
+            if (usuarioAtivoStr) {
+                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+            }
+            const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
+
+            // Monta objeto completo da nova ficha
+            const agoraDataHora = new Date().toLocaleString('pt-BR', { 
+                day: '2-digit', month: '2-digit', year: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
+            const novaFicha = {
+                id: novoIdFicha,
+                protocolo: novoIdFicha,
+                dataEnvio: agoraDataHora,
+                dataSaida: inputDataSaida?.value || '24/09/2026',
+                dataChegada: inputDataChegada?.value || '24/09/2026',
+                motoristaId: isComLogin ? usuarioAtivo.id : 'anonimo',
+                motorista: inputMotorista.value.trim(),
+                origemEnvio: isComLogin ? 'motorista_com_login' : 'motorista_sem_login',
+                placas: inputPlacas?.value || 'A definir pela Gestão',
+                destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
+                destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                kmSaida: inputKmSaida?.value || '',
+                kmChegada: inputKmChegada?.value || '',
+                kmTotal: inputKmTotal?.value || '',
+                valorAdiantamento: inputAdiantamento?.value || '',
+                freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
+                retorno1: inputRetorno1?.value || '',
+                retorno2: inputRetorno2?.value || '',
+                retorno3: inputRetorno3?.value || '',
+                totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
+                vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+                fretes: fretesAtuais,
+                abastecimentos: abastsAtuais,
+                totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
+                totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+                mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+                pedagios: [
+                    inputsPedagioMl[0]?.value || '',
+                    inputsPedagioMl[1]?.value || '',
+                    inputsPedagioMl[2]?.value || ''
+                ],
+                totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
+                impFederal: inputMlImpFederal?.value || '',
+                outrasDespesas: coletarOutrasDespesasAtuais(),
+                totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                anexos: arquivosComprovantesMl || [],
+                status: 'pendente'
+            };
+
+            // Salva na fila central de fichas
+            const todasFichas = obterListaFichasCentral();
+            todasFichas.unshift(novaFicha);
+            salvarListaFichasCentral(todasFichas);
+
+            // Incrementa contador sequencial
+            localStorage.setItem(STORAGE_FICHA_KEY, novoNumeroSeq + 1);
+
+            // Limpa rascunho temporário
+            localStorage.removeItem(STORAGE_ML_KEY);
+
+            // Dispara feedback de acordo com o login do motorista
+            if (!isComLogin) {
+                // SEM LOGIN: Exibe modal com o protocolo único gerado
+                const modalSemLogin = document.getElementById('modal-protocolo-sem-login');
+                const elNum = document.getElementById('modal-num-protocolo-sem-login');
+                const elHora = document.getElementById('modal-data-envio-sem-login');
+
+                if (elNum) elNum.textContent = novoIdFicha;
+                if (elHora) elHora.textContent = agoraDataHora;
+                if (modalSemLogin) modalSemLogin.classList.add('ativo');
+
+                exibirToast(`Ficha ${novoIdFicha} transmitida com sucesso para a Gestão!`, 'sucesso');
+            } else {
+                // COM LOGIN: Exibe confirmação com status 🟡 Pendente de Aprovação
+                const modalComLogin = document.getElementById('modal-protocolo-com-login');
+                const elNum = document.getElementById('modal-num-protocolo-com-login');
+
+                if (elNum) elNum.textContent = novoIdFicha;
+                if (modalComLogin) modalComLogin.classList.add('ativo');
+
+                atualizarContadorMinhasViagens();
+                exibirToast(`Ficha ${novoIdFicha} vinculada ao seu cadastro e enviada com sucesso!`, 'sucesso');
+            }
         });
     }
 
-    // Salvar progresso ao digitar nos campos de cabeçalho e prevenir submit padrão
+    // Salvar progresso ao digitar nos campos e prevenir submit padrão
     if (form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -1962,4 +2745,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.carregarProgressoMl = carregarProgressoMl;
     carregarProgressoMl();
+
+    // Dispara a configuração completa do ciclo de vida
+    configurarCicloDeVidaViagem();
 });
+

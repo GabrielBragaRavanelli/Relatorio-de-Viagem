@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Administrativo AJBorges Transportes - Gestão Operacional, Controle de Frota e Conferência de Viagens.">
+    <title>AJBorges Gestão • Painel Administrativo</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+    <link rel="shortcut icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Folha de Estilos do Dashboard -->
+    <link rel="stylesheet" href="../CSS/dashboard-admin.css">
+</head>
+
+<body class="admin-body">
+    <div class="admin-app-layout">
+        
+        <!-- ====================================================================
+             1. SIDEBAR FIXA À ESQUERDA (TEMA ESCURO PREMIUM)
+             ==================================================================== -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <!-- Topo / Identidade da Marca -->
+            <div class="sidebar-header">
+                <a href="dashboard-admin.html" class="sidebar-brand" title="AJBorges Transportes">
+                    <div class="brand-logo-wrapper">
+                        <img src="../Imagens/Favicon - AJBorges branca.png" alt="AJBorges Logo" class="brand-logo">
+                    </div>
+                    <div class="brand-info">
+                        <span class="brand-name">AJBorges</span>
+                        <span class="brand-tag">Gestão Operacional</span>
+                    </div>
+                </a>
+                <button type="button" class="btn-toggle-sidebar" id="btn-toggle-sidebar" aria-label="Recolher Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navegação Principal (12 Itens Estruturados) -->
+            <nav class="sidebar-nav" aria-label="Menu Principal de Gestão">
+                <div class="nav-group-label">OPERACIONAL &amp; BI</div>
+                <ul class="nav-list">
+                    <!-- 1. Dashboard (Visão Geral) -->
+                    <li class="nav-item">
+                        <a href="#dashboard" class="nav-link active" data-view="dashboard" id="nav-link-dashboard">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                                    <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                                    <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                                    <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Dashboard</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                    </li>
+
+                    <!-- 2. Viagens -->
+                    <li class="nav-item">
+                        <a href="#viagens" class="nav-link" data-view="viagens" id="nav-link-viagens">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="3" width="15" height="13"></rect>
+                                    <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
+                                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Viagens</span>
+                        </a>
+                    </li>
+
+                    <!-- 3. Pedágios -->
+                    <li class="nav-item">
+                        <a href="#pedagios" class="nav-link" data-view="pedagios" id="nav-link-pedagios">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="4" y1="9" x2="20" y2="9"></line>
+                                    <line x1="4" y1="15" x2="20" y2="15"></line>
+                                    <rect x="2" y="3" width="20" height="18" rx="2"></rect>
+                                    <path d="M12 9v6"></path>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Pedágios</span>
+                        </a>
+                    </li>
+
+                    <!-- 4. Acerto com Motoristas -->
+                    <li class="nav-item">
+                        <a href="#acertos" class="nav-link" data-view="acertos" id="nav-link-acertos">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Acerto Motoristas</span>
+                        </a>
+                    </li>
+
+                    <!-- 5. Revisão de Faturamento (5% Borges) -->
+                    <li class="nav-item">
+                        <a href="#faturamento" class="nav-link" data-view="faturamento" id="nav-link-faturamento">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Faturamento (5%)</span>
+                        </a>
+                    </li>
+
+                    <!-- 6. Conferência de Combustível -->
+                    <li class="nav-item">
+                        <a href="#combustivel" class="nav-link" data-view="combustivel" id="nav-link-combustivel">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"></path>
+                                    <path d="M15 10h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4"></path>
+                                    <path d="M6 12h4"></path>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Combustível</span>
+                        </a>
+                    </li>
+
+                    <!-- 7. Despesas Gerais -->
+                    <li class="nav-item">
+                        <a href="#despesas" class="nav-link" data-view="despesas" id="nav-link-despesas">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                                    <polyline points="17 18 23 18 23 12"></polyline>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Despesas Gerais</span>
+                        </a>
+                    </li>
+
+                    <!-- 8. Frota -->
+                    <li class="nav-item">
+                        <a href="#frota" class="nav-link" data-view="frota" id="nav-link-frota">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                    <circle cx="6" cy="18" r="2"></circle>
+                                    <circle cx="18" cy="18" r="2"></circle>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Frota</span>
+                        </a>
+                    </li>
+
+                    <!-- 9. Cadastros -->
+                    <li class="nav-item">
+                        <a href="#cadastros" class="nav-link" data-view="cadastros" id="nav-link-cadastros">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Cadastros</span>
+                        </a>
+                    </li>
+
+                    <!-- 10. Portal do Motorista (Fichas) -->
+                    <li class="nav-item">
+                        <a href="#fichas" class="nav-link nav-highlight" data-view="fichas" id="nav-link-fichas">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Portal da Frota</span>
+                            <span class="badge-pendentes-sidebar" id="badge-pendentes-sidebar" title="Fichas pendentes de conferência">3</span>
+                        </a>
+                    </li>
+
+                    <!-- 11. Planejamento -->
+                    <li class="nav-item">
+                        <a href="#planejamento" class="nav-link" data-view="planejamento" id="nav-link-planejamento">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Planejamento</span>
+                        </a>
+                    </li>
+
+                    <!-- 12. Configurações -->
+                    <li class="nav-item">
+                        <a href="#configuracoes" class="nav-link" data-view="configuracoes" id="nav-link-configuracoes">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Rodapé da Sidebar (Informações do Gestor & Logout) -->
+            <div class="sidebar-footer">
+                <div class="user-profile-badge">
+                    <div class="user-avatar-circle" id="user-avatar-initials">GO</div>
+                    <div class="user-details">
+                        <span class="user-email" id="sidebar-user-email">operacional@ajborges.com</span>
+                        <div class="user-role-row">
+                            <span class="role-tag">Administrador</span>
+                            <span class="pulse-online" title="Conectado"></span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout-sidebar" id="btn-logout" title="Encerrar Sessão">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ====================================================================
+             2. CONTEÚDO PRINCIPAL (TOPBAR + ÁREA DE VISUALIZAÇÃO)
+             ==================================================================== -->
+        <div class="admin-main-wrapper">
+            
+            <!-- Topbar Superior -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="btn-mobile-menu" id="btn-mobile-menu" aria-label="Abrir Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="topbar-title-block">
+                        <h1 class="topbar-title">Painel de Controle • Gestão Operacional AJBorges</h1>
+                        <p class="topbar-subtitle">
+                            <span class="live-dot"></span> Monitoramento em tempo real • <span id="current-date-display">24 de Setembro de 2026</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="topbar-center">
+                    <!-- Busca Global -->
+                    <div class="search-global-box">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="global-search-input" placeholder="Buscar por motorista, placa, rota ou nº ficha..." autocomplete="off">
+                        <button type="button" class="search-clear-btn" id="search-clear-btn" aria-label="Limpar busca" style="display: none;">✕</button>
+                        <kbd class="search-kbd">Ctrl+K</kbd>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Filtro de Período -->
+                    <div class="period-filter-group" role="group" aria-label="Filtro de Período">
+                        <button type="button" class="period-btn active" data-period="mes">Mês Atual</button>
+                        <button type="button" class="period-btn" data-period="30d">Últimos 30 dias</button>
+                        <button type="button" class="period-btn" data-period="semana">Semana</button>
+                    </div>
+
+                    <!-- Ações Rápidas -->
+                    <div class="topbar-quick-actions">
+                        <a href="relatorio-viagem.html?mode=admin" class="btn-topbar-primary" title="Abrir formulário de conferência ou emissão">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Nova Ficha</span>
+                        </a>
+                        <button type="button" class="btn-topbar-icon" id="btn-refresh-data" title="Recarregar Dados">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Container Principal com Transição de Seções -->
+            <main class="admin-content-area" id="admin-content-area">
+
+                <!-- ================================================================
+                     SEÇÃO 1: DASHBOARD (VISÃO GERAL & BI)
+                     ================================================================ -->
+                <section class="admin-section active" id="view-dashboard">
+                    
+                    <!-- 1. Linha de Cards de Indicadores Financeiros (KPIs) -->
+                    <div class="kpi-grid">
+                        
+                        <!-- KPI 1: Total Entrada (Faturamento Bruto) -->
+                        <div class="kpi-card card-entrada">
+                            <div class="kpi-header">
+                                <div class="kpi-title-block">
+                                    <span class="kpi-label">Total Entrada • Faturamento</span>
+                                    <h3 class="kpi-value" id="kpi-total-entrada">R$ 142.500,00</h3>
+                                </div>
+                                <div class="kpi-icon-box icon-entrada">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="kpi-subdetails">
+                                <div class="subdetail-item">
+                                    <span class="subdetail-name">Shopee</span>
+                                    <strong class="subdetail-val" id="kpi-entrada-shopee">R$ 58.200,00</strong>
+                                </div>
+                                <div class="subdetail-separator">•</div>
+                                <div class="subdetail-item">
+                                    <span class="subdetail-name">Mercado Livre</span>
+                                    <strong class="subdetail-val" id="kpi-entrada-ml">R$ 52.800,00</strong>
+                                </div>
+                                <div class="subdetail-separator">•</div>
+                                <div class="subdetail-item">
+                                    <span class="subdetail-name">Alimentício</span>
+                                    <strong class="subdetail-val" id="kpi-entrada-ali">R$ 31.500,00</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-footer">
+                                <span class="trend-badge trend-up">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                    +12.4% vs mês anterior
+                                </span>
+                                <span class="kpi-meta-text">11 viagens no período</span>
+                            </div>
+                        </div>
+
+                        <!-- KPI 2: Total Saída (Despesas da Frota) -->
+                        <div class="kpi-card card-saida">
+                            <div class="kpi-header">
+                                <div class="kpi-title-block">
+                                    <span class="kpi-label">Total Saída • Despesas Frota</span>
+                                    <h3 class="kpi-value" id="kpi-total-saida">R$ 88.420,00</h3>
+                                </div>
+                                <div class="kpi-icon-box icon-saida">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"></path>
+                                        <path d="M15 10h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4"></path>
+                                        <path d="M6 12h4"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="kpi-bars-despesas">
+                                <div class="despesa-progresso-linha" title="Diesel Postos: R$ 49.380 (55.8%)">
+                                    <div class="despesa-info-top">
+                                        <span>Diesel Postos</span>
+                                        <strong id="kpi-saida-diesel">R$ 49.380,00</strong>
+                                    </div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-diesel" style="width: 55.8%;"></div></div>
+                                </div>
+                                <div class="despesa-progresso-linha" title="Diárias & Comissões: R$ 18.240 (20.6%)">
+                                    <div class="despesa-info-top">
+                                        <span>Diárias / Comissões</span>
+                                        <strong id="kpi-saida-comissao">R$ 18.240,00</strong>
+                                    </div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-comissao" style="width: 20.6%;"></div></div>
+                                </div>
+                                <div class="despesa-sub-grid">
+                                    <div class="mini-despesa-pill">Pedágios: <strong id="kpi-saida-pedagio">R$ 12.150</strong></div>
+                                    <div class="mini-despesa-pill">Impostos: <strong id="kpi-saida-impostos">R$ 8.650</strong></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 3: Resultado Operacional Líquido -->
+                        <div class="kpi-card card-resultado">
+                            <div class="kpi-header">
+                                <div class="kpi-title-block">
+                                    <span class="kpi-label">Resultado Operacional Líquido</span>
+                                    <h3 class="kpi-value text-glow-green" id="kpi-resultado-liquido">R$ 54.080,00</h3>
+                                </div>
+                                <div class="kpi-icon-box icon-resultado">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                        <polyline points="17 6 23 6 23 12"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="kpi-resultado-stats">
+                                <div class="margem-destaque">
+                                    <span class="margem-numero" id="kpi-margem-lucro">37.9%</span>
+                                    <span class="margem-legenda">Margem Líquida</span>
+                                </div>
+                                <div class="meta-status-tag meta-atingida">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    Meta Superada (>35%)
+                                </div>
+                            </div>
+                            <div class="kpi-footer">
+                                <span class="lucro-por-viagem">Média: R$ 4.916,36 / viagem</span>
+                                <span class="lucro-retencao">Retenção de Caixa Forte</span>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4: Média Geral da Frota (Diesel km/l) -->
+                        <div class="kpi-card card-frota-kpi">
+                            <div class="kpi-header">
+                                <div class="kpi-title-block">
+                                    <span class="kpi-label">Média Geral de Combustível</span>
+                                    <h3 class="kpi-value" id="kpi-media-consumo-geral">2.38 km/l</h3>
+                                </div>
+                                <div class="kpi-icon-box icon-consumo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="alerta-consumo-box" id="alerta-consumo-box">
+                                <div class="alerta-badge-mini">
+                                    <span class="alerta-ponto-pulsante"></span>
+                                    <strong>Alerta Operacional:</strong>
+                                </div>
+                                <p class="alerta-texto" id="alerta-consumo-texto">Marcos Silva está com a menor média (<strong>2.15 km/l</strong> na serra).</p>
+                            </div>
+                            <div class="kpi-footer">
+                                <span>Meta da Frota: &gt;= 2.40 km/l</span>
+                                <span class="badge-fichas-pendentes" id="header-fichas-pendentes-counter">3 pendentes</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 2. Linha de Gráficos BI (Chart.js via CDN) -->
+                    <div class="bi-charts-grid">
+                        
+                        <!-- Gráfico 1: Faturamento vs Custo vs Lucro -->
+                        <div class="chart-card card-chart-financial">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Evolução Financeira: Faturamento vs Custos vs Lucro</h3>
+                                    <p class="chart-card-subtitle">Comparativo consolidado por período operacional</p>
+                                </div>
+                                <div class="chart-badges">
+                                    <span class="badge-legend legend-faturamento">Faturamento</span>
+                                    <span class="badge-legend legend-custo">Custos</span>
+                                    <span class="badge-legend legend-lucro">Lucro Líquido</span>
+                                </div>
+                            </div>
+                            <div class="chart-canvas-container">
+                                <canvas id="chart-financeiro"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Gráfico 3: Rendimento por Cliente -->
+                        <div class="chart-card card-chart-client">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Rendimento por Cliente &amp; Operação</h3>
+                                    <p class="chart-card-subtitle">Distribuição da receita bruta por contratante</p>
+                                </div>
+                            </div>
+                            <div class="chart-canvas-container donut-container">
+                                <canvas id="chart-clientes"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 3. Gráfico de Consumo por Motorista (km/l) com Alerta de Quem Gasta Mais Diesel -->
+                    <div class="chart-card card-chart-full">
+                        <div class="chart-card-header">
+                            <div class="header-with-alert">
+                                <div>
+                                    <h3 class="chart-card-title">Média de Consumo de Diesel (km/l) por Motorista</h3>
+                                    <p class="chart-card-subtitle">Monitoramento de eficiência energética e auditoria de abastecimento (Quem consome mais diesel vs meta de 2.40 km/l)</p>
+                                </div>
+                                <div class="alerta-destaque-header">
+                                    <span class="tag-critico">⚠️ 1 Motorista em Alerta de Alto Consumo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container horizontal-bar-container">
+                            <canvas id="chart-consumo-motoristas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- ============================================================
+                         4. MÓDULO DE FICHAS DO PORTAL DO MOTORISTA (ABA DE APROVAÇÃO)
+                         ============================================================ -->
+                    <div class="fichas-modulo-card" id="modulo-fichas-portal">
+                        <div class="fichas-modulo-header">
+                            <div class="modulo-title-block">
+                                <div class="icon-title-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="modulo-title">Portal da Frota • Fichas de Viagem</h2>
+                                    <p class="modulo-subtitle">Conferência operacional, validação de comprovantes e homologação de relatórios</p>
+                                </div>
+                            </div>
+
+                            <!-- Abas Seletoras de Status -->
+                            <div class="tabs-fichas-filtro" role="tablist">
+                                <button type="button" class="tab-ficha-btn active" data-status="pendente" id="tab-fichas-pendentes">
+                                    <span class="tab-indicator-dot dot-amarelo"></span>
+                                    <span>Pendentes de Conferência</span>
+                                    <span class="tab-counter-badge badge-amarelo" id="contador-tab-pendentes">3</span>
+                                </button>
+                                <button type="button" class="tab-ficha-btn" data-status="aprovado" id="tab-fichas-aprovadas">
+                                    <span class="tab-indicator-dot dot-verde"></span>
+                                    <span>Aprovadas / Concluídas</span>
+                                    <span class="tab-counter-badge badge-verde" id="contador-tab-aprovadas">8</span>
+                                </button>
+                                <button type="button" class="tab-ficha-btn" data-status="todos" id="tab-fichas-todas">
+                                    <span>Todas as Fichas</span>
+                                    <span class="tab-counter-badge" id="contador-tab-todas">11</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Ferramentas da Tabela -->
+                        <div class="tabela-toolbar">
+                            <div class="toolbar-left">
+                                <div class="filtro-cliente-wrapper">
+                                    <label for="filtro-cliente-select">Filtrar Cliente:</label>
+                                    <select id="filtro-cliente-select" class="select-filtro-custom">
+                                        <option value="todos">Todos os Clientes</option>
+                                        <option value="shopee">Shopee</option>
+                                        <option value="mercado_livre">Mercado Livre</option>
+                                        <option value="alimenticio">Alimentício</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="toolbar-right">
+                                <span class="tabela-info-registros" id="tabela-info-registros">Exibindo 3 fichas pendentes</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabela Responsiva de Fichas de Viagem -->
+                        <div class="tabela-fichas-responsive">
+                            <table class="tabela-fichas" id="tabela-fichas-gestao">
+                                <thead>
+                                    <tr>
+                                        <th>Nº Ficha</th>
+                                        <th>Data Envio</th>
+                                        <th>Motorista</th>
+                                        <th>Placas</th>
+                                        <th>Rota</th>
+                                        <th>Frete Bruto</th>
+                                        <th>Média Diesel</th>
+                                        <th>Status</th>
+                                        <th class="col-acoes text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-fichas-body">
+                                    <!-- Linhas geradas dinamicamente pelo JavaScript -->
+                                </tbody>
+                            </table>
+                            <div class="tabela-empty-state" id="tabela-empty-state" style="display: none;">
+                                <div class="empty-icon">🔍</div>
+                                <h4>Nenhuma ficha encontrada</h4>
+                                <p>Não há fichas registradas para o filtro ou termo de busca selecionado.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- ================================================================
+                     SEÇÕES SECUNDÁRIAS (INTEGRALMENTE NAVEGÁVEIS PELO MENU LATERAL)
+                     ================================================================ -->
+                
+                <!-- SEÇÃO 2: VIAGENS -->
+                <section class="admin-section" id="view-viagens">
+                    <div class="section-page-header">
+                        <h2>🚚 Gerenciamento Geral de Viagens</h2>
+                        <p>Visão integrada de rotas em andamento, ordens de carregamento e histórico da frota.</p>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <div class="frota-status-grid">
+                            <div class="status-summary-box">
+                                <span class="summary-number">11</span>
+                                <span class="summary-label">Viagens no Mês</span>
+                            </div>
+                            <div class="status-summary-box">
+                                <span class="summary-number">39.420 km</span>
+                                <span class="summary-label">Quilometragem Rodada</span>
+                            </div>
+                            <div class="status-summary-box">
+                                <span class="summary-number">100%</span>
+                                <span class="summary-label">Entregas no Prazo</span>
+                            </div>
+                        </div>
+                        <div class="fichas-modulo-card" style="margin-top: 24px;">
+                            <h3 style="margin-bottom: 16px; color: var(--cor-texto-primario);">Rotas Ativas da Semana</h3>
+                            <div id="container-viagens-resumo"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 3: PEDÁGIOS (CONCILIAÇÃO) -->
+                <section class="admin-section" id="view-pedagios">
+                    <div class="section-page-header">
+                        <h2>🛣️ Conciliação de Pedágios (TAG vs Relatório)</h2>
+                        <p>Cruzamento automático entre extratos da Concessionária/Sem Parar/Veloe e comprovantes das viagens.</p>
+                    </div>
+                    <div class="kpi-grid" style="margin-bottom: 24px;">
+                        <div class="kpi-card card-saida">
+                            <span class="kpi-label">Total Pedágio Declarado</span>
+                            <h3 class="kpi-value">R$ 12.150,00</h3>
+                            <span class="kpi-meta-text">11 viagens auditadas</span>
+                        </div>
+                        <div class="kpi-card card-entrada">
+                            <span class="kpi-label">TAGs Integradas (Sem Parar / Veloe)</span>
+                            <h3 class="kpi-value">R$ 12.020,00</h3>
+                            <span class="trend-badge trend-up">Divergência controlada (1.07%)</span>
+                        </div>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <table class="tabela-fichas">
+                            <thead>
+                                <tr>
+                                    <th>Ficha</th>
+                                    <th>Motorista</th>
+                                    <th>Rota</th>
+                                    <th>Praças Identificadas</th>
+                                    <th>Valor Ficha</th>
+                                    <th>Extrato TAG</th>
+                                    <th>Status Conciliação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pedagios-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 4: ACERTO COM MOTORISTAS -->
+                <section class="admin-section" id="view-acertos">
+                    <div class="section-page-header">
+                        <h2>💰 Acerto com Motoristas (Comissões &amp; Diárias)</h2>
+                        <p>Apuração de saldos líquidos a pagar, abatimento de adiantamentos e comissões por cliente.</p>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <table class="tabela-fichas">
+                            <thead>
+                                <tr>
+                                    <th>Motorista</th>
+                                    <th>Viagens Realizadas</th>
+                                    <th>Total Frete Gerado</th>
+                                    <th>Comissão Apurada</th>
+                                    <th>Adiantamentos Pagos</th>
+                                    <th>Saldo a Liquidar</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-acertos-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 5: REVISÃO DE FATURAMENTO (5% BORGES) -->
+                <section class="admin-section" id="view-faturamento">
+                    <div class="section-page-header">
+                        <h2>🧾 Revisão de Faturamento (5% Borges)</h2>
+                        <p>Controle de taxa de agenciamento, emissão de faturas e comissionamento da AJBorges.</p>
+                    </div>
+                    <div class="kpi-grid">
+                        <div class="kpi-card card-entrada">
+                            <span class="kpi-label">Base de Faturamento de Fretes</span>
+                            <h3 class="kpi-value">R$ 142.500,00</h3>
+                        </div>
+                        <div class="kpi-card card-resultado">
+                            <span class="kpi-label">Taxa Administrativa AJBorges (5%)</span>
+                            <h3 class="kpi-value text-glow-green">R$ 7.125,00</h3>
+                            <span class="kpi-meta-text">Apuração líquida de agenciamento</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 6: CONFERÊNCIA DE COMBUSTÍVEL -->
+                <section class="admin-section" id="view-combustivel">
+                    <div class="section-page-header">
+                        <h2>⛽ Conferência de Combustível (Cruzar Posto x Motorista)</h2>
+                        <p>Cruzamento das Notas Fiscais dos postos conveniados com os lançamentos de abastecimento e KM.</p>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <table class="tabela-fichas">
+                            <thead>
+                                <tr>
+                                    <th>Posto / Rede</th>
+                                    <th>NF</th>
+                                    <th>Data</th>
+                                    <th>Motorista</th>
+                                    <th>Litros</th>
+                                    <th>Preço/L</th>
+                                    <th>Valor Total</th>
+                                    <th>Validação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-combustivel-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 7: DESPESAS GERAIS -->
+                <section class="admin-section" id="view-despesas">
+                    <div class="section-page-header">
+                        <h2>📉 Despesas Gerais da Operação</h2>
+                        <p>Consolidado de manutenção, borracharia, pneus, impostos federais e taxas auxiliares.</p>
+                    </div>
+                    <div class="placeholder-section-card" id="container-despesas-resumo"></div>
+                </section>
+
+                <!-- SEÇÃO 8: FROTA -->
+                <section class="admin-section" id="view-frota">
+                    <div class="section-page-header">
+                        <h2>🚛 Gestão de Frota (Caminhões &amp; Carretas)</h2>
+                        <p>Status operacional de cavalos mecânicos, semirreboques, odômetros e manutenções programadas.</p>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <table class="tabela-fichas">
+                            <thead>
+                                <tr>
+                                    <th>Placa Cavalo</th>
+                                    <th>Placa Carreta</th>
+                                    <th>Modelo / Veículo</th>
+                                    <th>Motorista Atual</th>
+                                    <th>KM Atual</th>
+                                    <th>Média Consumo</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-frota-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO 9: CADASTROS -->
+                <section class="admin-section" id="view-cadastros">
+                    <div class="section-page-header">
+                        <h2>📝 Cadastros Operacionais (Clientes, Motoristas, Rotas)</h2>
+                        <p>Gerenciamento da base de dados e parceiros da AJBorges Transportes.</p>
+                    </div>
+                    <div class="placeholder-section-card" id="container-cadastros-resumo"></div>
+                </section>
+
+                <!-- SEÇÃO 10: PORTAL DO MOTORISTA (DIRETO) -->
+                <section class="admin-section" id="view-fichas">
+                    <!-- O conteúdo é sincronizado com o módulo principal -->
+                    <div class="section-page-header">
+                        <h2>📱 Portal da Frota • Fichas &amp; Auditoria</h2>
+                        <p>Fila prioritária de conferência e aprovação dos relatórios enviados pelos motoristas.</p>
+                    </div>
+                    <div id="container-fichas-clonado"></div>
+                </section>
+
+                <!-- SEÇÃO 11: PLANEJAMENTO -->
+                <section class="admin-section" id="view-planejamento">
+                    <div class="section-page-header">
+                        <h2>📅 Planejamento de Cargas &amp; Escalas</h2>
+                        <p>Programação semanal de saídas para Shopee, Mercado Livre e Cargas Alimentícias.</p>
+                    </div>
+                    <div class="placeholder-section-card" id="container-planejamento-resumo"></div>
+                </section>
+
+                <!-- SEÇÃO 12: CONFIGURAÇÕES -->
+                <section class="admin-section" id="view-configuracoes">
+                    <div class="section-page-header">
+                        <h2>⚙️ Configurações do Sistema</h2>
+                        <p>Parâmetros operacionais, meta de consumo de combustível e chaves de acesso.</p>
+                    </div>
+                    <div class="placeholder-section-card">
+                        <div class="config-grid">
+                            <div class="config-card">
+                                <h4>Meta de Consumo Diesel</h4>
+                                <p>Valor base para alerta da frota:</p>
+                                <input type="text" class="input-custom" value="2.40 km/l" readonly>
+                            </div>
+                            <div class="config-card">
+                                <h4>Percentual Taxa Borges</h4>
+                                <p>Taxa aplicada no resumo financeiro:</p>
+                                <input type="text" class="input-custom" value="5.0%" readonly>
+                            </div>
+                            <div class="config-card">
+                                <h4>Reset do Banco de Testes</h4>
+                                <p>Restaura fichas originais com dados de exemplo:</p>
+                                <button type="button" class="btn-acao-secundario" id="btn-reset-demo-data" style="margin-top: 8px;">Restaurar Dados Demo</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL: RESUMO RÁPIDO DA FICHA (AUDITORIA RÁPIDA)
+         ==================================================================== -->
+    <div class="modal-overlay" id="modal-resumo-ficha" aria-hidden="true" role="dialog">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="badge-modal" id="modal-ficha-id">AJB-2026-001</span>
+                    <h3 class="modal-title" id="modal-ficha-motorista">Conferência de Viagem</h3>
+                </div>
+                <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Fechar">✕</button>
+            </div>
+            
+            <div class="modal-body" id="modal-ficha-conteudo">
+                <!-- Conteúdo dinâmico preenchido via JavaScript -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-secundario" id="btn-modal-fechar">Fechar</button>
+                <a href="#" class="btn-modal-primario" id="btn-modal-abrir-completo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span>Conferir / Editar Ficha Completa</span>
+                </a>
+                <button type="button" class="btn-modal-sucesso" id="btn-modal-aprovar-direto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Aprovar Agora</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         TOAST DE NOTIFICAÇÃO
+         ==================================================================== -->
+    <div class="admin-toast" id="admin-toast" role="alert" aria-live="assertive" aria-hidden="true">
+        <span class="toast-icon" id="toast-icon">✓</span>
+        <span class="toast-message" id="toast-message">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- Scripts do Dashboard -->
+    <script src="../JavaScript/dashboard-admin.js"></script>
+</body>
+
+</html>
