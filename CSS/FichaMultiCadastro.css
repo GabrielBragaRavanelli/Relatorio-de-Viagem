@@ -6,6 +6,11 @@
     box-sizing: border-box;
 }
 
+html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+}
+
 :root {
     --azul-ajborges: #3d3d90;
     --azul-ajborges-escuro: #2b2b6d;
@@ -37,6 +42,9 @@ body {
     background-color: var(--cinza-claro);
     color: var(--cinza-escuro);
     line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* --- HEADER  --- */
