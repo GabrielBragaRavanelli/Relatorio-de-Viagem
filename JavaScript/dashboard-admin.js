@@ -3,420 +3,16 @@
  * AJBorges Transportes - Dashboard Administrativo
  * Gestão Operacional, Inteligência de Dados (BI) e Ciclo de Vida de Fichas
  * ==========================================================================
+ * Conectado exclusivamente aos dados reais enviados pelos motoristas
+ * via Relatório de Viagem e cadastros de Seja um Agregado Conosco.
+ * Sem dados inventados ou fictícios.
  */
 
 const STORAGE_FICHAS_KEY = 'ajborges_fichas_viagem';
 const STORAGE_USER_KEY = 'ajborges_usuario_ativo';
-
-// Dados Iniciais Realistas de Exemplo (Seed Data da AJBorges)
-const SEED_FICHAS = [
-    {
-        id: "AJB-2026-001",
-        protocolo: "AJB-2026-001",
-        dataEnvio: "23/09/2026 18:40",
-        dataSaida: "20/09/2026",
-        dataChegada: "23/09/2026",
-        motoristaId: "MOT-102",
-        motorista: "Marcos Antônio Silva",
-        origemEnvio: "motorista_com_login",
-        placas: "MHU-9157 / BRA-2E19",
-        destinoInicial: "Marília - SP",
-        destinoFinal: "São Paulo - SP",
-        kmSaida: "1569440",
-        kmChegada: "1573580",
-        kmTotal: "4140",
-        valorAdiantamento: "2.500,00",
-        freteOrigem: "8.900,00",
-        retorno1: "5.400,00",
-        retorno2: "",
-        retorno3: "",
-        totalFrete: "14.300,00",
-        vrComissao: "1.573,00",
-        fretes: [
-            { data: "20/09/2026", cliente: "mercado_livre", origem: "Marília/SP", destino: "Cajamar/SP", valor: "8.900,00", comissao: "400,00", descarga: "0,00" },
-            { data: "22/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Bauru/SP", valor: "5.400,00", comissao: "594,00", descarga: "0,00" }
-        ],
-        abastecimentos: [
-            { posto: "Posto Graal Marília", nf: "84920", km: "1569450", valor: "3.850,00", litros: "650,00" },
-            { posto: "Posto Sakamoto Guarulhos", nf: "99214", km: "1571400", valor: "4.200,00", litros: "700,00" },
-            { posto: "Posto Castelo Branco Bauru", nf: "10452", km: "1573200", valor: "3.480,00", litros: "580,00" }
-        ],
-        totalAbastecimento: "11.530,00",
-        totalLitros: "1.930,00",
-        mediaKmL: "2.15",
-        pedagios: ["420,00", "380,00", "0,00"],
-        totalPedagio: "800,00",
-        impFederal: "450,00",
-        outrasDespesas: [
-            { desc: "Imposto Federal", valor: "450,00" },
-            { desc: "Borracharia Pneu Dianteiro", valor: "180,00" }
-        ],
-        totalDespesas: "12.960,00",
-        resultadoViagem: "1.340,00",
-        saldoComissao: "-927,00",
-        anexos: [
-            { nome: "NF_Abastecimento_Graal_84920.pdf", tamanho: "412 KB", tipo: "pdf" },
-            { nome: "Comprovante_Pedagio_SemParar.pdf", tamanho: "218 KB", tipo: "pdf" }
-        ],
-        status: "pendente",
-        observacoesMotorista: "Pneu dianteiro reparado em trânsito com recibo anexo. Consumo afetado por congestionamento na serra."
-    },
-    {
-        id: "AJB-2026-002",
-        protocolo: "AJB-2026-002",
-        dataEnvio: "24/09/2026 09:15",
-        dataSaida: "21/09/2026",
-        dataChegada: "24/09/2026",
-        motoristaId: "MOT-104",
-        motorista: "Carlos Eduardo Ferreira",
-        origemEnvio: "motorista_com_login",
-        placas: "GHR-4512 / QWE-9871",
-        destinoInicial: "Curitiba - PR",
-        destinoFinal: "Santos - SP",
-        kmSaida: "890200",
-        kmChegada: "893950",
-        kmTotal: "3750",
-        valorAdiantamento: "2.800,00",
-        freteOrigem: "11.200,00",
-        retorno1: "6.800,00",
-        retorno2: "",
-        retorno3: "",
-        totalFrete: "18.000,00",
-        vrComissao: "1.980,00",
-        fretes: [
-            { data: "21/09/2026", cliente: "alimenticio", origem: "Curitiba/PR", destino: "São Paulo/SP", valor: "11.200,00", comissao: "1.232,00", descarga: "150,00" },
-            { data: "23/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Santos/SP", valor: "6.800,00", comissao: "748,00", descarga: "0,00" }
-        ],
-        abastecimentos: [
-            { posto: "Posto Shell Registro", nf: "55120", km: "891400", valor: "4.500,00", litros: "750,00" },
-            { posto: "Posto Ipiranga Cubatão", nf: "88145", km: "893200", valor: "4.650,00", litros: "780,00" }
-        ],
-        totalAbastecimento: "9.150,00",
-        totalLitros: "1.530,00",
-        mediaKmL: "2.45",
-        pedagios: ["580,00", "420,00", "0,00"],
-        totalPedagio: "1.000,00",
-        impFederal: "520,00",
-        outrasDespesas: [
-            { desc: "Imposto Federal", valor: "520,00" },
-            { desc: "Estacionamento Pátio Santos", valor: "120,00" }
-        ],
-        totalDespesas: "10.790,00",
-        resultadoViagem: "7.210,00",
-        saldoComissao: "-820,00",
-        anexos: [
-            { nome: "CTe_Alimenticio_Curitiba.pdf", tamanho: "520 KB", tipo: "pdf" },
-            { nome: "NF_Combustivel_Registro.pdf", tamanho: "310 KB", tipo: "pdf" }
-        ],
-        status: "pendente",
-        observacoesMotorista: "Viagem realizada sem intercorrências, aguardando liberação do adiantamento restante."
-    },
-    {
-        id: "AJB-2026-003",
-        protocolo: "AJB-2026-003",
-        dataEnvio: "24/09/2026 10:50",
-        dataSaida: "22/09/2026",
-        dataChegada: "24/09/2026",
-        motoristaId: "anonimo",
-        motorista: "Jean Gomes de Oliveira",
-        origemEnvio: "motorista_sem_login",
-        placas: "JKL-7820 / MNO-3341",
-        destinoInicial: "Campinas - SP",
-        destinoFinal: "Belo Horizonte - MG",
-        kmSaida: "1124500",
-        kmChegada: "1127600",
-        kmTotal: "3100",
-        valorAdiantamento: "2.200,00",
-        freteOrigem: "9.500,00",
-        retorno1: "5.800,00",
-        retorno2: "",
-        retorno3: "",
-        totalFrete: "15.300,00",
-        vrComissao: "1.683,00",
-        fretes: [
-            { data: "22/09/2026", cliente: "mercado_livre", origem: "Campinas/SP", destino: "Extrema/MG", valor: "9.500,00", comissao: "400,00", descarga: "0,00" },
-            { data: "23/09/2026", cliente: "shopee", origem: "Extrema/MG", destino: "Betim/MG", valor: "5.800,00", comissao: "638,00", descarga: "0,00" }
-        ],
-        abastecimentos: [
-            { posto: "Posto Fernandão Pouso Alegre", nf: "77189", km: "1125600", valor: "4.100,00", litros: "680,00" },
-            { posto: "Posto Gauchão Oliveira", nf: "33912", km: "1127100", valor: "4.020,00", litros: "670,00" }
-        ],
-        totalAbastecimento: "8.120,00",
-        totalLitros: "1.350,00",
-        mediaKmL: "2.30",
-        pedagios: ["490,00", "390,00", "0,00"],
-        totalPedagio: "880,00",
-        impFederal: "480,00",
-        outrasDespesas: [
-            { desc: "Imposto Federal", valor: "480,00" }
-        ],
-        totalDespesas: "9.480,00",
-        resultadoViagem: "5.820,00",
-        saldoComissao: "-517,00",
-        anexos: [
-            { nome: "Cupom_Fiscal_Fernandao.jpg", tamanho: "1.2 MB", tipo: "img" }
-        ],
-        status: "pendente",
-        observacoesMotorista: "Envio direto realizado pelo celular na chegada em Betim."
-    },
-    // Fichas já Aprovadas e Concluídas pela Gestão
-    {
-        id: "AJB-2026-004",
-        protocolo: "AJB-2026-004",
-        dataEnvio: "18/09/2026 14:10",
-        dataSaida: "14/09/2026",
-        dataChegada: "18/09/2026",
-        motoristaId: "MOT-105",
-        motorista: "Paulo Rogério Mendes",
-        origemEnvio: "motorista_com_login",
-        placas: "RTY-1122 / POI-3344",
-        destinoInicial: "São Paulo - SP",
-        destinoFinal: "Rio de Janeiro - RJ",
-        kmSaida: "650100",
-        kmChegada: "654120",
-        kmTotal: "4020",
-        valorAdiantamento: "2.400,00",
-        freteOrigem: "9.200,00",
-        retorno1: "6.100,00",
-        totalFrete: "15.300,00",
-        vrComissao: "1.683,00",
-        totalAbastecimento: "9.450,00",
-        totalLitros: "1.595,00",
-        mediaKmL: "2.52",
-        totalPedagio: "1.350,00",
-        impFederal: "550,00",
-        totalDespesas: "11.350,00",
-        resultadoViagem: "3.950,00",
-        saldoComissao: "-717,00",
-        status: "aprovado",
-        dataAprovacao: "19/09/2026 10:30",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-005",
-        protocolo: "AJB-2026-005",
-        dataEnvio: "17/09/2026 16:30",
-        dataSaida: "13/09/2026",
-        dataChegada: "17/09/2026",
-        motoristaId: "MOT-106",
-        motorista: "Ricardo Mendes Barreto",
-        origemEnvio: "motorista_com_login",
-        placas: "BNM-8899 / ZXC-5566",
-        destinoInicial: "Bauru - SP",
-        destinoFinal: "Uberlândia - MG",
-        kmSaida: "920400",
-        kmChegada: "924300",
-        kmTotal: "3900",
-        valorAdiantamento: "2.500,00",
-        freteOrigem: "8.400,00",
-        retorno1: "5.600,00",
-        totalFrete: "14.000,00",
-        vrComissao: "1.540,00",
-        totalAbastecimento: "8.750,00",
-        totalLitros: "1.511,00",
-        mediaKmL: "2.58",
-        totalPedagio: "1.100,00",
-        impFederal: "500,00",
-        totalDespesas: "10.350,00",
-        resultadoViagem: "3.650,00",
-        saldoComissao: "-960,00",
-        status: "aprovado",
-        dataAprovacao: "18/09/2026 09:15",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-006",
-        protocolo: "AJB-2026-006",
-        dataEnvio: "15/09/2026 11:20",
-        dataSaida: "10/09/2026",
-        dataChegada: "15/09/2026",
-        motoristaId: "MOT-107",
-        motorista: "Fernando Alves Lima",
-        origemEnvio: "motorista_com_login",
-        placas: "DFG-3456 / CVB-7890",
-        destinoInicial: "Marília - SP",
-        destinoFinal: "Goiânia - GO",
-        kmSaida: "1340100",
-        kmChegada: "1344600",
-        kmTotal: "4500",
-        valorAdiantamento: "2.800,00",
-        freteOrigem: "10.500,00",
-        retorno1: "6.200,00",
-        totalFrete: "16.700,00",
-        vrComissao: "1.837,00",
-        totalAbastecimento: "9.900,00",
-        totalLitros: "1.717,00",
-        mediaKmL: "2.62",
-        totalPedagio: "1.450,00",
-        impFederal: "600,00",
-        totalDespesas: "11.950,00",
-        resultadoViagem: "4.750,00",
-        saldoComissao: "-963,00",
-        status: "aprovado",
-        dataAprovacao: "16/09/2026 14:00",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-007",
-        protocolo: "AJB-2026-007",
-        dataEnvio: "12/09/2026 09:40",
-        dataSaida: "08/09/2026",
-        dataChegada: "12/09/2026",
-        motoristaId: "MOT-102",
-        motorista: "Marcos Antônio Silva",
-        origemEnvio: "motorista_com_login",
-        placas: "MHU-9157 / BRA-2E19",
-        destinoInicial: "Marília - SP",
-        destinoFinal: "São Paulo - SP",
-        kmSaida: "1565200",
-        kmChegada: "1569440",
-        kmTotal: "4240",
-        valorAdiantamento: "2.600,00",
-        freteOrigem: "8.800,00",
-        retorno1: "5.300,00",
-        totalFrete: "14.100,00",
-        vrComissao: "1.551,00",
-        totalAbastecimento: "9.300,00",
-        totalLitros: "1.820,00",
-        mediaKmL: "2.33",
-        totalPedagio: "1.250,00",
-        impFederal: "510,00",
-        totalDespesas: "11.060,00",
-        resultadoViagem: "3.040,00",
-        saldoComissao: "-1.049,00",
-        status: "aprovado",
-        dataAprovacao: "13/09/2026 11:00",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-008",
-        protocolo: "AJB-2026-008",
-        dataEnvio: "10/09/2026 17:15",
-        dataSaida: "06/09/2026",
-        dataChegada: "10/09/2026",
-        motoristaId: "MOT-104",
-        motorista: "Carlos Eduardo Ferreira",
-        origemEnvio: "motorista_com_login",
-        placas: "GHR-4512 / QWE-9871",
-        destinoInicial: "Curitiba - PR",
-        destinoFinal: "Santos - SP",
-        kmSaida: "886400",
-        kmChegada: "890200",
-        kmTotal: "3800",
-        valorAdiantamento: "2.700,00",
-        freteOrigem: "10.800,00",
-        retorno1: "6.400,00",
-        totalFrete: "17.200,00",
-        vrComissao: "1.892,00",
-        totalAbastecimento: "9.100,00",
-        totalLitros: "1.550,00",
-        mediaKmL: "2.45",
-        totalPedagio: "1.320,00",
-        impFederal: "580,00",
-        totalDespesas: "11.000,00",
-        resultadoViagem: "6.200,00",
-        saldoComissao: "-808,00",
-        status: "aprovado",
-        dataAprovacao: "11/09/2026 16:30",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-009",
-        protocolo: "AJB-2026-009",
-        dataEnvio: "07/09/2026 13:40",
-        dataSaida: "03/09/2026",
-        dataChegada: "07/09/2026",
-        motoristaId: "MOT-108",
-        motorista: "Valdemir Siqueira",
-        origemEnvio: "motorista_com_login",
-        placas: "KJU-9081 / PLM-2468",
-        destinoInicial: "Campinas - SP",
-        destinoFinal: "Porto Alegre - RS",
-        kmSaida: "780100",
-        kmChegada: "784900",
-        kmTotal: "4800",
-        valorAdiantamento: "3.000,00",
-        freteOrigem: "12.000,00",
-        retorno1: "7.100,00",
-        totalFrete: "19.100,00",
-        vrComissao: "2.101,00",
-        totalAbastecimento: "10.400,00",
-        totalLitros: "1.980,00",
-        mediaKmL: "2.42",
-        totalPedagio: "1.650,00",
-        impFederal: "680,00",
-        totalDespesas: "12.730,00",
-        resultadoViagem: "6.370,00",
-        saldoComissao: "-899,00",
-        status: "aprovado",
-        dataAprovacao: "08/09/2026 10:00",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-010",
-        protocolo: "AJB-2026-010",
-        dataEnvio: "04/09/2026 15:50",
-        dataSaida: "01/09/2026",
-        dataChegada: "04/09/2026",
-        motoristaId: "MOT-105",
-        motorista: "Paulo Rogério Mendes",
-        origemEnvio: "motorista_com_login",
-        placas: "RTY-1122 / POI-3344",
-        destinoInicial: "São Paulo - SP",
-        destinoFinal: "Belo Horizonte - MG",
-        kmSaida: "646200",
-        kmChegada: "650100",
-        kmTotal: "3900",
-        valorAdiantamento: "2.400,00",
-        freteOrigem: "8.500,00",
-        retorno1: "5.200,00",
-        totalFrete: "13.700,00",
-        vrComissao: "1.507,00",
-        totalAbastecimento: "8.600,00",
-        totalLitros: "1.540,00",
-        mediaKmL: "2.53",
-        totalPedagio: "1.050,00",
-        impFederal: "480,00",
-        totalDespesas: "10.130,00",
-        resultadoViagem: "3.570,00",
-        saldoComissao: "-893,00",
-        status: "aprovado",
-        dataAprovacao: "05/09/2026 09:30",
-        aprovadoPor: "operacional@ajborges.com"
-    },
-    {
-        id: "AJB-2026-011",
-        protocolo: "AJB-2026-011",
-        dataEnvio: "02/09/2026 18:20",
-        dataSaida: "29/08/2026",
-        dataChegada: "02/09/2026",
-        motoristaId: "MOT-106",
-        motorista: "Ricardo Mendes Barreto",
-        origemEnvio: "motorista_com_login",
-        placas: "BNM-8899 / ZXC-5566",
-        destinoInicial: "Bauru - SP",
-        destinoFinal: "São José do Rio Preto - SP",
-        kmSaida: "917100",
-        kmChegada: "920400",
-        kmTotal: "3300",
-        valorAdiantamento: "2.100,00",
-        freteOrigem: "7.900,00",
-        retorno1: "4.600,00",
-        totalFrete: "12.500,00",
-        vrComissao: "1.375,00",
-        totalAbastecimento: "7.400,00",
-        totalLitros: "1.310,00",
-        mediaKmL: "2.52",
-        totalPedagio: "850,00",
-        impFederal: "420,00",
-        totalDespesas: "8.670,00",
-        resultadoViagem: "3.830,00",
-        saldoComissao: "-725,00",
-        status: "aprovado",
-        dataAprovacao: "03/09/2026 14:10",
-        aprovadoPor: "operacional@ajborges.com"
-    }
-];
+const STORAGE_CADASTROS_AGREGADOS_KEY = 'ajborges_cadastros_agregados';
+const STORAGE_CONFIG_META_DIESEL = 'ajborges_config_meta_diesel';
+const STORAGE_CONFIG_TAXA_BORGES = 'ajborges_config_taxa_borges';
 
 // Instâncias globais de gráficos Chart.js
 let chartFinanceiroInstance = null;
@@ -430,30 +26,73 @@ let appState = {
     filtroCliente: 'todos',
     filtroPeriodo: 'mes', // 'mes' | '30d' | 'semana'
     termoBusca: '',
-    fichaSelecionadaModal: null
+    fichaSelecionadaModal: null,
+    config: {
+        metaDiesel: 2.40,
+        taxaBorges: 5.0
+    }
 };
 
 // ==========================================================================
-// INICIALIZAÇÃO DO BANCO DE DADOS LOCAL
+// 1. INICIALIZAÇÃO DO BANCO DE DADOS LOCAL
 // ==========================================================================
+
+// Lista de motoristas e identificadores de demonstração utilizados nos testes anteriores
+const NOMES_DEMO_EXEMPLOS = [
+    'Marcos Antônio Silva',
+    'Carlos Eduardo Ferreira',
+    'Jean Gomes de Oliveira',
+    'Valdemir Siqueira',
+    'Paulo Rogério de Souza',
+    'Ricardo Mendes Barreto',
+    'Fernando Alves de Lima',
+    'Roberto Carlos Prado',
+    'Marcelo Viana',
+    'Diego Silveira',
+    'Luciano Batista'
+];
+
+const MOCK_IDS_EXEMPLOS = [
+    'AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005',
+    'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'
+];
 
 function inicializarBancoDados() {
     const dadosSalvos = localStorage.getItem(STORAGE_FICHAS_KEY);
     if (!dadosSalvos) {
-        localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(SEED_FICHAS));
-        appState.fichas = SEED_FICHAS;
+        appState.fichas = [];
     } else {
         try {
-            appState.fichas = JSON.parse(dadosSalvos);
-            if (!Array.isArray(appState.fichas) || appState.fichas.length === 0) {
-                localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(SEED_FICHAS));
-                appState.fichas = SEED_FICHAS;
+            const parsed = JSON.parse(dadosSalvos);
+            if (Array.isArray(parsed)) {
+                // Filtra e expurga rigorosamente TODOS os dados de exemplo usados para demonstrar as planilhas
+                appState.fichas = parsed.filter(f => {
+                    if (!f || !f.id) return false;
+                    // Se for qualquer motorista das planilhas de exemplo
+                    if (NOMES_DEMO_EXEMPLOS.includes(f.motorista)) return false;
+                    // Se tiver ID de mock clássico e pertencer aos testes iniciais
+                    if (MOCK_IDS_EXEMPLOS.includes(f.id) && (!f.origemEnvio || f.origemEnvio === 'motorista_com_login' || f.origemEnvio === 'seed_sistema' || f.isExemplo)) {
+                        return false;
+                    }
+                    if (f.origemEnvio === 'seed_sistema' || f.isExemplo || f.isDemonstrativo) {
+                        return false;
+                    }
+                    return true;
+                });
+
+                // Persiste o banco de dados limpo sem nenhum dado de exemplo
+                localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(appState.fichas));
+            } else {
+                appState.fichas = [];
             }
         } catch (e) {
             console.error('Erro ao ler banco de dados local:', e);
-            localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(SEED_FICHAS));
-            appState.fichas = SEED_FICHAS;
+            appState.fichas = [];
         }
+    }
+
+    if (!appState.fichas || !Array.isArray(appState.fichas)) {
+        appState.fichas = [];
     }
 
     // Garante que o administrador esteja registrado como usuário ativo da sessão
@@ -471,13 +110,150 @@ function salvarFichasNoStorage() {
     localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(appState.fichas));
 }
 
+// --------------------------------------------------------------------------
+// 1.1 CONFIGURAÇÕES OPERACIONAIS DINÂMICAS (META DIESEL & TAXA BORGES)
+// --------------------------------------------------------------------------
+
+function parseNumeroBR(valor) {
+    if (valor === null || valor === undefined) return NaN;
+    const str = String(valor).trim().replace(',', '.');
+    return parseFloat(str);
+}
+
+function carregarConfiguracoes() {
+    const metaSalva = localStorage.getItem(STORAGE_CONFIG_META_DIESEL);
+    const taxaSalva = localStorage.getItem(STORAGE_CONFIG_TAXA_BORGES);
+
+    if (metaSalva !== null) {
+        const parsedMeta = parseNumeroBR(metaSalva);
+        if (!isNaN(parsedMeta) && parsedMeta > 0) {
+            appState.config.metaDiesel = parsedMeta;
+        }
+    }
+    if (taxaSalva !== null) {
+        const parsedTaxa = parseNumeroBR(taxaSalva);
+        if (!isNaN(parsedTaxa) && parsedTaxa >= 0) {
+            appState.config.taxaBorges = parsedTaxa;
+        }
+    }
+
+    const inputMeta = document.getElementById('config-meta-diesel');
+    const inputTaxa = document.getElementById('config-taxa-borges');
+    if (inputMeta) inputMeta.value = appState.config.metaDiesel.toFixed(2).replace('.', ',');
+    if (inputTaxa) inputTaxa.value = appState.config.taxaBorges.toFixed(1).replace('.', ',');
+
+    aplicarAtualizacoesConfiguracao(false);
+}
+
+function confirmarESalvarParametrosOperacionais() {
+    const inputMeta = document.getElementById('config-meta-diesel');
+    const inputTaxa = document.getElementById('config-taxa-borges');
+    if (!inputMeta || !inputTaxa) return;
+
+    const novaMeta = parseNumeroBR(inputMeta.value);
+    const novaTaxa = parseNumeroBR(inputTaxa.value);
+
+    // Validação da Meta de Diesel
+    if (isNaN(novaMeta) || novaMeta <= 0) {
+        alert('Por favor, informe uma Meta de Consumo Diesel válida maior que zero (ex: 2,40 km/l).');
+        inputMeta.focus();
+        return;
+    }
+
+    // Validação da Taxa Borges
+    if (isNaN(novaTaxa) || novaTaxa < 0 || novaTaxa > 100) {
+        alert('Por favor, informe um Percentual de Taxa Borges válido entre 0% e 100% (ex: 5,0%).');
+        inputTaxa.focus();
+        return;
+    }
+
+    const metaFmt = novaMeta.toFixed(2).replace('.', ',');
+    const taxaFmt = novaTaxa.toFixed(1).replace('.', ',');
+
+    const confirmou = confirm(
+        `Deseja realmente confirmar a alteração dos parâmetros operacionais?\n\n` +
+        `• Meta de Consumo Diesel: ${metaFmt} km/l\n` +
+        `• Percentual Taxa Borges: ${taxaFmt}%\n\n` +
+        `Todas as contas, faturamento, auditorias e gráficos serão atualizados imediatamente de acordo com esses valores.`
+    );
+
+    if (confirmou) {
+        appState.config.metaDiesel = novaMeta;
+        appState.config.taxaBorges = novaTaxa;
+        localStorage.setItem(STORAGE_CONFIG_META_DIESEL, novaMeta.toString());
+        localStorage.setItem(STORAGE_CONFIG_TAXA_BORGES, novaTaxa.toString());
+
+        inputMeta.value = metaFmt;
+        inputTaxa.value = taxaFmt;
+
+        aplicarAtualizacoesConfiguracao(true);
+        renderizarTabelaFichas();
+
+        exibirToast(`Parâmetros operacionais confirmados! Meta: ${metaFmt} km/l | Taxa: ${taxaFmt}%.`, 'sucesso');
+    } else {
+        inputMeta.value = appState.config.metaDiesel.toFixed(2).replace('.', ',');
+        inputTaxa.value = appState.config.taxaBorges.toFixed(1).replace('.', ',');
+        exibirToast('Alteração de parâmetros cancelada. Valores mantidos.', 'info');
+    }
+}
+
+function salvarConfiguracaoMetaDiesel(novaMeta) {
+    const val = parseNumeroBR(novaMeta);
+    if (isNaN(val) || val <= 0) return false;
+    appState.config.metaDiesel = val;
+    localStorage.setItem(STORAGE_CONFIG_META_DIESEL, val.toString());
+    aplicarAtualizacoesConfiguracao(true);
+    renderizarTabelaFichas();
+    return true;
+}
+
+function salvarConfiguracaoTaxaBorges(novaTaxa) {
+    const val = parseNumeroBR(novaTaxa);
+    if (isNaN(val) || val < 0) return false;
+    appState.config.taxaBorges = val;
+    localStorage.setItem(STORAGE_CONFIG_TAXA_BORGES, val.toString());
+    aplicarAtualizacoesConfiguracao(true);
+    return true;
+}
+
+function aplicarAtualizacoesConfiguracao(atualizarGraficosFlag = true) {
+    const metaFmt = appState.config.metaDiesel.toFixed(2).replace('.', ',');
+    const taxaFmt = appState.config.taxaBorges.toFixed(1).replace('.', ',');
+
+    const elMetaDisplay = document.getElementById('kpi-meta-frota-display');
+    if (elMetaDisplay) elMetaDisplay.textContent = metaFmt;
+
+    const elChartMetaDisplay = document.getElementById('chart-meta-frota-display');
+    if (elChartMetaDisplay) elChartMetaDisplay.textContent = metaFmt;
+
+    const elSubtitle = document.getElementById('subtitle-chart-consumo');
+    if (elSubtitle) {
+        elSubtitle.innerHTML = `Monitoramento de eficiência energética e auditoria de abastecimento (Quem consome mais diesel vs meta de <strong id="chart-meta-frota-display">${metaFmt}</strong> km/l)`;
+    }
+
+    const elNavTaxa = document.getElementById('nav-text-faturamento');
+    if (elNavTaxa) elNavTaxa.textContent = `Faturamento (${taxaFmt}%)`;
+
+    const elSecFaturamentoTitle = document.getElementById('heading-sec-faturamento');
+    if (elSecFaturamentoTitle) elSecFaturamentoTitle.innerHTML = `🧾 Revisão de Faturamento (${taxaFmt}% Borges)`;
+
+    const elLabelTaxaAdm = document.getElementById('label-taxa-adm');
+    if (elLabelTaxaAdm) elLabelTaxaAdm.textContent = `Taxa Administrativa AJBorges (${taxaFmt}%)`;
+
+    calcularMetricasDashboard();
+
+    if (atualizarGraficosFlag) {
+        atualizarGraficos();
+    }
+
+    preencherSecoesSecundarias();
+}
+
 // ==========================================================================
-// CÁLCULOS E ATUALIZAÇÃO DOS KPIS FINANCEIROS
+// 2. CÁLCULOS E ATUALIZAÇÃO DOS KPIS FINANCEIROS E OPERACIONAIS
 // ==========================================================================
 
 function calcularMetricasDashboard() {
-    // Fichas aprovadas compõem o faturamento oficial consolidado;
-    // Fichas pendentes entram na previsão operacional
     let totalEntrada = 0;
     let entradaShopee = 0;
     let entradaML = 0;
@@ -492,24 +268,22 @@ function calcularMetricasDashboard() {
     let somaKmTotal = 0;
     let somaLitrosTotal = 0;
 
-    // Iteração sobre todas as fichas para consolidar totais
+    // Iteração sobre todas as fichas reais
     appState.fichas.forEach(f => {
         const freteNum = parseValorMoeda(f.totalFrete);
         totalEntrada += freteNum;
 
-        // Distribuição estimada por cliente
-        if (f.fretes && Array.isArray(f.fretes)) {
+        // Distribuição por cliente
+        if (f.fretes && Array.isArray(f.fretes) && f.fretes.length > 0) {
             f.fretes.forEach(item => {
                 const v = parseValorMoeda(item.valor);
                 if (item.cliente === 'shopee') entradaShopee += v;
                 else if (item.cliente === 'mercado_livre') entradaML += v;
-                else entradaAlimenticio += v;
+                else if (item.cliente === 'alimenticio') entradaAlimenticio += v;
+                else entradaShopee += v;
             });
         } else {
-            // Estimativa proporcional caso a ficha não tenha detalhes
-            entradaShopee += freteNum * 0.408;
-            entradaML += freteNum * 0.371;
-            entradaAlimenticio += freteNum * 0.221;
+            entradaShopee += freteNum;
         }
 
         const dieselNum = parseValorMoeda(f.totalAbastecimento);
@@ -529,13 +303,16 @@ function calcularMetricasDashboard() {
 
     const resultadoLiquido = totalEntrada - totalSaida;
     const margemLiquida = totalEntrada > 0 ? ((resultadoLiquido / totalEntrada) * 100) : 0;
-    const mediaGeralFrota = somaLitrosTotal > 0 ? (somaKmTotal / somaLitrosTotal) : 2.38;
+    const mediaGeralFrota = somaLitrosTotal > 0 ? (somaKmTotal / somaLitrosTotal) : 0;
+    const totalViagens = appState.fichas.length;
+    const lucroMedioPorViagem = totalViagens > 0 ? (resultadoLiquido / totalViagens) : 0;
 
     // Atualiza elementos no DOM
     const elTotalEntrada = document.getElementById('kpi-total-entrada');
     const elEntradaShopee = document.getElementById('kpi-entrada-shopee');
     const elEntradaMl = document.getElementById('kpi-entrada-ml');
     const elEntradaAli = document.getElementById('kpi-entrada-ali');
+    const elMetaViagensCount = document.getElementById('kpi-viagens-meta-count');
 
     const elTotalSaida = document.getElementById('kpi-total-saida');
     const elSaidaDiesel = document.getElementById('kpi-saida-diesel');
@@ -545,12 +322,17 @@ function calcularMetricasDashboard() {
 
     const elResultadoLiquido = document.getElementById('kpi-resultado-liquido');
     const elMargemLucro = document.getElementById('kpi-margem-lucro');
+    const elLucroMedioViagem = document.getElementById('kpi-lucro-medio-viagem');
+    const elMetaStatusTag = document.getElementById('meta-status-tag-el');
     const elMediaConsumo = document.getElementById('kpi-media-consumo-geral');
+    const elAlertaConsumoTexto = document.getElementById('alerta-consumo-texto');
+    const elTagCritico = document.getElementById('tag-alerta-consumo-header');
 
     if (elTotalEntrada) elTotalEntrada.textContent = formatarMoeda(totalEntrada);
     if (elEntradaShopee) elEntradaShopee.textContent = formatarMoeda(entradaShopee);
     if (elEntradaMl) elEntradaMl.textContent = formatarMoeda(entradaML);
     if (elEntradaAli) elEntradaAli.textContent = formatarMoeda(entradaAlimenticio);
+    if (elMetaViagensCount) elMetaViagensCount.textContent = `${totalViagens} viagem(ns) no período`;
 
     if (elTotalSaida) elTotalSaida.textContent = formatarMoeda(totalSaida);
     if (elSaidaDiesel) elSaidaDiesel.textContent = formatarMoeda(saidaDiesel);
@@ -559,11 +341,85 @@ function calcularMetricasDashboard() {
     if (elSaidaImpostos) elSaidaImpostos.textContent = formatarMoeda(saidaImpostos);
 
     if (elResultadoLiquido) elResultadoLiquido.textContent = formatarMoeda(resultadoLiquido);
-    if (elMargemLucro) elMargemLucro.textContent = `${margemLiquida.toFixed(1)}%`;
-    if (elMediaConsumo) elMediaConsumo.textContent = `${mediaGeralFrota.toFixed(2)} km/l`;
+    if (elMargemLucro) elMargemLucro.textContent = totalEntrada > 0 ? `${margemLiquida.toFixed(1)}%` : '0.0%';
+    if (elLucroMedioViagem) elLucroMedioViagem.textContent = `Média: ${formatarMoeda(lucroMedioPorViagem)} / viagem`;
 
-    // Atualiza contadores
+    if (elMetaStatusTag) {
+        if (totalViagens === 0) {
+            elMetaStatusTag.className = 'meta-status-tag';
+            elMetaStatusTag.textContent = 'Aguardando Viagens';
+        } else if (margemLiquida >= 35) {
+            elMetaStatusTag.className = 'meta-status-tag meta-atingida';
+            elMetaStatusTag.textContent = 'Meta Superada (>35%)';
+        } else {
+            elMetaStatusTag.className = 'meta-status-tag';
+            elMetaStatusTag.textContent = 'Em Operação';
+        }
+    }
+
+    if (elMediaConsumo) {
+        elMediaConsumo.textContent = mediaGeralFrota > 0 ? `${mediaGeralFrota.toFixed(2)} km/l` : '0.00 km/l';
+    }
+
+    // Identificação de alerta real de consumo entre as fichas
+    let piorMotorista = null;
+    let menorMedia = 999;
+    appState.fichas.forEach(f => {
+        const med = parseFloat(f.mediaKmL || 0);
+        if (med > 0 && med < menorMedia) {
+            menorMedia = med;
+            piorMotorista = f.motorista || 'Motorista';
+        }
+    });
+
+    const metaDiesel = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+
+    if (piorMotorista && menorMedia < metaDiesel) {
+        if (elAlertaConsumoTexto) {
+            elAlertaConsumoTexto.innerHTML = `${piorMotorista} está com a menor média (<strong>${menorMedia.toFixed(2)} km/l</strong>), abaixo da meta (${metaDiesel.toFixed(2)} km/l).`;
+        }
+        if (elTagCritico) {
+            elTagCritico.textContent = '⚠️ Alerta de Alto Consumo';
+            elTagCritico.className = 'tag-critico';
+        }
+    } else {
+        if (elAlertaConsumoTexto) {
+            elAlertaConsumoTexto.textContent = totalViagens === 0 
+                ? 'Nenhuma viagem registrada no momento.' 
+                : 'Consumo de combustível dentro dos padrões normais.';
+        }
+        if (elTagCritico) {
+            elTagCritico.textContent = '✓ Consumo sob Controle';
+            elTagCritico.className = 'tag-critico tag-ok';
+        }
+    }
+
+    // Atualiza barras de progresso de despesas
+    const barraDiesel = document.querySelector('.bar-diesel');
+    const barraComissao = document.querySelector('.bar-comissao');
+    if (barraDiesel) {
+        const pctDiesel = totalSaida > 0 ? ((saidaDiesel / totalSaida) * 100).toFixed(1) : 0;
+        barraDiesel.style.width = `${pctDiesel}%`;
+    }
+    if (barraComissao) {
+        const pctComissao = totalSaida > 0 ? ((saidaComissao / totalSaida) * 100).toFixed(1) : 0;
+        barraComissao.style.width = `${pctComissao}%`;
+    }
+
+    // Atualiza contadores das abas e sidebar
     atualizarContadoresStatus();
+
+    // Atualiza indicadores das seções secundárias
+    atualizarIndicadoresSecoesSecundarias({
+        totalViagens,
+        somaKmTotal,
+        totalEntrada,
+        totalSaida,
+        saidaDiesel,
+        saidaComissao,
+        saidaPedagios,
+        saidaImpostos
+    });
 }
 
 function atualizarContadoresStatus() {
@@ -584,8 +440,30 @@ function atualizarContadoresStatus() {
     if (elHeaderCounter) elHeaderCounter.textContent = `${pendentes} pendente${pendentes !== 1 ? 's' : ''}`;
 }
 
+function atualizarIndicadoresSecoesSecundarias(totais) {
+    const elSecViagensTotal = document.getElementById('sec-viagens-total-mes');
+    const elSecViagensKm = document.getElementById('sec-viagens-total-km');
+    const elSecPedagiosTotal = document.getElementById('sec-pedagios-total');
+    const elSecPedagiosCount = document.getElementById('sec-pedagios-count');
+    const elSecPedagiosTags = document.getElementById('sec-pedagios-tags');
+    const elSecFaturamentoBase = document.getElementById('sec-faturamento-base');
+    const elSecFaturamentoTaxa = document.getElementById('sec-faturamento-taxa');
+    const elSecViagensPrazo = document.getElementById('sec-viagens-prazo');
+
+    if (elSecViagensTotal) elSecViagensTotal.textContent = totais.totalViagens;
+    if (elSecViagensKm) elSecViagensKm.textContent = `${totais.somaKmTotal.toLocaleString('pt-BR')} km`;
+    if (elSecViagensPrazo) elSecViagensPrazo.textContent = totais.totalViagens > 0 ? '100%' : '-';
+    if (elSecPedagiosTotal) elSecPedagiosTotal.textContent = formatarMoeda(totais.saidaPedagios);
+    if (elSecPedagiosCount) elSecPedagiosCount.textContent = `${totais.totalViagens} viagem(ns) auditada(s)`;
+    if (elSecPedagiosTags) elSecPedagiosTags.textContent = formatarMoeda(totais.saidaPedagios);
+
+    const taxaBorges = (appState.config && typeof appState.config.taxaBorges === 'number') ? appState.config.taxaBorges : 5.0;
+    if (elSecFaturamentoBase) elSecFaturamentoBase.textContent = formatarMoeda(totais.totalEntrada);
+    if (elSecFaturamentoTaxa) elSecFaturamentoTaxa.textContent = formatarMoeda(totais.totalEntrada * (taxaBorges / 100));
+}
+
 // ==========================================================================
-// RENDERIZAÇÃO DA TABELA DO PORTAL DO MOTORISTA
+// 3. RENDERIZAÇÃO DA TABELA DO PORTAL DO MOTORISTA
 // ==========================================================================
 
 function renderizarTabelaFichas() {
@@ -625,9 +503,13 @@ function renderizarTabelaFichas() {
 
     // Atualiza info de contagem
     if (elInfoRegistros) {
-        const tipoTexto = appState.filtroStatus === 'pendente' ? 'pendente(s)' : 
-                          appState.filtroStatus === 'aprovado' ? 'aprovada(s)' : 'registrada(s)';
-        elInfoRegistros.textContent = `Exibindo ${listaFiltrada.length} ficha(s) ${tipoTexto}`;
+        if (listaFiltrada.length === 0) {
+            elInfoRegistros.textContent = 'Nenhuma ficha registrada';
+        } else {
+            const tipoTexto = appState.filtroStatus === 'pendente' ? 'pendente(s)' : 
+                              appState.filtroStatus === 'aprovado' ? 'aprovada(s)' : 'registrada(s)';
+            elInfoRegistros.textContent = `Exibindo ${listaFiltrada.length} ficha(s) ${tipoTexto}`;
+        }
     }
 
     tbody.innerHTML = '';
@@ -646,9 +528,10 @@ function renderizarTabelaFichas() {
         const isPendente = ficha.status === 'pendente';
         const mediaNum = parseFloat(ficha.mediaKmL || 0);
 
+        const metaAtual = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
         let mediaClass = 'diesel-bom';
-        if (mediaNum < 2.20) mediaClass = 'diesel-alerta';
-        else if (mediaNum < 2.40) mediaClass = 'diesel-atencao';
+        if (mediaNum < (metaAtual - 0.20)) mediaClass = 'diesel-alerta';
+        else if (mediaNum < metaAtual) mediaClass = 'diesel-atencao';
 
         const rotaStr = (ficha.destinoInicial && ficha.destinoFinal) 
             ? `${ficha.destinoInicial} ➔ ${ficha.destinoFinal}` 
@@ -663,7 +546,7 @@ function renderizarTabelaFichas() {
                 <span class="td-ficha-id">${ficha.id}</span>
             </td>
             <td>
-                <span class="td-data-envio">${ficha.dataEnvio || ficha.dataSaida || '24/09/2026'}</span>
+                <span class="td-data-envio">${ficha.dataEnvio || ficha.dataSaida || '-'}</span>
             </td>
             <td>
                 <div class="driver-cell">
@@ -672,7 +555,7 @@ function renderizarTabelaFichas() {
                 </div>
             </td>
             <td>
-                <span class="placa-box">${ficha.placas || 'MHU-9157'}</span>
+                <span class="placa-box">${ficha.placas || 'Não informada'}</span>
             </td>
             <td>
                 <span class="rota-tag" title="${rotaStr}">${rotaStr}</span>
@@ -682,7 +565,7 @@ function renderizarTabelaFichas() {
             </td>
             <td>
                 <span class="diesel-badge ${mediaClass}">
-                    ${ficha.mediaKmL ? `${ficha.mediaKmL} km/l` : '2.38 km/l'}
+                    ${ficha.mediaKmL ? `${ficha.mediaKmL} km/l` : '0.00 km/l'}
                 </span>
             </td>
             <td>
@@ -731,14 +614,14 @@ function renderizarTabelaFichas() {
 }
 
 // ==========================================================================
-// APROVAÇÃO DIRETA E AÇÕES DE FICHAS
+// 4. APROVAÇÃO DIRETA E AÇÕES DE FICHAS
 // ==========================================================================
 
 function aprovarFichaDiretamente(fichaId) {
     const index = appState.fichas.findIndex(f => f.id === fichaId);
     if (index === -1) return;
 
-    if (!confirm(`Deseja aprovar e concluir o Relatório de Viagem ${fichaId}?`)) {
+    if (!confirm(`Deseja aprovar e homologar o Relatório de Viagem ${fichaId}?`)) {
         return;
     }
 
@@ -750,11 +633,12 @@ function aprovarFichaDiretamente(fichaId) {
     calcularMetricasDashboard();
     renderizarTabelaFichas();
     atualizarGraficos();
-    exibirToast(`Ficha ${fichaId} aprovada e concluída com sucesso!`, 'sucesso');
+    preencherSecoesSecundarias();
+    exibirToast(`Ficha ${fichaId} homologada com sucesso!`, 'sucesso');
 }
 
 // ==========================================================================
-// MODAL DE RESUMO RÁPIDO DA FICHA
+// 5. MODAL DE RESUMO RÁPIDO DA FICHA
 // ==========================================================================
 
 function abrirModalResumoFicha(fichaId) {
@@ -782,7 +666,6 @@ function abrirModalResumoFicha(fichaId) {
         };
     }
 
-    // Monta o corpo detalhado de conferência
     if (elConteudo) {
         let fretesHtml = '';
         if (ficha.fretes && ficha.fretes.length > 0) {
@@ -833,14 +716,14 @@ function abrirModalResumoFicha(fichaId) {
                     <div class="modal-info-linha"><span>Data Envio:</span> <strong>${ficha.dataEnvio || '-'}</strong></div>
                     <div class="modal-info-linha"><span>Período:</span> <strong>${ficha.dataSaida || '-'} até ${ficha.dataChegada || '-'}</strong></div>
                     <div class="modal-info-linha"><span>KM Saída / Chegada:</span> <strong>${ficha.kmSaida || '-'} / ${ficha.kmChegada || '-'}</strong></div>
-                    <div class="modal-info-linha"><span>KM Total Rodado:</span> <strong>${ficha.kmTotal || '-'} km</strong></div>
-                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${ficha.mediaKmL || '2.38'} km/l</strong></div>
+                    <div class="modal-info-linha"><span>KM Total Rodado:</span> <strong>${ficha.kmTotal || '0'} km</strong></div>
+                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${ficha.mediaKmL || '0.00'} km/l</strong></div>
                 </div>
                 <div class="modal-info-box">
                     <div class="modal-info-box-title">Fechamento Financeiro</div>
                     <div class="modal-info-linha"><span>Total Frete Bruto:</span> <strong style="color: #047857;">R$ ${ficha.totalFrete || '0,00'}</strong></div>
                     <div class="modal-info-linha"><span>Total Diesel:</span> <strong>R$ ${ficha.totalAbastecimento || '0,00'}</strong></div>
-                    <div class="modal-info-linha"><span>Pedágios + Imposto:</span> <strong>R$ ${parseValorMoeda(ficha.totalPedagio) + parseValorMoeda(ficha.impFederal)}</strong></div>
+                    <div class="modal-info-linha"><span>Pedágios + Imposto:</span> <strong>R$ ${formatarMoedaSemPrefixo(parseValorMoeda(ficha.totalPedagio) + parseValorMoeda(ficha.impFederal))}</strong></div>
                     <div class="modal-info-linha"><span>Adiantamento Concedido:</span> <strong>R$ ${ficha.valorAdiantamento || '0,00'}</strong></div>
                     <div class="modal-info-linha"><span>Saldo Comissão:</span> <strong style="color: #8b5cf6;">R$ ${ficha.saldoComissao || '0,00'}</strong></div>
                 </div>
@@ -899,21 +782,123 @@ function fecharModalResumo() {
 }
 
 // ==========================================================================
-// GRÁFICOS DE BI (CHART.JS)
+// 6. GRÁFICOS DE BI (CHART.JS - BASEADOS EXCLUSIVAMENTE EM DADOS REAIS)
 // ==========================================================================
 
+function obterDadosGraficosReais() {
+    // 1. Dados Financeiros
+    let labelsFin = [];
+    let fatData = [];
+    let custoData = [];
+    let lucroData = [];
+
+    if (appState.fichas.length === 0) {
+        labelsFin = ['Sem dados'];
+        fatData = [0];
+        custoData = [0];
+        lucroData = [0];
+    } else {
+        // Agrupa por ficha ou por data da viagem
+        labelsFin = appState.fichas.map(f => f.id || 'Ficha');
+        fatData = appState.fichas.map(f => parseValorMoeda(f.totalFrete));
+        custoData = appState.fichas.map(f => {
+            return parseValorMoeda(f.totalAbastecimento) + parseValorMoeda(f.vrComissao) + parseValorMoeda(f.totalPedagio) + parseValorMoeda(f.impFederal);
+        });
+        lucroData = fatData.map((fat, i) => fat - custoData[i]);
+    }
+
+    // 2. Dados por Cliente
+    let entradaShopee = 0;
+    let entradaML = 0;
+    let entradaAli = 0;
+
+    appState.fichas.forEach(f => {
+        if (f.fretes && Array.isArray(f.fretes) && f.fretes.length > 0) {
+            f.fretes.forEach(item => {
+                const v = parseValorMoeda(item.valor);
+                if (item.cliente === 'shopee') entradaShopee += v;
+                else if (item.cliente === 'mercado_livre') entradaML += v;
+                else if (item.cliente === 'alimenticio') entradaAli += v;
+                else entradaShopee += v;
+            });
+        } else {
+            entradaShopee += parseValorMoeda(f.totalFrete);
+        }
+    });
+
+    const totalClientes = entradaShopee + entradaML + entradaAli;
+    let labelsClientes = [];
+    let dataClientes = [];
+    let coresClientes = [];
+
+    if (totalClientes === 0) {
+        labelsClientes = ['Aguardando Viagens'];
+        dataClientes = [1];
+        coresClientes = ['#e2e8f0'];
+    } else {
+        labelsClientes = [
+            `Shopee (${((entradaShopee / totalClientes) * 100).toFixed(1)}%)`,
+            `Mercado Livre (${((entradaML / totalClientes) * 100).toFixed(1)}%)`,
+            `Alimentício (${((entradaAli / totalClientes) * 100).toFixed(1)}%)`
+        ];
+        dataClientes = [entradaShopee, entradaML, entradaAli];
+        coresClientes = ['#f97316', '#eab308', '#3d3d90'];
+    }
+
+    // 3. Dados de Consumo por Motorista
+    const motoristasMediaMap = {};
+    appState.fichas.forEach(f => {
+        const m = f.motorista || 'Motorista';
+        const med = parseFloat(f.mediaKmL || 0);
+        if (med > 0) {
+            if (!motoristasMediaMap[m]) motoristasMediaMap[m] = { soma: 0, count: 0 };
+            motoristasMediaMap[m].soma += med;
+            motoristasMediaMap[m].count += 1;
+        }
+    });
+
+    const nomesMotoristas = Object.keys(motoristasMediaMap);
+    let labelsConsumo = [];
+    let dataConsumo = [];
+    let coresConsumo = [];
+
+    if (nomesMotoristas.length === 0) {
+        labelsConsumo = ['Nenhum motorista com consumo registrado'];
+        dataConsumo = [0];
+        coresConsumo = ['#cbd5e1'];
+    } else {
+        const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+        nomesMotoristas.forEach(nome => {
+            const med = motoristasMediaMap[nome].soma / motoristasMediaMap[nome].count;
+            labelsConsumo.push(nome);
+            dataConsumo.push(parseFloat(med.toFixed(2)));
+            if (med < (meta - 0.20)) coresConsumo.push('#ef4444');
+            else if (med < meta) coresConsumo.push('#f59e0b');
+            else coresConsumo.push('#10b981');
+        });
+    }
+
+    return {
+        financeiro: { labels: labelsFin, faturamento: fatData, custos: custoData, lucro: lucroData },
+        clientes: { labels: labelsClientes, data: dataClientes, cores: coresClientes, total: totalClientes },
+        consumo: { labels: labelsConsumo, data: dataConsumo, cores: coresConsumo }
+    };
+}
+
 function inicializarGraficos() {
-    // 1. Gráfico Financeiro: Faturamento vs Custos vs Lucro
+    const dados = obterDadosGraficosReais();
+
+    // 1. Gráfico Financeiro
     const ctxFinanceiro = document.getElementById('chart-financeiro');
     if (ctxFinanceiro) {
         chartFinanceiroInstance = new Chart(ctxFinanceiro, {
             type: 'bar',
             data: {
-                labels: ['Maio/26', 'Junho/26', 'Julho/26', 'Agosto/26', 'Setembro/26 (Atual)'],
+                labels: dados.financeiro.labels,
                 datasets: [
                     {
                         label: 'Faturamento Bruto',
-                        data: [118000, 126500, 134000, 138900, 142500],
+                        data: dados.financeiro.faturamento,
                         backgroundColor: 'rgba(61, 61, 144, 0.85)',
                         borderColor: '#3d3d90',
                         borderWidth: 1,
@@ -921,7 +906,7 @@ function inicializarGraficos() {
                     },
                     {
                         label: 'Custos da Frota',
-                        data: [74200, 78900, 83100, 85600, 88420],
+                        data: dados.financeiro.custos,
                         backgroundColor: 'rgba(239, 68, 68, 0.75)',
                         borderColor: '#ef4444',
                         borderWidth: 1,
@@ -929,7 +914,7 @@ function inicializarGraficos() {
                     },
                     {
                         label: 'Lucro Líquido',
-                        data: [43800, 47600, 50900, 53300, 54080],
+                        data: dados.financeiro.lucro,
                         type: 'line',
                         borderColor: '#10b981',
                         backgroundColor: '#10b981',
@@ -948,7 +933,7 @@ function inicializarGraficos() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `${context.dataset.label}: R$ ${context.parsed.y.toLocaleString('pt-BR')},00`;
+                                return `${context.dataset.label}: R$ ${context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
                             }
                         }
                     }
@@ -959,7 +944,7 @@ function inicializarGraficos() {
                         grid: { color: '#f1f5f9' },
                         ticks: {
                             callback: function(val) {
-                                return 'R$ ' + (val / 1000) + 'k';
+                                return 'R$ ' + (val >= 1000 ? (val / 1000) + 'k' : val);
                             }
                         }
                     },
@@ -971,20 +956,16 @@ function inicializarGraficos() {
         });
     }
 
-    // 2. Gráfico Donut: Rendimento por Cliente
+    // 2. Gráfico Donut de Clientes
     const ctxClientes = document.getElementById('chart-clientes');
     if (ctxClientes) {
         chartClientesInstance = new Chart(ctxClientes, {
             type: 'doughnut',
             data: {
-                labels: ['Shopee (40.8%)', 'Mercado Livre (37.1%)', 'Alimentício (22.1%)'],
+                labels: dados.clientes.labels,
                 datasets: [{
-                    data: [58200, 52800, 31500],
-                    backgroundColor: [
-                        '#f97316', // Laranja Shopee
-                        '#eab308', // Amarelo Mercado Livre
-                        '#3d3d90'  // Azul AJBorges Alimentício
-                    ],
+                    data: dados.clientes.data,
+                    backgroundColor: dados.clientes.cores,
                     borderWidth: 3,
                     borderColor: '#ffffff',
                     hoverOffset: 6
@@ -1006,7 +987,8 @@ function inicializarGraficos() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return ` ${context.label}: R$ ${context.parsed.toLocaleString('pt-BR')},00`;
+                                if (dados.clientes.total === 0) return ' Sem dados de viagens';
+                                return ` ${context.label}: R$ ${context.parsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
                             }
                         }
                     }
@@ -1015,33 +997,17 @@ function inicializarGraficos() {
         });
     }
 
-    // 3. Gráfico Horizontal: Consumo de Diesel por Motorista (km/l)
+    // 3. Gráfico Horizontal de Consumo
     const ctxConsumo = document.getElementById('chart-consumo-motoristas');
     if (ctxConsumo) {
         chartConsumoInstance = new Chart(ctxConsumo, {
             type: 'bar',
             data: {
-                labels: [
-                    'Marcos Silva (Alerta de Consumo)',
-                    'Jean Gomes',
-                    'Valdemir Siqueira',
-                    'Carlos Eduardo',
-                    'Paulo Rogério',
-                    'Ricardo Mendes',
-                    'Fernando Alves'
-                ],
+                labels: dados.consumo.labels,
                 datasets: [{
                     label: 'Média de Consumo (km/l)',
-                    data: [2.15, 2.30, 2.42, 2.45, 2.52, 2.58, 2.62],
-                    backgroundColor: [
-                        '#ef4444', // Vermelho (Alerta: mais gasta diesel)
-                        '#f59e0b', // Amarelo
-                        '#10b981', // Verde
-                        '#10b981',
-                        '#10b981',
-                        '#10b981',
-                        '#059669'  // Verde escuro destaque
-                    ],
+                    data: dados.consumo.data,
+                    backgroundColor: dados.consumo.cores,
                     borderRadius: 6,
                     borderWidth: 1,
                     borderColor: 'rgba(0,0,0,0.05)'
@@ -1057,7 +1023,9 @@ function inicializarGraficos() {
                         callbacks: {
                             label: function(context) {
                                 const val = context.parsed.x;
-                                const status = val < 2.40 ? '(Abaixo da meta de 2.40 km/l)' : '(Dentro da meta)';
+                                if (val === 0) return ' Sem consumo registrado';
+                                const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+                                const status = val < meta ? `(Abaixo da meta de ${meta.toFixed(2)} km/l)` : '(Dentro da meta)';
                                 return ` Média: ${val.toFixed(2)} km/l ${status}`;
                             }
                         }
@@ -1065,8 +1033,8 @@ function inicializarGraficos() {
                 },
                 scales: {
                     x: {
-                        min: 1.8,
-                        max: 3.0,
+                        min: 0,
+                        max: 4.0,
                         grid: { color: '#f1f5f9' },
                         ticks: {
                             callback: function(val) {
@@ -1084,64 +1052,104 @@ function inicializarGraficos() {
 }
 
 function atualizarGraficos() {
-    if (chartFinanceiroInstance) chartFinanceiroInstance.update();
-    if (chartClientesInstance) chartClientesInstance.update();
-    if (chartConsumoInstance) chartConsumoInstance.update();
+    const dados = obterDadosGraficosReais();
+
+    if (chartFinanceiroInstance) {
+        chartFinanceiroInstance.data.labels = dados.financeiro.labels;
+        chartFinanceiroInstance.data.datasets[0].data = dados.financeiro.faturamento;
+        chartFinanceiroInstance.data.datasets[1].data = dados.financeiro.custos;
+        chartFinanceiroInstance.data.datasets[2].data = dados.financeiro.lucro;
+        chartFinanceiroInstance.update();
+    }
+
+    if (chartClientesInstance) {
+        chartClientesInstance.data.labels = dados.clientes.labels;
+        chartClientesInstance.data.datasets[0].data = dados.clientes.data;
+        chartClientesInstance.data.datasets[0].backgroundColor = dados.clientes.cores;
+        chartClientesInstance.update();
+    }
+
+    if (chartConsumoInstance) {
+        chartConsumoInstance.data.labels = dados.consumo.labels;
+        chartConsumoInstance.data.datasets[0].data = dados.consumo.data;
+        chartConsumoInstance.data.datasets[0].backgroundColor = dados.consumo.cores;
+        if (chartConsumoInstance.options && chartConsumoInstance.options.scales && chartConsumoInstance.options.scales.x) {
+            chartConsumoInstance.options.scales.x.max = Math.max(4.0, ((appState.config && appState.config.metaDiesel) ? appState.config.metaDiesel : 2.4) + 1.0);
+        }
+        chartConsumoInstance.update();
+    }
 }
 
 // ==========================================================================
-// RENDERIZAÇÃO DAS SEÇÕES SECUNDÁRIAS (SUB-VISÕES DO MENU)
+// 7. RENDERIZAÇÃO DAS SEÇÕES SECUNDÁRIAS (SUB-VISÕES DO MENU)
 // ==========================================================================
 
 function preencherSecoesSecundarias() {
     // 1. Seção Viagens Resumo
     const containerViagens = document.getElementById('container-viagens-resumo');
     if (containerViagens) {
-        containerViagens.innerHTML = `
-            <table class="tabela-fichas">
-                <thead>
-                    <tr><th>Viagem</th><th>Data</th><th>Motorista</th><th>Placas</th><th>Destino</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    ${appState.fichas.slice(0, 6).map(f => `
-                        <tr>
-                            <td><strong>${f.id}</strong></td>
-                            <td>${f.dataSaida || '20/09/2026'}</td>
-                            <td>${f.motorista}</td>
-                            <td><span class="placa-box">${f.placas}</span></td>
-                            <td>${f.destinoInicial} ➔ ${f.destinoFinal || 'SP'}</td>
-                            <td><span class="status-pill ${f.status === 'pendente' ? 'status-pendente' : 'status-concluido'}">${f.status === 'pendente' ? 'Em Conferência' : 'Concluído'}</span></td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
+        if (appState.fichas.length === 0) {
+            containerViagens.innerHTML = `
+                <div style="padding: 30px; text-align: center; color: #64748b;">
+                    <p style="font-size: 0.95rem; font-weight: 500;">Nenhuma rota ou viagem registrada no momento.</p>
+                    <p style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">Os relatórios submetidos pelos motoristas serão listados aqui.</p>
+                </div>
+            `;
+        } else {
+            containerViagens.innerHTML = `
+                <table class="tabela-fichas">
+                    <thead>
+                        <tr><th>Viagem</th><th>Data</th><th>Motorista</th><th>Placas</th><th>Destino</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        ${appState.fichas.slice(0, 10).map(f => `
+                            <tr>
+                                <td><strong>${f.id}</strong></td>
+                                <td>${f.dataSaida || f.dataEnvio || '-'}</td>
+                                <td>${f.motorista || 'Motorista'}</td>
+                                <td><span class="placa-box">${f.placas || 'Não informada'}</span></td>
+                                <td>${f.destinoInicial || '-'} ➔ ${f.destinoFinal || '-'}</td>
+                                <td><span class="status-pill ${f.status === 'pendente' ? 'status-pendente' : 'status-concluido'}">${f.status === 'pendente' ? 'Em Conferência' : 'Concluído'}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
     }
 
     // 2. Seção Pedágios
     const tbodyPedagios = document.getElementById('tabela-pedagios-body');
     if (tbodyPedagios) {
-        tbodyPedagios.innerHTML = appState.fichas.map(f => {
-            const valFicha = parseValorMoeda(f.totalPedagio || '800,00');
-            const extratoTag = valFicha > 0 ? (valFicha - (Math.random() * 20)).toFixed(2).replace('.', ',') : '0,00';
-            return `
+        const fichasComPedagio = appState.fichas.filter(f => parseValorMoeda(f.totalPedagio) > 0);
+        if (fichasComPedagio.length === 0) {
+            tbodyPedagios.innerHTML = `
                 <tr>
-                    <td><strong>${f.id}</strong></td>
-                    <td>${f.motorista}</td>
-                    <td>${f.destinoInicial} ➔ ${f.destinoFinal || 'SP'}</td>
-                    <td>Praça 1, Praça 2, Retorno</td>
-                    <td>R$ ${f.totalPedagio || '800,00'}</td>
-                    <td>R$ ${extratoTag}</td>
-                    <td><span class="status-pill status-concluido">✓ Conciliado</span></td>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
+                        Nenhuma conciliação de pedágio disponível ou declarada nas viagens atuais.
+                    </td>
                 </tr>
             `;
-        }).join('');
+        } else {
+            tbodyPedagios.innerHTML = fichasComPedagio.map(f => {
+                return `
+                    <tr>
+                        <td><strong>${f.id}</strong></td>
+                        <td>${f.motorista}</td>
+                        <td>${f.destinoInicial || '-'} ➔ ${f.destinoFinal || '-'}</td>
+                        <td>Praças declaradas</td>
+                        <td>R$ ${f.totalPedagio || '0,00'}</td>
+                        <td>R$ ${f.totalPedagio || '0,00'}</td>
+                        <td><span class="status-pill status-concluido">✓ Auditado</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 
     // 3. Seção Acerto Motoristas
     const tbodyAcertos = document.getElementById('tabela-acertos-body');
     if (tbodyAcertos) {
-        // Agrupa por motorista
         const motoristasMap = {};
         appState.fichas.forEach(f => {
             const m = f.motorista || 'Motorista';
@@ -1154,70 +1162,162 @@ function preencherSecoesSecundarias() {
             motoristasMap[m].adiantamentos += parseValorMoeda(f.valorAdiantamento);
         });
 
-        tbodyAcertos.innerHTML = Object.keys(motoristasMap).map(nome => {
-            const d = motoristasMap[nome];
-            const saldoLiquidar = d.comissao - d.adiantamentos;
-            return `
+        const nomes = Object.keys(motoristasMap);
+        if (nomes.length === 0) {
+            tbodyAcertos.innerHTML = `
                 <tr>
-                    <td><strong>${nome}</strong></td>
-                    <td>${d.viagens} viagens</td>
-                    <td>R$ ${formatarMoedaSemPrefixo(d.freteTotal)}</td>
-                    <td><strong style="color: #4f46e5;">R$ ${formatarMoedaSemPrefixo(d.comissao)}</strong></td>
-                    <td>R$ ${formatarMoedaSemPrefixo(d.adiantamentos)}</td>
-                    <td><strong style="color: ${saldoLiquidar >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoedaSemPrefixo(saldoLiquidar)}</strong></td>
-                    <td><button type="button" class="btn-acao-resumo" onclick="exibirToast('Extrato de acerto gerado para ${nome}', 'info')">Emitir Acerto</button></td>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
+                        Nenhum acerto de motorista pendente. Aguardando relatórios de viagem.
+                    </td>
                 </tr>
             `;
-        }).join('');
+        } else {
+            tbodyAcertos.innerHTML = nomes.map(nome => {
+                const d = motoristasMap[nome];
+                const saldoLiquidar = d.comissao - d.adiantamentos;
+                return `
+                    <tr>
+                        <td><strong>${nome}</strong></td>
+                        <td>${d.viagens} viagem(ns)</td>
+                        <td>R$ ${formatarMoedaSemPrefixo(d.freteTotal)}</td>
+                        <td><strong style="color: #4f46e5;">R$ ${formatarMoedaSemPrefixo(d.comissao)}</strong></td>
+                        <td>R$ ${formatarMoedaSemPrefixo(d.adiantamentos)}</td>
+                        <td><strong style="color: ${saldoLiquidar >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoedaSemPrefixo(saldoLiquidar)}</strong></td>
+                        <td><button type="button" class="btn-acao-resumo" onclick="exibirToast('Extrato de acerto gerado para ${nome}', 'info')">Emitir Acerto</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 
     // 4. Seção Combustível
     const tbodyCombustivel = document.getElementById('tabela-combustivel-body');
     if (tbodyCombustivel) {
-        tbodyCombustivel.innerHTML = `
-            <tr><td>Posto Graal Marília</td><td>NF 84920</td><td>20/09/2026</td><td>Marcos Silva</td><td>650 L</td><td>R$ 5,92</td><td>R$ 3.850,00</td><td><span class="status-pill status-concluido">✓ Aprovado</span></td></tr>
-            <tr><td>Posto Sakamoto Guarulhos</td><td>NF 99214</td><td>21/09/2026</td><td>Marcos Silva</td><td>700 L</td><td>R$ 6,00</td><td>R$ 4.200,00</td><td><span class="status-pill status-concluido">✓ Aprovado</span></td></tr>
-            <tr><td>Posto Shell Registro</td><td>NF 55120</td><td>21/09/2026</td><td>Carlos Eduardo</td><td>750 L</td><td>R$ 6,00</td><td>R$ 4.500,00</td><td><span class="status-pill status-concluido">✓ Aprovado</span></td></tr>
-            <tr><td>Posto Fernandão Pouso Alegre</td><td>NF 77189</td><td>22/09/2026</td><td>Jean Gomes</td><td>680 L</td><td>R$ 6,02</td><td>R$ 4.100,00</td><td><span class="status-pill status-concluido">✓ Aprovado</span></td></tr>
-        `;
+        const listaAbast = [];
+        appState.fichas.forEach(f => {
+            if (f.abastecimentos && Array.isArray(f.abastecimentos)) {
+                f.abastecimentos.forEach(ab => {
+                    listaAbast.push({
+                        posto: ab.posto || 'Posto Conveniado',
+                        nf: ab.nf || '-',
+                        data: f.dataSaida || f.dataEnvio || '-',
+                        motorista: f.motorista || 'Motorista',
+                        litros: ab.litros || '0',
+                        valor: ab.valor || '0,00'
+                    });
+                });
+            }
+        });
+
+        if (listaAbast.length === 0) {
+            tbodyCombustivel.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 28px;">
+                        Nenhum registro de abastecimento para conferência no momento.
+                    </td>
+                </tr>
+            `;
+        } else {
+            tbodyCombustivel.innerHTML = listaAbast.map(ab => {
+                const v = parseValorMoeda(ab.valor);
+                const l = parseValorMoeda(ab.litros);
+                const precoL = l > 0 ? (v / l).toFixed(2).replace('.', ',') : '0,00';
+                return `
+                    <tr>
+                        <td>${ab.posto}</td>
+                        <td>NF ${ab.nf}</td>
+                        <td>${ab.data}</td>
+                        <td>${ab.motorista}</td>
+                        <td>${ab.litros} L</td>
+                        <td>R$ ${precoL}</td>
+                        <td>R$ ${ab.valor}</td>
+                        <td><span class="status-pill status-concluido">✓ Lançado</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 
     // 5. Seção Frota
     const tbodyFrota = document.getElementById('tabela-frota-body');
     if (tbodyFrota) {
-        tbodyFrota.innerHTML = `
-            <tr><td><strong>MHU-9157</strong></td><td>BRA-2E19</td><td>Scania R450 6x2</td><td>Marcos Silva</td><td>1.573.580 km</td><td><span class="diesel-badge diesel-alerta">2.15 km/l</span></td><td><span class="status-pill status-pendente">Em Rota</span></td></tr>
-            <tr><td><strong>GHR-4512</strong></td><td>QWE-9871</td><td>Volvo FH 540 6x4</td><td>Carlos Eduardo</td><td>893.950 km</td><td><span class="diesel-badge diesel-bom">2.45 km/l</span></td><td><span class="status-pill status-concluido">Disponível</span></td></tr>
-            <tr><td><strong>JKL-7820</strong></td><td>MNO-3341</td><td>DAF XF 480 6x2</td><td>Jean Gomes</td><td>1.127.600 km</td><td><span class="diesel-badge diesel-atencao">2.30 km/l</span></td><td><span class="status-pill status-pendente">Em Rota</span></td></tr>
-            <tr><td><strong>RTY-1122</strong></td><td>POI-3344</td><td>Mercedes Actros 2651</td><td>Paulo Rogério</td><td>654.120 km</td><td><span class="diesel-badge diesel-bom">2.52 km/l</span></td><td><span class="status-pill status-concluido">Disponível</span></td></tr>
-            <tr><td><strong>BNM-8899</strong></td><td>ZXC-5566</td><td>Scania R440 6x2</td><td>Ricardo Mendes</td><td>924.300 km</td><td><span class="diesel-badge diesel-bom">2.58 km/l</span></td><td><span class="status-pill status-concluido">Disponível</span></td></tr>
-        `;
+        const veiculosMap = {};
+        appState.fichas.forEach(f => {
+            if (f.placas) {
+                if (!veiculosMap[f.placas]) {
+                    veiculosMap[f.placas] = {
+                        motorista: f.motorista || 'Motorista',
+                        kmAtual: f.kmChegada || f.kmSaida || '-',
+                        media: f.mediaKmL || '0.00',
+                        status: f.status === 'pendente' ? 'Em Rota' : 'Disponível'
+                    };
+                }
+            }
+        });
+
+        const placas = Object.keys(veiculosMap);
+        if (placas.length === 0) {
+            tbodyFrota.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
+                        Nenhum veículo registrado em viagens ativas no momento.
+                    </td>
+                </tr>
+            `;
+        } else {
+            tbodyFrota.innerHTML = placas.map(p => {
+                const v = veiculosMap[p];
+                const partes = p.split('/');
+                const cavalo = partes[0]?.trim() || p;
+                const carreta = partes[1]?.trim() || '-';
+                return `
+                    <tr>
+                        <td><strong>${cavalo}</strong></td>
+                        <td>${carreta}</td>
+                        <td>Veículo Pesado</td>
+                        <td>${v.motorista}</td>
+                        <td>${v.kmAtual} km</td>
+                        <td><span class="diesel-badge diesel-bom">${v.media} km/l</span></td>
+                        <td><span class="status-pill ${v.status === 'Em Rota' ? 'status-pendente' : 'status-concluido'}">${v.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 
     // 6. Seção Despesas Gerais
     const containerDespesas = document.getElementById('container-despesas-resumo');
     if (containerDespesas) {
+        let saidaDiesel = 0, saidaComissao = 0, saidaPedagios = 0, saidaImpostos = 0;
+        appState.fichas.forEach(f => {
+            saidaDiesel += parseValorMoeda(f.totalAbastecimento);
+            saidaComissao += parseValorMoeda(f.vrComissao);
+            saidaPedagios += parseValorMoeda(f.totalPedagio);
+            saidaImpostos += parseValorMoeda(f.impFederal);
+        });
+        const total = saidaDiesel + saidaComissao + saidaPedagios + saidaImpostos;
+
         containerDespesas.innerHTML = `
             <div class="kpi-grid">
                 <div class="kpi-card card-saida">
                     <span class="kpi-label">Diesel &amp; Postos</span>
-                    <h3 class="kpi-value">R$ 49.380,00</h3>
-                    <span class="kpi-meta-text">55.8% do custo total</span>
+                    <h3 class="kpi-value">${formatarMoeda(saidaDiesel)}</h3>
+                    <span class="kpi-meta-text">${total > 0 ? ((saidaDiesel / total) * 100).toFixed(1) : 0}% do custo total</span>
                 </div>
                 <div class="kpi-card card-saida">
                     <span class="kpi-label">Diárias e Comissões</span>
-                    <h3 class="kpi-value">R$ 18.240,00</h3>
-                    <span class="kpi-meta-text">20.6% do custo total</span>
+                    <h3 class="kpi-value">${formatarMoeda(saidaComissao)}</h3>
+                    <span class="kpi-meta-text">${total > 0 ? ((saidaComissao / total) * 100).toFixed(1) : 0}% do custo total</span>
                 </div>
                 <div class="kpi-card card-saida">
                     <span class="kpi-label">Pedágios em Rodovias</span>
-                    <h3 class="kpi-value">R$ 12.150,00</h3>
-                    <span class="kpi-meta-text">13.7% do custo total</span>
+                    <h3 class="kpi-value">${formatarMoeda(saidaPedagios)}</h3>
+                    <span class="kpi-meta-text">${total > 0 ? ((saidaPedagios / total) * 100).toFixed(1) : 0}% do custo total</span>
                 </div>
                 <div class="kpi-card card-saida">
                     <span class="kpi-label">Impostos &amp; Outras</span>
-                    <h3 class="kpi-value">R$ 8.650,00</h3>
-                    <span class="kpi-meta-text">9.8% do custo total</span>
+                    <h3 class="kpi-value">${formatarMoeda(saidaImpostos)}</h3>
+                    <span class="kpi-meta-text">${total > 0 ? ((saidaImpostos / total) * 100).toFixed(1) : 0}% do custo total</span>
                 </div>
             </div>
         `;
@@ -1226,22 +1326,28 @@ function preencherSecoesSecundarias() {
     // 7. Seção Cadastros
     const containerCadastros = document.getElementById('container-cadastros-resumo');
     if (containerCadastros) {
+        let totalAgregados = 0;
+        try {
+            const cadSalvos = JSON.parse(localStorage.getItem(STORAGE_CADASTROS_AGREGADOS_KEY) || '[]');
+            if (Array.isArray(cadSalvos)) totalAgregados = cadSalvos.length;
+        } catch (e) {}
+
         containerCadastros.innerHTML = `
             <div class="config-grid">
                 <div class="config-card">
-                    <h4>Clientes Ativos (3)</h4>
+                    <h4>Clientes da Operação</h4>
                     <p>Shopee Brasil, Mercado Livre Logística e Cargas Alimentícias.</p>
                     <span class="status-pill status-concluido">Contratos Ativos</span>
                 </div>
                 <div class="config-card">
-                    <h4>Motoristas na Frota (7)</h4>
-                    <p>Cadastro com CNH, exame toxicológico e ficha multi-cadastro completa.</p>
-                    <a href="FichaMultiCadastro.html" style="font-size: 0.82rem; color: #4f46e5; text-decoration: none; font-weight: 600;">+ Adicionar Motorista / PF / PJ</a>
+                    <h4>Cadastros de Agregados (${totalAgregados})</h4>
+                    <p>Fichas recebidas pelo formulário Seja um Agregado Conosco.</p>
+                    <a href="Dashboard-cadastro-motorista.html" style="font-size: 0.85rem; color: #4f46e5; text-decoration: none; font-weight: 600;">Ver Painel de Cadastros (${totalAgregados}) ➔</a>
                 </div>
                 <div class="config-card">
-                    <h4>Rotas Principais (5)</h4>
-                    <p>SP ➔ RJ, SP ➔ PR, SP ➔ MG, Interior SP ➔ Cajamar, Marília ➔ Santos.</p>
-                    <span class="status-pill status-concluido">Rotas Homologadas</span>
+                    <h4>Rotas Homologadas</h4>
+                    <p>Rotas definidas conforme demandas de fretes registradas.</p>
+                    <span class="status-pill status-concluido">Rotas em Operação</span>
                 </div>
             </div>
         `;
@@ -1250,25 +1356,42 @@ function preencherSecoesSecundarias() {
     // 8. Seção Planejamento
     const containerPlanejamento = document.getElementById('container-planejamento-resumo');
     if (containerPlanejamento) {
-        containerPlanejamento.innerHTML = `
-            <div class="modal-info-box" style="margin-bottom: 16px;">
-                <h4 style="margin-bottom: 8px;">Escala da Próxima Semana (28/09 a 04/10)</h4>
-                <p style="font-size: 0.85rem; color: #475569;">Planejamento de carregamentos programados nos centros de distribuição Cajamar (ML), Barueri (Shopee) e Granja Xereta (Marília).</p>
-            </div>
-            <table class="tabela-fichas">
-                <thead><tr><th>Dia</th><th>Operação</th><th>Origem</th><th>Destino</th><th>Veículo Alocado</th><th>Motorista</th></tr></thead>
-                <tbody>
-                    <tr><td>Segunda</td><td>Mercado Livre</td><td>Cajamar/SP</td><td>Curitiba/PR</td><td>Scania R450</td><td>Marcos Silva</td></tr>
-                    <tr><td>Terça</td><td>Shopee</td><td>Barueri/SP</td><td>Belo Horizonte/MG</td><td>Volvo FH 540</td><td>Carlos Eduardo</td></tr>
-                    <tr><td>Quarta</td><td>Alimentício</td><td>Marília/SP</td><td>Santos/SP</td><td>DAF XF 480</td><td>Jean Gomes</td></tr>
-                </tbody>
-            </table>
-        `;
+        const fichasPendentes = appState.fichas.filter(f => f.status === 'pendente');
+        if (fichasPendentes.length === 0) {
+            containerPlanejamento.innerHTML = `
+                <div style="padding: 30px; text-align: center; color: #64748b;">
+                    <p style="font-size: 0.95rem; font-weight: 500;">Nenhuma escala ou rota com viagem pendente no momento.</p>
+                    <p style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">Todas as viagens recebidas foram homologadas ou estão concluídas.</p>
+                </div>
+            `;
+        } else {
+            containerPlanejamento.innerHTML = `
+                <div class="modal-info-box" style="margin-bottom: 16px;">
+                    <h4 style="margin-bottom: 6px;">Programação de Viagens em Conferência</h4>
+                    <p style="font-size: 0.82rem; color: #475569;">Relatórios enviados que aguardam homologação da gestão operacional.</p>
+                </div>
+                <table class="tabela-fichas">
+                    <thead><tr><th>Ficha</th><th>Motorista</th><th>Origem</th><th>Destino</th><th>Veículo</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${fichasPendentes.map(f => `
+                            <tr>
+                                <td><strong>${f.id}</strong></td>
+                                <td>${f.motorista}</td>
+                                <td>${f.destinoInicial || '-'}</td>
+                                <td>${f.destinoFinal || '-'}</td>
+                                <td>${f.placas || '-'}</td>
+                                <td><span class="status-pill status-pendente">Aguardando Conferência</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
     }
 }
 
 // ==========================================================================
-// CONTROLE DE NAVEGAÇÃO DE SEÇÕES (SIDEBAR TABS)
+// 8. CONTROLE DE NAVEGAÇÃO DE SEÇÕES (SIDEBAR TABS)
 // ==========================================================================
 
 function alternarSecao(viewId) {
@@ -1280,8 +1403,6 @@ function alternarSecao(viewId) {
         link.classList.toggle('active', targetView === viewId);
     });
 
-    // Se a aba for 'fichas', rola diretamente para o módulo de fichas no Dashboard
-    // ou exibe a visão dedicada
     if (viewId === 'fichas') {
         const moduloFichas = document.getElementById('modulo-fichas-portal');
         const viewDash = document.getElementById('view-dashboard');
@@ -1297,7 +1418,6 @@ function alternarSecao(viewId) {
         return;
     }
 
-    // Oculta todas e exibe a selecionada
     document.querySelectorAll('.admin-section').forEach(sec => {
         const id = sec.id.replace('view-', '');
         sec.classList.toggle('active', id === viewId);
@@ -1307,7 +1427,7 @@ function alternarSecao(viewId) {
 }
 
 // ==========================================================================
-// TOAST DE NOTIFICAÇÃO DO DASHBOARD
+// 9. TOAST DE NOTIFICAÇÃO DO DASHBOARD
 // ==========================================================================
 
 let toastTimeout = null;
@@ -1346,7 +1466,7 @@ function exibirToast(mensagem, tipo = 'sucesso') {
 }
 
 // ==========================================================================
-// FUNÇÕES AUXILIARES DE FORMATAÇÃO E MOEDA
+// 10. FUNÇÕES AUXILIARES DE FORMATAÇÃO E MOEDA
 // ==========================================================================
 
 function parseValorMoeda(str) {
@@ -1375,12 +1495,13 @@ function formatarNomeCliente(slug) {
 }
 
 // ==========================================================================
-// EVENT LISTENERS E INICIALIZAÇÃO DO DOM
+// 11. EVENT LISTENERS E INICIALIZAÇÃO DO DOM
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa o banco de dados e calcula métricas
+    // 1. Inicializa o banco de dados e carrega configurações dinâmicas
     inicializarBancoDados();
+    carregarConfiguracoes();
     calcularMetricasDashboard();
     renderizarTabelaFichas();
     inicializarGraficos();
@@ -1404,15 +1525,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Navegação por abas da sidebar
     document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
             const view = link.getAttribute('data-view');
-            alternarSecao(view);
-            history.replaceState(null, '', `#${view}`);
+            if (view) {
+                e.preventDefault();
+                alternarSecao(view);
+                history.replaceState(null, '', `#${view}`);
 
-            // Fecha menu no mobile se aberto
-            const sidebar = document.getElementById('admin-sidebar');
-            if (sidebar && sidebar.classList.contains('sidebar-aberta')) {
-                sidebar.classList.remove('sidebar-aberta');
+                const sidebar = document.getElementById('admin-sidebar');
+                if (sidebar && sidebar.classList.contains('sidebar-aberta')) {
+                    sidebar.classList.remove('sidebar-aberta');
+                }
             }
         });
     });
@@ -1455,7 +1577,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarTabelaFichas();
         });
 
-        // Atalho Ctrl+K ou Command+K para focar na busca
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
@@ -1483,7 +1604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             appState.filtroPeriodo = btn.getAttribute('data-period');
-            exibirToast(`Filtro atualizado para: ${btn.textContent}`, 'info');
+            exibirToast(`Filtro de período: ${btn.textContent}`, 'info');
         });
     });
 
@@ -1495,7 +1616,62 @@ document.addEventListener('DOMContentLoaded', () => {
             calcularMetricasDashboard();
             renderizarTabelaFichas();
             atualizarGraficos();
+            preencherSecoesSecundarias();
             exibirToast('Dados operacionais atualizados em tempo real.', 'sucesso');
+        });
+    }
+
+    // 9.1 Botão de Limpeza do Banco de Dados Local (Apagar Dados)
+    const btnLimparDados = document.getElementById('btn-limpar-dados-armazenados');
+    if (btnLimparDados) {
+        btnLimparDados.addEventListener('click', () => {
+            if (confirm('Tem certeza de que deseja apagar todas as fichas e dados locais salvos? Esta ação não pode ser desfeita.')) {
+                localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify([]));
+                appState.fichas = [];
+                calcularMetricasDashboard();
+                renderizarTabelaFichas();
+                atualizarGraficos();
+                preencherSecoesSecundarias();
+                exibirToast('Todas as fichas e dados foram apagados com sucesso.', 'sucesso');
+            }
+        });
+    }
+
+    // 9.2 Botões de Confirmação dos Parâmetros Operacionais (Meta Diesel & Taxa Borges)
+    const btnSalvarMeta = document.getElementById('btn-salvar-meta-diesel');
+    const btnSalvarTaxa = document.getElementById('btn-salvar-taxa-borges');
+
+    if (btnSalvarMeta) {
+        btnSalvarMeta.addEventListener('click', () => {
+            confirmarESalvarParametrosOperacionais();
+        });
+    }
+
+    if (btnSalvarTaxa) {
+        btnSalvarTaxa.addEventListener('click', () => {
+            confirmarESalvarParametrosOperacionais();
+        });
+    }
+
+    // Permitir confirmar com tecla Enter nos campos de Meta ou Taxa
+    const inputConfigMeta = document.getElementById('config-meta-diesel');
+    const inputConfigTaxa = document.getElementById('config-taxa-borges');
+
+    if (inputConfigMeta) {
+        inputConfigMeta.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmarESalvarParametrosOperacionais();
+            }
+        });
+    }
+
+    if (inputConfigTaxa) {
+        inputConfigTaxa.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmarESalvarParametrosOperacionais();
+            }
         });
     }
 
@@ -1545,19 +1721,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') fecharModalResumo();
     });
-
-    // 13. Botão de Restaurar Dados Demo nas Configurações
-    const btnResetDemo = document.getElementById('btn-reset-demo-data');
-    if (btnResetDemo) {
-        btnResetDemo.addEventListener('click', () => {
-            if (confirm('Restaurar o banco de dados demonstrativo da AJBorges com as 11 fichas iniciais?')) {
-                localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(SEED_FICHAS));
-                appState.fichas = SEED_FICHAS;
-                calcularMetricasDashboard();
-                renderizarTabelaFichas();
-                atualizarGraficos();
-                exibirToast('Dados restaurados com sucesso!', 'sucesso');
-            }
-        });
-    }
 });

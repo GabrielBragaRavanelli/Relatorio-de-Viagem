@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(salvoLocal) && salvoLocal > maxNum) {
             maxNum = salvoLocal;
         }
-        return maxNum > 0 ? (maxNum + 1) : 4;
+        return maxNum > 0 ? (maxNum + 1) : 1;
     }
 
     function formatarNumeroFicha(num) {
@@ -2079,133 +2079,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dados) {
             try {
                 const lista = JSON.parse(dados);
-                if (Array.isArray(lista) && lista.length > 0) return lista;
+                if (Array.isArray(lista)) {
+                    // Remove dados de seed mockados antigos se existirem
+                    const limpa = lista.filter(f => {
+                        if (!f || !f.id) return false;
+                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005', 
+                                         'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
+                        return !mockIds.includes(f.id);
+                    });
+                    if (limpa.length !== lista.length) {
+                        localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(limpa));
+                    }
+                    return limpa;
+                }
             } catch (e) {}
         }
-        // Fallback para inicialização caso o banco esteja limpo
-        const seedPadrao = [
-            {
-                id: "AJB-2026-001",
-                protocolo: "AJB-2026-001",
-                dataEnvio: "23/09/2026 18:40",
-                dataSaida: "20/09/2026",
-                dataChegada: "23/09/2026",
-                motoristaId: "MOT-102",
-                motorista: "Marcos Antônio Silva",
-                origemEnvio: "motorista_com_login",
-                placas: "MHU-9157 / BRA-2E19",
-                destinoInicial: "Marília - SP",
-                destinoFinal: "São Paulo - SP",
-                kmSaida: "1569440",
-                kmChegada: "1573580",
-                kmTotal: "4140",
-                valorAdiantamento: "2.500,00",
-                freteOrigem: "8.900,00",
-                retorno1: "5.400,00",
-                totalFrete: "14.300,00",
-                vrComissao: "1.573,00",
-                fretes: [
-                    { data: "20/09/2026", cliente: "mercado_livre", origem: "Marília/SP", destino: "Cajamar/SP", valor: "8.900,00", comissao: "400,00", descarga: "0,00" },
-                    { data: "22/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Bauru/SP", valor: "5.400,00", comissao: "594,00", descarga: "0,00" }
-                ],
-                abastecimentos: [
-                    { posto: "Posto Graal Marília", nf: "84920", km: "1569450", valor: "3.850,00", litros: "650,00" },
-                    { posto: "Posto Sakamoto Guarulhos", nf: "99214", km: "1571400", valor: "4.200,00", litros: "700,00" },
-                    { posto: "Posto Castelo Branco Bauru", nf: "10452", km: "1573200", valor: "3.480,00", litros: "580,00" }
-                ],
-                totalAbastecimento: "11.530,00",
-                totalLitros: "1.930,00",
-                mediaKmL: "2.15",
-                pedagios: ["420,00", "380,00", "0,00"],
-                totalPedagio: "800,00",
-                impFederal: "450,00",
-                totalDespesas: "12.960,00",
-                resultadoViagem: "1.340,00",
-                saldoComissao: "-927,00",
-                status: "pendente",
-                observacoesMotorista: "Pneu dianteiro reparado em trânsito com recibo anexo. Consumo afetado por congestionamento na serra."
-            },
-            {
-                id: "AJB-2026-002",
-                protocolo: "AJB-2026-002",
-                dataEnvio: "24/09/2026 09:15",
-                dataSaida: "21/09/2026",
-                dataChegada: "24/09/2026",
-                motoristaId: "MOT-104",
-                motorista: "Carlos Eduardo Ferreira",
-                origemEnvio: "motorista_com_login",
-                placas: "GHR-4512 / QWE-9871",
-                destinoInicial: "Curitiba - PR",
-                destinoFinal: "Santos - SP",
-                kmSaida: "890200",
-                kmChegada: "893950",
-                kmTotal: "3750",
-                valorAdiantamento: "2.800,00",
-                freteOrigem: "11.200,00",
-                retorno1: "6.800,00",
-                totalFrete: "18.000,00",
-                vrComissao: "1.980,00",
-                fretes: [
-                    { data: "21/09/2026", cliente: "alimenticio", origem: "Curitiba/PR", destino: "São Paulo/SP", valor: "11.200,00", comissao: "1.232,00", descarga: "150,00" },
-                    { data: "23/09/2026", cliente: "shopee", origem: "São Paulo/SP", destino: "Santos/SP", valor: "6.800,00", comissao: "748,00", descarga: "0,00" }
-                ],
-                abastecimentos: [
-                    { posto: "Posto Shell Registro", nf: "55120", km: "891400", valor: "4.500,00", litros: "750,00" },
-                    { posto: "Posto Ipiranga Cubatão", nf: "88145", km: "893200", valor: "4.650,00", litros: "780,00" }
-                ],
-                totalAbastecimento: "9.150,00",
-                totalLitros: "1.530,00",
-                mediaKmL: "2.45",
-                pedagios: ["580,00", "420,00", "0,00"],
-                totalPedagio: "1.000,00",
-                impFederal: "520,00",
-                totalDespesas: "10.790,00",
-                resultadoViagem: "7.210,00",
-                saldoComissao: "-820,00",
-                status: "pendente"
-            },
-            {
-                id: "AJB-2026-003",
-                protocolo: "AJB-2026-003",
-                dataEnvio: "24/09/2026 10:50",
-                dataSaida: "22/09/2026",
-                dataChegada: "24/09/2026",
-                motoristaId: "anonimo",
-                motorista: "Jean Gomes de Oliveira",
-                origemEnvio: "motorista_sem_login",
-                placas: "JKL-7820 / MNO-3341",
-                destinoInicial: "Campinas - SP",
-                destinoFinal: "Belo Horizonte - MG",
-                kmSaida: "1124500",
-                kmChegada: "1127600",
-                kmTotal: "3100",
-                valorAdiantamento: "2.200,00",
-                freteOrigem: "9.500,00",
-                retorno1: "5.800,00",
-                totalFrete: "15.300,00",
-                vrComissao: "1.683,00",
-                fretes: [
-                    { data: "22/09/2026", cliente: "mercado_livre", origem: "Campinas/SP", destino: "Extrema/MG", valor: "9.500,00", comissao: "400,00", descarga: "0,00" },
-                    { data: "23/09/2026", cliente: "shopee", origem: "Extrema/MG", destino: "Betim/MG", valor: "5.800,00", comissao: "638,00", descarga: "0,00" }
-                ],
-                abastecimentos: [
-                    { posto: "Posto Fernandão Pouso Alegre", nf: "77189", km: "1125600", valor: "4.100,00", litros: "680,00" },
-                    { posto: "Posto Gauchão Oliveira", nf: "33912", km: "1127100", valor: "4.020,00", litros: "670,00" }
-                ],
-                totalAbastecimento: "8.120,00",
-                totalLitros: "1.350,00",
-                mediaKmL: "2.30",
-                pedagios: ["490,00", "390,00", "0,00"],
-                totalPedagio: "880,00",
-                impFederal: "480,00",
-                totalDespesas: "9.480,00",
-                resultadoViagem: "5.820,00",
-                saldoComissao: "-517,00",
-                status: "pendente"
-            }
-        ];
-        localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(seedPadrao));
-        return seedPadrao;
+        return [];
     }
 
     function salvarListaFichasCentral(lista) {
@@ -2590,15 +2479,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnNovoEnvioComLogin) {
         btnNovoEnvioComLogin.addEventListener('click', () => {
             window.location.href = 'relatorio-viagem.html';
-        });
-    }
-
-    // Botões de ação do Formulário (Salvar Rascunho)
-    const btnSalvarRascunhoMl = document.getElementById('btn-salvar-rascunho-ml');
-    if (btnSalvarRascunhoMl) {
-        btnSalvarRascunhoMl.addEventListener('click', () => {
-            salvarProgressoMl();
-            exibirToast('Rascunho do Relatório de Viagem salvo com sucesso!', 'sucesso');
         });
     }
 

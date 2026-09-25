@@ -1,0 +1,469 @@
+/* ==========================================================================
+   AJBorges Transportes - Seleção de Dashboard
+   Tema Limpo Fundo Branco • Design Premium Corporativo
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Identidade da Marca AJBorges */
+    --aj-azul-primario: #3d3d90;
+    --aj-azul-profundo: #2b2b6d;
+    --aj-azul-hover: #313175;
+    --aj-azul-suave: #eef2ff;
+    --aj-azul-borda: #c7d2fe;
+    --aj-azul-glow: rgba(61, 61, 144, 0.12);
+
+    /* Acento Card Motorista (Verde Esmeralda) */
+    --aj-verde-primario: #059669;
+    --aj-verde-hover: #047857;
+    --aj-verde-suave: #ecfdf5;
+    --aj-verde-borda: #a7f3d0;
+    --aj-verde-glow: rgba(5, 150, 105, 0.12);
+
+    /* Superfícies Neutras e Fundo Branco */
+    --fundo-pagina: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --card-border-hover-admin: #3d3d90;
+    --card-border-hover-motorista: #059669;
+
+    /* Textos */
+    --texto-titulo: #0f172a;
+    --texto-corpo: #475569;
+    --texto-mutado: #64748b;
+    --texto-claro: #94a3b8;
+
+    /* Sombras Sutis */
+    --sombra-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --sombra-card-hover-admin: 0 20px 40px -8px rgba(61, 61, 144, 0.16), 0 4px 12px -2px rgba(61, 61, 144, 0.08);
+    --sombra-card-hover-motorista: 0 20px 40px -8px rgba(5, 150, 105, 0.16), 0 4px 12px -2px rgba(5, 150, 105, 0.08);
+
+    /* Transição */
+    --transicao: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset básico */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--fundo-pagina);
+    color: var(--texto-corpo);
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem;
+}
+
+/* Container Centralizado */
+.hub-container {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Cabeçalho Hero */
+.hub-hero {
+    text-align: center;
+    max-width: 680px;
+    margin-bottom: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hub-logo-box {
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    transition: var(--transicao);
+}
+
+.hub-logo-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(61, 61, 144, 0.1);
+}
+
+.hub-logo-box img {
+    height: 52px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.hub-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    background-color: var(--aj-azul-suave);
+    border: 1px solid var(--aj-azul-borda);
+    color: var(--aj-azul-primario);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1.25rem;
+}
+
+.hub-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--aj-azul-primario);
+}
+
+.hub-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--texto-titulo);
+    line-height: 1.2;
+    margin-bottom: 0.85rem;
+    letter-spacing: -0.03em;
+}
+
+.hub-subtitle {
+    font-size: 1.05rem;
+    color: var(--texto-mutado);
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   Dois Blocos Lado a Lado Centralizados
+   ========================================================================== */
+.blocks-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(340px, 470px));
+    gap: 2.25rem;
+    width: 100%;
+    justify-content: center;
+    align-items: stretch;
+}
+
+/* Card Individual */
+.portal-card {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 20px;
+    padding: 2.5rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transicao);
+    box-shadow: var(--sombra-card);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Destaque Superior nos Cards */
+.portal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transition: var(--transicao);
+}
+
+.card-admin::before {
+    background: linear-gradient(90deg, #3d3d90, #5c5cb8);
+}
+
+.card-motorista::before {
+    background: linear-gradient(90deg, #059669, #10b981);
+}
+
+/* Hover no Card Admin */
+.card-admin:hover,
+.card-admin:focus-visible {
+    border-color: var(--card-border-hover-admin);
+    transform: translateY(-6px);
+    box-shadow: var(--sombra-card-hover-admin);
+    outline: none;
+}
+
+/* Hover no Card Motorista */
+.card-motorista:hover,
+.card-motorista:focus-visible {
+    border-color: var(--card-border-hover-motorista);
+    transform: translateY(-6px);
+    box-shadow: var(--sombra-card-hover-motorista);
+    outline: none;
+}
+
+/* Topo do Card */
+.card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+/* Ícone */
+.card-icon-container {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transicao);
+}
+
+.card-admin .card-icon-container {
+    background-color: var(--aj-azul-suave);
+    color: var(--aj-azul-primario);
+    border: 1px solid var(--aj-azul-borda);
+}
+
+.card-motorista .card-icon-container {
+    background-color: var(--aj-verde-suave);
+    color: var(--aj-verde-primario);
+    border: 1px solid var(--aj-verde-borda);
+}
+
+.portal-card:hover .card-icon-container {
+    transform: scale(1.08);
+}
+
+.card-icon-container svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* Tag / Badge */
+.card-tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    border-radius: 9999px;
+}
+
+.card-admin .card-tag {
+    background-color: var(--aj-azul-suave);
+    color: var(--aj-azul-primario);
+    border: 1px solid var(--aj-azul-borda);
+}
+
+.card-motorista .card-tag {
+    background-color: var(--aj-verde-suave);
+    color: var(--aj-verde-primario);
+    border: 1px solid var(--aj-verde-borda);
+}
+
+/* Textos do Card */
+.card-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--texto-titulo);
+    margin-bottom: 0.65rem;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+.card-desc {
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: var(--texto-corpo);
+    margin-bottom: 1.5rem;
+}
+
+/* Lista de Recursos */
+.card-features-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.feature-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.88rem;
+    color: var(--texto-titulo);
+    font-weight: 500;
+}
+
+.feature-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.card-admin .feature-check {
+    background-color: var(--aj-azul-suave);
+    color: var(--aj-azul-primario);
+}
+
+.card-motorista .feature-check {
+    background-color: var(--aj-verde-suave);
+    color: var(--aj-verde-primario);
+}
+
+.feature-check svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Botão de Ação CTA no final do Card */
+.card-action-box {
+    margin-top: 2rem;
+}
+
+.card-button {
+    width: 100%;
+    padding: 0.95rem 1.4rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    transition: var(--transicao);
+}
+
+/* Botão Admin */
+.card-admin .card-button {
+    background-color: var(--aj-azul-primario);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--aj-azul-glow);
+}
+
+.card-admin:hover .card-button {
+    background-color: var(--aj-azul-hover);
+    box-shadow: 0 6px 18px rgba(61, 61, 144, 0.35);
+}
+
+/* Botão Motorista */
+.card-motorista .card-button {
+    background-color: var(--aj-verde-primario);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--aj-verde-glow);
+}
+
+.card-motorista:hover .card-button {
+    background-color: var(--aj-verde-hover);
+    box-shadow: 0 6px 18px rgba(5, 150, 105, 0.35);
+}
+
+.arrow-icon-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: var(--transicao);
+}
+
+.portal-card:hover .arrow-icon-circle {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.arrow-icon-circle svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* Link Auxiliar / Voltar ao Login */
+.hub-back-row {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.link-voltar-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--texto-mutado);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: var(--transicao);
+}
+
+.link-voltar-login:hover {
+    color: var(--aj-azul-primario);
+    background-color: var(--aj-azul-suave);
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+@media (max-width: 860px) {
+    body {
+        padding: 2.5rem 1rem;
+    }
+
+    .blocks-grid {
+        grid-template-columns: 1fr;
+        max-width: 460px;
+        gap: 1.75rem;
+    }
+
+    .hub-title {
+        font-size: 2rem;
+    }
+
+    .portal-card {
+        padding: 2rem 1.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hub-title {
+        font-size: 1.75rem;
+    }
+
+    .portal-card {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.4rem;
+    }
+}

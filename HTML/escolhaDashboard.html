@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Central de Seleção de Painéis AJBorges Transportes - Acesse o Painel Administrativo ou o Painel de Cadastro de Motoristas.">
+    <title>AJBorges Transportes • Escolha o Painel</title>
+
+    <!-- Favicon Oficial -->
+    <link rel="icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+    <link rel="shortcut icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Folha de Estilos Exclusiva da Página de Seleção -->
+    <link rel="stylesheet" href="../CSS/escolhaDashboard.css">
+</head>
+
+<body>
+    <!-- Container Centralizado (Sem Header e Sem Footer) -->
+    <main class="hub-container">
+
+        <!-- Cabeçalho de Contexto (Sem Foto) -->
+        <section class="hub-hero">
+            <div class="hub-badge">
+                <span class="hub-badge-dot"></span>
+                <span>Portal Corporativo de Gestão</span>
+            </div>
+            <h1 class="hub-title">Selecione o Painel de Controle</h1>
+            <p class="hub-subtitle">
+                Escolha o ambiente de trabalho que deseja gerenciar. Os acessos são organizados para garantir foco operacional e controle rigoroso.
+            </p>
+        </section>
+
+        <!-- DOIS BLOCOS LADO A LADO CENTRALIZADOS -->
+        <section class="blocks-grid" aria-label="Opções de Dashboard">
+
+            <!-- BLOCO 1: DASHBOARD - PORTAL DA FROTA -->
+            <a href="dashboard-admin.html" class="portal-card card-admin" id="card-dashboard-admin" title="Acessar o Dashboard - Portal da Frota">
+                <div class="card-content-top">
+                    <div class="card-header-row">
+                        <div class="card-icon-container" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                                <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                                <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+                            </svg>
+                        </div>
+                        <span class="card-tag">Operacional &amp; BI</span>
+                    </div>
+
+                    <h2 class="card-title">Dashboard - Portal da Frota</h2>
+                    <p class="card-desc">
+                        Painel geral de conferência de viagens, controle de despesas e combustíveis, conferência de pedágios e fechamento de acertos.
+                    </p>
+
+                    <ul class="card-features-list">
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Gestão de viagens e conferência de relatórios</span>
+                        </li>
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Controle financeiro de pedágios e abastecimentos</span>
+                        </li>
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Acerto de contas e fechamento com motoristas</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-action-box">
+                    <button type="button" class="card-button" tabindex="-1">
+                        <span>Acessar Portal da Frota</span>
+                        <span class="arrow-icon-circle">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </a>
+
+            <!-- BLOCO 2: DASHBOARD - CADASTRO DO MOTORISTA (SEJA UM AGREGADO CONOSCO) -->
+            <a href="Dashboard-cadastro-motorista.html" class="portal-card card-motorista" id="card-dashboard-motorista" title="Acessar o Dashboard - Cadastro do Motorista">
+                <div class="card-content-top">
+                    <div class="card-header-row">
+                        <div class="card-icon-container" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <span class="card-tag">Seja um Agregado Conosco</span>
+                    </div>
+
+                    <h2 class="card-title">Dashboard - Cadastro do Motorista</h2>
+                    <p class="card-desc">
+                        Painel exclusivo conectado às fichas submetidas no formulário Seja um Agregado Conosco. Triagem documental, aprovação de candidatos e homologação de frota.
+                    </p>
+
+                    <ul class="card-features-list">
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Recepção direta das fichas de Seja um Agregado Conosco</span>
+                        </li>
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Conferência de CNH, CRLV, ANTT e dados do veículo</span>
+                        </li>
+                        <li class="feature-row">
+                            <span class="feature-check">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span>Triagem, homologação e controle de agregados PF/PJ</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-action-box">
+                    <button type="button" class="card-button" tabindex="-1">
+                        <span>Acessar Cadastro do Motorista</span>
+                        <span class="arrow-icon-circle">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </a>
+
+        </section>
+
+        <!-- Link Discreto para Voltar ao Login -->
+        <div class="hub-back-row">
+            <a href="Login.html" class="link-voltar-login">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Sair ou entrar com outra conta</span>
+            </a>
+        </div>
+
+    </main>
+</body>
+
+</html>

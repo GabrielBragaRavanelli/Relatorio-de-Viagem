@@ -123,7 +123,7 @@
                                     <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                             </span>
-                            <span class="nav-text">Faturamento (5%)</span>
+                            <span class="nav-text" id="nav-text-faturamento">Faturamento (5.0%)</span>
                         </a>
                     </li>
 
@@ -193,7 +193,7 @@
                                 </svg>
                             </span>
                             <span class="nav-text">Portal da Frota</span>
-                            <span class="badge-pendentes-sidebar" id="badge-pendentes-sidebar" title="Fichas pendentes de conferência">3</span>
+                            <span class="badge-pendentes-sidebar" id="badge-pendentes-sidebar" title="Fichas pendentes de conferência">0</span>
                         </a>
                     </li>
 
@@ -222,6 +222,23 @@
                                 </svg>
                             </span>
                             <span class="nav-text">Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-group-label" style="margin-top: 16px;">SISTEMAS &amp; PAINÉIS</div>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="escolhaDashboard.html" class="nav-link" title="Ir para o Hub de Dashboard">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Hub de Dashboard</span>
                         </a>
                     </li>
                 </ul>
@@ -330,7 +347,7 @@
                             <div class="kpi-header">
                                 <div class="kpi-title-block">
                                     <span class="kpi-label">Total Entrada • Faturamento</span>
-                                    <h3 class="kpi-value" id="kpi-total-entrada">R$ 142.500,00</h3>
+                                    <h3 class="kpi-value" id="kpi-total-entrada">R$ 0,00</h3>
                                 </div>
                                 <div class="kpi-icon-box icon-entrada">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -342,27 +359,24 @@
                             <div class="kpi-subdetails">
                                 <div class="subdetail-item">
                                     <span class="subdetail-name">Shopee</span>
-                                    <strong class="subdetail-val" id="kpi-entrada-shopee">R$ 58.200,00</strong>
+                                    <strong class="subdetail-val" id="kpi-entrada-shopee">R$ 0,00</strong>
                                 </div>
                                 <div class="subdetail-separator">•</div>
                                 <div class="subdetail-item">
                                     <span class="subdetail-name">Mercado Livre</span>
-                                    <strong class="subdetail-val" id="kpi-entrada-ml">R$ 52.800,00</strong>
+                                    <strong class="subdetail-val" id="kpi-entrada-ml">R$ 0,00</strong>
                                 </div>
                                 <div class="subdetail-separator">•</div>
                                 <div class="subdetail-item">
                                     <span class="subdetail-name">Alimentício</span>
-                                    <strong class="subdetail-val" id="kpi-entrada-ali">R$ 31.500,00</strong>
+                                    <strong class="subdetail-val" id="kpi-entrada-ali">R$ 0,00</strong>
                                 </div>
                             </div>
                             <div class="kpi-footer">
-                                <span class="trend-badge trend-up">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="18 15 12 9 6 15"></polyline>
-                                    </svg>
-                                    +12.4% vs mês anterior
+                                <span class="trend-badge" id="kpi-faturamento-trend">
+                                    Monitoramento em tempo real
                                 </span>
-                                <span class="kpi-meta-text">11 viagens no período</span>
+                                <span class="kpi-meta-text" id="kpi-viagens-meta-count">0 viagens no período</span>
                             </div>
                         </div>
 
@@ -371,7 +385,7 @@
                             <div class="kpi-header">
                                 <div class="kpi-title-block">
                                     <span class="kpi-label">Total Saída • Despesas Frota</span>
-                                    <h3 class="kpi-value" id="kpi-total-saida">R$ 88.420,00</h3>
+                                    <h3 class="kpi-value" id="kpi-total-saida">R$ 0,00</h3>
                                 </div>
                                 <div class="kpi-icon-box icon-saida">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -382,23 +396,23 @@
                                 </div>
                             </div>
                             <div class="kpi-bars-despesas">
-                                <div class="despesa-progresso-linha" title="Diesel Postos: R$ 49.380 (55.8%)">
+                                <div class="despesa-progresso-linha" id="despesa-linha-diesel" title="Diesel Postos">
                                     <div class="despesa-info-top">
                                         <span>Diesel Postos</span>
-                                        <strong id="kpi-saida-diesel">R$ 49.380,00</strong>
+                                        <strong id="kpi-saida-diesel">R$ 0,00</strong>
                                     </div>
-                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-diesel" style="width: 55.8%;"></div></div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-diesel" style="width: 0%;"></div></div>
                                 </div>
-                                <div class="despesa-progresso-linha" title="Diárias & Comissões: R$ 18.240 (20.6%)">
+                                <div class="despesa-progresso-linha" id="despesa-linha-comissao" title="Diárias & Comissões">
                                     <div class="despesa-info-top">
                                         <span>Diárias / Comissões</span>
-                                        <strong id="kpi-saida-comissao">R$ 18.240,00</strong>
+                                        <strong id="kpi-saida-comissao">R$ 0,00</strong>
                                     </div>
-                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-comissao" style="width: 20.6%;"></div></div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill bar-comissao" style="width: 0%;"></div></div>
                                 </div>
                                 <div class="despesa-sub-grid">
-                                    <div class="mini-despesa-pill">Pedágios: <strong id="kpi-saida-pedagio">R$ 12.150</strong></div>
-                                    <div class="mini-despesa-pill">Impostos: <strong id="kpi-saida-impostos">R$ 8.650</strong></div>
+                                    <div class="mini-despesa-pill">Pedágios: <strong id="kpi-saida-pedagio">R$ 0,00</strong></div>
+                                    <div class="mini-despesa-pill">Impostos: <strong id="kpi-saida-impostos">R$ 0,00</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -408,7 +422,7 @@
                             <div class="kpi-header">
                                 <div class="kpi-title-block">
                                     <span class="kpi-label">Resultado Operacional Líquido</span>
-                                    <h3 class="kpi-value text-glow-green" id="kpi-resultado-liquido">R$ 54.080,00</h3>
+                                    <h3 class="kpi-value text-glow-green" id="kpi-resultado-liquido">R$ 0,00</h3>
                                 </div>
                                 <div class="kpi-icon-box icon-resultado">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -419,19 +433,16 @@
                             </div>
                             <div class="kpi-resultado-stats">
                                 <div class="margem-destaque">
-                                    <span class="margem-numero" id="kpi-margem-lucro">37.9%</span>
+                                    <span class="margem-numero" id="kpi-margem-lucro">0.0%</span>
                                     <span class="margem-legenda">Margem Líquida</span>
                                 </div>
-                                <div class="meta-status-tag meta-atingida">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                    Meta Superada (>35%)
+                                <div class="meta-status-tag" id="meta-status-tag-el">
+                                    Aguardando Viagens
                                 </div>
                             </div>
                             <div class="kpi-footer">
-                                <span class="lucro-por-viagem">Média: R$ 4.916,36 / viagem</span>
-                                <span class="lucro-retencao">Retenção de Caixa Forte</span>
+                                <span class="lucro-por-viagem" id="kpi-lucro-medio-viagem">Média: R$ 0,00 / viagem</span>
+                                <span class="lucro-retencao">Retenção de Caixa</span>
                             </div>
                         </div>
 
@@ -440,7 +451,7 @@
                             <div class="kpi-header">
                                 <div class="kpi-title-block">
                                     <span class="kpi-label">Média Geral de Combustível</span>
-                                    <h3 class="kpi-value" id="kpi-media-consumo-geral">2.38 km/l</h3>
+                                    <h3 class="kpi-value" id="kpi-media-consumo-geral">0.00 km/l</h3>
                                 </div>
                                 <div class="kpi-icon-box icon-consumo">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -453,13 +464,13 @@
                             <div class="alerta-consumo-box" id="alerta-consumo-box">
                                 <div class="alerta-badge-mini">
                                     <span class="alerta-ponto-pulsante"></span>
-                                    <strong>Alerta Operacional:</strong>
+                                    <strong>Auditoria de Combustível:</strong>
                                 </div>
-                                <p class="alerta-texto" id="alerta-consumo-texto">Marcos Silva está com a menor média (<strong>2.15 km/l</strong> na serra).</p>
+                                <p class="alerta-texto" id="alerta-consumo-texto">Nenhuma viagem registrada no momento.</p>
                             </div>
                             <div class="kpi-footer">
-                                <span>Meta da Frota: &gt;= 2.40 km/l</span>
-                                <span class="badge-fichas-pendentes" id="header-fichas-pendentes-counter">3 pendentes</span>
+                                <span>Meta da Frota: &gt;= <strong id="kpi-meta-frota-display">2.40</strong> km/l</span>
+                                <span class="badge-fichas-pendentes" id="header-fichas-pendentes-counter">0 pendentes</span>
                             </div>
                         </div>
 
@@ -507,10 +518,10 @@
                             <div class="header-with-alert">
                                 <div>
                                     <h3 class="chart-card-title">Média de Consumo de Diesel (km/l) por Motorista</h3>
-                                    <p class="chart-card-subtitle">Monitoramento de eficiência energética e auditoria de abastecimento (Quem consome mais diesel vs meta de 2.40 km/l)</p>
+                                    <p class="chart-card-subtitle" id="subtitle-chart-consumo">Monitoramento de eficiência energética e auditoria de abastecimento (Quem consome mais diesel vs meta de <strong id="chart-meta-frota-display">2.40</strong> km/l)</p>
                                 </div>
                                 <div class="alerta-destaque-header">
-                                    <span class="tag-critico">⚠️ 1 Motorista em Alerta de Alto Consumo</span>
+                                    <span class="tag-critico" id="tag-alerta-consumo-header">Sem alertas de consumo</span>
                                 </div>
                             </div>
                         </div>
@@ -542,16 +553,16 @@
                                 <button type="button" class="tab-ficha-btn active" data-status="pendente" id="tab-fichas-pendentes">
                                     <span class="tab-indicator-dot dot-amarelo"></span>
                                     <span>Pendentes de Conferência</span>
-                                    <span class="tab-counter-badge badge-amarelo" id="contador-tab-pendentes">3</span>
+                                    <span class="tab-counter-badge badge-amarelo" id="contador-tab-pendentes">0</span>
                                 </button>
                                 <button type="button" class="tab-ficha-btn" data-status="aprovado" id="tab-fichas-aprovadas">
                                     <span class="tab-indicator-dot dot-verde"></span>
                                     <span>Aprovadas / Concluídas</span>
-                                    <span class="tab-counter-badge badge-verde" id="contador-tab-aprovadas">8</span>
+                                    <span class="tab-counter-badge badge-verde" id="contador-tab-aprovadas">0</span>
                                 </button>
                                 <button type="button" class="tab-ficha-btn" data-status="todos" id="tab-fichas-todas">
                                     <span>Todas as Fichas</span>
-                                    <span class="tab-counter-badge" id="contador-tab-todas">11</span>
+                                    <span class="tab-counter-badge" id="contador-tab-todas">0</span>
                                 </button>
                             </div>
                         </div>
@@ -570,7 +581,7 @@
                                 </div>
                             </div>
                             <div class="toolbar-right">
-                                <span class="tabela-info-registros" id="tabela-info-registros">Exibindo 3 fichas pendentes</span>
+                                <span class="tabela-info-registros" id="tabela-info-registros">Nenhuma ficha registrada</span>
                             </div>
                         </div>
 
@@ -594,10 +605,10 @@
                                     <!-- Linhas geradas dinamicamente pelo JavaScript -->
                                 </tbody>
                             </table>
-                            <div class="tabela-empty-state" id="tabela-empty-state" style="display: none;">
+                            <div class="tabela-empty-state" id="tabela-empty-state" style="display: block;">
                                 <div class="empty-icon">🔍</div>
                                 <h4>Nenhuma ficha encontrada</h4>
-                                <p>Não há fichas registradas para o filtro ou termo de busca selecionado.</p>
+                                <p>Aguardando envio de relatórios de viagem pelos motoristas.</p>
                             </div>
                         </div>
                     </div>
@@ -617,20 +628,22 @@
                     <div class="placeholder-section-card">
                         <div class="frota-status-grid">
                             <div class="status-summary-box">
-                                <span class="summary-number">11</span>
+                                <span class="summary-number" id="sec-viagens-total-mes">0</span>
                                 <span class="summary-label">Viagens no Mês</span>
                             </div>
                             <div class="status-summary-box">
-                                <span class="summary-number">39.420 km</span>
+                                <span class="summary-number" id="sec-viagens-total-km">0 km</span>
                                 <span class="summary-label">Quilometragem Rodada</span>
                             </div>
                             <div class="status-summary-box">
-                                <span class="summary-number">100%</span>
+                                <span class="summary-number" id="sec-viagens-prazo">100%</span>
                                 <span class="summary-label">Entregas no Prazo</span>
                             </div>
                         </div>
                         <div class="fichas-modulo-card" style="margin-top: 24px;">
-                            <h3 style="margin-bottom: 16px; color: var(--cor-texto-primario);">Rotas Ativas da Semana</h3>
+                            <div style="padding: 22px 28px 18px 28px; border-bottom: 1px solid #e2e8f0; background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);">
+                                <h3 style="margin: 0; color: var(--cor-texto-primario); font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700;">Rotas Ativas da Semana</h3>
+                            </div>
                             <div id="container-viagens-resumo"></div>
                         </div>
                     </div>
@@ -645,13 +658,13 @@
                     <div class="kpi-grid" style="margin-bottom: 24px;">
                         <div class="kpi-card card-saida">
                             <span class="kpi-label">Total Pedágio Declarado</span>
-                            <h3 class="kpi-value">R$ 12.150,00</h3>
-                            <span class="kpi-meta-text">11 viagens auditadas</span>
+                            <h3 class="kpi-value" id="sec-pedagios-total">R$ 0,00</h3>
+                            <span class="kpi-meta-text" id="sec-pedagios-count">0 viagens auditadas</span>
                         </div>
                         <div class="kpi-card card-entrada">
                             <span class="kpi-label">TAGs Integradas (Sem Parar / Veloe)</span>
-                            <h3 class="kpi-value">R$ 12.020,00</h3>
-                            <span class="trend-badge trend-up">Divergência controlada (1.07%)</span>
+                            <h3 class="kpi-value" id="sec-pedagios-tags">R$ 0,00</h3>
+                            <span class="trend-badge" id="sec-pedagios-trend">Conciliação automática</span>
                         </div>
                     </div>
                     <div class="placeholder-section-card">
@@ -699,17 +712,17 @@
                 <!-- SEÇÃO 5: REVISÃO DE FATURAMENTO (5% BORGES) -->
                 <section class="admin-section" id="view-faturamento">
                     <div class="section-page-header">
-                        <h2>🧾 Revisão de Faturamento (5% Borges)</h2>
+                        <h2 id="heading-sec-faturamento">🧾 Revisão de Faturamento (5.0% Borges)</h2>
                         <p>Controle de taxa de agenciamento, emissão de faturas e comissionamento da AJBorges.</p>
                     </div>
                     <div class="kpi-grid">
                         <div class="kpi-card card-entrada">
                             <span class="kpi-label">Base de Faturamento de Fretes</span>
-                            <h3 class="kpi-value">R$ 142.500,00</h3>
+                            <h3 class="kpi-value" id="sec-faturamento-base">R$ 0,00</h3>
                         </div>
                         <div class="kpi-card card-resultado">
-                            <span class="kpi-label">Taxa Administrativa AJBorges (5%)</span>
-                            <h3 class="kpi-value text-glow-green">R$ 7.125,00</h3>
+                            <span class="kpi-label" id="label-taxa-adm">Taxa Administrativa AJBorges (5.0%)</span>
+                            <h3 class="kpi-value text-glow-green" id="sec-faturamento-taxa">R$ 0,00</h3>
                             <span class="kpi-meta-text">Apuração líquida de agenciamento</span>
                         </div>
                     </div>
@@ -811,20 +824,49 @@
                         <div class="config-grid">
                             <div class="config-card">
                                 <h4>Meta de Consumo Diesel</h4>
-                                <p>Valor base para alerta da frota:</p>
-                                <input type="text" class="input-custom" value="2.40 km/l" readonly>
+                                <p>Valor base para auditoria e alertas da frota:</p>
+                                <div class="config-input-wrapper">
+                                    <input type="text" inputmode="decimal" class="input-custom config-input-editable" id="config-meta-diesel" value="2,40" placeholder="2,40" aria-label="Meta de Consumo Diesel em km/l">
+                                    <span class="input-unit-badge">km/l</span>
+                                </div>
+                                <span class="config-hint-text">Média mínima esperada por veículo</span>
+                                <button type="button" class="btn-salvar-config" id="btn-salvar-meta-diesel" title="Confirmar alteração da Meta de Consumo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Confirmar Alteração</span>
+                                </button>
                             </div>
                             <div class="config-card">
                                 <h4>Percentual Taxa Borges</h4>
-                                <p>Taxa aplicada no resumo financeiro:</p>
-                                <input type="text" class="input-custom" value="5.0%" readonly>
+                                <p>Taxa de agenciamento aplicada no faturamento:</p>
+                                <div class="config-input-wrapper">
+                                    <input type="text" inputmode="decimal" class="input-custom config-input-editable" id="config-taxa-borges" value="5,0" placeholder="5,0" aria-label="Percentual da Taxa Borges">
+                                    <span class="input-unit-badge">%</span>
+                                </div>
+                                <span class="config-hint-text">Atualiza contas e faturamento em tempo real</span>
+                                <button type="button" class="btn-salvar-config" id="btn-salvar-taxa-borges" title="Confirmar alteração da Taxa Borges">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Confirmar Alteração</span>
+                                </button>
                             </div>
                             <div class="config-card">
-                                <h4>Reset do Banco de Testes</h4>
-                                <p>Restaura fichas originais com dados de exemplo:</p>
-                                <button type="button" class="btn-acao-secundario" id="btn-reset-demo-data" style="margin-top: 8px;">Restaurar Dados Demo</button>
+                                <h4>Limpeza do Banco de Dados</h4>
+                                <p>Apagar todas as fichas e dados locais salvos:</p>
+                                <button type="button" class="btn-apagar-dados" id="btn-limpar-dados-armazenados" title="Apagar todas as fichas salvas">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                    </svg>
+                                    <span>Apagar Dados</span>
+                                </button>
                             </div>
                         </div>
+
                     </div>
                 </section>
 
@@ -839,7 +881,7 @@
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-header-info">
-                    <span class="badge-modal" id="modal-ficha-id">AJB-2026-001</span>
+                    <span class="badge-modal" id="modal-ficha-id">-</span>
                     <h3 class="modal-title" id="modal-ficha-motorista">Conferência de Viagem</h3>
                 </div>
                 <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Fechar">✕</button>

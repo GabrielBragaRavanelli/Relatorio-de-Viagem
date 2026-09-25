@@ -320,5 +320,108 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // =========================================================================
+    // SALVAMENTO REAL NO LOCALSTORAGE (CONEXÃO COM DASHBOARD DE MOTORISTAS)
+    // =========================================================================
+    const STORAGE_CADASTROS_KEY = 'ajborges_cadastros_agregados';
+
+    function salvarNovoCadastro(cadastro) {
+        try {
+            const existentes = JSON.parse(localStorage.getItem(STORAGE_CADASTROS_KEY) || '[]');
+            existentes.unshift(cadastro);
+            localStorage.setItem(STORAGE_CADASTROS_KEY, JSON.stringify(existentes));
+            return true;
+        } catch (e) {
+            console.error('Erro ao salvar cadastro no localStorage:', e);
+            return false;
+        }
+    }
+
+    if (formPJ) {
+        formPJ.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const nomeEmpresa = (document.getElementById('pj-nome-empresa')?.value || '').trim();
+            const cnpj = (document.getElementById('pj-cnpj')?.value || '').trim();
+            const telEmpresa = (document.getElementById('pj-telefone-empresa')?.value || '').trim();
+            const motoristaNome = (document.getElementById('pj-motorista-nome')?.value || '').trim();
+            const motoristaSobrenome = (document.getElementById('pj-motorista-sobrenome')?.value || '').trim();
+            const nomeCompleto = `${motoristaNome} ${motoristaSobrenome}`.trim() || nomeEmpresa;
+            const cpf = (document.getElementById('pj-cpf')?.value || '').trim();
+            const celular = (document.getElementById('pj-celular')?.value || telEmpresa).trim();
+            const cnh = (document.getElementById('pj-cnh')?.value || '').trim();
+            const catCnh = (document.getElementById('pj-cnh-categoria')?.value || 'E').trim();
+            const veiculoModelo = (document.getElementById('pj-veic-modelo')?.value || 'Caminhão Pesado').trim();
+            const veiculoPlaca = (document.getElementById('pj-veic-placa')?.value || '').trim();
+            const carretaPlaca = (document.getElementById('pj-carreta-placa')?.value || '').trim();
+
+            const novoRegistro = {
+                id: 'AGR-PJ-' + Date.now(),
+                tipo: 'Pessoa Jurídica (PJ)',
+                tipoCodigo: 'pj',
+                empresa: nomeEmpresa,
+                documentoEmpresa: cnpj,
+                nome: nomeCompleto,
+                documento: cpf || cnpj,
+                telefone: celular || telEmpresa,
+                categoria: catCnh,
+                cnh: cnh || 'Informada',
+                veiculo: veiculoModelo,
+                placa: veiculoPlaca,
+                carretaPlaca: carretaPlaca,
+                data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                status: 'pendente',
+                origem: 'Seja um Agregado Conosco (PJ)'
+            };
+
+            if (salvarNovoCadastro(novoRegistro)) {
+                alert('Ficha cadastral de Pessoa Jurídica enviada com sucesso! Os dados foram encaminhados diretamente ao Dashboard de Homologação.');
+                formPJ.reset();
+            }
+        });
+    }
+
+    if (formPF) {
+        formPF.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const motoristaNome = (document.getElementById('pf-motorista-nome')?.value || '').trim();
+            const motoristaSobrenome = (document.getElementById('pf-motorista-sobrenome')?.value || '').trim();
+            const nomeCompleto = `${motoristaNome} ${motoristaSobrenome}`.trim();
+            const cpf = (document.getElementById('pf-cpf')?.value || '').trim();
+            const celular = (document.getElementById('pf-celular')?.value || '').trim();
+            const cnh = (document.getElementById('pf-cnh')?.value || '').trim();
+            const catCnh = (document.getElementById('pf-cnh-categoria')?.value || 'E').trim();
+            const veiculoModelo = (document.getElementById('pf-veic-modelo')?.value || 'Cavalo Mecânico').trim();
+            const veiculoPlaca = (document.getElementById('pf-veic-placa')?.value || '').trim();
+            const carretaPlaca = (document.getElementById('pf-carreta-placa')?.value || '').trim();
+
+            const novoRegistro = {
+                id: 'AGR-PF-' + Date.now(),
+                tipo: 'Pessoa Física (PF)',
+                tipoCodigo: 'pf',
+                empresa: 'Autônomo',
+                documentoEmpresa: '',
+                nome: nomeCompleto,
+                documento: cpf,
+                telefone: celular,
+                categoria: catCnh,
+                cnh: cnh || 'Informada',
+                veiculo: veiculoModelo,
+                placa: veiculoPlaca,
+                carretaPlaca: carretaPlaca,
+                data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                status: 'pendente',
+                origem: 'Seja um Agregado Conosco (PF)'
+            };
+
+            if (salvarNovoCadastro(novoRegistro)) {
+                alert('Ficha cadastral de Pessoa Física enviada com sucesso! Os dados foram encaminhados diretamente ao Dashboard de Homologação.');
+                formPF.reset();
+            }
+        });
+    }
 });
+
 
