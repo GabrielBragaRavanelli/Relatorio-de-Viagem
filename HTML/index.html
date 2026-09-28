@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
     <link rel="shortcut icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
@@ -70,6 +71,23 @@
             </nav>
         </div>
     </header>
+
+    <main class="hero-carousel-container">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"></div>
+                <div class="swiper-slide"></div>
+                <div class="swiper-slide"></div>
+            </div>
+
+            <!-- Paginação -->
+            <div class="swiper-pagination"></div>
+
+            <!-- Botões de navegação -->
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+    </main>
 
     <footer>
         <div class="footer-container">
@@ -204,8 +222,25 @@
         </div>
     </footer>
 
+    <!-- Swiper JS Script -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Inicialização do Swiper
+            const swiper = new Swiper('.swiper', {
+                loop: true,
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev"
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true
+                },
+                autoplay: true
+            });
+
+            // Dropdown do menu
             const dropdownItem = document.getElementById('dropdown-portais');
             const dropdownBtn = document.getElementById('dropdown-menu-btn');
 

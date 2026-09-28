@@ -564,3 +564,95 @@ footer {
         padding: 0 20px 30px;
     }
 }
+
+/* --- CARROSSEL HERO (SWIPER) --- */
+
+.hero-carousel-container {
+    width: 100%;
+    margin-top: 70px;
+    height: calc(100vh - 70px);
+    min-height: 480px;
+    max-height: 750px;
+    position: relative;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.hero-carousel-container .swiper {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+}
+
+.hero-carousel-container .swiper-slide {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Customização dos Controles do Swiper sobre Fundo Branco */
+.hero-carousel-container .swiper-pagination-bullet {
+    background-color: #cbd5e1;
+    width: 12px;
+    height: 12px;
+    opacity: 1;
+    margin: 0 6px;
+    transition: all 0.3s ease;
+}
+
+.hero-carousel-container .swiper-pagination-bullet-active {
+    background-color: var(--azul-ajborges);
+    width: 30px;
+    border-radius: 6px;
+}
+
+.hero-carousel-container .swiper-button-next,
+.hero-carousel-container .swiper-button-prev {
+    color: var(--azul-ajborges);
+    width: 48px;
+    height: 48px;
+    background: #ffffff;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 50%;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+}
+
+.hero-carousel-container .swiper-button-next::after,
+.hero-carousel-container .swiper-button-prev::after {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.hero-carousel-container .swiper-button-next:hover,
+.hero-carousel-container .swiper-button-prev:hover {
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    border-color: var(--azul-ajborges);
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px rgba(61, 61, 144, 0.25);
+}
+
+/* Responsividade do Carrossel */
+@media (max-width: 640px) {
+    .hero-carousel-container {
+        margin-top: 110px;
+        height: calc(100vh - 110px);
+    }
+
+    .hero-carousel-container .swiper-button-next,
+    .hero-carousel-container .swiper-button-prev {
+        width: 38px;
+        height: 38px;
+    }
+
+    .hero-carousel-container .swiper-button-next::after,
+    .hero-carousel-container .swiper-button-prev::after {
+        font-size: 14px;
+    }
+}
+
+
