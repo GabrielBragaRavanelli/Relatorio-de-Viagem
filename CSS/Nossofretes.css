@@ -318,6 +318,694 @@ header {
     margin: 4px 6px;
 }
 
+/* Suporte aos links ativos */
+.lista-links li a:hover,
+.lista-links li a.link-ativo,
+.lista-links li a.active {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: var(--branco);
+    transform: translateY(-1px);
+}
+
+/* --- CONTEÚDO PRINCIPAL (NOSSOS FRETES) --- */
+
+main {
+    margin-top: 70px;
+    width: 100%;
+    background-color: var(--fundo-principal);
+    display: flex;
+    flex-direction: column;
+}
+
+/* HERO NOSSOS FRETES */
+.fretes-hero {
+    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 60%, var(--azul-ajborges-medio) 100%);
+    color: var(--branco);
+    padding: 70px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.fretes-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.fretes-hero-container {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.fretes-hero-titulo {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.fretes-hero-subtitulo {
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/* SEÇÃO DE FILTROS DE FRETES */
+.fretes-filtros-section {
+    padding: 0 24px;
+    margin-top: -35px;
+    position: relative;
+    z-index: 10;
+}
+
+.filtros-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px 28px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+.filtros-form {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-item label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.filtro-select,
+.filtro-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--cinza-escuro);
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+    outline: none;
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px var(--azul-ajborges-alpha);
+}
+
+.btn-filtrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.25);
+    height: 44px;
+}
+
+.btn-filtrar:hover {
+    background-color: var(--azul-ajborges-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(61, 61, 144, 0.35);
+}
+
+/* SEÇÃO MURAL DE FRETES */
+.fretes-mural-section {
+    padding: 60px 24px;
+}
+
+.fretes-mural-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mural-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.mural-titulo-bloco h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 6px;
+}
+
+.mural-titulo-bloco p {
+    font-size: 14px;
+    color: var(--cinza-texto);
+}
+
+.mural-contador-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(61, 61, 144, 0.15);
+}
+
+.mural-contador-tag .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--verde-sucesso);
+}
+
+.fretes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.frete-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid var(--cinza-borda);
+    padding: 24px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.frete-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(61, 61, 144, 0.14);
+    border-color: var(--azul-ajborges-medio);
+}
+
+.frete-badge-status {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-imediato {
+    background-color: var(--verde-sucesso-fundo);
+    color: var(--verde-sucesso-escuro);
+    border: 1px solid var(--verde-sucesso-borda);
+}
+
+.status-programado {
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    border: 1px solid rgba(61, 61, 144, 0.18);
+}
+
+.status-retorno {
+    background-color: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.frete-codigo {
+    font-size: 12px;
+    color: var(--cinza-medio);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.frete-rota-box {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--cinza-borda);
+}
+
+.rota-ponto {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.rota-ponto:last-child {
+    margin-bottom: 0;
+}
+
+.rota-marcador {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.marcador-origem {
+    background-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px var(--azul-ajborges-suave);
+}
+
+.marcador-destino {
+    background-color: var(--verde-sucesso);
+    box-shadow: 0 0 0 3px var(--verde-sucesso-fundo);
+}
+
+.rota-linha-conexao {
+    width: 2px;
+    height: 14px;
+    background-color: #cbd5e1;
+    margin-left: 6px;
+    margin-top: -6px;
+    margin-bottom: -6px;
+}
+
+.rota-cidade {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+}
+
+.rota-estado {
+    font-size: 13px;
+    color: var(--cinza-medio);
+    font-weight: 500;
+}
+
+.frete-specs-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.spec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.spec-label {
+    color: var(--cinza-medio);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.spec-label svg {
+    width: 15px;
+    height: 15px;
+    color: var(--azul-ajborges);
+}
+
+.spec-valor {
+    color: var(--cinza-escuro);
+    font-weight: 600;
+    text-align: right;
+}
+
+.frete-card-footer {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-pegar-frete {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.2);
+}
+
+.btn-pegar-frete:hover {
+    background-color: var(--azul-ajborges-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(61, 61, 144, 0.3);
+}
+
+/* SEÇÃO COMO FUNCIONA */
+.como-funciona-section {
+    padding: 80px 24px;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--cinza-borda);
+    border-top: 1px solid var(--cinza-borda);
+}
+
+.como-funciona-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.como-funciona-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 50px;
+}
+
+.como-funciona-titulo {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 12px;
+}
+
+.como-funciona-subtitulo {
+    font-size: 15px;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+}
+
+.passos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.passo-card {
+    background: var(--fundo-principal);
+    border-radius: 18px;
+    padding: 30px 20px;
+    border: 1px solid var(--cinza-borda);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: transform 0.25s ease;
+}
+
+.passo-card:hover {
+    transform: translateY(-4px);
+}
+
+.passo-numero {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.3);
+}
+
+.passo-titulo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 8px;
+}
+
+.passo-desc {
+    font-size: 13px;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+}
+
+/* SEÇÃO VANTAGENS DO AGREGADO */
+.vantagens-section {
+    padding: 80px 24px;
+    background-color: var(--fundo-principal);
+    border-bottom: 1px solid var(--cinza-borda);
+}
+
+.vantagens-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.vantagens-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.vantagem-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px 22px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.vantagem-icone {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vantagem-icone svg {
+    width: 22px;
+    height: 22px;
+}
+
+.vantagem-info h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 6px;
+}
+
+.vantagem-info p {
+    font-size: 13px;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+}
+
+/* SEÇÃO CTA FRETES */
+.fretes-cta-section {
+    padding: 70px 24px;
+    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 100%);
+    color: #ffffff;
+    text-align: center;
+}
+
+.fretes-cta-container {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.fretes-cta-titulo {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    line-height: 1.3;
+}
+
+.fretes-cta-subtitulo {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.fretes-cta-botoes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-cta-branco {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    color: var(--azul-ajborges-escuro);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cta-branco:hover {
+    background-color: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.btn-cta-whatsapp-grande {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #25d366;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+}
+
+.btn-cta-whatsapp-grande:hover {
+    background-color: #1eb954;
+    transform: translateY(-2px);
+}
+
+/* RESPONSIVIDADE DE NOSSOS FRETES */
+@media (max-width: 1024px) {
+    .filtros-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .btn-filtrar {
+        grid-column: 1 / -1;
+    }
+
+    .fretes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .passos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .vantagens-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .fretes-hero {
+        padding: 44px 16px 60px;
+    }
+
+    .fretes-hero-titulo {
+        font-size: 26px;
+    }
+
+    .fretes-hero-subtitulo {
+        font-size: 14px;
+    }
+
+    .filtros-container {
+        padding: 20px 16px;
+    }
+
+    .filtros-form {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .fretes-mural-section {
+        padding: 40px 16px;
+    }
+
+    .fretes-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .como-funciona-section,
+    .vantagens-section {
+        padding: 50px 16px;
+    }
+
+    .como-funciona-titulo {
+        font-size: 24px;
+    }
+
+    .passos-grid,
+    .vantagens-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .fretes-cta-section {
+        padding: 50px 16px;
+    }
+
+    .fretes-cta-titulo {
+        font-size: 24px;
+    }
+
+    .fretes-cta-botoes {
+        flex-direction: column;
+    }
+
+    .btn-cta-branco,
+    .btn-cta-whatsapp-grande {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 /* --- FOOTER --- */
 
 footer {

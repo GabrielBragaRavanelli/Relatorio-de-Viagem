@@ -151,7 +151,8 @@ header {
 }
 
 .lista-links li a:hover,
-.lista-links li a.link-ativo {
+.lista-links li a.link-ativo,
+.lista-links li a.active {
     background-color: rgba(255, 255, 255, 0.18);
     color: var(--branco);
     transform: translateY(-1px);
@@ -316,6 +317,599 @@ header {
     height: 1px;
     background-color: #e8ecf4;
     margin: 4px 6px;
+}
+
+/* --- CONTEÚDO PRINCIPAL (CONTATO) --- */
+
+main {
+    margin-top: 70px;
+    width: 100%;
+    background-color: var(--fundo-principal);
+    display: flex;
+    flex-direction: column;
+}
+
+/* HERO CONTATO */
+.contato-hero {
+    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 60%, var(--azul-ajborges-medio) 100%);
+    color: var(--branco);
+    padding: 60px 24px 70px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.contato-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.contato-hero-container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.contato-hero-titulo {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.contato-hero-subtitulo {
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* CARDS DE CANAIS RÁPIDOS */
+.canais-rapidos-section {
+    padding: 0 24px;
+    margin-top: -35px;
+    position: relative;
+    z-index: 10;
+}
+
+.canais-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.canal-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.canal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(61, 61, 144, 0.15);
+    border-color: var(--azul-ajborges-claro);
+}
+
+.canal-icone-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.canal-card:hover .canal-icone-box {
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+}
+
+.canal-icone-box svg {
+    width: 26px;
+    height: 26px;
+}
+
+.canal-titulo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 6px;
+}
+
+.canal-detalhe {
+    font-size: 13px;
+    color: var(--cinza-texto);
+    margin-bottom: 14px;
+    line-height: 1.4;
+    min-height: 36px;
+}
+
+.canal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--azul-ajborges);
+    text-decoration: none;
+    margin-top: auto;
+    padding: 6px 14px;
+    background-color: var(--azul-ajborges-suave);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.canal-link:hover {
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+}
+
+/* SEÇÃO PRINCIPAL (FORMULÁRIO + DETALHES) */
+.contato-principal-section {
+    padding: 60px 24px;
+}
+
+.contato-principal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 32px;
+    align-items: start;
+}
+
+/* CARD DO FORMULÁRIO */
+.form-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 36px 32px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.form-header {
+    margin-bottom: 28px;
+}
+
+.form-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 8px;
+}
+
+.form-header p {
+    font-size: 14px;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cinza-escuro);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--cinza-escuro);
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3.5px var(--azul-ajborges-alpha);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.btn-enviar-contato {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(61, 61, 144, 0.25);
+    width: 100%;
+}
+
+.btn-enviar-contato:hover {
+    background-color: var(--azul-ajborges-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(61, 61, 144, 0.35);
+}
+
+.alerta-sucesso {
+    display: none;
+    padding: 14px 18px;
+    background-color: var(--verde-sucesso-fundo);
+    border: 1px solid var(--verde-sucesso-borda);
+    border-radius: 10px;
+    color: var(--verde-sucesso-escuro);
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 18px;
+    align-items: center;
+    gap: 10px;
+}
+
+.alerta-sucesso.visivel {
+    display: flex;
+}
+
+/* CARDS DE DETALHES DE CONTATO */
+.info-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 26px;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+
+.info-card-header svg {
+    width: 22px;
+    height: 22px;
+    color: var(--azul-ajborges);
+}
+
+.info-card-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza-medio);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-valor {
+    font-size: 14px;
+    color: var(--cinza-escuro);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.info-valor strong {
+    color: var(--azul-ajborges);
+}
+
+/* Badge de status operacional */
+.status-operacional {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--verde-sucesso-fundo);
+    color: var(--verde-sucesso-escuro);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+    border: 1px solid var(--verde-sucesso-borda);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--verde-sucesso);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* SEÇÃO MAPA GOOGLE MAPS */
+.mapa-section {
+    padding: 0 24px 70px;
+}
+
+.mapa-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.mapa-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 32px;
+}
+
+.mapa-titulo {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 10px;
+}
+
+.mapa-subtitulo {
+    font-size: 15px;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+}
+
+.mapa-card {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--cinza-borda);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.mapa-iframe-wrapper {
+    width: 100%;
+    height: 480px;
+    position: relative;
+    background-color: #e2e8f0;
+}
+
+.mapa-iframe-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.mapa-barra-acoes {
+    padding: 20px 28px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--cinza-borda);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.mapa-endereco-resumo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mapa-endereco-resumo svg {
+    width: 24px;
+    height: 24px;
+    color: var(--azul-ajborges);
+    flex-shrink: 0;
+}
+
+.mapa-endereco-resumo p {
+    font-size: 14px;
+    color: var(--cinza-escuro);
+    line-height: 1.4;
+}
+
+.mapa-endereco-resumo strong {
+    color: var(--azul-ajborges);
+}
+
+.mapa-botoes-grupo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-mapa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+.btn-mapa-primario {
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+}
+
+.btn-mapa-primario:hover {
+    background-color: var(--azul-ajborges-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.25);
+}
+
+.btn-mapa-secundario {
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    border: 1px solid rgba(61, 61, 144, 0.15);
+}
+
+.btn-mapa-secundario:hover {
+    background-color: var(--azul-ajborges);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* RESPONSIVIDADE DE CONTATO */
+@media (max-width: 1024px) {
+    .canais-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .contato-principal-container {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .mapa-barra-acoes {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mapa-botoes-grupo {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    .contato-hero {
+        padding: 40px 16px 60px;
+    }
+
+    .contato-hero-titulo {
+        font-size: 26px;
+    }
+
+    .contato-hero-subtitulo {
+        font-size: 14px;
+    }
+
+    .canais-rapidos-section {
+        margin-top: -30px;
+        padding: 0 16px;
+    }
+
+    .canais-container {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .contato-principal-section {
+        padding: 40px 16px;
+    }
+
+    .form-card {
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .info-card {
+        padding: 20px 16px;
+    }
+
+    .mapa-section {
+        padding: 0 16px 50px;
+    }
+
+    .mapa-titulo {
+        font-size: 24px;
+    }
+
+    .mapa-iframe-wrapper {
+        height: 350px;
+    }
+
+    .btn-mapa {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* --- FOOTER --- */
