@@ -111,19 +111,19 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 46px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    background-color: var(--branco);
-    padding: 4px 10px;
+    background-color: transparent;
+    padding: 0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .logotipo-AJBorges img:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.04);
+    filter: drop-shadow(0 4px 12px rgba(96, 165, 250, 0.4));
 }
 
 .header-links {

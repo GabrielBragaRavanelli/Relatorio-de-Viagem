@@ -112,19 +112,19 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 46px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    background-color: var(--branco);
-    padding: 4px 10px;
+    background-color: transparent;
+    padding: 0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .logotipo-AJBorges img:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.04);
+    filter: drop-shadow(0 4px 12px rgba(96, 165, 250, 0.4));
 }
 
 .header-links {
@@ -1247,3 +1247,57 @@ footer {
         padding: 0 20px 30px;
     }
 }
+
+/* ==========================================
+   SISTEMA DE ANIMAÇÕES SCROLL REVEAL
+   ========================================== */
+
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale,
+.reveal-fade {
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-up {
+    transform: translateY(35px);
+}
+
+.reveal-left {
+    transform: translateX(-40px);
+}
+
+.reveal-right {
+    transform: translateX(40px);
+}
+
+.reveal-scale {
+    transform: scale(0.92);
+}
+
+.reveal-fade {
+    transform: scale(0.96);
+}
+
+/* Estado ativo quando elemento entra na viewport */
+.revealed {
+    opacity: 1 !important;
+    transform: translate(0, 0) scale(1) !important;
+}
+
+/* Cascata sequencial (Efeito dominó / Stagger) */
+.stagger-delay:nth-child(1) { transition-delay: 0.05s; }
+.stagger-delay:nth-child(2) { transition-delay: 0.14s; }
+.stagger-delay:nth-child(3) { transition-delay: 0.22s; }
+.stagger-delay:nth-child(4) { transition-delay: 0.30s; }
+.stagger-delay:nth-child(5) { transition-delay: 0.38s; }
+.stagger-delay:nth-child(6) { transition-delay: 0.46s; }
+.stagger-delay:nth-child(7) { transition-delay: 0.54s; }
+.stagger-delay:nth-child(8) { transition-delay: 0.62s; }
+.stagger-delay:nth-child(9) { transition-delay: 0.70s; }
+.stagger-delay:nth-child(10) { transition-delay: 0.78s; }
+

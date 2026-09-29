@@ -58,20 +58,6 @@ body {
     --azul-info-escuro: #1d4ed8;
     --azul-info-fundo: #eff6ff;
     --azul-info-borda: #bfdbfe;
-    --cor-pedagio: #0284c7;
-    --cor-pedagio-escuro: #0369a1;
-    --cor-pedagio-bg: #f0f9ff;
-    --cor-pedagio-border: #bae6fd;
-    --cor-imposto-federal: #dc2626;
-    --cor-imposto-federal-escuro: #991b1b;
-    --cor-imposto-federal-bg: #fef2f2;
-    --cor-imposto-federal-border: #fecaca;
-    --cor-ml-amarelo: #eab308;
-    --cor-ml-amarelo-suave: #fef9c3;
-    --cor-comissao-roxo: #8b5cf6;
-    --cor-comissao-roxo-escuro: #5b21b6;
-    --cor-comissao-roxo-bg: #f5f3ff;
-    --cor-comissao-roxo-border: #ddd6fe;
     --sombra-card: 0 4px 18px rgba(0, 0, 0, 0.06);
     --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.04);
     --sombra-elevada: 0 10px 25px rgba(61, 61, 144, 0.15);
@@ -112,19 +98,19 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 46px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    background-color: var(--branco);
-    padding: 4px 10px;
+    background-color: transparent;
+    padding: 0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .logotipo-AJBorges img:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.04);
+    filter: drop-shadow(0 4px 12px rgba(96, 165, 250, 0.4));
 }
 
 .header-links {
@@ -151,7 +137,8 @@ header {
 }
 
 .lista-links li a:hover,
-.lista-links li a.link-ativo {
+.lista-links li a.link-ativo,
+.lista-links li a.active {
     background-color: rgba(255, 255, 255, 0.18);
     color: var(--branco);
     transform: translateY(-1px);
@@ -318,15 +305,6 @@ header {
     margin: 4px 6px;
 }
 
-/* Suporte aos links ativos */
-.lista-links li a:hover,
-.lista-links li a.link-ativo,
-.lista-links li a.active {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: var(--branco);
-    transform: translateY(-1px);
-}
-
 /* --- CONTEÚDO PRINCIPAL (NOSSOS FRETES) --- */
 
 main {
@@ -337,26 +315,48 @@ main {
     flex-direction: column;
 }
 
-/* HERO NOSSOS FRETES */
+/* HERO NOSSOS FRETES COM FOTO SCANIA */
 .fretes-hero {
-    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 60%, var(--azul-ajborges-medio) 100%);
-    color: var(--branco);
-    padding: 70px 24px 80px;
-    text-align: center;
     position: relative;
+    width: 100%;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    padding: 80px 24px;
+    color: var(--branco);
+    text-align: center;
 }
 
-.fretes-hero::before {
-    content: '';
+.fretes-hero-bg {
     position: absolute;
-    top: -40%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.fretes-hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+}
+
+.fretes-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.92) 0%,
+        rgba(61, 61, 144, 0.88) 60%,
+        rgba(43, 43, 109, 0.92) 100%
+    );
 }
 
 .fretes-hero-container {
@@ -367,429 +367,212 @@ main {
 }
 
 .fretes-hero-titulo {
-    font-size: 40px;
+    font-size: 38px;
     font-weight: 800;
     line-height: 1.2;
     margin-bottom: 16px;
     letter-spacing: -0.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .fretes-hero-subtitulo {
     font-size: 16px;
     line-height: 1.65;
-    color: rgba(255, 255, 255, 0.9);
-    max-width: 720px;
+    color: #e2e8f0;
+    max-width: 700px;
     margin: 0 auto;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* SEÇÃO DE FILTROS DE FRETES */
-.fretes-filtros-section {
+/* SEÇÃO CENTRAL PORTAL FRETEBRAS */
+.fretebras-portal-section {
     padding: 0 24px;
-    margin-top: -35px;
+    margin-top: -50px;
     position: relative;
     z-index: 10;
 }
 
-.filtros-container {
-    max-width: 1200px;
+.fretebras-portal-container {
+    max-width: 1000px;
     margin: 0 auto;
+}
+
+.fretebras-card-destaque {
     background: #ffffff;
-    border-radius: 18px;
-    padding: 24px 28px;
-    border: 1px solid var(--cinza-borda);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
-}
-
-.filtros-form {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr) auto;
-    gap: 16px;
-    align-items: flex-end;
-}
-
-.filtro-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.filtro-item label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--cinza-escuro);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.filtro-select,
-.filtro-input {
-    width: 100%;
-    padding: 11px 14px;
+    border-radius: 20px;
+    padding: 48px 40px;
     border: 1.5px solid var(--cinza-borda);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    color: var(--cinza-escuro);
-    background-color: #ffffff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 12px 35px rgba(27, 27, 78, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+    text-align: center;
 }
 
-.filtro-select:focus,
-.filtro-input:focus {
-    outline: none;
-    border-color: var(--azul-ajborges);
-    box-shadow: 0 0 0 3px var(--azul-ajborges-alpha);
+.fretebras-card-header {
+    max-width: 760px;
+    margin: 0 auto 36px;
 }
 
-.btn-filtrar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background-color: var(--azul-ajborges);
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 22px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.25);
-    height: 44px;
-}
-
-.btn-filtrar:hover {
-    background-color: var(--azul-ajborges-escuro);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(61, 61, 144, 0.35);
-}
-
-/* SEÇÃO MURAL DE FRETES */
-.fretes-mural-section {
-    padding: 60px 24px;
-}
-
-.fretes-mural-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.mural-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.mural-titulo-bloco h2 {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--cinza-escuro);
-    margin-bottom: 6px;
-}
-
-.mural-titulo-bloco p {
-    font-size: 14px;
-    color: var(--cinza-texto);
-}
-
-.mural-contador-tag {
+.fretebras-badge-tag {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background-color: var(--azul-ajborges-suave);
-    color: var(--azul-ajborges);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 16px;
-    border-radius: 999px;
-    border: 1px solid rgba(61, 61, 144, 0.15);
-}
-
-.mural-contador-tag .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--verde-sucesso);
-}
-
-.fretes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-.frete-card {
-    background: #ffffff;
-    border-radius: 18px;
-    border: 1px solid var(--cinza-borda);
-    padding: 24px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.frete-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(61, 61, 144, 0.14);
-    border-color: var(--azul-ajborges-medio);
-}
-
-.frete-badge-status {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.status-imediato {
     background-color: var(--verde-sucesso-fundo);
     color: var(--verde-sucesso-escuro);
     border: 1px solid var(--verde-sucesso-borda);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 18px;
 }
 
-.status-programado {
-    background-color: var(--azul-ajborges-suave);
+.live-pulse {
+    width: 8px;
+    height: 8px;
+    background-color: var(--verde-sucesso);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: livePulseAnim 1.8s infinite;
+}
+
+@keyframes livePulseAnim {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.fretebras-titulo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 14px;
+    line-height: 1.3;
+}
+
+.fretebras-desc {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--cinza-texto);
+}
+
+.fretebras-desc strong {
     color: var(--azul-ajborges);
-    border: 1px solid rgba(61, 61, 144, 0.18);
 }
 
-.status-retorno {
-    background-color: #fffbeb;
-    color: #b45309;
-    border: 1px solid #fde68a;
+.fretebras-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+    text-align: left;
 }
 
-.frete-codigo {
-    font-size: 12px;
-    color: var(--cinza-medio);
-    font-weight: 600;
-    margin-bottom: 12px;
-    display: block;
-}
-
-.frete-rota-box {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px dashed var(--cinza-borda);
-}
-
-.rota-ponto {
+.info-ponto {
+    background-color: #f8fafc;
+    border: 1px solid var(--cinza-borda);
+    border-radius: 14px;
+    padding: 18px 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 14px;
 }
 
-.rota-ponto:last-child {
-    margin-bottom: 0;
-}
-
-.rota-marcador {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
+.info-ponto svg {
+    width: 24px;
+    height: 24px;
+    color: var(--azul-ajborges);
     flex-shrink: 0;
 }
 
-.marcador-origem {
-    background-color: var(--azul-ajborges);
-    box-shadow: 0 0 0 3px var(--azul-ajborges-suave);
-}
-
-.marcador-destino {
-    background-color: var(--verde-sucesso);
-    box-shadow: 0 0 0 3px var(--verde-sucesso-fundo);
-}
-
-.rota-linha-conexao {
-    width: 2px;
-    height: 14px;
-    background-color: #cbd5e1;
-    margin-left: 6px;
-    margin-top: -6px;
-    margin-bottom: -6px;
-}
-
-.rota-cidade {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--cinza-escuro);
-}
-
-.rota-estado {
-    font-size: 13px;
-    color: var(--cinza-medio);
-    font-weight: 500;
-}
-
-.frete-specs-lista {
-    list-style: none;
+.info-ponto div {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 24px;
 }
 
-.spec-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
+.info-ponto strong {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 2px;
 }
 
-.spec-label {
+.info-ponto span {
+    font-size: 12px;
     color: var(--cinza-medio);
+}
+
+.fretebras-acoes {
     display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.spec-label svg {
-    width: 15px;
-    height: 15px;
-    color: var(--azul-ajborges);
-}
-
-.spec-valor {
-    color: var(--cinza-escuro);
-    font-weight: 600;
-    text-align: right;
-}
-
-.frete-card-footer {
-    margin-top: auto;
-    display: flex;
-    gap: 10px;
-}
-
-.btn-pegar-frete {
-    width: 100%;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background-color: var(--azul-ajborges);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 18px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.2);
+    gap: 18px;
+    flex-wrap: wrap;
 }
 
-.btn-pegar-frete:hover {
-    background-color: var(--azul-ajborges-escuro);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(61, 61, 144, 0.3);
-}
-
-/* SEÇÃO COMO FUNCIONA */
-.como-funciona-section {
-    padding: 80px 24px;
-    background-color: #ffffff;
-    border-bottom: 1px solid var(--cinza-borda);
-    border-top: 1px solid var(--cinza-borda);
-}
-
-.como-funciona-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.como-funciona-header {
-    text-align: center;
-    max-width: 720px;
-    margin: 0 auto 50px;
-}
-
-.como-funciona-titulo {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--cinza-escuro);
-    margin-bottom: 12px;
-}
-
-.como-funciona-subtitulo {
-    font-size: 15px;
-    color: var(--cinza-texto);
-    line-height: 1.6;
-}
-
-.passos-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-}
-
-.passo-card {
-    background: var(--fundo-principal);
-    border-radius: 18px;
-    padding: 30px 20px;
-    border: 1px solid var(--cinza-borda);
-    display: flex;
-    flex-direction: column;
+.btn-fretebras-principal {
+    display: inline-flex;
     align-items: center;
-    text-align: center;
-    position: relative;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--azul-ajborges) 0%, var(--azul-ajborges-escuro) 100%);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 16px 36px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(61, 61, 144, 0.3);
+    transition: all 0.25s ease;
+}
+
+.btn-fretebras-principal:hover {
+    background: linear-gradient(135deg, var(--azul-ajborges-medio) 0%, var(--azul-ajborges) 100%);
+    box-shadow: 0 10px 25px rgba(61, 61, 144, 0.45);
+    transform: translateY(-2px);
+}
+
+.btn-fretebras-principal svg {
     transition: transform 0.25s ease;
 }
 
-.passo-card:hover {
-    transform: translateY(-4px);
+.btn-fretebras-principal:hover svg {
+    transform: translate(3px, -3px);
 }
 
-.passo-numero {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: var(--azul-ajborges);
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 800;
-    display: flex;
+.btn-fretebras-whatsapp {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.3);
-}
-
-.passo-titulo {
-    font-size: 16px;
+    gap: 8px;
+    background-color: #25d366;
+    color: #ffffff;
+    font-size: 14.5px;
     font-weight: 700;
-    color: var(--cinza-escuro);
-    margin-bottom: 8px;
+    padding: 16px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.25);
+    transition: all 0.25s ease;
 }
 
-.passo-desc {
-    font-size: 13px;
-    color: var(--cinza-texto);
-    line-height: 1.5;
+.btn-fretebras-whatsapp:hover {
+    background-color: #1eb954;
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.35);
+    transform: translateY(-2px);
 }
 
-/* SEÇÃO VANTAGENS DO AGREGADO */
+/* SEÇÃO 3 BLOCOS DE VANTAGENS (100% ESTÁTICOS) */
 .vantagens-section {
-    padding: 80px 24px;
-    background-color: var(--fundo-principal);
-    border-bottom: 1px solid var(--cinza-borda);
+    padding: 60px 24px 80px;
+    width: 100%;
 }
 
 .vantagens-container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
@@ -802,17 +585,25 @@ main {
 .vantagem-card {
     background: #ffffff;
     border-radius: 16px;
-    padding: 28px 22px;
+    padding: 26px 22px;
     border: 1px solid var(--cinza-borda);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
     display: flex;
     align-items: flex-start;
     gap: 16px;
+    transform: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vantagem-card:hover {
+    transform: none !important;
+    border-color: rgba(61, 61, 144, 0.25);
+    box-shadow: 0 6px 20px rgba(61, 61, 144, 0.08);
 }
 
 .vantagem-icone {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     background-color: var(--azul-ajborges-suave);
     color: var(--azul-ajborges);
@@ -828,9 +619,9 @@ main {
 }
 
 .vantagem-info h4 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    color: var(--cinza-escuro);
+    color: #1e293b;
     margin-bottom: 6px;
 }
 
@@ -840,100 +631,10 @@ main {
     line-height: 1.5;
 }
 
-/* SEÇÃO CTA FRETES */
-.fretes-cta-section {
-    padding: 70px 24px;
-    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 100%);
-    color: #ffffff;
-    text-align: center;
-}
-
-.fretes-cta-container {
-    max-width: 760px;
-    margin: 0 auto;
-}
-
-.fretes-cta-titulo {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 14px;
-    line-height: 1.3;
-}
-
-.fretes-cta-subtitulo {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 30px;
-    line-height: 1.6;
-}
-
-.fretes-cta-botoes {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.btn-cta-branco {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #ffffff;
-    color: var(--azul-ajborges-escuro);
-    font-size: 15px;
-    font-weight: 700;
-    padding: 14px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.btn-cta-branco:hover {
-    background-color: #f1f5f9;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.btn-cta-whatsapp-grande {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #25d366;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 14px 28px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
-}
-
-.btn-cta-whatsapp-grande:hover {
-    background-color: #1eb954;
-    transform: translateY(-2px);
-}
-
 /* RESPONSIVIDADE DE NOSSOS FRETES */
 @media (max-width: 1024px) {
-    .filtros-form {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .btn-filtrar {
-        grid-column: 1 / -1;
-    }
-
-    .fretes-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-
-    .passos-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+    .fretebras-info-grid {
+        grid-template-columns: 1fr;
     }
 
     .vantagens-grid {
@@ -943,7 +644,8 @@ main {
 
 @media (max-width: 640px) {
     .fretes-hero {
-        padding: 44px 16px 60px;
+        padding: 50px 16px 70px;
+        min-height: 300px;
     }
 
     .fretes-hero-titulo {
@@ -954,57 +656,87 @@ main {
         font-size: 14px;
     }
 
-    .filtros-container {
-        padding: 20px 16px;
+    .fretebras-portal-section {
+        padding: 0 16px;
+        margin-top: -35px;
     }
 
-    .filtros-form {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .fretebras-card-destaque {
+        padding: 30px 18px;
     }
 
-    .fretes-mural-section {
-        padding: 40px 16px;
+    .fretebras-titulo {
+        font-size: 22px;
     }
 
-    .fretes-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .como-funciona-section,
-    .vantagens-section {
-        padding: 50px 16px;
-    }
-
-    .como-funciona-titulo {
-        font-size: 24px;
-    }
-
-    .passos-grid,
-    .vantagens-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
-    .fretes-cta-section {
-        padding: 50px 16px;
-    }
-
-    .fretes-cta-titulo {
-        font-size: 24px;
-    }
-
-    .fretes-cta-botoes {
+    .fretebras-acoes {
         flex-direction: column;
+        width: 100%;
     }
 
-    .btn-cta-branco,
-    .btn-cta-whatsapp-grande {
+    .btn-fretebras-principal,
+    .btn-fretebras-whatsapp {
         width: 100%;
         justify-content: center;
     }
+
+    .vantagens-section {
+        padding: 40px 16px 60px;
+    }
+
+    .vantagens-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }
+
+/* --- SISTEMA DE ANIMAÇÕES SCROLL REVEAL (ESTILO MARILAN) --- */
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale,
+.reveal-fade {
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-up {
+    transform: translateY(35px);
+}
+
+.reveal-left {
+    transform: translateX(-40px);
+}
+
+.reveal-right {
+    transform: translateX(40px);
+}
+
+.reveal-scale {
+    transform: scale(0.92);
+}
+
+.reveal-fade {
+    transform: scale(0.96);
+}
+
+.revealed {
+    opacity: 1 !important;
+    transform: translate(0, 0) scale(1) !important;
+}
+
+/* Efeito Cascata / Stagger Delay */
+.stagger-delay:nth-child(1) { transition-delay: 0.05s; }
+.stagger-delay:nth-child(2) { transition-delay: 0.14s; }
+.stagger-delay:nth-child(3) { transition-delay: 0.23s; }
+.stagger-delay:nth-child(4) { transition-delay: 0.32s; }
+.stagger-delay:nth-child(5) { transition-delay: 0.41s; }
+.stagger-delay:nth-child(6) { transition-delay: 0.50s; }
+.stagger-delay:nth-child(7) { transition-delay: 0.59s; }
+.stagger-delay:nth-child(8) { transition-delay: 0.68s; }
+.stagger-delay:nth-child(9) { transition-delay: 0.77s; }
+.stagger-delay:nth-child(10) { transition-delay: 0.86s; }
 
 /* --- FOOTER --- */
 

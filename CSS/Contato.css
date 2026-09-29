@@ -112,19 +112,19 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 46px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    background-color: var(--branco);
-    padding: 4px 10px;
+    background-color: transparent;
+    padding: 0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .logotipo-AJBorges img:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.04);
+    filter: drop-shadow(0 4px 12px rgba(96, 165, 250, 0.4));
 }
 
 .header-links {
@@ -331,24 +331,41 @@ main {
 
 /* HERO CONTATO */
 .contato-hero {
-    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 60%, var(--azul-ajborges-medio) 100%);
-    color: var(--branco);
-    padding: 60px 24px 70px;
-    text-align: center;
     position: relative;
+    background-image: url('../Imagens/scaniaamarela.jpeg');
+    background-size: cover;
+    background-position: center 52%;
+    background-repeat: no-repeat;
+    color: var(--branco);
+    padding: 75px 24px 85px;
+    text-align: center;
     overflow: hidden;
+}
+
+.contato-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(30, 30, 92, 0.90) 0%,
+        rgba(61, 61, 144, 0.85) 50%,
+        rgba(43, 43, 109, 0.94) 100%
+    );
+    z-index: 1;
 }
 
 .contato-hero::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(61, 61, 144, 0.35) 0%, rgba(15, 23, 42, 0.75) 100%);
+    z-index: 1;
 }
 
 .contato-hero-container {
@@ -362,16 +379,18 @@ main {
     font-size: 38px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     letter-spacing: -0.5px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .contato-hero-subtitulo {
     font-size: 16px;
-    line-height: 1.65;
-    color: rgba(255, 255, 255, 0.9);
-    max-width: 680px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 620px;
     margin: 0 auto;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
 }
 
 /* CARDS DE CANAIS RÁPIDOS */
@@ -911,6 +930,54 @@ main {
         justify-content: center;
     }
 }
+
+/* --- SISTEMA DE ANIMAÇÕES SCROLL REVEAL (ESTILO MARILAN) --- */
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale,
+.reveal-fade {
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-up {
+    transform: translateY(35px);
+}
+
+.reveal-left {
+    transform: translateX(-40px);
+}
+
+.reveal-right {
+    transform: translateX(40px);
+}
+
+.reveal-scale {
+    transform: scale(0.92);
+}
+
+.reveal-fade {
+    transform: scale(0.96);
+}
+
+.revealed {
+    opacity: 1 !important;
+    transform: translate(0, 0) scale(1) !important;
+}
+
+/* Efeito Cascata / Stagger Delay */
+.stagger-delay:nth-child(1) { transition-delay: 0.05s; }
+.stagger-delay:nth-child(2) { transition-delay: 0.14s; }
+.stagger-delay:nth-child(3) { transition-delay: 0.23s; }
+.stagger-delay:nth-child(4) { transition-delay: 0.32s; }
+.stagger-delay:nth-child(5) { transition-delay: 0.41s; }
+.stagger-delay:nth-child(6) { transition-delay: 0.50s; }
+.stagger-delay:nth-child(7) { transition-delay: 0.59s; }
+.stagger-delay:nth-child(8) { transition-delay: 0.68s; }
+.stagger-delay:nth-child(9) { transition-delay: 0.77s; }
+.stagger-delay:nth-child(10) { transition-delay: 0.86s; }
 
 /* --- FOOTER --- */
 

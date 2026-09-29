@@ -113,19 +113,19 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 46px;
+    height: 48px;
     width: auto;
     object-fit: contain;
-    background-color: var(--branco);
-    padding: 4px 10px;
+    background-color: transparent;
+    padding: 0;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .logotipo-AJBorges img:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.04);
+    filter: drop-shadow(0 4px 12px rgba(96, 165, 250, 0.4));
 }
 
 .header-links {
@@ -357,34 +357,16 @@ main {
     gap: 10px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.03);
-    transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s ease, border-color 0.35s ease;
-}
-
-
-.bloco-portalmotorista {
-    animation: flutuar 4.2s ease-in-out infinite;
-}
-
-.bloco-semlogin {
-    animation: flutuar 4.2s ease-in-out infinite 0.7s;
-}
-
-.bloco-comlogin {
-    animation: flutuar 4.2s ease-in-out infinite 1.4s;
-}
-
-.bloco-multicadastro {
-    animation: flutuar 4.2s ease-in-out infinite 2.1s;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .bloco-portalmotorista:hover,
 .bloco-semlogin:hover,
 .bloco-comlogin:hover,
 .bloco-multicadastro:hover {
-    animation-play-state: paused;
-    transform: translateY(-10px);
+    transform: none;
     border-color: var(--azul-ajborges);
-    box-shadow: 0 20px 35px rgba(61, 61, 144, 0.16), 0 8px 16px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 12px 28px rgba(61, 61, 144, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .bloco-cabecalho {

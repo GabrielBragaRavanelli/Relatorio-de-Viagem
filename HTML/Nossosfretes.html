@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../CSS/Nossofretes.css">
-    <link rel="icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
-    <link rel="shortcut icon" type="image/png" href="../Imagens/Favicon - AJBorges branca.png">
-    <link rel="apple-touch-icon" href="../Imagens/Favicon - AJBorges branca.png">
+    <link rel="icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
+    <link rel="shortcut icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
+    <link rel="apple-touch-icon" href="../Imagens/iconeAJb-prata.jpeg">
     <title>Nossos Fretes - AJBorges Transportes</title>
 </head>
 
@@ -15,8 +15,8 @@
     <header>
         <div class="header-AJBorges">
             <div class="logotipo-AJBorges">
-                <a href="index.html" class="logo-link">
-                    <img src="../Imagens/Favicon - AJBorges branca.png" alt="AJBorges Transportes">
+                <a href="index.html" class="logo-link" aria-label="Página inicial AJBorges Transportes">
+                    <img src="../Imagens/iconeAJb-prata.jpeg" alt="AJBorges Transportes">
                 </a>
             </div>
             <nav class="header-links" aria-label="Navegação principal">
@@ -72,509 +72,100 @@
     </header>
 
     <main>
-        <!-- Hero da Página Nossos Fretes -->
+        <!-- Hero com Imagem Real Scania e Overlay Executivo -->
         <section class="fretes-hero">
-            <div class="fretes-hero-container">
+            <div class="fretes-hero-bg">
+                <img src="../Imagens/scaniaamarela.jpeg" alt="Scania AJBorges na Rodovia">
+                <div class="fretes-hero-overlay"></div>
+            </div>
+            <div class="fretes-hero-container reveal-up">
                 <h1 class="fretes-hero-titulo">Nossos Fretes &amp; Cargas Disponíveis</h1>
                 <p class="fretes-hero-subtitulo">
-                    Rotas contínuas, fretes de ida e volta, adiantamento rápido e pagamento pontual para caminhoneiros autônomos e transportadoras parceiras em todo o Brasil.
+                    Rotas contínuas para todo o Brasil, adiantamento garantido, fretes de retorno e pontualidade máxima para você rodar com segurança.
                 </p>
             </div>
         </section>
 
-        <!-- Barra de Filtros e Pesquisa -->
-        <section class="fretes-filtros-section" aria-label="Filtro de Fretes">
-            <div class="filtros-container">
-                <form class="filtros-form" id="form-filtros-fretes" onsubmit="event.preventDefault(); filtrarFretes();">
-                    <div class="filtro-item">
-                        <label for="filtro-origem">Origem (Saída)</label>
-                        <select id="filtro-origem" class="filtro-select">
-                            <option value="">Todas as Origens</option>
-                            <option value="SP">São Paulo (Marília e Região)</option>
-                            <option value="RS">Rio Grande do Sul (Passo Fundo / Garibaldi)</option>
-                            <option value="SC">Santa Catarina</option>
-                            <option value="ES">Espírito Santo (Vitória)</option>
-                            <option value="MG">Minas Gerais</option>
-                            <option value="PR">Paraná</option>
-                        </select>
+        <!-- Seção Central Integrada ao Fretebras -->
+        <section class="fretebras-portal-section">
+            <div class="fretebras-portal-container">
+                <div class="fretebras-card-destaque reveal-up">
+                    <div class="fretebras-card-header">
+                        <div class="fretebras-badge-tag">
+                            <span class="live-pulse"></span>
+                            Cargas Atualizadas em Tempo Real
+                        </div>
+                        <h2 class="fretebras-titulo">Mural Oficial AJBorges na Fretebras</h2>
+                        <p class="fretebras-desc">
+                            Todos os nossos fretes abertos, origens, destinos, tipos de veículos e condições de carregamento são gerenciados e publicados diretamente em nosso painel oficial na <strong>Fretebras</strong>.
+                        </p>
                     </div>
 
-                    <div class="filtro-item">
-                        <label for="filtro-destino">Destino (Entrega)</label>
-                        <select id="filtro-destino" class="filtro-select">
-                            <option value="">Todos os Destinos</option>
-                            <option value="SP">São Paulo</option>
-                            <option value="RS">Rio Grande do Sul</option>
-                            <option value="SC">Santa Catarina</option>
-                            <option value="RJ">Rio de Janeiro</option>
-                            <option value="MG">Minas Gerais</option>
-                            <option value="ES">Espírito Santo</option>
-                            <option value="PR">Paraná</option>
-                        </select>
-                    </div>
-
-                    <div class="filtro-item">
-                        <label for="filtro-veiculo">Tipo de Conjunto</label>
-                        <select id="filtro-veiculo" class="filtro-select">
-                            <option value="">Todos os Veículos</option>
-                            <option value="bau">Carreta Baú Fechado</option>
-                            <option value="sider">Sider / Lonado</option>
-                            <option value="bitrem">Bitrem / Rodotrem</option>
-                            <option value="ls">Carreta LS</option>
-                        </select>
-                    </div>
-
-                    <div class="filtro-item">
-                        <label for="filtro-busca">Palavra-chave / Carga</label>
-                        <input type="text" id="filtro-busca" class="filtro-input" placeholder="Ex: Alimentos, Vinhos, Sucos...">
-                    </div>
-
-                    <button type="submit" class="btn-filtrar">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <span>Buscar Fretes</span>
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- Mural de Fretes em Aberto -->
-        <section class="fretes-mural-section" id="mural">
-            <div class="fretes-mural-container">
-                <div class="mural-header">
-                    <div class="mural-titulo-bloco">
-                        <h2>Fretes Disponíveis para Carregamento</h2>
-                        <p>Oportunidades atualizadas diariamente pela central logística AJBorges.</p>
-                    </div>
-                    <div class="mural-contador-tag">
-                        <span class="dot"></span>
-                        <span id="contador-fretes">6 Fretes Ativos Hoje</span>
-                    </div>
-                </div>
-
-                <div class="fretes-grid" id="lista-fretes">
-                    <!-- Frete 1: Marília SP -> Porto Alegre RS -->
-                    <div class="frete-card" data-origem="SP" data-destino="RS" data-veiculo="bau">
-                        <span class="frete-badge-status status-imediato">Saída Imediata</span>
-                        <span class="frete-codigo">CÓD: AJB-8421</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Marília</span>
-                                    <span class="rota-estado"> • SP</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">Porto Alegre</span>
-                                    <span class="rota-estado"> • RS</span>
-                                </div>
+                    <div class="fretebras-info-grid">
+                        <div class="info-ponto reveal-up stagger-delay">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <div>
+                                <strong>Disponibilidade Diária</strong>
+                                <span>Cargas novas publicadas todos os dias</span>
                             </div>
                         </div>
 
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Carreta Baú / Sider</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Alimentos (Biscoitos/Massas)</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">27 Toneladas (Paletizado)</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">Adiantamento + Pedágio Incluso</span>
-                            </li>
-                        </ul>
+                        <div class="info-ponto reveal-up stagger-delay">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <div>
+                                <strong>Segurança &amp; Confiabilidade</strong>
+                                <span>Empresa verificada e homologada</span>
+                            </div>
+                        </div>
 
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8421%20(Marília%20SP%20para%20Porto%20Alegre%20RS)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
+                        <div class="info-ponto reveal-up stagger-delay">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                            </svg>
+                            <div>
+                                <strong>Variedade de Conjuntos</strong>
+                                <span>Carretas Baú, Sider, Bitrem e LS</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Frete 2: Garibaldi RS -> São Paulo SP -->
-                    <div class="frete-card" data-origem="RS" data-destino="SP" data-veiculo="bau">
-                        <span class="frete-badge-status status-programado">Programado Semanal</span>
-                        <span class="frete-codigo">CÓD: AJB-8422</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Garibaldi</span>
-                                    <span class="rota-estado"> • RS</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">São Paulo</span>
-                                    <span class="rota-estado"> • SP (Capital e Região)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Carreta Baú / Sider</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Vinhos, Espumantes e Sucos</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">25 Toneladas</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">À Vista na Entrega</span>
-                            </li>
-                        </ul>
-
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8422%20(Garibaldi%20RS%20para%20São%20Paulo%20SP)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Frete 3: Passo Fundo RS -> Marília SP -->
-                    <div class="frete-card" data-origem="RS" data-destino="SP" data-veiculo="bitrem">
-                        <span class="frete-badge-status status-imediato">Saída Imediata</span>
-                        <span class="frete-codigo">CÓD: AJB-8423</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Passo Fundo</span>
-                                    <span class="rota-estado"> • RS</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">Marília</span>
-                                    <span class="rota-estado"> • SP</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Bitrem / Carreta LS Baú</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Grãos / Carga Geral Agro</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">36 Toneladas</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">Adiantamento em Cartão</span>
-                            </li>
-                        </ul>
-
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8423%20(Passo%20Fundo%20RS%20para%20Marília%20SP)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Frete 4: Marília SP -> Vitória ES -->
-                    <div class="frete-card" data-origem="SP" data-destino="ES" data-veiculo="ls">
-                        <span class="frete-badge-status status-programado">Frete Contínuo</span>
-                        <span class="frete-codigo">CÓD: AJB-8424</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Marília</span>
-                                    <span class="rota-estado"> • SP</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">Vitória / Serra</span>
-                                    <span class="rota-estado"> • ES</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Carreta LS Baú</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Doces e Balas</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">28 Toneladas</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">Frete Direto + Retorno Garantido</span>
-                            </li>
-                        </ul>
-
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8424%20(Marília%20SP%20para%20Vitória%20ES)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Frete 5: Criciúma SC -> Campinas SP -->
-                    <div class="frete-card" data-origem="SC" data-destino="SP" data-veiculo="sider">
-                        <span class="frete-badge-status status-imediato">Saída Imediata</span>
-                        <span class="frete-codigo">CÓD: AJB-8425</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Criciúma</span>
-                                    <span class="rota-estado"> • SC</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">Campinas</span>
-                                    <span class="rota-estado"> • SP</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Sider / Carreta Baú</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Embalagens Descartáveis</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">22 Toneladas (Volume Alto)</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">Adiantamento 80% + Saldo 24h</span>
-                            </li>
-                        </ul>
-
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8425%20(Criciúma%20SC%20para%20Campinas%20SP)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Frete 6: Belo Horizonte MG -> Marília SP -->
-                    <div class="frete-card" data-origem="MG" data-destino="SP" data-veiculo="bau">
-                        <span class="frete-badge-status status-retorno">Frete de Retorno</span>
-                        <span class="frete-codigo">CÓD: AJB-8426</span>
-                        
-                        <div class="frete-rota-box">
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-origem"></span>
-                                <div>
-                                    <span class="rota-cidade">Belo Horizonte</span>
-                                    <span class="rota-estado"> • MG</span>
-                                </div>
-                            </div>
-                            <div class="rota-linha-conexao"></div>
-                            <div class="rota-ponto">
-                                <span class="rota-marcador marcador-destino"></span>
-                                <div>
-                                    <span class="rota-cidade">Marília</span>
-                                    <span class="rota-estado"> • SP</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="frete-specs-lista">
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-                                    Veículo:
-                                </span>
-                                <span class="spec-valor">Carreta Baú Fechado</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    Produto:
-                                </span>
-                                <span class="spec-valor">Matéria-prima Industrial</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                                    Peso / Volume:
-                                </span>
-                                <span class="spec-valor">26 Toneladas</span>
-                            </li>
-                            <li class="spec-item">
-                                <span class="spec-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    Pagamento:
-                                </span>
-                                <span class="spec-valor">Pagamento Rápido na Descarga</span>
-                            </li>
-                        </ul>
-
-                        <div class="frete-card-footer">
-                            <a href="https://wa.me/5514996527387?text=Olá!%20Tenho%20interesse%20no%20frete%20código%20AJB-8426%20(Belo%20Horizonte%20MG%20para%20Marília%20SP)." target="_blank" rel="noopener noreferrer" class="btn-pegar-frete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                <span>Pegar Este Frete</span>
-                            </a>
-                        </div>
+                    <div class="fretebras-acoes">
+                        <a href="https://www.fretebras.com.br/fretes/grupo-empresa-8285" target="_blank" rel="noopener noreferrer" class="btn-fretebras-principal">
+                            <span>Acessar Fretes Disponíveis na Fretebras</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                <polyline points="7 7 17 7 17 17"></polyline>
+                            </svg>
+                        </a>
+                        <a href="https://wa.me/5514996527387?text=Olá!%20Gostaria%20de%20consultar%20fretes%20disponíveis%20na%20AJBorges." target="_blank" rel="noopener noreferrer" class="btn-fretebras-whatsapp">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            </svg>
+                            <span>Falar com a Mesa de Fretes</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Seção Como Funciona para Agregados -->
-        <section class="como-funciona-section">
-            <div class="como-funciona-container">
-                <div class="como-funciona-header">
-                    <h2 class="como-funciona-titulo">Como Carregar com a AJBorges</h2>
-                    <p class="como-funciona-subtitulo">
-                        Processo simples, transparente e sem complicação burocrática para você rodar com segurança.
-                    </p>
-                </div>
-
-                <div class="passos-grid">
-                    <div class="passo-card">
-                        <span class="passo-numero">1</span>
-                        <h3 class="passo-titulo">Escolha o Frete</h3>
-                        <p class="passo-desc">Consulte as rotas disponíveis no mural ou solicite opções com nossa equipe via WhatsApp.</p>
-                    </div>
-
-                    <div class="passo-card">
-                        <span class="passo-numero">2</span>
-                        <h3 class="passo-titulo">Cadastro Rápido</h3>
-                        <p class="passo-desc">Envie seus dados e documentação do conjunto através da ficha online simplificada.</p>
-                    </div>
-
-                    <div class="passo-card">
-                        <span class="passo-numero">3</span>
-                        <h3 class="passo-titulo">Adiantamento &amp; Carga</h3>
-                        <p class="passo-desc">Receba o adiantamento de combustível e pedágio garantido antes de iniciar a viagem.</p>
-                    </div>
-
-                    <div class="passo-card">
-                        <span class="passo-numero">4</span>
-                        <h3 class="passo-titulo">Descarga &amp; Saldo</h3>
-                        <p class="passo-desc">Comprovante de entrega validado e saldo liquidado diretamente na sua conta com pontualidade.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Seção Vantagens do Agregado -->
+        <!-- Seção 3 Blocos de Vantagens (100% Estáticos) -->
         <section class="vantagens-section">
             <div class="vantagens-container">
                 <div class="vantagens-grid">
-                    <div class="vantagem-card">
+                    <div class="vantagem-card reveal-up stagger-delay">
                         <div class="vantagem-icone">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                            </svg>
                         </div>
                         <div class="vantagem-info">
                             <h4>Pagamento Rigorosamente em Dia</h4>
@@ -582,9 +173,13 @@
                         </div>
                     </div>
 
-                    <div class="vantagem-card">
+                    <div class="vantagem-card reveal-up stagger-delay">
                         <div class="vantagem-icone">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                <line x1="8" y1="2" x2="8" y2="18"></line>
+                                <line x1="16" y1="6" x2="16" y2="22"></line>
+                            </svg>
                         </div>
                         <div class="vantagem-info">
                             <h4>Fretes de Retorno Garantidos</h4>
@@ -592,34 +187,17 @@
                         </div>
                     </div>
 
-                    <div class="vantagem-card">
+                    <div class="vantagem-card reveal-up stagger-delay">
                         <div class="vantagem-icone">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
                         </div>
                         <div class="vantagem-info">
                             <h4>Apoio e Rastreamento 24h</h4>
                             <p>Central de suporte operacional e torre de controle acompanhando você na estrada.</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA Final -->
-        <section class="fretes-cta-section">
-            <div class="fretes-cta-container">
-                <h2 class="fretes-cta-titulo">Não Encontrou a Rota que Deseja?</h2>
-                <p class="fretes-cta-subtitulo">
-                    Fale diretamente com nossa mesa de fretes ou cadastre seu caminhão para ser avisado assim que surgir uma carga no seu perfil!
-                </p>
-                <div class="fretes-cta-botoes">
-                    <a href="https://wa.me/5514996527387?text=Olá!%20Gostaria%20de%20consultar%20fretes%20disponíveis%20na%20AJBorges." target="_blank" rel="noopener noreferrer" class="btn-cta-whatsapp-grande">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                        <span>Falar com Mesa de Fretes</span>
-                    </a>
-                    <a href="FichaMultiCadastro.html" class="btn-cta-branco">
-                        <span>Cadastrar Meu Veículo</span>
-                    </a>
                 </div>
             </div>
         </section>
@@ -633,8 +211,7 @@
                     <div class="footer-coluna-header">
                         <h3>Redes Sociais</h3>
                     </div>
-                    <p class="footer-descricao">Siga a AJBorges nas redes sociais e fique conectado com nossos serviços
-                        e novidades.</p>
+                    <p class="footer-descricao">Siga a AJBorges nas redes sociais e fique conectado com nossos serviços e novidades.</p>
                     <div class="links-redessociais">
                         <a href="https://www.instagram.com/ajborgestransp/" target="_blank" rel="noopener noreferrer"
                             title="Instagram" aria-label="Instagram">
@@ -724,8 +301,7 @@
                             </svg>
                             <div class="contato-info">
                                 <span class="contato-tipo">WhatsApp</span>
-                                <a href="https://wa.me/5514996527387" target="_blank" rel="noopener noreferrer">(14)
-                                    99652-7387</a>
+                                <a href="https://wa.me/5514996527387" target="_blank" rel="noopener noreferrer">(14) 99652-7387</a>
                             </div>
                         </li>
                     </ul>
@@ -754,7 +330,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; 2026 AJBorges Transporte & Logística. Todos os direitos reservados.</p>
+            <p>&copy; 2026 AJBorges Transporte &amp; Logística. Todos os direitos reservados.</p>
         </div>
     </footer>
 
@@ -786,57 +362,29 @@
                 });
             }
 
-            // Filtro dinâmico de Fretes
-            const formFiltros = document.getElementById('form-filtros-fretes');
-            const selectOrigem = document.getElementById('filtro-origem');
-            const selectDestino = document.getElementById('filtro-destino');
-            const selectVeiculo = document.getElementById('filtro-veiculo');
-            const inputBusca = document.getElementById('filtro-busca');
-            const cards = document.querySelectorAll('.frete-card');
-            const contadorEl = document.getElementById('contador-fretes');
-
-            window.filtrarFretes = function () {
-                const origem = selectOrigem ? selectOrigem.value.toUpperCase().trim() : '';
-                const destino = selectDestino ? selectDestino.value.toUpperCase().trim() : '';
-                const veiculo = selectVeiculo ? selectVeiculo.value.toLowerCase().trim() : '';
-                const busca = inputBusca ? inputBusca.value.toLowerCase().trim() : '';
-
-                let visiveis = 0;
-
-                cards.forEach(card => {
-                    const cardOrigem = (card.getAttribute('data-origem') || '').toUpperCase();
-                    const cardDestino = (card.getAttribute('data-destino') || '').toUpperCase();
-                    const cardVeiculo = (card.getAttribute('data-veiculo') || '').toLowerCase();
-                    const cardTexto = card.textContent.toLowerCase();
-
-                    const matchOrigem = !origem || cardOrigem === origem;
-                    const matchDestino = !destino || cardDestino === destino;
-                    const matchVeiculo = !veiculo || cardVeiculo === veiculo || (veiculo === 'bau' && cardVeiculo.includes('bau'));
-                    const matchBusca = !busca || cardTexto.includes(busca);
-
-                    if (matchOrigem && matchDestino && matchVeiculo && matchBusca) {
-                        card.style.display = 'flex';
-                        visiveis++;
-                    } else {
-                        card.style.display = 'none';
-                    }
+            // SISTEMA DE ANIMAÇÕES SCROLL REVEAL (ESTILO MARILAN - NATIVO & 60 FPS)
+            const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade');
+            
+            if ('IntersectionObserver' in window) {
+                const revealObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('revealed');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    root: null,
+                    threshold: 0.12,
+                    rootMargin: '0px 0px -40px 0px'
                 });
 
-                if (contadorEl) {
-                    if (visiveis === 1) {
-                        contadorEl.textContent = '1 Frete Encontrado';
-                    } else if (visiveis > 1) {
-                        contadorEl.textContent = `${visiveis} Fretes Ativos Hoje`;
-                    } else {
-                        contadorEl.textContent = 'Nenhum Frete Encontrado';
-                    }
-                }
-            };
-
-            if (selectOrigem) selectOrigem.addEventListener('change', window.filtrarFretes);
-            if (selectDestino) selectDestino.addEventListener('change', window.filtrarFretes);
-            if (selectVeiculo) selectVeiculo.addEventListener('change', window.filtrarFretes);
-            if (inputBusca) inputBusca.addEventListener('input', window.filtrarFretes);
+                revealElements.forEach(el => {
+                    revealObserver.observe(el);
+                });
+            } else {
+                revealElements.forEach(el => el.classList.add('revealed'));
+            }
         });
     </script>
 </body>
