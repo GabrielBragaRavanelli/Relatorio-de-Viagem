@@ -676,6 +676,9 @@ main {
     padding: 24px;
     margin: 30px 0;
     box-shadow: 0 6px 20px rgba(61, 61, 144, 0.05);
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .subbloco-cabecalho {
@@ -712,12 +715,14 @@ main {
     margin-top: 2px;
 }
 
-/* Grid das 6 Colunas da Tabela de Fretes */
+/* Grid da Tabela de Fretes: 4 Colunas no topo (Origem + 3 Retornos) e 2 Totais destacados na base */
 .tabela-fretes-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
     align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .frete-coluna {
@@ -725,11 +730,13 @@ main {
     flex-direction: column;
     gap: 8px;
     background: var(--branco);
-    padding: 13px 10px;
+    padding: 14px 12px;
     border-radius: 10px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
     transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .frete-coluna:hover {
@@ -745,15 +752,21 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.3px;
     line-height: 1.2;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
 }
 
 .frete-coluna-origem {
     border-left: 3.5px solid var(--azul-ajborges);
 }
 
-/* Destaque: Total Frete */
+/* Destaque: Total Frete & Vr Comissão ocupando as 2 metades da linha inferior */
 .frete-destaque-total {
+    grid-column: span 2;
     background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
     border: 1.5px solid #6366f1;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
@@ -793,6 +806,7 @@ main {
 
 /* Destaque: Vr Comissão */
 .frete-destaque-comissao {
+    grid-column: span 2;
     background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
     border: 1.5px solid #10b981;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
@@ -2152,8 +2166,13 @@ main {
    ========================================== */
 @media (max-width: 1080px) {
     .tabela-fretes-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .frete-destaque-total,
+    .frete-destaque-comissao {
+        grid-column: span 1;
     }
 
     .grid-indicadores-viagem {
@@ -2218,6 +2237,12 @@ main {
 
     .tabela-fretes-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .frete-destaque-total,
+    .frete-destaque-comissao {
+        grid-column: span 1;
     }
 
     .grid-indicadores-viagem {
@@ -3056,26 +3081,104 @@ footer {
     border-radius: 9999px;
 }
 
-/* Campos Bloqueados para o Motorista */
-.campo-bloqueado-gestao input {
-    background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
-    color: #64748b !important;
+/* ==========================================================================
+   CAMPOS BLOQUEADOS / DEFINIDOS PELA FROTA (Visual Minimalista Corporativo)
+   ========================================================================== */
+.campo-bloqueado-gestao {
+    position: relative;
     cursor: not-allowed !important;
 }
 
+.campo-bloqueado-gestao,
+.campo-bloqueado-gestao *,
+.campo-bloqueado-gestao label,
+.campo-bloqueado-gestao .input-wrapper,
+.campo-bloqueado-gestao .input-icone,
+.campo-bloqueado-gestao .tag-bloqueado-frota,
+.campo-bloqueado-gestao .tag-bloqueado-adm,
+input.campo-bloqueado-gestao,
+input[readonly].campo-bloqueado-gestao,
+select.campo-bloqueado-gestao {
+    cursor: not-allowed !important;
+}
+
+.campo-bloqueado-gestao input,
+.campo-bloqueado-gestao select,
+input.campo-bloqueado-gestao {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    cursor: not-allowed !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    user-select: none !important;
+    caret-color: transparent !important;
+    pointer-events: auto !important;
+}
+
+.campo-bloqueado-gestao input:focus,
+.campo-bloqueado-gestao select:focus {
+    outline: none !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+/* Desativação total de botões e seletores nativos de data nos campos bloqueados */
+.campo-bloqueado-gestao .btn-picker-data {
+    pointer-events: none !important;
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+}
+
+.campo-bloqueado-gestao .input-picker-data-nativo {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+.tag-bloqueado-frota,
 .tag-bloqueado-adm {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #6366f1;
-    background-color: #eef2ff;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid #c7d2fe;
-    margin-left: 6px;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    padding: 2px 6px;
+    border-radius: 5px;
+    margin-left: 6px;
+    letter-spacing: 0.2px;
+    vertical-align: middle;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    cursor: not-allowed !important;
+    white-space: nowrap;
+}
+
+.tag-bloqueado-frota svg,
+.tag-bloqueado-adm svg {
+    color: var(--azul-ajborges);
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+    cursor: not-allowed !important;
+}
+
+/* Ocultação total do Imposto Federal para motorista */
+.oculto-motorista {
+    display: none !important;
+}
+
+/* Botões de Alternância de Perfil nos Banners */
+.btn-toggle-modo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 /* Modais de Confirmação e Protocolo */

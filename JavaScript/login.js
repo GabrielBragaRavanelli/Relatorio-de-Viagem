@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
                 role: 'motorista',
                 id: 'MOT-104',
-                nome: 'Carlos Eduardo Ferreira',
+                nome: '',
                 cpf: cpfVal
             }));
 

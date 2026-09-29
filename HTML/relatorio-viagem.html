@@ -79,6 +79,9 @@
             <span class="status-pill status-pendente" id="admin-banner-status">🟡 Pendente de Conferência</span>
         </div>
         <div class="barra-admin-acoes">
+            <button type="button" class="btn-voltar-gestao btn-toggle-modo" id="btn-alternar-modo-motorista" title="Alternar para visão do Motorista">
+                🚛 Visão Motorista
+            </button>
             <a href="dashboard-admin.html#fichas" class="btn-voltar-gestao" title="Retornar à fila de conferência no Dashboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -103,16 +106,21 @@
             <!-- Barra Informativa do Modo Motorista -->
             <div class="barra-motorista-info" id="barra-motorista-info">
                 <div class="motorista-info-left">
-                    <span class="motorista-icone-tag">📱</span>
+                    <span class="motorista-icone-tag">🚛</span>
                     <div class="motorista-texto-aviso">
-                        <strong id="motorista-saudacao-texto">Portal da Frota • Envio Operacional de Viagem</strong><br>
-                        <span id="motorista-subtexto-aviso">Campos de cabeçalho e KM são conferidos pela Gestão. Preencha seus Fretes, Abastecimentos e Imposto Federal com comprovantes.</span>
+                        <strong id="motorista-saudacao-texto">Portal da Frota • Modo Motorista</strong><br>
+                        <span id="motorista-subtexto-aviso">Dados do veículo, fretes e pedágios são definidos pela Frota. Preencha seus abastecimentos e comprovantes.</span>
                     </div>
                 </div>
-                <div class="motorista-info-right" id="motorista-botoes-logado" style="display: none;">
-                    <button type="button" class="btn-minhas-viagens" id="btn-abrir-minhas-viagens">
-                        <span>Minhas Viagens</span>
-                        <span class="badge-contador-viagens" id="badge-total-minhas-viagens">0</span>
+                <div class="motorista-info-right">
+                    <div id="motorista-botoes-logado" style="display: none;">
+                        <button type="button" class="btn-minhas-viagens" id="btn-abrir-minhas-viagens">
+                            <span>Minhas Viagens</span>
+                            <span class="badge-contador-viagens" id="badge-total-minhas-viagens">0</span>
+                        </button>
+                    </div>
+                    <button type="button" class="btn-minhas-viagens btn-toggle-modo" id="btn-alternar-modo-admin" title="Alternar para visão do Administrador">
+                        🛡️ Visão Admin
                     </button>
                 </div>
             </div>
@@ -199,7 +207,7 @@
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
                                     <input type="text" id="motorista" name="motorista" required
-                                        placeholder="Ex: Jean Gomes" autocomplete="name">
+                                        placeholder="Nome completo do motorista" autocomplete="name">
                                 </div>
                             </div>
 
@@ -1692,10 +1700,10 @@
 
                                         <div class="grid-despesas-dupla">
                                             <!-- Coluna Pedágio (3 linhas) -->
-                                            <div class="card-secao-despesa card-pedagio">
+                                            <div class="card-secao-despesa card-pedagio" id="card-bloco-pedagio">
                                                 <div class="card-despesa-topo">
                                                     <div class="card-despesa-ident">
-                                                        <span class="badge-mini-tag">3 Linhas</span>
+                                                        <span class="badge-mini-tag" id="badge-pedagio-status">3 Linhas</span>
                                                         <h4>Pedágios</h4>
                                                     </div>
                                                     <span class="card-despesa-sub">Valor de cada pedágio</span>
@@ -1745,33 +1753,24 @@
                                             <div class="card-secao-despesa card-outras-despesas">
                                                 <div class="card-despesa-topo">
                                                     <div class="card-despesa-ident">
-                                                        <span class="badge-mini-tag badge-alerta-tag">Obrigatório: Linha
-                                                            1</span>
+                                                        <span class="badge-mini-tag badge-alerta-tag" id="badge-imposto-obrigatorio">Obrigatório: Linha 1</span>
                                                         <h4>Outras Despesas</h4>
                                                     </div>
                                                     <span class="card-despesa-sub">Descrição e Valor</span>
                                                 </div>
 
                                                 <div class="linhas-despesas-lista">
-                                                    <!-- Linha 1: IMPOSTO FEDERAL (Bloqueado / Obrigatório) -->
-                                                    <div class="linha-despesa-composta">
+                                                    <!-- Linha 1: IMPOSTO FEDERAL (Sensível / Exclusivo Admin) -->
+                                                    <div class="linha-despesa-composta" id="linha-imposto-federal">
                                                         <div class="desc-com-trava">
                                                             <label for="ml-despesa-desc-1">
-                                                                Descrição 1 <span class="tag-bloqueada"
-                                                                    title="Campo bloqueado: Imposto Federal"><svg
-                                                                        xmlns="http://www.w3.org/2000/svg" width="11"
-                                                                        height="11" viewBox="0 0 24 24" fill="none"
-                                                                        stroke="currentColor" stroke-width="2">
-                                                                        <rect x="3" y="11" width="18" height="11" rx="2"
-                                                                            ry="2"></rect>
-                                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                                                    </svg> Obrigatório</span>
+                                                                Imposto Federal (IRRF / INSS / SEST / SENAT)
                                                             </label>
                                                             <div class="input-wrapper input-bloqueado-wrapper">
                                                                 <input type="text" id="ml-despesa-desc-1"
-                                                                    name="ml_despesa_desc_1" value="Imposto Federal"
+                                                                    name="ml_despesa_desc_1" value="Imposto Federal (IRRF / INSS / SEST / SENAT)"
                                                                     readonly class="input-bloqueado-campo"
-                                                                    title="Campo fixo obrigatório: Imposto Federal">
+                                                                    title="Imposto Federal (IRRF / INSS / SEST / SENAT)">
                                                             </div>
                                                         </div>
                                                         <div class="valor-com-rotulo">
@@ -2000,18 +1999,6 @@
 
                                     <!-- 6. BLOCO: AÇÕES DO FORMULÁRIO -->
                                     <div class="bloco-acoes-relatorio">
-                                        <button type="button" id="btn-salvar-rascunho-ml" class="btn-acao-secundario">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <path
-                                                    d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
-                                                </path>
-                                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                                <polyline points="7 3 7 8 15 8"></polyline>
-                                            </svg>
-                                            Salvar Rascunho
-                                        </button>
                                         <button type="submit" id="btn-finalizar-relatorio-ml" class="btn-acao-primario">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -2227,19 +2214,6 @@
                         <h3>Contatos</h3>
                     </div>
                     <ul class="links-contatos-lista">
-                        <li>
-                            <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                                </path>
-                            </svg>
-                            <div class="contato-info">
-                                <span class="contato-tipo">Telefone</span>
-                                <a href="tel:1434251419">(14) 3425-1419</a>
-                            </div>
-                        </li>
                         <li>
                             <svg class="icone-contato" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

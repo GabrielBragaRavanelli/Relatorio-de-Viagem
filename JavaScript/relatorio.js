@@ -48,6 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_CENTRAL_FICHAS = 'ajborges_fichas_viagem';
     const STORAGE_USER_ACTIVE = 'ajborges_usuario_ativo';
 
+    // Limpeza de exemplo mockado no armazenamento e input
+    try {
+        const uAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        if (uAtivoStr) {
+            const uAtivo = JSON.parse(uAtivoStr);
+            if (uAtivo && uAtivo.nome === 'Carlos Eduardo Ferreira') {
+                uAtivo.nome = '';
+                localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(uAtivo));
+            }
+        }
+    } catch(e) {}
+    if (inputMotorista && inputMotorista.value === 'Carlos Eduardo Ferreira') {
+        inputMotorista.value = '';
+    }
+
     function obterProximoNumeroFicha() {
         const dadosCentrais = localStorage.getItem(STORAGE_CENTRAL_FICHAS);
         let maxNum = 0;
@@ -240,6 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function abrirSeletorNativo() {
             if (!pickerNativo) return;
+            if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.classList.contains('campo-bloqueado-gestao') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                return;
+            }
             sincronizarComPickerNativo();
             if (typeof pickerNativo.showPicker === 'function') {
                 try {
@@ -254,6 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pickerNativo) {
             pickerNativo.addEventListener('change', () => {
+                if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                    return;
+                }
                 if (pickerNativo.value) {
                     const partes = pickerNativo.value.split('-');
                     if (partes.length === 3) {
@@ -269,15 +290,26 @@ document.addEventListener('DOMContentLoaded', () => {
             btnCalendario.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                    return;
+                }
                 abrirSeletorNativo();
             });
         }
 
-        inputTexto.addEventListener('dblclick', () => {
+        inputTexto.addEventListener('dblclick', (e) => {
+            if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                e.preventDefault();
+                return;
+            }
             abrirSeletorNativo();
         });
 
         inputTexto.addEventListener('keydown', (e) => {
+            if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                e.preventDefault();
+                return;
+            }
             if (e.ctrlKey || e.altKey || e.metaKey || [
                 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
             ].includes(e.key)) {
@@ -2101,6 +2133,34 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(lista));
     }
 
+    // Alternância de Perfil (Driver vs Admin)
+    window.alternarPerfil = function(novoRole) {
+        let usuario = null;
+        try {
+            usuario = JSON.parse(localStorage.getItem(STORAGE_USER_ACTIVE) || '{}');
+        } catch(e) { usuario = {}; }
+        
+        if (novoRole === 'admin' || novoRole === 'diretoria') {
+            usuario.role = 'admin';
+            usuario.nome = usuario.nome || 'Administrador Central';
+            usuario.email = usuario.email || 'admin@ajborges.com';
+            localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuario));
+            exibirToast('Visão de ADMINISTRADOR ativada (Todos os campos liberados para edição)', 'sucesso');
+        } else {
+            usuario.role = 'motorista';
+            usuario.nome = (usuario.nome && usuario.nome !== 'Carlos Eduardo Ferreira') ? usuario.nome : '';
+            usuario.email = usuario.email || 'motorista@ajborges.com';
+            localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuario));
+            exibirToast('Visão de MOTORISTA ativada (Campos corporativos bloqueados / Imposto Federal oculto)', 'info');
+        }
+        
+        const url = new URL(window.location.href);
+        url.searchParams.delete('mode');
+        window.history.replaceState({}, '', url.toString());
+
+        configurarCicloDeVidaViagem();
+    };
+
     // Configuração dos Modos (Admin vs Motorista)
     function configurarCicloDeVidaViagem() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -2110,10 +2170,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+            try { 
+                usuarioAtivo = JSON.parse(usuarioAtivoStr);
+                if (usuarioAtivo && usuarioAtivo.nome === 'Carlos Eduardo Ferreira') {
+                    usuarioAtivo.nome = '';
+                    localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
+                }
+            } catch (e) {}
         }
 
-        const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && usuarioAtivo.role === 'admin' && modeUrl !== 'motorista');
+        const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
         const isModoView = (modeUrl === 'view');
 
         const barraAdmin = document.getElementById('barra-admin-operacional');
@@ -2123,12 +2189,116 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnAdminAprovar = document.getElementById('btn-admin-aprovar-concluir');
         const btnAdminSalvar = document.getElementById('btn-admin-salvar-alteracoes');
 
-        const camposGestaoAdm = [
-            inputPlacas, inputDataSaida, inputDataChegada,
-            inputKmSaida, inputKmChegada, inputKmTotal,
-            inputDestinoInicial, inputDestinoFinal, inputAdiantamento,
-            inputFreteOrigem, inputRetorno1, inputRetorno2, inputRetorno3
-        ];
+        // Campos com governança corporativa da empresa
+        const camposGovernançaFrota = [
+            inputMotorista,
+            inputPlacas,
+            inputDataSaida,
+            inputDataChegada,
+            inputKmSaida,
+            inputKmChegada,
+            inputKmTotal,
+            inputDestinoInicial,
+            inputDestinoFinal,
+            inputAdiantamento,
+            inputFreteOrigem,
+            inputRetorno1,
+            inputRetorno2,
+            inputRetorno3,
+            inputTotalFrete,
+            inputVrComissao,
+            document.getElementById('ml-total-relacao-descarga'),
+            document.getElementById('ml-pedagio-1'),
+            document.getElementById('ml-pedagio-2'),
+            document.getElementById('ml-pedagio-3'),
+            document.getElementById('ml-total-pedagio')
+        ].filter(Boolean);
+
+        const camposDescargaTabela = Array.from(document.querySelectorAll('.input-descarga-frete-ml'));
+        const linhaImpostoFederal = document.getElementById('linha-imposto-federal');
+        const badgeImpostoObrigatorio = document.getElementById('badge-imposto-obrigatorio');
+        const inputMlImpFederal = document.getElementById('ml-imp-federal-valor');
+        const badgePedagio = document.getElementById('badge-pedagio-status');
+        const botoesPickerData = document.querySelectorAll('.btn-picker-data');
+
+        function aplicarBloqueioCampo(input, rotulo = 'Definido pela Frota') {
+            if (!input) return;
+            input.setAttribute('readonly', 'true');
+            input.setAttribute('tabindex', '-1');
+            const wrapper = input.closest('.campo-grupo') || input.closest('.frete-coluna') || input.closest('.linha-despesa-item') || input.closest('.total-mini-wrap')?.parentElement || input.parentElement;
+            if (wrapper) {
+                wrapper.classList.add('campo-bloqueado-gestao');
+
+                // Desabilita seletores e botões de data associados
+                const pickers = wrapper.querySelectorAll('.input-picker-data-nativo, input[type="date"]');
+                pickers.forEach(p => {
+                    p.setAttribute('disabled', 'true');
+                    p.disabled = true;
+                });
+                const btnsPicker = wrapper.querySelectorAll('.btn-picker-data');
+                btnsPicker.forEach(b => {
+                    b.setAttribute('disabled', 'true');
+                    b.style.pointerEvents = 'none';
+                    b.style.opacity = '0.3';
+                    b.style.cursor = 'not-allowed';
+                });
+
+                const label = wrapper.querySelector('label') || wrapper.closest('.frete-coluna')?.querySelector('label');
+                if (label && !label.querySelector('.tag-bloqueado-frota')) {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag-bloqueado-frota';
+                    tag.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>${rotulo}</span>
+                    `;
+                    label.appendChild(tag);
+                }
+            }
+        }
+
+        function liberarCampoBloqueado(input) {
+            if (!input) return;
+            input.removeAttribute('readonly');
+            input.removeAttribute('disabled');
+            input.removeAttribute('tabindex');
+            const wrapper = input.closest('.campo-grupo') || input.closest('.frete-coluna') || input.closest('.linha-despesa-item') || input.parentElement;
+            if (wrapper) {
+                wrapper.classList.remove('campo-bloqueado-gestao');
+                const pickers = wrapper.querySelectorAll('.input-picker-data-nativo, input[type="date"]');
+                pickers.forEach(p => {
+                    p.removeAttribute('disabled');
+                    p.disabled = false;
+                });
+                const btnsPicker = wrapper.querySelectorAll('.btn-picker-data');
+                btnsPicker.forEach(b => {
+                    b.removeAttribute('disabled');
+                    b.disabled = false;
+                    b.style.pointerEvents = 'auto';
+                    b.style.opacity = '1';
+                    b.style.cursor = 'pointer';
+                });
+                const tags = wrapper.querySelectorAll('.tag-bloqueado-frota, .tag-bloqueado-adm');
+                tags.forEach(t => t.remove());
+                const label = wrapper.closest('.frete-coluna')?.querySelector('label');
+                if (label) {
+                    label.querySelectorAll('.tag-bloqueado-frota, .tag-bloqueado-adm').forEach(t => t.remove());
+                }
+            }
+        }
+
+        // Conecta botões de troca de visão (modo teste / apresentação)
+        const btnAlternarMotorista = document.getElementById('btn-alternar-modo-motorista');
+        const btnAlternarAdmin = document.getElementById('btn-alternar-modo-admin');
+        if (btnAlternarMotorista && !btnAlternarMotorista.dataset.bound) {
+            btnAlternarMotorista.dataset.bound = 'true';
+            btnAlternarMotorista.addEventListener('click', () => window.alternarPerfil('motorista'));
+        }
+        if (btnAlternarAdmin && !btnAlternarAdmin.dataset.bound) {
+            btnAlternarAdmin.dataset.bound = 'true';
+            btnAlternarAdmin.addEventListener('click', () => window.alternarPerfil('admin'));
+        }
 
         // -------------------------------------------------------------
         // CASO A: MODO ADMINISTRADOR (Conferência 100% Liberada)
@@ -2137,23 +2307,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (barraAdmin) barraAdmin.classList.add('ativa');
             if (barraMotorista) barraMotorista.style.display = 'none';
 
-            // LIBERAÇÃO TOTAL DOS CAMPOS PARA O ADMINISTRADOR
-            camposGestaoAdm.forEach(input => {
-                if (input) {
-                    input.removeAttribute('readonly');
-                    input.removeAttribute('disabled');
-                    const wrapper = input.closest('.campo-grupo') || input.parentElement;
-                    if (wrapper) {
-                        wrapper.classList.remove('campo-bloqueado-gestao');
-                        const tag = wrapper.querySelector('.tag-bloqueado-adm');
-                        if (tag) tag.remove();
-                    }
-                }
+            // 1. Liberação total dos campos sob governança da empresa
+            camposGovernançaFrota.forEach(input => liberarCampoBloqueado(input));
+            camposDescargaTabela.forEach(input => {
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+                input.classList.remove('campo-bloqueado-gestao');
             });
 
-            if (inputMotorista) {
-                inputMotorista.removeAttribute('readonly');
+            // 2. Imposto Federal visível e livremente editável
+            if (linhaImpostoFederal) linhaImpostoFederal.classList.remove('oculto-motorista');
+            if (badgeImpostoObrigatorio) badgeImpostoObrigatorio.classList.remove('oculto-motorista');
+            if (inputMlImpFederal) {
+                liberarCampoBloqueado(inputMlImpFederal);
+                inputMlImpFederal.removeAttribute('readonly');
             }
+
+            // 3. Status de Pedágio
+            if (badgePedagio) badgePedagio.textContent = '3 Linhas';
+
+            // 4. Habilita seletores de data
+            botoesPickerData.forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            });
 
             // Abre o formulário oficial automaticamente para conferência
             toggleFormularioUnificado(true, false);
@@ -2245,27 +2422,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // -------------------------------------------------------------
-        // CASO C: MODO MOTORISTA (Envio Com ou Sem Login)
+        // CASO C: MODO MOTORISTA (Com Permissões e Campos Bloqueados)
         // -------------------------------------------------------------
         if (barraAdmin) barraAdmin.classList.remove('ativa');
         if (barraMotorista) barraMotorista.style.display = 'flex';
 
-        // BLOQUEIO DOS CAMPOS DO ADMINISTRADOR NO CABEÇALHO
-        camposGestaoAdm.forEach(input => {
-            if (input) {
-                input.setAttribute('readonly', 'true');
-                const wrapper = input.closest('.campo-grupo') || input.parentElement;
-                if (wrapper) {
-                    wrapper.classList.add('campo-bloqueado-gestao');
-                    const label = wrapper.querySelector('label');
-                    if (label && !label.querySelector('.tag-bloqueado-adm')) {
-                        const tag = document.createElement('span');
-                        tag.className = 'tag-bloqueado-adm';
-                        tag.innerHTML = '🔒 Gestão';
-                        label.appendChild(tag);
-                    }
-                }
-            }
+        // 1. Aplicação de Bloqueio nos Campos Sob Governança da Frota
+        camposGovernançaFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
+        camposDescargaTabela.forEach(input => {
+            input.setAttribute('readonly', 'true');
+            input.classList.add('campo-bloqueado-gestao');
+        });
+
+        // 2. Ocultação total do campo sensível: Imposto Federal (IRRF / INSS / SEST / SENAT)
+        if (linhaImpostoFederal) linhaImpostoFederal.classList.add('oculto-motorista');
+        if (badgeImpostoObrigatorio) badgeImpostoObrigatorio.classList.add('oculto-motorista');
+
+        // 3. Status de Pedágio
+        if (badgePedagio) badgePedagio.textContent = 'Definido pela Frota';
+
+        // 4. Desabilita seletores de data
+        botoesPickerData.forEach(btn => {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.4';
         });
 
         // Abre automaticamente o formulário oficial para lançamento de fretes e diesel
@@ -2280,12 +2459,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMotoristaLogado = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
         if (isMotoristaLogado) {
+            const nomeMotoristaValido = (usuarioAtivo.nome && usuarioAtivo.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtivo.nome : '';
             if (inputMotorista) {
-                inputMotorista.value = usuarioAtivo.nome || 'Carlos Eduardo Ferreira';
-                inputMotorista.setAttribute('readonly', 'true');
+                inputMotorista.value = nomeMotoristaValido;
+                if (nomeMotoristaValido) {
+                    inputMotorista.setAttribute('readonly', 'true');
+                } else {
+                    inputMotorista.removeAttribute('readonly');
+                    inputMotorista.placeholder = 'Nome completo do motorista';
+                }
             }
             if (motoristaSaudacao) {
-                motoristaSaudacao.innerHTML = `Olá, <strong>${usuarioAtivo.nome || 'Motorista'}</strong> • Conectado via Portal`;
+                motoristaSaudacao.innerHTML = `Olá, <strong>${nomeMotoristaValido || 'Motorista'}</strong> • Conectado via Portal`;
             }
             if (motoristaBotoesLogado) {
                 motoristaBotoesLogado.style.display = 'block';
@@ -2299,7 +2484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             if (motoristaSaudacao) {
-                motoristaSaudacao.innerHTML = `Portal da Frota • Preenchimento sem login`;
+                motoristaSaudacao.innerHTML = `Portal da Frota • Modo Motorista`;
             }
             if (motoristaBotoesLogado) {
                 motoristaBotoesLogado.style.display = 'none';
