@@ -420,12 +420,12 @@ main {
 }
 
 .contato-hero-desc-extra {
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: rgba(226, 232, 240, 0.92);
-    max-width: 760px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 820px;
     margin: 0 auto;
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
 .contato-hero-desc-extra strong {
@@ -718,56 +718,74 @@ main {
     font-size: 14px;
     color: var(--cinza-escuro);
     font-weight: 500;
-    line-height: 1.7;
+    line-height: 1.6;
+}
+
+/* LISTA LIMPA DE FILIAIS (PONTOS HORIZONTAIS AO LADO DO TEXTO SEM CARDS) */
+.filiais-lista-limpa {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 4px 0;
+    gap: 12px;
+    padding: 8px 0 4px;
+    width: 100%;
 }
 
-.info-valor .filial-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: #f8faff;
-    border: 1px solid rgba(61, 61, 144, 0.08);
-    transition: background 0.2s ease, border-color 0.2s ease;
+.filial-linha {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100%;
+    transition: transform 0.2s ease;
 }
 
-.info-valor .filial-item:hover {
-    background: rgba(61, 61, 144, 0.06);
-    border-color: rgba(61, 61, 144, 0.18);
+.filial-linha:hover {
+    transform: translateX(4px);
 }
 
-.info-valor .filial-bullet {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--azul-ajborges);
-    flex-shrink: 0;
-    opacity: 0.7;
+.filial-linha .filial-bullet {
+    display: inline-block !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    border-radius: 50% !important;
+    background-color: var(--azul-ajborges) !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    opacity: 0.85;
 }
 
-.info-valor .filial-item.matriz .filial-bullet {
-    background: #10b981;
-    opacity: 1;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+.filial-linha.matriz .filial-bullet {
+    background-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22) !important;
+    opacity: 1 !important;
 }
 
-.info-valor .filial-item.matriz {
-    border-color: rgba(16, 185, 129, 0.22);
-    background: rgba(16, 185, 129, 0.05);
-}
-
-.info-valor strong {
+.filial-linha .filial-nome {
+    font-size: 14px;
+    font-weight: 600;
     color: var(--azul-ajborges);
-    font-size: 13.5px;
+    line-height: 1.4;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.info-valor .filial-item.matriz strong {
+.filial-linha.matriz .filial-nome {
     color: #059669;
+    font-weight: 700;
+}
+
+.filial-badge-matriz {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 600;
 }
 
 /* Badge de status operacional */
@@ -1073,8 +1091,10 @@ main {
         font-size: 28px;
     }
 
-    .contato-hero-subtitulo {
+    .contato-hero-subtitulo,
+    .contato-hero-desc-extra {
         font-size: 14.5px;
+        line-height: 1.6;
     }
 
     .canais-rapidos-section {

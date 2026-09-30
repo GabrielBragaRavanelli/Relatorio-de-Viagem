@@ -336,10 +336,12 @@ main {
     position: relative;
     width: 100%;
     overflow: hidden;
-    padding: 105px 24px 115px;
-    min-height: 520px;
+    padding: 100px 24px 75px;
+    min-height: 560px;
     color: var(--branco);
     background-color: #0b1120;
+    display: flex;
+    align-items: center;
 }
 
 .sobrenos-unificado-bg {
@@ -358,7 +360,7 @@ main {
     object-fit: cover;
     object-position: center 30%;
     display: block;
-    filter: brightness(0.92);
+    filter: brightness(0.94);
 }
 
 .sobrenos-unificado-overlay {
@@ -369,22 +371,23 @@ main {
     height: 100%;
     background: linear-gradient(
         180deg,
-        rgba(15, 23, 42, 0.94) 0%,
-        rgba(30, 30, 92, 0.85) 30%,
-        rgba(27, 27, 78, 0.88) 65%,
-        rgba(15, 23, 42, 0.96) 100%
+        rgba(11, 17, 32, 0.90) 0%,
+        rgba(25, 25, 78, 0.74) 35%,
+        rgba(20, 20, 65, 0.80) 65%,
+        rgba(11, 17, 32, 0.95) 100%
     );
 }
 
 .sobrenos-unificado-container {
     position: relative;
     z-index: 2;
-    max-width: 1100px;
+    max-width: 1120px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 48px;
+    gap: 45px;
 }
 
 /* BLOCO 1: HERO */
@@ -392,145 +395,98 @@ main {
     text-align: center;
     max-width: 860px;
     margin: 0 auto;
-    padding: 35px 20px 10px;
+    padding: 20px 20px 0;
 }
 
 .sobrenos-hero-titulo {
-    font-size: 46px;
+    font-size: 48px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     letter-spacing: -0.5px;
     color: #ffffff;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
 }
 
 .sobrenos-hero-subtitulo {
-    font-size: 17.5px;
-    line-height: 1.68;
-    color: rgba(255, 255, 255, 0.92);
-    max-width: 760px;
-    margin: 0 auto;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-}
-
-/* BLOCO 2: HISTÓRIA (CARD TRANSLÚCIDO EXECUTIVO) */
-.historia-bloco-card {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 20px;
-    padding: 44px 50px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    text-align: left;
-}
-
-.historia-header-bloco {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.historia-tag-badge {
-    display: inline-flex;
-    align-self: flex-start;
-    padding: 5px 14px;
-    background: rgba(96, 165, 250, 0.2);
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #93c5fd;
-}
-
-.historia-bloco-card .historia-titulo {
-    font-size: 30px;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.25;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.historia-textos {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.historia-bloco-card .historia-paragrafo {
-    font-size: 15.5px;
-    line-height: 1.8;
-    color: rgba(255, 255, 255, 0.92);
-}
-
-.historia-bloco-card .historia-paragrafo strong {
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.historia-bloco-card .historia-destaque {
-    background: rgba(61, 61, 144, 0.45);
-    border-left: 4px solid #60a5fa;
-    padding: 18px 24px;
-    border-radius: 0 14px 14px 0;
-    font-size: 15.5px;
+    font-size: 18px;
     line-height: 1.7;
-    color: #ffffff;
-    font-weight: 500;
-    font-style: italic;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    margin: 6px 0;
+    color: rgba(255, 255, 255, 0.94);
+    max-width: 780px;
+    margin: 0 auto 28px;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 
-.historia-acoes {
+.sobrenos-hero-acoes {
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 16px;
-    margin-top: 6px;
     flex-wrap: wrap;
 }
 
-.btn-secundario-glass {
+.btn-hero-primario {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    color: var(--azul-ajborges-escuro);
+    font-size: 15.5px;
+    font-weight: 700;
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition: all 0.25s ease;
+}
+
+.btn-hero-primario:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(255, 255, 255, 0.2);
+}
+
+.btn-hero-primario svg {
+    transition: transform 0.2s ease;
+}
+
+.btn-hero-primario:hover svg {
+    transform: translateX(4px);
+}
+
+.btn-hero-secundario {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 15px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15.5px;
     font-weight: 600;
     text-decoration: none;
     background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     color: #ffffff;
+    backdrop-filter: blur(10px);
     transition: all 0.25s ease;
-    backdrop-filter: blur(8px);
 }
 
-.btn-secundario-glass:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #ffffff;
+.btn-hero-secundario:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.55);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* BLOCO 3: PILARES & COMPROMISSO OPERACIONAL */
+/* BLOCO 2: PILARES & COMPROMISSO OPERACIONAL */
 .sobrenos-pilares-card {
     width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 18px;
-    padding: 24px 30px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 20px;
+    padding: 26px 36px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
 .pilares-mini-grid {
@@ -1218,11 +1174,8 @@ main {
 /* RESPONSIVIDADE DE SOBRE NÓS */
 @media (max-width: 1024px) {
     .sobrenos-topo-unificado {
-        padding: 60px 20px 70px;
-    }
-
-    .historia-bloco-card {
-        padding: 36px 32px;
+        padding: 70px 20px 60px;
+        min-height: auto;
     }
 
     .stats-container {
@@ -1262,35 +1215,31 @@ main {
 
 @media (max-width: 640px) {
     .sobrenos-topo-unificado {
-        padding: 44px 16px 55px;
+        padding: 50px 16px 50px;
+        min-height: auto;
     }
 
     .sobrenos-hero-titulo {
-        font-size: 28px;
+        font-size: 30px;
     }
 
     .sobrenos-hero-subtitulo {
-        font-size: 14.5px;
+        font-size: 15px;
     }
 
-    .historia-bloco-card {
-        padding: 24px 18px;
-        border-radius: 16px;
-        gap: 16px;
+    .sobrenos-hero-acoes {
+        flex-direction: column;
+        width: 100%;
     }
 
-    .historia-bloco-card .historia-titulo {
-        font-size: 22px;
+    .btn-hero-primario,
+    .btn-hero-secundario {
+        width: 100%;
+        justify-content: center;
     }
 
-    .historia-bloco-card .historia-paragrafo {
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    .historia-bloco-card .historia-destaque {
-        font-size: 14px;
-        padding: 14px 16px;
+    .sobrenos-pilares-card {
+        padding: 20px 18px;
     }
 
     .stats-section {
