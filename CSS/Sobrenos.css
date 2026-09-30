@@ -336,7 +336,8 @@ main {
     position: relative;
     width: 100%;
     overflow: hidden;
-    padding: 75px 24px 85px;
+    padding: 105px 24px 115px;
+    min-height: 520px;
     color: var(--branco);
     background-color: #0b1120;
 }
@@ -368,10 +369,10 @@ main {
     height: 100%;
     background: linear-gradient(
         180deg,
-        rgba(15, 23, 42, 0.93) 0%,
-        rgba(30, 30, 92, 0.86) 30%,
+        rgba(15, 23, 42, 0.94) 0%,
+        rgba(30, 30, 92, 0.85) 30%,
         rgba(27, 27, 78, 0.88) 65%,
-        rgba(15, 23, 42, 0.95) 100%
+        rgba(15, 23, 42, 0.96) 100%
     );
 }
 
@@ -383,7 +384,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 45px;
+    gap: 48px;
 }
 
 /* BLOCO 1: HERO */
@@ -391,38 +392,24 @@ main {
     text-align: center;
     max-width: 860px;
     margin: 0 auto;
-}
-
-.sobrenos-tag-topo {
-    display: inline-block;
-    padding: 6px 16px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: #e2e8f0;
-    margin-bottom: 16px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    padding: 35px 20px 10px;
 }
 
 .sobrenos-hero-titulo {
-    font-size: 42px;
+    font-size: 46px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     letter-spacing: -0.5px;
     color: #ffffff;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 .sobrenos-hero-subtitulo {
-    font-size: 17px;
-    line-height: 1.65;
+    font-size: 17.5px;
+    line-height: 1.68;
     color: rgba(255, 255, 255, 0.92);
-    max-width: 740px;
+    max-width: 760px;
     margin: 0 auto;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
@@ -430,16 +417,16 @@ main {
 /* BLOCO 2: HISTÓRIA (CARD TRANSLÚCIDO EXECUTIVO) */
 .historia-bloco-card {
     width: 100%;
-    background: rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 20px;
     padding: 44px 50px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     text-align: left;
 }
 
@@ -471,6 +458,12 @@ main {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+.historia-textos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .historia-bloco-card .historia-paragrafo {
     font-size: 15.5px;
     line-height: 1.8;
@@ -494,6 +487,98 @@ main {
     font-style: italic;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     margin: 6px 0;
+}
+
+.historia-acoes {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-secundario-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(8px);
+}
+
+.btn-secundario-glass:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* BLOCO 3: PILARES & COMPROMISSO OPERACIONAL */
+.sobrenos-pilares-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 24px 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.pilares-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.pilar-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.pilar-icone {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    background: rgba(96, 165, 250, 0.18);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pilar-icone svg {
+    width: 22px;
+    height: 22px;
+}
+
+.pilar-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pilar-texto strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.pilar-texto span {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
 }
 
 /* SEÇÃO ESTATÍSTICAS */
@@ -811,38 +896,30 @@ main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 9px;
     width: 100%;
     margin-top: 4px;
-    padding: 10px 16px;
+    padding: 12px 20px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #ffffff !important;
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     text-decoration: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.32);
     transition: all 0.25s ease;
+    letter-spacing: 0.2px;
 }
 
 .btn-operacional-marilia:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.38);
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.42);
     color: #ffffff !important;
 }
 
 .btn-operacional-marilia svg {
     flex-shrink: 0;
-}
-
-.btn-badge-fone {
-    background: rgba(255, 255, 255, 0.22);
-    padding: 2px 7px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
 }
 
 /* SEÇÃO ESPECIALIDADES CORPORATIVAS (ALIMENTÍCIO & E-COMMERCE) */
@@ -1156,6 +1233,11 @@ main {
     .pilares-grid {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .pilares-mini-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .estrutura-grid {
