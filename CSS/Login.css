@@ -92,7 +92,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 70px;
+    height: 100px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -112,7 +112,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 48px;
+    height: 85px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -323,7 +323,7 @@ main.login-main {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 110px 20px 60px;
+    padding: 140px 20px 60px;
     position: relative;
     overflow: hidden;
     background: radial-gradient(circle at 50% 20%, rgba(61, 61, 144, 0.08) 0%, rgba(244, 246, 251, 1) 70%);

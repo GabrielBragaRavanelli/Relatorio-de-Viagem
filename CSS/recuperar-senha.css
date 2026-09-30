@@ -74,7 +74,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 70px;
+    height: 100px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -94,7 +94,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 48px;
+    height: 85px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -309,9 +309,9 @@ header {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 100px 20px 60px 20px;
+    padding: 130px 20px 60px 20px;
     background: linear-gradient(135deg, #f0f4ff 0%, #f8faff 50%, #edf2fc 100%);
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 100px);
 }
 
 /* Formas decorativas com blur para profundidade visual moderna */
