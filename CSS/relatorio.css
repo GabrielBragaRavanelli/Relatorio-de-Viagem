@@ -111,7 +111,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 85px;
+    height: 90px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -134,16 +134,17 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 8px 16px;
+    font-size: 16.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 7px 14px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -169,9 +170,10 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 15px;
-    font-weight: 500;
-    padding: 8px 16px;
+    font-size: 16.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 7px 14px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
