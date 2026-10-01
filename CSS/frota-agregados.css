@@ -1,0 +1,451 @@
+/* ==========================================================================
+   SEÇÃO FROTA & AGREGADOS (SLIDER DE FROTAS + BANNER EXECUTIVO AJBORGES)
+   Identidade visual corporativa: Azul AJBorges (#3d3d90) & Acentos Ciano/Azul
+   ========================================================================== */
+
+.secao-frota-agregados {
+    width: 100%;
+    background-color: #0b0e1b;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- SLIDER SUPERIOR DE FROTAS --- */
+.frota-slider-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: #060810;
+}
+
+.frota-slider-track-container {
+    display: flex;
+    width: 100%;
+    gap: 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+}
+
+.frota-slider-track-container::-webkit-scrollbar {
+    display: none;
+}
+
+.frota-slide-item {
+    flex: 0 0 33.3333%;
+    min-width: 33.3333%;
+    height: 420px;
+    position: relative;
+    overflow: hidden;
+    scroll-snap-align: start;
+    cursor: pointer;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.frota-slide-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease;
+    display: block;
+}
+
+.frota-slide-item:hover img {
+    transform: scale(1.06);
+    filter: brightness(1.06);
+}
+
+.frota-slide-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 110px;
+    background: linear-gradient(180deg, transparent 0%, rgba(6, 8, 16, 0.82) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px 24px;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.frota-slide-tag {
+    background: rgba(15, 20, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Botões Circulares do Slider (< e >) */
+.frota-slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    color: #1e293b;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.frota-slider-btn.prev {
+    left: 24px;
+}
+
+.frota-slider-btn.next {
+    right: 24px;
+}
+
+.frota-slider-btn:hover {
+    background: #ffffff;
+    color: var(--azul-ajborges, #3d3d90);
+    transform: translateY(-50%) scale(1.12);
+    box-shadow: 0 8px 28px rgba(61, 61, 144, 0.5);
+}
+
+.frota-slider-btn:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+/* --- BANNER EXECUTIVO ESCURO --- */
+.frota-executiva-banner {
+    background-color: #111216;
+    padding: 70px 24px;
+    color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+.frota-executiva-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 90px;
+    align-items: stretch;
+    padding: 0 24px;
+    box-sizing: border-box;
+}
+
+.frota-coluna-item {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 480px;
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+}
+
+.frota-col-esquerda,
+.frota-col-direita {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.frota-col-titulo {
+    font-family: 'Poppins', 'Montserrat', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+    line-height: 1.1;
+}
+
+.frota-col-traco {
+    display: none;
+}
+
+.frota-col-citacao {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #e2e8f0;
+    font-weight: 400;
+    font-style: italic;
+    margin: 0 0 28px 0;
+    width: 100%;
+    max-width: 100%;
+    flex-grow: 1;
+    min-height: 82px;
+}
+
+.frota-col-citacao strong {
+    color: #ffffff;
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Botões Executivos Alinhados */
+.btn-frota-executivo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #181a20;
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    margin-top: auto;
+    align-self: flex-start;
+}
+
+.btn-frota-executivo:hover {
+    border-color: #ffffff;
+    background-color: #242733;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-frota-executivo:active {
+    transform: translateY(0);
+}
+
+.btn-frota-executivo svg {
+    transition: transform 0.25s ease, color 0.25s ease;
+    color: #cbd5e1;
+}
+
+.btn-frota-executivo:hover svg {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+/* --- LIGHTBOX MODAL PARA GALERIA DE FOTOS --- */
+.frota-lightbox-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.frota-lightbox-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.frota-lightbox-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(6, 8, 18, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.frota-lightbox-content {
+    position: relative;
+    z-index: 2;
+    max-width: 90vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.frota-lightbox-img-wrap {
+    max-width: 100%;
+    max-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(61, 61, 144, 0.35);
+    background-color: #0b0e1b;
+}
+
+.frota-lightbox-img-wrap img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+}
+
+.frota-lightbox-caption {
+    width: 100%;
+    padding: 14px 20px;
+    background-color: #0f1325;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    border-top: 1px solid rgba(61, 61, 144, 0.25);
+}
+
+.frota-lightbox-close {
+    position: absolute;
+    top: -48px;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 38px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.frota-lightbox-close:hover {
+    color: #60a5fa;
+    transform: scale(1.15);
+}
+
+.frota-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.frota-lightbox-nav.prev {
+    left: -64px;
+}
+
+.frota-lightbox-nav.next {
+    right: -64px;
+}
+
+.frota-lightbox-nav:hover {
+    background: #3d3d90;
+    border-color: #60a5fa;
+    box-shadow: 0 0 16px rgba(96, 165, 250, 0.45);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 1024px) {
+    .frota-slide-item {
+        flex: 0 0 50%;
+        min-width: 50%;
+        height: 340px;
+    }
+
+    .frota-executiva-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .frota-coluna-item {
+        max-width: 520px;
+        width: 100%;
+    }
+
+    .frota-col-esquerda,
+    .frota-col-direita {
+        align-items: center;
+        text-align: center;
+    }
+
+    .frota-col-traco {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .frota-col-citacao {
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        min-height: auto;
+    }
+
+    .btn-frota-executivo {
+        align-self: center;
+        margin-top: 0;
+    }
+
+    .frota-lightbox-nav.prev {
+        left: 12px;
+    }
+
+    .frota-lightbox-nav.next {
+        right: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .frota-slide-item {
+        flex: 0 0 100%;
+        min-width: 100%;
+        height: 270px;
+        border-right: none;
+    }
+
+    .frota-slider-btn {
+        width: 42px;
+        height: 42px;
+    }
+
+    .frota-slider-btn.prev {
+        left: 12px;
+    }
+
+    .frota-slider-btn.next {
+        right: 12px;
+    }
+
+    .frota-executiva-banner {
+        padding: 50px 18px;
+    }
+
+    .frota-col-titulo {
+        font-size: 34px;
+    }
+}

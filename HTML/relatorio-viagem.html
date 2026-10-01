@@ -219,8 +219,9 @@
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <input type="text" id="motorista" name="motorista" required
-                                        placeholder="Nome completo do motorista" autocomplete="name">
+                                    <select id="motorista" name="motorista" required autocomplete="name">
+                                        <option value="">Selecione o motorista...</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -236,8 +237,9 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <input type="text" id="placas" name="placas" required placeholder="Ex: MHU 9157"
-                                        maxlength="8">
+                                    <select id="placas" name="placas" required>
+                                        <option value="">Selecione a placa...</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -657,9 +659,33 @@
                                                     <th style="width: 14%;">OPERAÇÃO</th>
                                                     <th style="width: 15%;">ORIGEM</th>
                                                     <th style="width: 15%;">DESTINO</th>
-                                                    <th style="width: 15%;">VALOR FRETE</th>
-                                                    <th style="width: 15%;">COMISSÃO</th>
-                                                    <th style="width: 15%;">DESCARGA</th>
+                                                    <th style="width: 15%;">
+                                                        VALOR FRETE
+                                                        <span class="tag-bloqueado-frota th-tag-gestao" title="Definido pela Gestão">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                            </svg>
+                                                            <span>GESTÃO</span>
+                                                        </span>
+                                                    </th>
+                                                    <th style="width: 15%;">
+                                                        COMISSÃO
+                                                        <span class="tag-bloqueado-frota th-tag-gestao" title="Definido pela Gestão">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                            </svg>
+                                                            <span>GESTÃO</span>
+                                                        </span>
+                                                    </th>
+                                                    <th style="width: 15%;">
+                                                        DESCARGA
+                                                        <span class="tag-bloqueado-frota th-tag-gestao" title="Definido pela Gestão">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                                            </svg>
+                                                            <span>GESTÃO</span>
+                                                        </span>
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1452,9 +1478,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_1"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_1"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_1" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_1"
@@ -1495,9 +1522,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_2"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_2"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_2" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_2"
@@ -1538,9 +1566,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_3"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_3"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_3" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_3"
@@ -1581,9 +1610,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_4"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_4"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_4" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_4"
@@ -1624,9 +1654,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_5"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_5"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_5" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_5"
@@ -1667,9 +1698,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_6"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_6"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_6" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_6"
@@ -1710,9 +1742,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_7"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_7"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_7" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_7"
@@ -1753,9 +1786,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_8"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_8"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_8" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_8"
@@ -1796,9 +1830,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_9"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_9"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_9" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_9"
@@ -1839,9 +1874,10 @@
                                                             </svg>
                                                         </button>
                                                     </td>
-                                                    <td><input type="text" name="posto_ml_10"
-                                                            class="input-tabela input-posto"
-                                                            placeholder="Nome do posto..."></td>
+                                                    <td><select name="posto_ml_10"
+                                                            class="input-tabela input-posto">
+                                                            <option value="">Selecione o posto...</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_10" class="input-tabela input-nf"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_10"
@@ -2061,14 +2097,14 @@
                                                 <div class="linha-despesa-composta" id="linha-imposto-federal">
                                                     <div class="desc-com-trava">
                                                         <label for="ml-despesa-desc-1">
-                                                            Imposto Federal (IRRF / INSS / SEST / SENAT)
+                                                            Imposto Federal
                                                         </label>
                                                         <div class="input-wrapper input-bloqueado-wrapper">
                                                             <input type="text" id="ml-despesa-desc-1"
                                                                 name="ml_despesa_desc_1"
-                                                                value="Imposto Federal (IRRF / INSS / SEST / SENAT)"
+                                                                value="Imposto Federal"
                                                                 readonly class="input-bloqueado-campo"
-                                                                title="Imposto Federal (IRRF / INSS / SEST / SENAT)">
+                                                                title="Imposto Federal">
                                                         </div>
                                                     </div>
                                                     <div class="valor-com-rotulo">

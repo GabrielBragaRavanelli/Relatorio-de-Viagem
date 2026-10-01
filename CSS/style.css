@@ -2225,7 +2225,7 @@ footer {
     z-index: 2;
     max-width: 1180px;
     margin: 0 auto;
-    min-height: 380px; /* Mantém a altura da seção constante, impedindo aumento ou salto da página ao abrir */
+    min-height: 480px; /* Mantém a altura da seção fixa e estável, eliminando qualquer aumento embaixo quando os cards abrem */
 }
 
 /* Card Retangular Horizontal Expansível */
@@ -2263,6 +2263,8 @@ footer {
     justify-content: space-between;
     padding: 16px 28px;
     gap: 16px;
+    min-height: 82px;
+    box-sizing: border-box;
     transition: padding 0.35s ease;
 }
 
@@ -2374,6 +2376,8 @@ footer {
     transform: translateY(10px);
     transition: opacity 0.35s ease, transform 0.35s ease;
     padding: 0 28px;
+    display: flex;
+    flex-direction: column;
 }
 
 .capsula-card:hover .capsula-corpo,
@@ -2387,6 +2391,8 @@ footer {
     transform: translateY(0);
     padding: 4px 28px 26px 28px;
     transition-delay: 0.08s;
+    min-height: 295px;
+    box-sizing: border-box;
 }
 
 .capsula-divisor {
@@ -2400,6 +2406,9 @@ footer {
     color: #475569;
     line-height: 1.6;
     margin: 0 0 16px 0;
+    min-height: 72px;
+    display: flex;
+    align-items: flex-start;
 }
 
 .capsula-box-specs {
@@ -2407,6 +2416,10 @@ footer {
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     padding: 16px 18px;
+    min-height: 168px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .capsula-specs-titulo {
@@ -2460,11 +2473,21 @@ footer {
     .capsula-header {
         padding: 14px 20px;
         gap: 12px;
+        min-height: 72px;
     }
 
     .capsula-card:hover .capsula-corpo-inner,
     .capsula-card.expandido .capsula-corpo-inner {
         padding: 4px 20px 22px 20px;
+        min-height: auto;
+    }
+
+    .capsula-descricao {
+        min-height: auto;
+    }
+
+    .capsula-box-specs {
+        min-height: auto;
     }
 
     .capsula-badge {

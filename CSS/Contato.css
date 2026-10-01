@@ -921,6 +921,75 @@ main {
     }
 }
 
+/* COLUNA DO FORMULÁRIO + CARDS INFERIORES */
+.form-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* CARD DE FILIAIS EM DISPOSIÇÃO HORIZONTAL */
+.info-card.info-card-horizontal {
+    width: 100%;
+}
+
+.estrutura-lista-horizontal {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px 18px !important;
+    margin: 16px 0 20px 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.estrutura-lista-horizontal li {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 13.5px !important;
+    color: var(--cinza-escuro) !important;
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.estrutura-lista-horizontal li:hover {
+    transform: translateY(-2px);
+    border-color: var(--azul-ajborges-claro);
+    box-shadow: 0 4px 12px rgba(61, 61, 144, 0.08);
+}
+
+.torre-destaque-horizontal {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    padding: 16px 20px !important;
+}
+
+.torre-destaque-horizontal .torre-conteudo-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+.torre-destaque-horizontal .torre-texto {
+    flex: 1;
+}
+
+.torre-destaque-horizontal .btn-operacional-marilia {
+    width: auto !important;
+    min-width: 250px !important;
+    margin-top: 0 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+}
+
 /* SEÇÃO MAPA GOOGLE MAPS */
 .mapa-section {
     padding: 0 24px 70px;
@@ -1063,6 +1132,19 @@ main {
         gap: 28px;
     }
 
+    .estrutura-lista-horizontal {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .torre-destaque-horizontal .torre-conteudo-wrapper {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .torre-destaque-horizontal .btn-operacional-marilia {
+        width: 100% !important;
+    }
+
     .mapa-barra-acoes {
         flex-direction: column;
         align-items: stretch;
@@ -1126,6 +1208,16 @@ main {
 
     .info-card {
         padding: 20px 16px;
+    }
+
+    .estrutura-lista-horizontal {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .torre-destaque-horizontal {
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
 
     .mapa-section {

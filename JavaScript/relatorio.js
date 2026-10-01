@@ -58,9 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(uAtivo));
             }
         }
-    } catch(e) {}
+    } catch (e) { }
     if (inputMotorista && inputMotorista.value === 'Carlos Eduardo Ferreira') {
         inputMotorista.value = '';
+    }
+
+    // Helper global para checagem de permissão de Gestão/Admin
+    function verificarPermissaoAdmin() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeUrl = urlParams.get('mode');
+        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtivo = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
+        }
+        return (modeUrl === 'admin') || (usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
     }
 
     function obterProximoNumeroFicha() {
@@ -80,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         const salvoLocal = parseInt(localStorage.getItem(STORAGE_FICHA_KEY), 10);
         if (!isNaN(salvoLocal) && salvoLocal > maxNum) {
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------
     // 1. Formatação de Placas (Maiúsculas e Hífen)
     // ------------------------------------------
-    if (inputPlacas) {
+    if (inputPlacas && inputPlacas.tagName === 'INPUT') {
         inputPlacas.addEventListener('input', (e) => {
             let valor = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (valor.length > 3 && !valor.includes('-') && /^[A-Z]{3}[0-9]/.test(valor)) {
@@ -755,22 +767,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectCli = document.querySelector(`select[name="cliente_frete_ml_${index}"]`);
         const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${index}"]`);
         const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${index}"]`);
+        const inputDescarga = document.querySelector(`input[name="descarga_frete_ml_${index}"]`);
 
         if (!selectCli || !inputValFrete || !inputComissao) return;
 
         const tipoOperacao = selectCli.value;
+        const isGestao = verificarPermissaoAdmin();
 
-        // O campo VALOR FRETE é SEMPRE livre para digitação manual em todas as operações
-        inputValFrete.removeAttribute('readonly');
+        // 1. VALOR FRETE: Trancado para o motorista (Definido pela Gestão)
+        if (isGestao) {
+            inputValFrete.removeAttribute('readonly');
+            inputValFrete.removeAttribute('tabindex');
+            inputValFrete.classList.remove('campo-bloqueado-gestao');
+        } else {
+            inputValFrete.setAttribute('readonly', 'true');
+            inputValFrete.setAttribute('tabindex', '-1');
+            inputValFrete.classList.add('campo-bloqueado-gestao');
+        }
 
+        // 2. DESCARGA: Trancada para o motorista (Definida pela Gestão)
+        if (inputDescarga) {
+            if (isGestao) {
+                inputDescarga.removeAttribute('readonly');
+                inputDescarga.removeAttribute('tabindex');
+                inputDescarga.classList.remove('campo-bloqueado-gestao');
+            } else {
+                inputDescarga.setAttribute('readonly', 'true');
+                inputDescarga.setAttribute('tabindex', '-1');
+                inputDescarga.classList.add('campo-bloqueado-gestao');
+            }
+        }
+
+        // 3. COMISSÃO: Cálculo automático ou fixo, trancada para o motorista
         if (tipoOperacao === 'mercado_livre') {
-            // Apenas a comissão é fixa em R$ 400,00 e bloqueada; frete livre
-            inputComissao.setAttribute('readonly', 'true');
-            inputComissao.dataset.editadoManual = '';
             inputComissao.value = '400,00';
+            inputComissao.dataset.editadoManual = '';
         } else if (tipoOperacao === 'shopee') {
-            // Shopee: comissão bloqueada (readonly), calculada automaticamente a 11%
-            inputComissao.setAttribute('readonly', 'true');
             inputComissao.dataset.editadoManual = '';
             const valorNum = parseMoeda(inputValFrete.value);
             if (valorNum > 0) {
@@ -780,20 +812,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputComissao.value = '';
             }
         } else if (tipoOperacao === 'alimenticio') {
-            // Alimentício: 11% retirado! Frete e comissão livres para preenchimento manual
-            inputComissao.removeAttribute('readonly');
             inputComissao.dataset.editadoManual = '';
-            if (acaoDisparadaPorSelect) {
+            if (acaoDisparadaPorSelect && isGestao) {
                 inputComissao.value = '';
             }
         } else {
-            // Vazio / Desmarcado
-            inputComissao.setAttribute('readonly', 'true');
             inputComissao.dataset.editadoManual = '';
-            if (acaoDisparadaPorSelect) {
+            if (acaoDisparadaPorSelect && isGestao) {
                 inputValFrete.value = '';
             }
             inputComissao.value = '';
+        }
+
+        if (isGestao) {
+            if (tipoOperacao === 'alimenticio' || tipoOperacao === '') {
+                inputComissao.removeAttribute('readonly');
+                inputComissao.removeAttribute('tabindex');
+                inputComissao.classList.remove('campo-bloqueado-gestao');
+            } else {
+                inputComissao.setAttribute('readonly', 'true');
+            }
+        } else {
+            inputComissao.setAttribute('readonly', 'true');
+            inputComissao.setAttribute('tabindex', '-1');
+            inputComissao.classList.add('campo-bloqueado-gestao');
         }
     }
 
@@ -942,18 +984,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTotalLitrosCombustivelMl = document.getElementById('ml-total-litros-combustivel');
 
     for (let i = 1; i <= 10; i++) {
-        const inputPosto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const inputPosto = document.querySelector(`[name="posto_ml_${i}"]`);
         const inputNf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const inputKm = document.querySelector(`input[name="km_ml_${i}"]`);
         const inputValor = document.querySelector(`input[name="valor_ml_${i}"]`);
         const inputLitros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
         if (inputPosto) {
-            inputPosto.addEventListener('input', () => {
-                salvarProgressoMl();
-                if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
-                    atualizarListaLinhasAbastPreenchidasPopover();
-                }
+            ['input', 'change'].forEach(ev => {
+                inputPosto.addEventListener(ev, () => {
+                    salvarProgressoMl();
+                    if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+                        atualizarListaLinhasAbastPreenchidasPopover();
+                    }
+                });
             });
         }
 
@@ -1544,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ações de Limpeza de Abastecimento ML
     function verificarLinhaAbastPreenchida(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const km = document.querySelector(`input[name="km_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1558,7 +1602,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function obterResumoLinhaAbast(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
         const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
@@ -1584,7 +1628,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function limparLinhaAbast(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const km = document.querySelector(`input[name="km_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1648,7 +1692,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLimparAbastMlTodas) {
         btnLimparAbastMlTodas.addEventListener('click', () => {
             for (let i = 1; i <= 10; i++) {
-                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                 const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                 const km = document.querySelector(`input[name="km_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1756,7 +1800,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const abastecimentosMl = [];
             for (let i = 1; i <= 10; i++) {
                 abastecimentosMl.push({
-                    posto: document.querySelector(`input[name="posto_ml_${i}"]`)?.value || '',
+                    posto: document.querySelector(`[name="posto_ml_${i}"]`)?.value || '',
                     nf: document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '',
                     km: document.querySelector(`input[name="km_ml_${i}"]`)?.value || '',
                     valor: document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '',
@@ -1798,8 +1842,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Restaurar cabeçalho
                 if (dados.cabecalho) {
-                    if (inputMotorista && dados.cabecalho.motorista) inputMotorista.value = dados.cabecalho.motorista;
-                    if (inputPlacas && dados.cabecalho.placas) inputPlacas.value = dados.cabecalho.placas;
+                    if (inputMotorista && dados.cabecalho.motorista) {
+                        let opt = Array.from(inputMotorista.options).find(o => o.value.toUpperCase() === dados.cabecalho.motorista.toUpperCase());
+                        if (!opt) {
+                            const o = document.createElement('option');
+                            o.value = dados.cabecalho.motorista;
+                            o.textContent = dados.cabecalho.motorista;
+                            inputMotorista.appendChild(o);
+                        }
+                        inputMotorista.value = dados.cabecalho.motorista;
+                    }
+                    if (inputPlacas && dados.cabecalho.placas) {
+                        let opt = Array.from(inputPlacas.options).find(o => o.value.toUpperCase() === dados.cabecalho.placas.toUpperCase());
+                        if (!opt) {
+                            const o = document.createElement('option');
+                            o.value = dados.cabecalho.placas;
+                            o.textContent = dados.cabecalho.placas;
+                            inputPlacas.appendChild(o);
+                        }
+                        inputPlacas.value = dados.cabecalho.placas;
+                    }
                     if (inputDataSaida && dados.cabecalho.dataSaida) inputDataSaida.value = normalizarDataExibicao(dados.cabecalho.dataSaida);
                     if (inputDataChegada && dados.cabecalho.dataChegada) inputDataChegada.value = normalizarDataExibicao(dados.cabecalho.dataChegada);
                     if (inputKmSaida && dados.cabecalho.kmSaida) inputKmSaida.value = dados.cabecalho.kmSaida;
@@ -1893,13 +1955,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Array.isArray(dados.abastecimentos)) {
                     dados.abastecimentos.forEach((ab, idx) => {
                         const i = idx + 1;
-                        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                         const km = document.querySelector(`input[name="km_ml_${i}"]`);
                         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
                         const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-                        if (posto && ab.posto) { posto.value = ab.posto; temAbastPreenchido = true; }
+                        if (posto && ab.posto) {
+                            let opt = Array.from(posto.options).find(o => o.value.toUpperCase() === ab.posto.toUpperCase());
+                            if (!opt) {
+                                const o = document.createElement('option');
+                                o.value = ab.posto;
+                                o.textContent = ab.posto;
+                                posto.appendChild(o);
+                            }
+                            posto.value = ab.posto;
+                            temAbastPreenchido = true;
+                        }
                         if (nf && ab.nf) { nf.value = ab.nf; temAbastPreenchido = true; }
                         if (km && ab.km) { km.value = ab.km; temAbastPreenchido = true; }
                         if (valor && ab.valor) { valor.value = ab.valor; temAbastPreenchido = true; }
@@ -1999,7 +2071,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function coletarAbastecimentosAtuais() {
         const abasts = [];
         for (let i = 1; i <= 10; i++) {
-            const posto = document.querySelector(`input[name="posto_ml_${i}"]`)?.value || '';
+            const posto = document.querySelector(`[name="posto_ml_${i}"]`)?.value || '';
             const nf = document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '';
             const km = document.querySelector(`input[name="km_ml_${i}"]`)?.value || '';
             const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
@@ -2024,8 +2096,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ficha) return;
 
         // Cabeçalho
-        if (inputMotorista && ficha.motorista) inputMotorista.value = ficha.motorista;
-        if (inputPlacas && ficha.placas) inputPlacas.value = ficha.placas;
+        if (inputMotorista && ficha.motorista) {
+            let opt = Array.from(inputMotorista.options).find(o => o.value.toUpperCase() === ficha.motorista.toUpperCase());
+            if (!opt) {
+                const o = document.createElement('option');
+                o.value = ficha.motorista;
+                o.textContent = ficha.motorista;
+                inputMotorista.appendChild(o);
+            }
+            inputMotorista.value = ficha.motorista;
+        }
+        if (inputPlacas && ficha.placas) {
+            let opt = Array.from(inputPlacas.options).find(o => o.value.toUpperCase() === ficha.placas.toUpperCase());
+            if (!opt) {
+                const o = document.createElement('option');
+                o.value = ficha.placas;
+                o.textContent = ficha.placas;
+                inputPlacas.appendChild(o);
+            }
+            inputPlacas.value = ficha.placas;
+        }
         if (inputDataSaida && ficha.dataSaida) inputDataSaida.value = normalizarDataExibicao(ficha.dataSaida);
         if (inputDataChegada && ficha.dataChegada) inputDataChegada.value = normalizarDataExibicao(ficha.dataChegada);
         if (inputKmSaida && ficha.kmSaida) inputKmSaida.value = ficha.kmSaida;
@@ -2067,13 +2157,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Array.isArray(ficha.abastecimentos)) {
             ficha.abastecimentos.forEach((ab, idx) => {
                 const i = idx + 1;
-                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                 const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                 const km = document.querySelector(`input[name="km_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
                 const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-                if (posto && ab.posto) posto.value = ab.posto;
+                if (posto && ab.posto) {
+                    let opt = Array.from(posto.options).find(o => o.value.toUpperCase() === ab.posto.toUpperCase());
+                    if (!opt) {
+                        const o = document.createElement('option');
+                        o.value = ab.posto;
+                        o.textContent = ab.posto;
+                        posto.appendChild(o);
+                    }
+                    posto.value = ab.posto;
+                }
                 if (nf && ab.nf) nf.value = ab.nf;
                 if (km && ab.km) km.value = ab.km;
                 if (valor && ab.valor) valor.value = ab.valor;
@@ -2115,8 +2214,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Remove dados de seed mockados antigos se existirem
                     const limpa = lista.filter(f => {
                         if (!f || !f.id) return false;
-                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005', 
-                                         'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
+                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005',
+                            'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
                         return !mockIds.includes(f.id);
                     });
                     if (limpa.length !== lista.length) {
@@ -2124,7 +2223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     return limpa;
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         return [];
     }
@@ -2134,12 +2233,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Alternância de Perfil (Driver vs Admin)
-    window.alternarPerfil = function(novoRole) {
+    window.alternarPerfil = function (novoRole) {
         let usuario = null;
         try {
             usuario = JSON.parse(localStorage.getItem(STORAGE_USER_ACTIVE) || '{}');
-        } catch(e) { usuario = {}; }
-        
+        } catch (e) { usuario = {}; }
+
         if (novoRole === 'admin' || novoRole === 'diretoria') {
             usuario.role = 'admin';
             usuario.nome = usuario.nome || 'Administrador Central';
@@ -2153,7 +2252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuario));
             exibirToast('Visão de MOTORISTA ativada (Campos corporativos bloqueados / Imposto Federal oculto)', 'info');
         }
-        
+
         const url = new URL(window.location.href);
         url.searchParams.delete('mode');
         window.history.replaceState({}, '', url.toString());
@@ -2170,13 +2269,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { 
+            try {
                 usuarioAtivo = JSON.parse(usuarioAtivoStr);
                 if (usuarioAtivo && usuarioAtivo.nome === 'Carlos Eduardo Ferreira') {
                     usuarioAtivo.nome = '';
                     localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
@@ -2221,7 +2320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const badgePedagio = document.getElementById('badge-pedagio-status');
         const botoesPickerData = document.querySelectorAll('.btn-picker-data');
 
-        function aplicarBloqueioCampo(input, rotulo = 'Definido pela Frota') {
+        function aplicarBloqueioCampo(input, rotulo = 'Definido pela Gestão') {
             if (!input) return;
             input.setAttribute('readonly', 'true');
             input.setAttribute('tabindex', '-1');
@@ -2309,10 +2408,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Liberação total dos campos sob governança da empresa
             camposGovernançaFrota.forEach(input => liberarCampoBloqueado(input));
-            camposDescargaTabela.forEach(input => {
+
+            // Liberação das 3 colunas de frete para a Gestão / Administrador
+            const inputsValorFrete = Array.from(document.querySelectorAll('.input-valor-frete-ml'));
+            const inputsComissaoFrete = Array.from(document.querySelectorAll('.input-comissao-frete-ml'));
+            const inputsDescargaFrete = Array.from(document.querySelectorAll('.input-descarga-frete-ml'));
+            [...inputsValorFrete, ...inputsComissaoFrete, ...inputsDescargaFrete].forEach(input => {
                 input.removeAttribute('readonly');
                 input.removeAttribute('disabled');
+                input.removeAttribute('tabindex');
                 input.classList.remove('campo-bloqueado-gestao');
+                const parentMoeda = input.closest('.tabela-moeda-wrap');
+                if (parentMoeda) parentMoeda.classList.remove('campo-bloqueado-gestao');
             });
 
             // 2. Imposto Federal visível e livremente editável
@@ -2373,7 +2480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     atualizarFichaNaBase(idAprovar, true);
                     sessionStorage.setItem('ajborges_toast_mensagem', `Relatório ${idAprovar} APROVADO e CONCLUÍDO com sucesso!`);
-                    
+
                     // Retorna suavemente ao Dashboard Administrativo na seção de fichas
                     setTimeout(() => {
                         window.location.href = 'dashboard-admin.html#fichas';
@@ -2427,11 +2534,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (barraAdmin) barraAdmin.classList.remove('ativa');
         if (barraMotorista) barraMotorista.style.display = 'flex';
 
-        // 1. Aplicação de Bloqueio nos Campos Sob Governança da Frota
-        camposGovernançaFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
-        camposDescargaTabela.forEach(input => {
+        // 1. Aplicação de Bloqueio nos Campos Sob Governança da Gestão
+        camposGovernançaFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Gestão'));
+
+        // Bloqueio das 3 colunas da tabela de fretes para o motorista (VALOR FRETE, COMISSÃO e DESCARGA)
+        const inputsValorFrete = Array.from(document.querySelectorAll('.input-valor-frete-ml'));
+        const inputsComissaoFrete = Array.from(document.querySelectorAll('.input-comissao-frete-ml'));
+        const inputsDescargaFrete = Array.from(document.querySelectorAll('.input-descarga-frete-ml'));
+        [...inputsValorFrete, ...inputsComissaoFrete, ...inputsDescargaFrete].forEach(input => {
             input.setAttribute('readonly', 'true');
+            input.setAttribute('tabindex', '-1');
             input.classList.add('campo-bloqueado-gestao');
+            const parentMoeda = input.closest('.tabela-moeda-wrap');
+            if (parentMoeda) parentMoeda.classList.add('campo-bloqueado-gestao');
         });
 
         // 2. Ocultação total do campo sensível: Imposto Federal (IRRF / INSS / SEST / SENAT)
@@ -2439,7 +2554,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badgeImpostoObrigatorio) badgeImpostoObrigatorio.classList.add('oculto-motorista');
 
         // 3. Status de Pedágio
-        if (badgePedagio) badgePedagio.textContent = 'Definido pela Frota';
+        if (badgePedagio) badgePedagio.textContent = 'Definido pela Gestão';
 
         // 4. Desabilita seletores de data
         botoesPickerData.forEach(btn => {
@@ -2461,12 +2576,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isMotoristaLogado) {
             const nomeMotoristaValido = (usuarioAtivo.nome && usuarioAtivo.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtivo.nome : '';
             if (inputMotorista) {
-                inputMotorista.value = nomeMotoristaValido;
                 if (nomeMotoristaValido) {
-                    inputMotorista.setAttribute('readonly', 'true');
+                    let opt = Array.from(inputMotorista.options).find(o => o.value.toUpperCase() === nomeMotoristaValido.toUpperCase());
+                    if (!opt) {
+                        const o = document.createElement('option');
+                        o.value = nomeMotoristaValido;
+                        o.textContent = nomeMotoristaValido;
+                        inputMotorista.appendChild(o);
+                    }
+                    inputMotorista.value = nomeMotoristaValido;
+                    inputMotorista.style.pointerEvents = 'none';
+                    inputMotorista.style.backgroundColor = '#f8fafc';
+                    inputMotorista.setAttribute('tabindex', '-1');
+
+                    // Vínculo automático inicial da placa para o motorista logado
+                    if (inputPlacas && !inputPlacas.value && mapaMotoristaPlaca[nomeMotoristaValido.toUpperCase()]) {
+                        inputPlacas.value = mapaMotoristaPlaca[nomeMotoristaValido.toUpperCase()];
+                    }
                 } else {
-                    inputMotorista.removeAttribute('readonly');
-                    inputMotorista.placeholder = 'Nome completo do motorista';
+                    inputMotorista.style.pointerEvents = '';
+                    inputMotorista.style.backgroundColor = '';
+                    inputMotorista.removeAttribute('tabindex');
                 }
             }
             if (motoristaSaudacao) {
@@ -2496,7 +2626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
         }
         if (!usuarioAtivo || usuarioAtivo.role !== 'motorista') return;
 
@@ -2570,7 +2700,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
         }
         if (!usuarioAtivo) return;
 
@@ -2709,14 +2839,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
             let usuarioAtivo = null;
             if (usuarioAtivoStr) {
-                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
             }
             const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
             // Monta objeto completo da nova ficha
-            const agoraDataHora = new Date().toLocaleString('pt-BR', { 
-                day: '2-digit', month: '2-digit', year: 'numeric', 
-                hour: '2-digit', minute: '2-digit' 
+            const agoraDataHora = new Date().toLocaleString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             });
 
             const novaFicha = {
@@ -2808,10 +2938,295 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Sincronização inicial com Google Sheets e vinculação Motorista <-> Placa
+    sincronizarComGoogleSheets();
+    configurarVinculoMotoristaPlaca();
+
     window.carregarProgressoMl = carregarProgressoMl;
     carregarProgressoMl();
 
     // Dispara a configuração completa do ciclo de vida
     configurarCicloDeVidaViagem();
 });
+
+// ==========================================================================
+// INTEGRAÇÃO EM TEMPO REAL: GOOGLE SHEETS (FROTA AJBORGES)
+// ==========================================================================
+// Integração EXCLUSIVAMENTE DE LEITURA (HTTP GET). Planilha 100% intacta.
+const LINK_GOOGLE_SHEETS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSD4-GWAn_bNswB31LnjIBVezbRNYxd0NjnXaekV6uiE5D2LN-GdGX2Q1o6HxqcRTtqAGJGkCQx4wF6/pub?gid=1654915875&single=true&output=csv';
+const CHAVE_CACHE_GOOGLE_SHEETS = 'ajborges_cadastros_sheets_cache';
+
+const mapaMotoristaPlaca = {};
+const mapaPlacaMotorista = {};
+
+/**
+ * Parser seguro de CSV para células com aspas, vírgulas e quebras
+ */
+function parsearCSVGoogleSheets(texto) {
+    const linhas = [];
+    let linhaAtual = [];
+    let campoAtual = '';
+    let dentroAspas = false;
+
+    for (let i = 0; i < texto.length; i++) {
+        const c = texto[i];
+        const prox = texto[i + 1];
+
+        if (c === '"') {
+            if (dentroAspas && prox === '"') {
+                campoAtual += '"';
+                i++;
+            } else {
+                dentroAspas = !dentroAspas;
+            }
+        } else if (c === ',' && !dentroAspas) {
+            linhaAtual.push(campoAtual.trim());
+            campoAtual = '';
+        } else if ((c === '\r' || c === '\n') && !dentroAspas) {
+            if (c === '\r' && prox === '\n') i++;
+            linhaAtual.push(campoAtual.trim());
+            if (linhaAtual.some(col => col !== '')) {
+                linhas.push(linhaAtual);
+            }
+            linhaAtual = [];
+            campoAtual = '';
+        } else {
+            campoAtual += c;
+        }
+    }
+    if (campoAtual !== '' || linhaAtual.length > 0) {
+        linhaAtual.push(campoAtual.trim());
+        if (linhaAtual.some(col => col !== '')) {
+            linhas.push(linhaAtual);
+        }
+    }
+    return linhas;
+}
+
+/**
+ * Popula um elemento <select> preservando o valor atualmente selecionado
+ */
+function preencherSelectDinamico(selectElement, opcoes, placeholder) {
+    if (!selectElement) return;
+
+    // Preserva o valor selecionado
+    const valorAtual = selectElement.value || selectElement.getAttribute('data-valor-pendente') || '';
+
+    selectElement.innerHTML = '';
+    const optPadrao = document.createElement('option');
+    optPadrao.value = '';
+    optPadrao.textContent = placeholder;
+    selectElement.appendChild(optPadrao);
+
+    let valorEncontrado = false;
+
+    opcoes.forEach(item => {
+        if (!item) return;
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        if (valorAtual && item.toUpperCase() === valorAtual.toUpperCase()) {
+            opt.selected = true;
+            valorEncontrado = true;
+        }
+        selectElement.appendChild(opt);
+    });
+
+    // Se havia um valor previamente selecionado e ele não consta na lista, mantém para não perder dados
+    if (valorAtual && !valorEncontrado) {
+        const optExtra = document.createElement('option');
+        optExtra.value = valorAtual;
+        optExtra.textContent = valorAtual;
+        optExtra.selected = true;
+        selectElement.appendChild(optExtra);
+    }
+}
+
+/**
+ * Aplica os dados estruturados aos selects da página
+ */
+function aplicarDadosNosSelects(dados) {
+    if (!dados) return;
+    const { postos, motoristas, placas, vinculosMotoristaPlaca, vinculosPlacaMotorista } = dados;
+
+    if (vinculosMotoristaPlaca) {
+        Object.assign(mapaMotoristaPlaca, vinculosMotoristaPlaca);
+    }
+    if (vinculosPlacaMotorista) {
+        Object.assign(mapaPlacaMotorista, vinculosPlacaMotorista);
+    }
+
+    // 1. Select de Motorista
+    const campoMotorista = document.getElementById('motorista');
+    if (campoMotorista) {
+        preencherSelectDinamico(campoMotorista, motoristas, 'Selecione o motorista...');
+    }
+
+    // 2. Select de Placas
+    const campoPlacas = document.getElementById('placas');
+    if (campoPlacas) {
+        preencherSelectDinamico(campoPlacas, placas, 'Selecione a placa...');
+    }
+
+    // 3. Selects de Postos de Combustível (todas as 10 linhas de combustível)
+    for (let i = 1; i <= 10; i++) {
+        const selectPosto = document.querySelector(`select[name="posto_ml_${i}"]`);
+        if (selectPosto) {
+            preencherSelectDinamico(selectPosto, postos, 'Selecione o posto...');
+        }
+    }
+
+    // Vínculo inicial se um já estiver preenchido e o outro não
+    if (campoMotorista && campoMotorista.value && campoPlacas && !campoPlacas.value) {
+        const placa = mapaMotoristaPlaca[campoMotorista.value.trim().toUpperCase()];
+        if (placa) campoPlacas.value = placa;
+    } else if (campoPlacas && campoPlacas.value && campoMotorista && !campoMotorista.value) {
+        const mot = mapaPlacaMotorista[campoPlacas.value.trim().toUpperCase()];
+        if (mot) campoMotorista.value = mot;
+    }
+}
+
+/**
+ * Extrai, desduplica e ordena os dados da planilha
+ */
+function processarLinhasPlanilha(linhas) {
+    const motoristasSet = new Set();
+    const placasSet = new Set();
+    const postosSet = new Set();
+    const vinculosMotoristaPlaca = {};
+    const vinculosPlacaMotorista = {};
+
+    // Pula linha 0 de cabeçalho
+    for (let i = 1; i < linhas.length; i++) {
+        const colunas = linhas[i];
+        const placa = (colunas[0] || '').trim();
+        const posto = (colunas[1] || '').trim();
+        const motorista = (colunas[2] || '').trim();
+
+        if (placa) placasSet.add(placa);
+        if (posto) postosSet.add(posto);
+        if (motorista) motoristasSet.add(motorista);
+
+        if (motorista && placa) {
+            vinculosMotoristaPlaca[motorista.toUpperCase()] = placa;
+            if (!vinculosPlacaMotorista[placa.toUpperCase()]) {
+                vinculosPlacaMotorista[placa.toUpperCase()] = motorista;
+            }
+        }
+    }
+
+    return {
+        motoristas: Array.from(motoristasSet).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+        placas: Array.from(placasSet).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+        postos: Array.from(postosSet).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+        vinculosMotoristaPlaca,
+        vinculosPlacaMotorista,
+        timestamp: Date.now()
+    };
+}
+
+/**
+ * Sincronização automática em tempo real via HTTP GET com fallback offline
+ */
+async function sincronizarComGoogleSheets() {
+    // 1. Tenta restaurar do cache local imediatamente para renderização ultrarrápida
+    try {
+        const cacheSalvo = localStorage.getItem(CHAVE_CACHE_GOOGLE_SHEETS);
+        if (cacheSalvo) {
+            const dadosCache = JSON.parse(cacheSalvo);
+            if (dadosCache && Array.isArray(dadosCache.postos)) {
+                aplicarDadosNosSelects(dadosCache);
+            }
+        }
+    } catch (e) {
+        console.warn('Cache offline de cadastros indisponível:', e);
+    }
+
+    // 2. Busca a versão mais atualizada diretamente na planilha (Exclusivamente GET)
+    try {
+        const resposta = await fetch(LINK_GOOGLE_SHEETS_CSV, {
+            method: 'GET',
+            headers: { 'Accept': 'text/csv, text/plain, */*' }
+        });
+
+        if (!resposta.ok) {
+            throw new Error(`HTTP ${resposta.status}`);
+        }
+
+        const textoCSV = await resposta.text();
+        const linhas = parsearCSVGoogleSheets(textoCSV);
+
+        if (linhas.length <= 1) return;
+
+        const dadosAtualizados = processarLinhasPlanilha(linhas);
+
+        // Aplica os novos dados aos selects
+        aplicarDadosNosSelects(dadosAtualizados);
+
+        // Salva cópia atualizada no localStorage para fallback
+        localStorage.setItem(CHAVE_CACHE_GOOGLE_SHEETS, JSON.stringify(dadosAtualizados));
+    } catch (erro) {
+        console.warn('Operando com dados locais/cache do Google Sheets:', erro);
+    }
+}
+
+/**
+ * Vínculo automático e bidirecional: Motorista <-> Placa
+ */
+function configurarVinculoMotoristaPlaca() {
+    const campoMotorista = document.getElementById('motorista');
+    const campoPlacas = document.getElementById('placas');
+
+    if (campoMotorista && campoPlacas) {
+        // Ao selecionar Motorista -> seleciona a Placa vinculada
+        ['change', 'input'].forEach(ev => {
+            campoMotorista.addEventListener(ev, () => {
+                const nome = campoMotorista.value.trim().toUpperCase();
+                if (!nome) return;
+
+                const placaVinculada = mapaMotoristaPlaca[nome];
+                if (placaVinculada) {
+                    let opt = Array.from(campoPlacas.options).find(o => o.value.toUpperCase() === placaVinculada.toUpperCase());
+                    if (opt) {
+                        campoPlacas.value = opt.value;
+                    } else {
+                        const novaOpt = document.createElement('option');
+                        novaOpt.value = placaVinculada;
+                        novaOpt.textContent = placaVinculada;
+                        campoPlacas.appendChild(novaOpt);
+                        campoPlacas.value = placaVinculada;
+                    }
+                    if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+                }
+            });
+        });
+
+        // Ao selecionar Placa -> seleciona o Motorista vinculado
+        ['change', 'input'].forEach(ev => {
+            campoPlacas.addEventListener(ev, () => {
+                const placa = campoPlacas.value.trim().toUpperCase();
+                if (!placa) return;
+
+                const motoristaVinculado = mapaPlacaMotorista[placa];
+                if (motoristaVinculado) {
+                    let opt = Array.from(campoMotorista.options).find(o => o.value.toUpperCase() === motoristaVinculado.toUpperCase());
+                    if (opt) {
+                        campoMotorista.value = opt.value;
+                    } else {
+                        const novaOpt = document.createElement('option');
+                        novaOpt.value = motoristaVinculado;
+                        novaOpt.textContent = motoristaVinculado;
+                        campoMotorista.appendChild(novaOpt);
+                        campoMotorista.value = motoristaVinculado;
+                    }
+                    if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
+                }
+            });
+        });
+    }
+}
+
+// Exposição global das funções para acesso ou recarregamento manual
+window.sincronizarComGoogleSheets = sincronizarComGoogleSheets;
+window.configurarVinculoMotoristaPlaca = configurarVinculoMotoristaPlaca;
 

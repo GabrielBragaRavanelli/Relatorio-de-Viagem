@@ -634,7 +634,8 @@ main {
     user-select: none;
 }
 
-.input-wrapper input {
+.input-wrapper input,
+.input-wrapper select {
     width: 100%;
     border: none;
     outline: none;
@@ -644,6 +645,24 @@ main {
     color: #0f172a;
     background: transparent;
     border-radius: 10px;
+}
+
+.input-wrapper select {
+    padding-right: 40px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+.input-wrapper select option {
+    background-color: #ffffff;
+    color: #0f172a;
+    padding: 10px 14px;
 }
 
 .input-wrapper input::placeholder {
@@ -1384,6 +1403,27 @@ main {
     background-color: #ffffff;
     color: #1e293b;
     cursor: text;
+}
+
+select.input-tabela {
+    cursor: pointer !important;
+    padding-right: 28px !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+select.input-tabela option {
+    background-color: #ffffff;
+    color: #1e293b;
+    padding: 6px 10px;
 }
 
 .tabela-moeda-wrap,
@@ -3163,6 +3203,50 @@ input.campo-bloqueado-gestao {
     width: 11px;
     height: 11px;
     flex-shrink: 0;
+    cursor: not-allowed !important;
+}
+
+.th-tag-gestao {
+    margin-left: 4px;
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.th-tag-gestao svg {
+    width: 9px;
+    height: 9px;
+    color: var(--azul-ajborges);
+}
+
+.tabela-moeda-wrap.campo-bloqueado-gestao,
+.tabela-moeda-wrap:has(input.campo-bloqueado-gestao),
+.tabela-moeda-wrap:has(input[readonly].campo-bloqueado-gestao) {
+    cursor: not-allowed !important;
+}
+
+.tabela-moeda-wrap.campo-bloqueado-gestao input,
+.tabela-moeda-wrap:has(input.campo-bloqueado-gestao) input {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    cursor: not-allowed !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.tabela-moeda-wrap.campo-bloqueado-gestao .tabela-moeda-prefixo,
+.tabela-moeda-wrap:has(input.campo-bloqueado-gestao) .tabela-moeda-prefixo {
+    color: #94a3b8 !important;
     cursor: not-allowed !important;
 }
 

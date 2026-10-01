@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="../CSS/frota-agregados.css">
     <link rel="icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
     <link rel="shortcut icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
     <link rel="apple-touch-icon" href="../Imagens/iconeAJb-prata.jpeg">
@@ -355,95 +356,120 @@
             </div>
         </section>
 
-        <!-- SEÇÃO INSTITUCIONAL: A SOLUÇÃO IDEAL PARA A SUA EMPRESA (FLOATING CARDS) -->
-        <section class="aj-solutions-section" id="solucoes-ajborges">
-            <div class="aj-container">
-                <!-- Cabeçalho da Seção -->
-                <div class="aj-section-header reveal-up">
-                    <h2 class="aj-section-title">A solução ideal para a sua empresa</h2>
-                    <p class="aj-section-subtitle">
-                        Eficiência operacional, pontualidade britânica e segurança máxima em transporte rodoviário para os maiores setores produtivos do país.
-                    </p>
-                </div>
+        <!-- SEÇÃO FROTA & AGREGADOS (SLIDER DE FROTAS + BANNER EXECUTIVO ESCURO) -->
+        <section class="secao-frota-agregados" id="secao-frota">
+            <!-- Slider Superior de Caminhões -->
+            <div class="frota-slider-wrapper">
+                <button type="button" class="frota-slider-btn prev" id="frotaSliderPrev" aria-label="Foto anterior da frota">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
 
-                <!-- Grid de Cards Flutuantes Superiores (3 Colunas Desktop / 1 Coluna Mobile) -->
-                <div class="aj-cards-grid">
-                    <!-- Card 1: Movimentação Nacional -->
-                    <article class="aj-card reveal-up" style="--reveal-delay: 0ms; --float-duration: 4.6s; --float-delay: 0s;">
-                        <div class="aj-card-media">
-                            <img src="../Imagens/CaminhaoAJB-Carrossel.jpg" alt="Movimentação Nacional • Transporte Rodoviário de Cargas" class="aj-card-img" loading="lazy">
-                            <div class="aj-card-overlay"></div>
+                <div class="frota-slider-track-container" id="frotaSliderTrack">
+                    <!-- Slide 1: Scania Verde AJBorges -->
+                    <div class="frota-slide-item" data-index="0" data-src="../Imagens/caminhao-verde-ajborges.png" data-title="Scania Verde AJBorges Transportes">
+                        <img src="../Imagens/caminhao-verde-ajborges.png" alt="Scania Verde AJBorges Transportes" loading="lazy">
+                        <div class="frota-slide-overlay">
+                            <span class="frota-slide-tag">Frota Exclusiva AJBorges</span>
                         </div>
-                        <div class="aj-card-body">
-                            <span class="aj-category-tag">MOVIMENTAÇÃO NACIONAL</span>
-                            <h3 class="aj-card-title">Transporte Rodoviário de Cargas</h3>
-                            <p class="aj-card-text">
-                                Soluções completas e seguras para cargas fracionadas e lotação por todo o território nacional, com frota moderna rastreada 24 horas por dia.
-                            </p>
-                        </div>
-                    </article>
-
-                    <!-- Card 2: Indústria & Alimentos -->
-                    <article class="aj-card reveal-up" style="--reveal-delay: 150ms; --float-duration: 5.2s; --float-delay: 1.1s;">
-                        <div class="aj-card-media">
-                            <img src="../Imagens/CargaAJB-carrossel.png" alt="Indústria & Alimentos • Distribuição Alimentícia & Vinhos" class="aj-card-img" loading="lazy">
-                            <div class="aj-card-overlay"></div>
-                        </div>
-                        <div class="aj-card-body">
-                            <span class="aj-category-tag">INDÚSTRIA &amp; ALIMENTOS</span>
-                            <h3 class="aj-card-title">Distribuição Alimentícia &amp; Vinhos</h3>
-                            <p class="aj-card-text">
-                                Especialistas na logística de produtos alimentícios, insumos e bebidas finas, garantindo controle térmico, manuseio cuidadoso e integridade total.
-                            </p>
-                        </div>
-                    </article>
-
-                    <!-- Card 3: Transferência Expressa -->
-                    <article class="aj-card reveal-up" style="--reveal-delay: 300ms; --float-duration: 4.9s; --float-delay: 2.2s;">
-                        <div class="aj-card-media">
-                            <img src="../Imagens/banner-ajborges-03.png" alt="Transferência Expressa • E-commerce Shopee & Mercado Livre" class="aj-card-img" loading="lazy">
-                            <div class="aj-card-overlay"></div>
-                        </div>
-                        <div class="aj-card-body">
-                            <span class="aj-category-tag">TRANSFERÊNCIA EXPRESSA</span>
-                            <h3 class="aj-card-title">E-commerce (Shopee &amp; Mercado Livre)</h3>
-                            <p class="aj-card-text">
-                                Conexão ágil e estratégica entre centros de distribuição e hubs regionais, atendendo aos padrões rigorosos de pontualidade dos maiores marketplaces.
-                            </p>
-                        </div>
-                    </article>
-                </div>
-
-                <!-- Card Horizontal de Destaque Embaixo dos 3 Cards -->
-                <article class="aj-card aj-card-horizontal reveal-up" style="--reveal-delay: 200ms; --float-duration: 5.6s; --float-delay: 1.5s;">
-                    <div class="aj-card-horizontal-media">
-                        <img src="../Imagens/4scanais.jpeg" alt="Operações Dedicadas e Frota Exclusiva AJBorges" class="aj-card-img" loading="lazy">
-                        <div class="aj-card-overlay"></div>
                     </div>
-                    <div class="aj-card-horizontal-body">
-                        <span class="aj-category-tag">OPERAÇÕES DEDICADAS &amp; GESTÃO INTEGRADA</span>
-                        <h3 class="aj-card-title">Logística Customizada &amp; Lotação Exclusiva</h3>
-                        <p class="aj-card-text">
-                            Projetos logísticos sob medida desenvolvidos para indústrias que exigem alta disponibilidade, frota dedicada padronizada, gestão de risco rigorosa e telemetria satelital contínua com torre de controle 24 horas por dia.
+                    <!-- Slide 2: Scania Amarela Rodovia -->
+                    <div class="frota-slide-item" data-index="1" data-src="../Imagens/scaniaamarela.jpeg" data-title="Scania Amarela AJBorges na Rodovia">
+                        <img src="../Imagens/scaniaamarela.jpeg" alt="Scania Amarela AJBorges na Rodovia" loading="lazy">
+                        <div class="frota-slide-overlay">
+                            <span class="frota-slide-tag">Rotas Contínuas Brasil</span>
+                        </div>
+                    </div>
+                    <!-- Slide 3: Frota Colorida Scania -->
+                    <div class="frota-slide-item" data-index="2" data-src="../Imagens/5scanais.jpeg" data-title="Linha Scanias Coloridas AJBorges">
+                        <img src="../Imagens/5scanais.jpeg" alt="Linha de Caminhões Scania AJBorges" loading="lazy">
+                        <div class="frota-slide-overlay">
+                            <span class="frota-slide-tag">Frota Padronizada</span>
+                        </div>
+                    </div>
+                    <!-- Slide 4: Linha Scania Azul AJBorges -->
+                    <div class="frota-slide-item" data-index="3" data-src="../Imagens/4scanais.jpeg" data-title="Linha Scania Azul AJBorges">
+                        <img src="../Imagens/4scanais.jpeg" alt="Linha Scania Azul AJBorges" loading="lazy">
+                        <div class="frota-slide-overlay">
+                            <span class="frota-slide-tag">Monitoramento 24 Horas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="frota-slider-btn next" id="frotaSliderNext" aria-label="Próxima foto da frota">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Banner Executivo Escuro: Frota & Agregados -->
+            <div class="frota-executiva-banner">
+                <div class="frota-executiva-container">
+                    <!-- Coluna 1: Frota -->
+                    <div class="frota-coluna-item frota-col-esquerda reveal-up">
+                        <h2 class="frota-col-titulo">FROTA</h2>
+                        <p class="frota-col-citacao">
+                            “Veículos novos e padronizados, aliando alta tecnologia, segurança e pontualidade na estrada.”
                         </p>
+                        <button type="button" class="btn-frota-executivo" id="btnAbrirGaleria">
+                            <span>Galeria de Fotos</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </button>
                     </div>
-                </article>
+
+                    <!-- Coluna 2: Agregados -->
+                    <div class="frota-coluna-item frota-col-direita reveal-up" style="--reveal-delay: 200ms;">
+                        <h2 class="frota-col-titulo">AGREGADOS</h2>
+                        <p class="frota-col-citacao">
+                            “Em sinergia com a nossa frota, mais de <strong>+100 agregados</strong> parceiros impulsionam nossa agilidade e cobertura em todo o território nacional.”
+                        </p>
+                        <a href="FichaMultiCadastro.html" class="btn-frota-executivo">
+                            <span>Vem Agregar</span>
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
+
+        <!-- Modal Galeria de Fotos Lightbox -->
+        <div class="frota-lightbox-modal" id="frotaLightboxModal" aria-hidden="true" role="dialog" aria-label="Galeria de Fotos da Frota AJBorges">
+            <div class="frota-lightbox-backdrop" id="frotaLightboxBackdrop"></div>
+            <div class="frota-lightbox-content">
+                <button type="button" class="frota-lightbox-close" id="frotaLightboxClose" aria-label="Fechar galeria">&times;</button>
+                <button type="button" class="frota-lightbox-nav prev" id="frotaLightboxPrev" aria-label="Foto anterior">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="frota-lightbox-img-wrap">
+                    <img id="frotaLightboxImg" src="" alt="Foto da Frota AJBorges">
+                    <div class="frota-lightbox-caption" id="frotaLightboxCaption"></div>
+                </div>
+                <button type="button" class="frota-lightbox-nav next" id="frotaLightboxNext" aria-label="Próxima foto">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
 
         <!-- SEÇÃO ESPECIALIDADES CORPORATIVAS (CÁPSULAS CILÍNDRICAS HORIZONTAIS EXPANSÍVEIS) -->
         <section class="especialidades-section" id="especialidades">
             <!-- Marca d'água de fundo (carrossel sutil 3 segundos a 0.08 de opacidade) -->
             <div class="especialidades-watermark-carousel" aria-hidden="true">
                 <div class="watermark-item active" data-index="0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
-                        <path d="M12 2v20"/>
-                        <path d="M12 6c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="currentColor"/>
-                        <path d="M12 6c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="currentColor"/>
-                        <path d="M12 11c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="currentColor"/>
-                        <path d="M12 11c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="currentColor"/>
-                        <path d="M12 16c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="currentColor"/>
-                        <path d="M12 16c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="currentColor"/>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
                     </svg>
                 </div>
                 <div class="watermark-item" data-index="1">
@@ -474,14 +500,8 @@
                         <div class="capsula-header">
                             <div class="capsula-lead">
                                 <div class="capsula-badge badge-alimenticio" title="Indústria Alimentícia">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 2v20"/>
-                                        <path d="M12 6c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="#FFFFFF"/>
-                                        <path d="M12 6c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="#FFFFFF"/>
-                                        <path d="M12 11c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="#FFFFFF"/>
-                                        <path d="M12 11c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="#FFFFFF"/>
-                                        <path d="M12 16c1.4-1.4 2.8-1.4 4.2 0c1.4 1.4 1.4 2.8 0 4.2c-1.4 1.4-2.8 1.4-4.2 0Z" fill="#FFFFFF"/>
-                                        <path d="M12 16c-1.4-1.4-2.8-1.4-4.2 0c-1.4 1.4-1.4 2.8 0 4.2c1.4 1.4 2.8 1.4 4.2 0Z" fill="#FFFFFF"/>
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
                                     </svg>
                                 </div>
                                 <div class="capsula-info">
@@ -1127,9 +1147,131 @@
                     revealObserver.observe(el);
                 });
             } else {
-                // Fallback para navegadores legados
                 revealElements.forEach(el => el.classList.add('revealed'));
             }
+
+            // CONTROLE DO SLIDER DE FROTAS (SUPERIOR)
+            const frotaTrack = document.getElementById('frotaSliderTrack');
+            const frotaBtnPrev = document.getElementById('frotaSliderPrev');
+            const frotaBtnNext = document.getElementById('frotaSliderNext');
+            const frotaSlides = document.querySelectorAll('.frota-slide-item');
+            const frotaWrapper = document.querySelector('.frota-slider-wrapper');
+
+            if (frotaTrack && frotaBtnPrev && frotaBtnNext) {
+                const getSlideWidth = () => {
+                    const first = frotaTrack.querySelector('.frota-slide-item');
+                    return first ? first.offsetWidth : 360;
+                };
+
+                const avancarSlide = () => {
+                    const slideWidth = getSlideWidth();
+                    const maxScroll = frotaTrack.scrollWidth - frotaTrack.clientWidth;
+                    if (frotaTrack.scrollLeft >= maxScroll - 15) {
+                        frotaTrack.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        frotaTrack.scrollBy({ left: slideWidth, behavior: 'smooth' });
+                    }
+                };
+
+                const retrocederSlide = () => {
+                    const slideWidth = getSlideWidth();
+                    if (frotaTrack.scrollLeft <= 15) {
+                        frotaTrack.scrollTo({ left: frotaTrack.scrollWidth, behavior: 'smooth' });
+                    } else {
+                        frotaTrack.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+                    }
+                };
+
+                frotaBtnNext.addEventListener('click', avancarSlide);
+                frotaBtnPrev.addEventListener('click', retrocederSlide);
+
+                // Auto-slide sutil a cada 4.5 segundos (pausa ao passar o mouse)
+                let autoSlideInterval = setInterval(avancarSlide, 4500);
+
+                if (frotaWrapper) {
+                    frotaWrapper.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
+                    frotaWrapper.addEventListener('mouseleave', () => {
+                        clearInterval(autoSlideInterval);
+                        autoSlideInterval = setInterval(avancarSlide, 4500);
+                    });
+                }
+            }
+
+            // MODAL LIGHTBOX - GALERIA DE FOTOS EXECUTIVA
+            const modalLightbox = document.getElementById('frotaLightboxModal');
+            const lightboxImg = document.getElementById('frotaLightboxImg');
+            const lightboxCaption = document.getElementById('frotaLightboxCaption');
+            const btnAbrirGaleria = document.getElementById('btnAbrirGaleria');
+            const btnCloseLightbox = document.getElementById('frotaLightboxClose');
+            const backdropLightbox = document.getElementById('frotaLightboxBackdrop');
+            const btnLightboxPrev = document.getElementById('frotaLightboxPrev');
+            const btnLightboxNext = document.getElementById('frotaLightboxNext');
+
+            const fotosGaleria = Array.from(document.querySelectorAll('.frota-slide-item')).map(slide => ({
+                src: slide.getAttribute('data-src') || slide.querySelector('img').src,
+                title: slide.getAttribute('data-title') || slide.querySelector('img').alt
+            }));
+
+            let indiceFotoAtual = 0;
+
+            const atualizarFotoModal = (index) => {
+                if (fotosGaleria.length === 0) return;
+                indiceFotoAtual = (index + fotosGaleria.length) % fotosGaleria.length;
+                if (lightboxImg) lightboxImg.src = fotosGaleria[indiceFotoAtual].src;
+                if (lightboxCaption) lightboxCaption.textContent = fotosGaleria[indiceFotoAtual].title;
+            };
+
+            const abrirModal = (index = 0) => {
+                atualizarFotoModal(index);
+                if (modalLightbox) {
+                    modalLightbox.classList.add('active');
+                    modalLightbox.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                }
+            };
+
+            const fecharModal = () => {
+                if (modalLightbox) {
+                    modalLightbox.classList.remove('active');
+                    modalLightbox.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                }
+            };
+
+            if (btnAbrirGaleria) {
+                btnAbrirGaleria.addEventListener('click', () => abrirModal(0));
+            }
+
+            document.querySelectorAll('.frota-slide-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const idx = parseInt(this.getAttribute('data-index') || '0', 10);
+                    abrirModal(idx);
+                });
+            });
+
+            if (btnCloseLightbox) btnCloseLightbox.addEventListener('click', fecharModal);
+            if (backdropLightbox) backdropLightbox.addEventListener('click', fecharModal);
+
+            if (btnLightboxNext) {
+                btnLightboxNext.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    atualizarFotoModal(indiceFotoAtual + 1);
+                });
+            }
+
+            if (btnLightboxPrev) {
+                btnLightboxPrev.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    atualizarFotoModal(indiceFotoAtual - 1);
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (!modalLightbox || !modalLightbox.classList.contains('active')) return;
+                if (e.key === 'Escape') fecharModal();
+                if (e.key === 'ArrowRight') atualizarFotoModal(indiceFotoAtual + 1);
+                if (e.key === 'ArrowLeft') atualizarFotoModal(indiceFotoAtual - 1);
+            });
         });
     </script>
 </body>
