@@ -331,7 +331,7 @@ main {
     flex-direction: column;
 }
 
-/* HERO CONTATO COM FOTO CAMINHÃO BRANCO AJBORGES E OVERLAY */
+/* HERO CONTATO COM FOTO BANNER-AJBORGES-03 E OVERLAY */
 .contato-hero {
     position: relative;
     width: 100%;
@@ -341,7 +341,7 @@ main {
     justify-content: center;
     overflow: hidden;
     padding: 115px 24px 150px;
-    background-image: url('../Imagens/CaminhaoBrancoAJB-carrossel.png');
+    background-image: url('../Imagens/banner-ajborges-03.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

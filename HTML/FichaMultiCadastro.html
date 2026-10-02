@@ -22,18 +22,22 @@
             <nav class="header-links" aria-label="Navegação principal">
                 <ul class="lista-links">
                     <li class="dropdown-item" id="dropdown-portais">
-                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false" aria-haspopup="true">
+                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false"
+                            aria-haspopup="true">
                             <span>Portais &amp; Cadastros</span>
-                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
-                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu" aria-labelledby="dropdown-menu-btn">
+                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu"
+                            aria-labelledby="dropdown-menu-btn">
                             <a href="PortaldaFrota.html" class="dropdown-link" role="menuitem">
                                 <div class="dropdown-icon-box">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <rect x="1" y="3" width="15" height="13"></rect>
                                         <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
                                         <circle cx="5.5" cy="18.5" r="2.5"></circle>
@@ -49,7 +53,8 @@
                             <a href="FichaMultiCadastro.html" class="dropdown-link" role="menuitem">
                                 <div class="dropdown-icon-box">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="9" cy="7" r="4"></circle>
                                         <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -77,10 +82,14 @@
         <section class="welcome-section">
             <h1 class="welcome-title">Bem-vindo(a)!</h1>
             <p class="welcome-description">
-                Este formulário atualiza o cadastro de motoristas e empresas parceiras da <span class="marca-ajborges">AJBorges</span> para manter conformidade operacional, segurança e comunicação.
+                Este formulário atualiza o cadastro de motoristas e empresas parceiras da <span
+                    class="marca-ajborges">AJBorges</span> para manter conformidade operacional, segurança e
+                comunicação.
             </p>
             <div class="attention-box">
-                <span class="attention-label">Atenção:</span> ao final você precisará anexar CNH (frente/verso), comprovante de residência, documentos do(s) veículo(s) e RNTRC/ANTT (quando aplicável). Tenha os arquivos digitalizados (PDF/JPG/PNG) no seu celular ou computador para agilizar.
+                <span class="attention-label">Atenção:</span> ao final você precisará anexar CNH (frente/verso),
+                comprovante de residência, documentos do(s) veículo(s) e RNTRC/ANTT (quando aplicável). Tenha os
+                arquivos digitalizados (PDF/JPG/PNG) no seu celular ou computador para agilizar.
             </div>
         </section>
 
@@ -123,7 +132,8 @@
                 <div class="step-body">
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-nome-empresa">Nome da Empresa: <span class="required-asterisk">*</span></label>
+                            <label for="pj-nome-empresa">Nome da Empresa: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-nome-empresa" name="nome_empresa" required>
                         </div>
                         <div class="form-group">
@@ -135,21 +145,25 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-telefone-empresa">Telefone da Empresa: <span class="required-asterisk">*</span></label>
+                            <label for="pj-telefone-empresa">Telefone da Empresa: <span
+                                    class="required-asterisk">*</span></label>
                             <div class="phone-input-wrapper">
                                 <div class="phone-prefix">
-                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14"
+                                        aria-hidden="true">
                                         <rect width="20" height="14" fill="#009c3b" />
                                         <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
                                         <circle cx="10" cy="7" r="3.2" fill="#002776" />
                                     </svg>
                                     <span class="prefix-arrow">▾</span>
                                 </div>
-                                <input type="tel" id="pj-telefone-empresa" name="telefone_empresa" placeholder="(11) 96123-4567" required>
+                                <input type="tel" id="pj-telefone-empresa" name="telefone_empresa"
+                                    placeholder="(11) 96123-4567" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="pj-responsavel">Responsável pelo Contato: <span class="required-asterisk">*</span></label>
+                            <label for="pj-responsavel">Responsável pelo Contato: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-responsavel" name="responsavel_contato" required>
                         </div>
                     </div>
@@ -162,7 +176,8 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">02 - Dados do Motorista</h3>
                     </div>
-                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista vinculado(a).</p>
+                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista
+                        vinculado(a).</p>
                 </div>
 
                 <div class="step-body">
@@ -182,7 +197,8 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
+                            <label for="pj-nascimento">Data de Nascimento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pj-nascimento" name="data_nascimento" required>
                         </div>
                         <div class="form-group">
@@ -233,14 +249,16 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                            <label for="pj-cidade-nasc">Cidade/Estado de Nascimento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-cidade-nasc" name="cidade_estado_nascimento" required>
                         </div>
                         <div class="form-group">
                             <label for="pj-celular">Celular: <span class="required-asterisk">*</span></label>
                             <div class="phone-input-wrapper">
                                 <div class="phone-prefix">
-                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14"
+                                        aria-hidden="true">
                                         <rect width="20" height="14" fill="#009c3b" />
                                         <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
                                         <circle cx="10" cy="7" r="3.2" fill="#002776" />
@@ -258,18 +276,21 @@
                             <input type="text" id="pj-mae" name="nome_mae" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-registro">Nº Registro da CNH: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-cnh-registro" name="cnh_registro" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-cnh-emissao">Data de Emissão (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-emissao">Data de Emissão (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pj-cnh-emissao" name="cnh_emissao" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-cnh-primeira">Data da 1ª CNH: <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-primeira">Data da 1ª CNH: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pj-cnh-primeira" name="cnh_primeira" required>
                         </div>
                     </div>
@@ -309,14 +330,16 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pj-cnh-validade">Validade (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-validade">Validade (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pj-cnh-validade" name="cnh_validade" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-cnh-categoria">Categoria (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-categoria">Categoria (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pj-cnh-categoria" name="cnh_categoria" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="A">A</option>
@@ -330,7 +353,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pj-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pj-cnh-seguranca">Código de Segurança (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-cnh-seguranca" name="cnh_codigo_seguranca" required>
                         </div>
                     </div>
@@ -386,7 +410,8 @@
                     <div class="form-row col-3">
                         <div class="form-group">
                             <label for="pj-veic-placa">Placa: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23" required>
+                            <input type="text" id="pj-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23"
+                                required>
                         </div>
                         <div class="form-group">
                             <label for="pj-veic-marca">Marca: <span class="required-asterisk">*</span></label>
@@ -408,7 +433,8 @@
                             <input type="text" id="pj-veic-ano" name="veic_ano" placeholder="AAAA" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-veic-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <label for="pj-veic-cidade-emp">Cidade de Emplacamento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-veic-cidade-emp" name="veic_cidade_emplacamento" required>
                         </div>
                         <div class="form-group">
@@ -448,7 +474,8 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-veic-tipologia">Tipologia do Veículo: <span class="required-asterisk">*</span></label>
+                            <label for="pj-veic-tipologia">Tipologia do Veículo: <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pj-veic-tipologia" name="veic_tipologia" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="VUC/¾">VUC/¾</option>
@@ -467,7 +494,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pj-veic-carroceria">Tipo de Carroceria: <span class="required-asterisk">*</span></label>
+                            <label for="pj-veic-carroceria">Tipo de Carroceria: <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pj-veic-carroceria" name="veic_carroceria" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="00 – Não aplicável">00 – Não aplicável</option>
@@ -493,25 +521,33 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-rastreador-pri">Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <label for="pj-rastreador-pri">Rastreador Primário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-rastreador-pri" name="veic_rastreador_primario" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-id-rastreador-pri">ID Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <label for="pj-id-rastreador-pri">ID Rastreador Primário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-id-rastreador-pri" name="veic_id_rastreador_primario" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-rastreador-sec">Rastreador Secundário: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-rastreador-sec" name="veic_rastreador_secundario" value="NA" required>
-                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                            <label for="pj-rastreador-sec">Rastreador Secundário: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-rastreador-sec" name="veic_rastreador_secundario" value="NA"
+                                required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e
+                                respectivo ID</span>
                         </div>
                         <div class="form-group">
-                            <label for="pj-id-rastreador-sec">ID Rastreador Secundário: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA" required>
-                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                            <label for="pj-id-rastreador-sec">ID Rastreador Secundário: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA"
+                                required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e
+                                respectivo ID</span>
                         </div>
                     </div>
 
@@ -540,7 +576,8 @@
                 <div class="step-body">
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-prop-doc">CPF/CNPJ Proprietário: <span class="required-asterisk">*</span></label>
+                            <label for="pj-prop-doc">CPF/CNPJ Proprietário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-prop-doc" name="prop_documento" required>
                         </div>
                         <div class="form-group">
@@ -550,7 +587,8 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="pj-prop-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <label for="pj-prop-endereco">Endereço do Proprietário: <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="pj-prop-endereco" name="prop_endereco" required>
                         <span class="field-sublabel">Endereço linha 1</span>
                     </div>
@@ -618,8 +656,10 @@
                             <input type="text" id="pj-carreta-renavam" name="carreta_renavam" value="NA" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-carreta-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA" required>
+                            <label for="pj-carreta-cidade-emp">Cidade de Emplacamento: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pj-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA"
+                                required>
                         </div>
                     </div>
 
@@ -648,17 +688,20 @@
                 <div class="step-body">
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pj-prop-carreta-doc">CPF/CNPJ do Proprietário: <span class="required-asterisk">*</span></label>
+                            <label for="pj-prop-carreta-doc">CPF/CNPJ do Proprietário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-prop-carreta-doc" name="prop_carreta_documento" required>
                         </div>
                         <div class="form-group">
-                            <label for="pj-prop-carreta-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <label for="pj-prop-carreta-mae">Nome da Mãe: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pj-prop-carreta-mae" name="prop_carreta_mae" value="NA" required>
                         </div>
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="pj-prop-carreta-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <label for="pj-prop-carreta-endereco">Endereço do Proprietário: <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="pj-prop-carreta-endereco" name="prop_carreta_endereco" required>
                         <span class="field-sublabel">Endereço linha 1</span>
                     </div>
@@ -676,7 +719,8 @@
 
                     <div class="form-row col-2">
                         <div class="subfield-group">
-                            <input type="text" id="pj-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000" required>
+                            <input type="text" id="pj-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000"
+                                required>
                             <span class="field-sublabel">Código Postal</span>
                         </div>
                         <div></div>
@@ -690,7 +734,8 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">08 - Envio de Documentos</h3>
                     </div>
-                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou PNG</strong> (máx. 5MB por arquivo).</p>
+                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou
+                            PNG</strong> (máx. 5MB por arquivo).</p>
                 </div>
 
                 <div class="step-body">
@@ -698,14 +743,17 @@
                         <label>CNH (frente e verso): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-cnh">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
                                 <span class="upload-subtext">Você pode enviar até 2 arquivos.</span>
-                                <input type="file" id="file-doc-cnh" name="doc_cnh" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <input type="file" id="file-doc-cnh" name="doc_cnh" class="file-input-hidden" multiple
+                                    accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-cnh"></div>
                         </div>
@@ -715,13 +763,16 @@
                         <label>Comprovante de Residência (atual): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-residencia">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-residencia" name="doc_residencia" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-residencia" name="doc_residencia"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-residencia"></div>
                         </div>
@@ -731,13 +782,16 @@
                         <label>CRLV do Cavalo Mecânico: <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-crlv-cavalo">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-crlv-cavalo" name="doc_crlv_cavalo" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-cavalo" name="doc_crlv_cavalo"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-crlv-cavalo"></div>
                         </div>
@@ -747,13 +801,16 @@
                         <label>CRLV da Carreta: <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-crlv-carreta">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-crlv-carreta" name="doc_crlv_carreta" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-carreta" name="doc_crlv_carreta"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-crlv-carreta"></div>
                         </div>
@@ -763,13 +820,16 @@
                         <label>RNTRC/ANTT (se aplicável): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-rntrc">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-rntrc" name="doc_rntrc" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-rntrc" name="doc_rntrc" class="file-input-hidden"
+                                    accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-rntrc"></div>
                         </div>
@@ -779,14 +839,17 @@
                         <label>Outros Documentos Complementares (Opcional):</label>
                         <div class="upload-dropzone" data-target="file-doc-complementares">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
                                 <span class="upload-subtext">Você pode enviar até 3 arquivos.</span>
-                                <input type="file" id="file-doc-complementares" name="doc_complementares" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <input type="file" id="file-doc-complementares" name="doc_complementares"
+                                    class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-complementares"></div>
                         </div>
@@ -808,7 +871,8 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">02 - Dados do Motorista</h3>
                     </div>
-                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista vinculado(a).</p>
+                    <p class="step-subtitle">Informe os dados pessoais e da <strong>CNH</strong> do motorista
+                        vinculado(a).</p>
                 </div>
 
                 <div class="step-body">
@@ -828,7 +892,8 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
+                            <label for="pf-nascimento">Data de Nascimento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pf-nascimento" name="data_nascimento" required>
                         </div>
                         <div class="form-group">
@@ -879,14 +944,16 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                            <label for="pf-cidade-nasc">Cidade/Estado de Nascimento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-cidade-nasc" name="cidade_estado_nascimento" required>
                         </div>
                         <div class="form-group">
                             <label for="pf-celular">Celular: <span class="required-asterisk">*</span></label>
                             <div class="phone-input-wrapper">
                                 <div class="phone-prefix">
-                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14" aria-hidden="true">
+                                    <svg class="flag-icon" viewBox="0 0 20 14" width="20" height="14"
+                                        aria-hidden="true">
                                         <rect width="20" height="14" fill="#009c3b" />
                                         <polygon points="10,1.5 18.5,7 10,12.5 1.5,7" fill="#ffdf00" />
                                         <circle cx="10" cy="7" r="3.2" fill="#002776" />
@@ -904,18 +971,21 @@
                             <input type="text" id="pf-mae" name="nome_mae" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-registro">Nº Registro da CNH: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-cnh-registro" name="cnh_registro" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-cnh-emissao">Data de Emissão (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-emissao">Data de Emissão (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pf-cnh-emissao" name="cnh_emissao" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-cnh-primeira">Data da 1ª CNH: <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-primeira">Data da 1ª CNH: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pf-cnh-primeira" name="cnh_primeira" required>
                         </div>
                     </div>
@@ -955,14 +1025,16 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pf-cnh-validade">Validade (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-validade">Validade (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="date" id="pf-cnh-validade" name="cnh_validade" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-cnh-categoria">Categoria (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-categoria">Categoria (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pf-cnh-categoria" name="cnh_categoria" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="A">A</option>
@@ -976,7 +1048,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pf-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
+                            <label for="pf-cnh-seguranca">Código de Segurança (CNH): <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-cnh-seguranca" name="cnh_codigo_seguranca" required>
                         </div>
                     </div>
@@ -1032,7 +1105,8 @@
                     <div class="form-row col-3">
                         <div class="form-group">
                             <label for="pf-veic-placa">Placa: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pf-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23" required>
+                            <input type="text" id="pf-veic-placa" name="veic_placa" placeholder="ABC-1234 ou ABC1D23"
+                                required>
                         </div>
                         <div class="form-group">
                             <label for="pf-veic-marca">Marca: <span class="required-asterisk">*</span></label>
@@ -1054,7 +1128,8 @@
                             <input type="text" id="pf-veic-ano" name="veic_ano" placeholder="AAAA" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-veic-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
+                            <label for="pf-veic-cidade-emp">Cidade de Emplacamento: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-veic-cidade-emp" name="veic_cidade_emplacamento" required>
                         </div>
                         <div class="form-group">
@@ -1094,7 +1169,8 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-veic-tipologia">Tipologia do Veículo: <span class="required-asterisk">*</span></label>
+                            <label for="pf-veic-tipologia">Tipologia do Veículo: <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pf-veic-tipologia" name="veic_tipologia" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="VUC/¾">VUC/¾</option>
@@ -1113,7 +1189,8 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="pf-veic-carroceria">Tipo de Carroceria: <span class="required-asterisk">*</span></label>
+                            <label for="pf-veic-carroceria">Tipo de Carroceria: <span
+                                    class="required-asterisk">*</span></label>
                             <select id="pf-veic-carroceria" name="veic_carroceria" required>
                                 <option value="">--- Selecione a escolha ---</option>
                                 <option value="00 – Não aplicável">00 – Não aplicável</option>
@@ -1139,25 +1216,33 @@
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-rastreador-pri">Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <label for="pf-rastreador-pri">Rastreador Primário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-rastreador-pri" name="veic_rastreador_primario" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-id-rastreador-pri">ID Rastreador Primário: <span class="required-asterisk">*</span></label>
+                            <label for="pf-id-rastreador-pri">ID Rastreador Primário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-id-rastreador-pri" name="veic_id_rastreador_primario" required>
                         </div>
                     </div>
 
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-rastreador-sec">Rastreador Secundário: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pf-rastreador-sec" name="veic_rastreador_secundario" value="NA" required>
-                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                            <label for="pf-rastreador-sec">Rastreador Secundário: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-rastreador-sec" name="veic_rastreador_secundario" value="NA"
+                                required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e
+                                respectivo ID</span>
                         </div>
                         <div class="form-group">
-                            <label for="pf-id-rastreador-sec">ID Rastreador Secundário: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pf-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA" required>
-                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e respectivo ID</span>
+                            <label for="pf-id-rastreador-sec">ID Rastreador Secundário: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-id-rastreador-sec" name="veic_id_rastreador_secundario" value="NA"
+                                required>
+                            <span class="field-subtext">Preencha este campo somente se houver rastreador secundário e
+                                respectivo ID</span>
                         </div>
                     </div>
 
@@ -1186,7 +1271,8 @@
                 <div class="step-body">
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-prop-doc">CPF/CNPJ Proprietário: <span class="required-asterisk">*</span></label>
+                            <label for="pf-prop-doc">CPF/CNPJ Proprietário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-prop-doc" name="prop_documento" required>
                         </div>
                         <div class="form-group">
@@ -1196,7 +1282,8 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="pf-prop-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <label for="pf-prop-endereco">Endereço do Proprietário: <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="pf-prop-endereco" name="prop_endereco" required>
                         <span class="field-sublabel">Endereço linha 1</span>
                     </div>
@@ -1264,8 +1351,10 @@
                             <input type="text" id="pf-carreta-renavam" name="carreta_renavam" value="NA" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-carreta-cidade-emp">Cidade de Emplacamento: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pf-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA" required>
+                            <label for="pf-carreta-cidade-emp">Cidade de Emplacamento: <span
+                                    class="required-asterisk">*</span></label>
+                            <input type="text" id="pf-carreta-cidade-emp" name="carreta_cidade_emplacamento" value="NA"
+                                required>
                         </div>
                     </div>
 
@@ -1294,17 +1383,20 @@
                 <div class="step-body">
                     <div class="form-row col-2">
                         <div class="form-group">
-                            <label for="pf-prop-carreta-doc">CPF/CNPJ do Proprietário: <span class="required-asterisk">*</span></label>
+                            <label for="pf-prop-carreta-doc">CPF/CNPJ do Proprietário: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-prop-carreta-doc" name="prop_carreta_documento" required>
                         </div>
                         <div class="form-group">
-                            <label for="pf-prop-carreta-mae">Nome da Mãe: <span class="required-asterisk">*</span></label>
+                            <label for="pf-prop-carreta-mae">Nome da Mãe: <span
+                                    class="required-asterisk">*</span></label>
                             <input type="text" id="pf-prop-carreta-mae" name="prop_carreta_mae" value="NA" required>
                         </div>
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="pf-prop-carreta-endereco">Endereço do Proprietário: <span class="required-asterisk">*</span></label>
+                        <label for="pf-prop-carreta-endereco">Endereço do Proprietário: <span
+                                class="required-asterisk">*</span></label>
                         <input type="text" id="pf-prop-carreta-endereco" name="prop_carreta_endereco" required>
                         <span class="field-sublabel">Endereço linha 1</span>
                     </div>
@@ -1322,7 +1414,8 @@
 
                     <div class="form-row col-2">
                         <div class="subfield-group">
-                            <input type="text" id="pf-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000" required>
+                            <input type="text" id="pf-prop-carreta-cep" name="prop_carreta_cep" placeholder="00000-000"
+                                required>
                             <span class="field-sublabel">Código Postal</span>
                         </div>
                         <div></div>
@@ -1336,7 +1429,8 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">08 - Envio de Documentos</h3>
                     </div>
-                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou PNG</strong> (máx. 5MB por arquivo).</p>
+                    <p class="step-subtitle">Anexe arquivos <strong>legíveis</strong> em <strong>PDF, JPG ou
+                            PNG</strong> (máx. 5MB por arquivo).</p>
                 </div>
 
                 <div class="step-body">
@@ -1344,14 +1438,17 @@
                         <label>CNH (frente e verso): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-cnh-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-cnh-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
                                 <span class="upload-subtext">Você pode enviar até 2 arquivos.</span>
-                                <input type="file" id="file-doc-cnh-pf" name="doc_cnh" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <input type="file" id="file-doc-cnh-pf" name="doc_cnh" class="file-input-hidden"
+                                    multiple accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-cnh-pf"></div>
                         </div>
@@ -1361,13 +1458,16 @@
                         <label>Comprovante de Residência (atual): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-residencia-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia-pf" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-residencia-pf" name="doc_residencia" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-residencia-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-residencia-pf" name="doc_residencia"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-residencia-pf"></div>
                         </div>
@@ -1377,13 +1477,16 @@
                         <label>CRLV do Cavalo Mecânico: <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-crlv-cavalo-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo-pf" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-crlv-cavalo-pf" name="doc_crlv_cavalo" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-cavalo-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-cavalo-pf" name="doc_crlv_cavalo"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-crlv-cavalo-pf"></div>
                         </div>
@@ -1393,13 +1496,16 @@
                         <label>CRLV da Carreta: <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-crlv-carreta-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta-pf" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-crlv-carreta-pf" name="doc_crlv_carreta" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-crlv-carreta-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-crlv-carreta-pf" name="doc_crlv_carreta"
+                                    class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-crlv-carreta-pf"></div>
                         </div>
@@ -1409,13 +1515,16 @@
                         <label>RNTRC/ANTT (se aplicável): <span class="required-asterisk">*</span></label>
                         <div class="upload-dropzone" data-target="file-doc-rntrc-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc-pf" class="upload-action-link">Choose Files to Upload</label></span>
-                                <input type="file" id="file-doc-rntrc-pf" name="doc_rntrc" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-rntrc-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
+                                <input type="file" id="file-doc-rntrc-pf" name="doc_rntrc" class="file-input-hidden"
+                                    accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-rntrc-pf"></div>
                         </div>
@@ -1425,14 +1534,17 @@
                         <label>Outros Documentos Complementares (Opcional):</label>
                         <div class="upload-dropzone" data-target="file-doc-complementares-pf">
                             <div class="upload-inner-card">
-                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                    stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                     <polyline points="17 8 12 3 7 8" />
                                     <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
-                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares-pf" class="upload-action-link">Choose Files to Upload</label></span>
+                                <span class="upload-text">Drag & Drop Files, <label for="file-doc-complementares-pf"
+                                        class="upload-action-link">Choose Files to Upload</label></span>
                                 <span class="upload-subtext">Você pode enviar até 3 arquivos.</span>
-                                <input type="file" id="file-doc-complementares-pf" name="doc_complementares" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                <input type="file" id="file-doc-complementares-pf" name="doc_complementares"
+                                    class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
                             </div>
                             <div class="file-preview-list" id="preview-file-doc-complementares-pf"></div>
                         </div>

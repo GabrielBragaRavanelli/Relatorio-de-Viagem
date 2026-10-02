@@ -332,7 +332,7 @@ main {
 }
 
 /* ========================================================
-   SEÇÃO CONHEÇA A AJBORGES: FUNDO CAMINHAO AJB + 2 COLUNAS (TEXTO & MAPA)
+   SEÇÃO CONHEÇA A AJBORGES: FUNDO BANNER-AJBORGES-01 + 2 COLUNAS (TEXTO & MAPA)
    ======================================================== */
 .sobrenos-topo-unificado {
     position: relative;
@@ -342,7 +342,7 @@ main {
     min-height: 580px;
     color: var(--branco);
     background-color: #0b1120;
-    background-image: url('../Imagens/CaminhaoAJB-Carrossel.jpg');
+    background-image: url('../Imagens/banner-ajborges-01.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
