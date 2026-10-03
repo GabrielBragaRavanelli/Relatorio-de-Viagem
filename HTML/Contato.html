@@ -162,14 +162,13 @@
         <!-- Seção Principal: Formulário + Detalhes Institucionais -->
         <section class="contato-principal-section">
             <div class="contato-principal-container">
-                <!-- Coluna Formulário + Filiais Horizontal Abaixo -->
-                <div class="form-coluna reveal-left">
-                    <div class="form-card">
+                <!-- Linha Superior: Formulário + Detalhes da Matriz e Horários -->
+                <div class="contato-linha-superior">
+                    <div class="form-card reveal-left">
                         <div class="form-header">
                             <h2>Envie uma Mensagem Direta</h2>
                             <p>Preencha os campos abaixo e nosso departamento comercial/operacional responderá o mais
-                                breve
-                                possível.</p>
+                                breve possível.</p>
                         </div>
                         <form id="form-contato"
                             onsubmit="event.preventDefault(); document.getElementById('alerta-contato').classList.add('visivel'); this.reset();">
@@ -230,7 +229,74 @@
                         </form>
                     </div>
 
-                    <!-- Card de Filiais Regionais na Horizontal (Abaixo de Envie uma Mensagem Direta) -->
+                    <!-- Coluna Detalhes e Endereço -->
+                    <div class="info-coluna reveal-right">
+                        <!-- Card de Endereço Detalhado -->
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <h3>Sede Matriz da AJBorges</h3>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Empresa / Instalação</span>
+                                <span class="info-valor"><strong>AJBORGES Transporte Rodoviário & Logística</strong> (Granja
+                                    Xereta)</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Rodovia & Quilômetro</span>
+                                <span class="info-valor">Rodovia Marília / Bauru (SP-294), SN - KM 449</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Bairro e Cidade</span>
+                                <span class="info-valor">Área Rural de Marília, Marília - SP</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Código Postal</span>
+                                <span class="info-valor">CEP: 17539-899</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Ponto de Referência</span>
+                                <span class="info-valor">Próximo ao trevo de acesso da SP-294 e Coca-Cola Femsa</span>
+                            </div>
+                        </div>
+
+                        <!-- Card de Horários e Plantão -->
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <h3>Horários de Atendimento</h3>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Atendimento Comercial & Administrativo</span>
+                                <span class="info-valor">Segunda a Sexta-feira: 08:00 às 18:00</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Expediente aos Sábados</span>
+                                <span class="info-valor">Sábado: 08:00 às 12:00</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Monitoramento e Rastreamento de Cargas</span>
+                                <span class="info-valor">Plantão operacional 24 horas por dia, 7 dias por semana</span>
+                                <div class="status-operacional">
+                                    <span class="status-dot"></span>
+                                    <span>Central de Rastreamento Ativa 24h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Linha Inferior: Filiais e Atendimento LADO A LADO NA MESMA LINHA -->
+                <div class="contato-linha-inferior reveal-up">
+                    <!-- Card de Filiais Regionais -->
                     <div class="info-card info-card-horizontal">
                         <div class="info-card-header">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -295,68 +361,52 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Coluna Detalhes e Endereço -->
-                <div class="info-coluna reveal-right">
-                    <!-- Card de Endereço Detalhado -->
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                            <h3>Sede Matriz da AJBorges</h3>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Empresa / Instalação</span>
-                            <span class="info-valor"><strong>AJBORGES Transporte Rodoviário & Logística</strong> (Granja
-                                Xereta)</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Rodovia & Quilômetro</span>
-                            <span class="info-valor">Rodovia Marília / Bauru (SP-294), SN - KM 449</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Bairro e Cidade</span>
-                            <span class="info-valor">Área Rural de Marília, Marília - SP</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Código Postal</span>
-                            <span class="info-valor">CEP: 17539-899</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Ponto de Referência</span>
-                            <span class="info-valor">Próximo ao trevo de acesso da SP-294 e Coca-Cola Femsa</span>
-                        </div>
-                    </div>
-
-                    <!-- Card de Horários e Plantão -->
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <h3>Horários de Atendimento</h3>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Atendimento Comercial & Administrativo</span>
-                            <span class="info-valor">Segunda a Sexta-feira: 08:00 às 18:00</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Expediente aos Sábados</span>
-                            <span class="info-valor">Sábado: 08:00 às 12:00</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Monitoramento e Rastreamento de Cargas</span>
-                            <span class="info-valor">Plantão operacional 24 horas por dia, 7 dias por semana</span>
-                            <div class="status-operacional">
-                                <span class="status-dot"></span>
-                                <span>Central de Rastreamento Ativa 24h</span>
+                    <!-- Card de Atendimento Especializado e Apoio Rápido -->
+                    <div class="info-card info-card-atendimento">
+                        <div class="atendimento-conteudo-topo">
+                            <div class="info-card-header">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <h3>Atendimento & Apoio Estratégico</h3>
                             </div>
+                            <div class="info-item info-item-atendimento">
+                                <span class="info-label">Cotações Rápidas & Fretes</span>
+                                <span class="info-valor">Consulte cargas disponíveis, rotas ativas e fretes para todo o Brasil.</span>
+                            </div>
+                            <ul class="fretes-vantagens-lista">
+                                <li>
+                                    <span class="estrutura-bullet"></span>
+                                    <span><strong>Suporte Comercial:</strong> Retorno ágil e atendimento consultivo para fretes</span>
+                                </li>
+                                <li>
+                                    <span class="estrutura-bullet"></span>
+                                    <span><strong>Mural Diário:</strong> Cargas atualizadas em tempo real</span>
+                                </li>
+                                <li>
+                                    <span class="estrutura-bullet"></span>
+                                    <span><strong>Rotas de Retorno:</strong> Oportunidades contínuas para parceiros</span>
+                                </li>
+                                <li>
+                                    <span class="estrutura-bullet"></span>
+                                    <span><strong>Plantão Operacional:</strong> Suporte logístico dedicado para sua carga</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="apoio-acoes-botoes">
+                            <a href="Nossosfretes.html" class="btn-apoio-link btn-apoio-fretes">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="1" y="3" width="15" height="13"></rect>
+                                    <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
+                                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                </svg>
+                                <span>Consultar Nossos Fretes</span>
+                            </a>
                         </div>
                     </div>
                 </div>
