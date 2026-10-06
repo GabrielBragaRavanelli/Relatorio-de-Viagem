@@ -593,6 +593,14 @@ function renderizarTabelaFichas() {
                             ✓
                         </button>
                     ` : ''}
+                    <button type="button" class="btn-acao-excluir" data-ficha-id="${ficha.id}" title="Excluir Ficha e remover dados do Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
                 </div>
             </td>
         `;
@@ -600,7 +608,7 @@ function renderizarTabelaFichas() {
         tbody.appendChild(tr);
     });
 
-    // Registra eventos nos botões de resumo e aprovação rápida
+    // Registra eventos nos botões de resumo, aprovação rápida e exclusão
     tbody.querySelectorAll('.btn-acao-resumo').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-ficha-id');
@@ -614,10 +622,18 @@ function renderizarTabelaFichas() {
             aprovarFichaDiretamente(id);
         });
     });
+
+    tbody.querySelectorAll('.btn-acao-excluir').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-ficha-id');
+            excluirFichaDiretamente(id);
+        });
+    });
 }
 
 // ==========================================================================
-// 4. APROVAÇÃO DIRETA E AÇÕES DE FICHAS
+// 4. APROVAÇÃO DIRETA E AÇÕES DE FICHAS (APROVAR E EXCLUIR)
 // ==========================================================================
 
 function aprovarFichaDiretamente(fichaId) {
@@ -646,6 +662,54 @@ function aprovarFichaDiretamente(fichaId) {
     exibirToast(`Ficha ${fichaId} homologada com sucesso!`, 'sucesso');
 }
 
+/**
+ * Exclui a ficha permanentemente e remove todos os seus lançamentos
+ * de faturamento, despesas, diesel, pedágios e médias do Dashboard.
+ */
+async function excluirFichaDiretamente(fichaId) {
+    const ficha = appState.fichas.find(f => f.id === fichaId);
+    if (!ficha) return;
+
+    const motoristaNome = ficha.motorista || 'Motorista';
+    const freteFormatado = ficha.totalFrete ? ` (Frete: R$ ${ficha.totalFrete})` : '';
+
+    const confirmou = confirm(
+        `Tem certeza de que deseja apagar a ficha ${fichaId}?\n` +
+        `Motorista: ${motoristaNome}${freteFormatado}\n\n` +
+        `Esta ação apagará permanentemente esta ficha e removerá todos os seus dados e valores do Dashboard e dos relatórios.`
+    );
+
+    if (!confirmou) return;
+
+    // 1. Remove do estado de memória
+    appState.fichas = appState.fichas.filter(f => f.id !== fichaId);
+
+    // 2. Persiste a lista limpa no LocalStorage
+    salvarFichasNoStorage();
+
+    // 3. Exclui do banco de dados em nuvem Supabase (se conectado)
+    if (typeof window.excluirFichaSupabase === 'function') {
+        try {
+            await window.excluirFichaSupabase(fichaId);
+        } catch (e) {
+            console.warn('Erro ao excluir no Supabase:', e);
+        }
+    }
+
+    // 4. Fecha o modal de resumo se estiver aberto nesta ficha
+    if (appState.fichaSelecionadaModal && appState.fichaSelecionadaModal.id === fichaId) {
+        fecharModalResumo();
+    }
+
+    // 5. Recalcula imediatamente todos os KPIs, tabelas e gráficos do Dashboard
+    calcularMetricasDashboard();
+    renderizarTabelaFichas();
+    atualizarGraficos();
+    preencherSecoesSecundarias();
+
+    exibirToast(`Ficha ${fichaId} apagada com sucesso! Dados removidos do dashboard.`, 'sucesso');
+}
+
 // ==========================================================================
 // 5. MODAL DE RESUMO RÁPIDO DA FICHA
 // ==========================================================================
@@ -662,6 +726,7 @@ function abrirModalResumoFicha(fichaId) {
     const elConteudo = document.getElementById('modal-ficha-conteudo');
     const btnLinkCompleto = document.getElementById('btn-modal-abrir-completo');
     const btnAprovarDireto = document.getElementById('btn-modal-aprovar-direto');
+    const btnExcluirDireto = document.getElementById('btn-modal-excluir-direto');
 
     if (elId) elId.textContent = ficha.id;
     if (elMot) elMot.textContent = `${ficha.motorista || 'Motorista'} • ${ficha.placas || 'Placas'}`;
@@ -672,6 +737,12 @@ function abrirModalResumoFicha(fichaId) {
         btnAprovarDireto.onclick = () => {
             aprovarFichaDiretamente(ficha.id);
             fecharModalResumo();
+        };
+    }
+
+    if (btnExcluirDireto) {
+        btnExcluirDireto.onclick = () => {
+            excluirFichaDiretamente(ficha.id);
         };
     }
 
@@ -1544,6 +1615,19 @@ async function sincronizarFichasComSupabase() {
                     calcularMetricasDashboard();
                     renderizarTabelaFichas();
                     atualizarGraficos();
+                }
+            },
+            (idFichaExcluida) => {
+                if (!idFichaExcluida) return;
+                const idx = appState.fichas.findIndex(f => f.id === idFichaExcluida);
+                if (idx >= 0) {
+                    appState.fichas.splice(idx, 1);
+                    salvarFichasNoStorage();
+                    calcularMetricasDashboard();
+                    renderizarTabelaFichas();
+                    atualizarGraficos();
+                    preencherSecoesSecundarias();
+                    exibirToast(`🗑️ Ficha ${idFichaExcluida} removida da gestão em tempo real.`, 'info');
                 }
             }
         );

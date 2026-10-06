@@ -1436,6 +1436,35 @@ body.admin-body {
     border-color: #10b981;
 }
 
+.btn-acao-excluir {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 6px 9px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transicao-rapida);
+}
+
+.btn-acao-excluir:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(239, 68, 68, 0.35);
+}
+
+.btn-acao-excluir svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
 /* Empty State da Tabela */
 .tabela-empty-state {
     padding: 50px 20px;
@@ -1951,6 +1980,29 @@ body.admin-body {
 .btn-modal-sucesso:hover {
     background: linear-gradient(135deg, #059669, #047857);
     transform: translateY(-1px);
+}
+
+.btn-modal-perigo {
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transicao-rapida);
+}
+
+.btn-modal-perigo:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 /* ==========================================================================

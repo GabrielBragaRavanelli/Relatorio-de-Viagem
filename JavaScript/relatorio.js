@@ -2188,6 +2188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminStatus = document.getElementById('admin-banner-status');
         const btnAdminAprovar = document.getElementById('btn-admin-aprovar-concluir');
         const btnAdminSalvar = document.getElementById('btn-admin-salvar-alteracoes');
+        const btnAdminExcluir = document.getElementById('btn-admin-excluir-ficha');
 
         // Campos com governança corporativa da empresa
         const camposGovernançaFrota = [
@@ -2378,6 +2379,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         window.location.href = 'dashboard-admin.html#fichas';
                     }, 500);
+                });
+            }
+
+            // Ação de "Apagar Ficha" pelo Administrador
+            if (btnAdminExcluir) {
+                btnAdminExcluir.addEventListener('click', async () => {
+                    const idExcluir = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
+                    if (!confirm(`Tem certeza de que deseja apagar a ficha ${idExcluir}?\n\nTodos os dados desta viagem serão removidos permanentemente do dashboard e dos relatórios.`)) {
+                        return;
+                    }
+
+                    // 1. Remove da lista local
+                    const todasFichas = obterListaFichasCentral();
+                    const atualizadas = todasFichas.filter(f => f.id !== idExcluir);
+                    salvarListaFichasCentral(atualizadas);
+
+                    // 2. Remove do Supabase
+                    if (typeof window.excluirFichaSupabase === 'function') {
+                        try {
+                            await window.excluirFichaSupabase(idExcluir);
+                        } catch (e) {
+                            console.warn('Erro ao excluir ficha no Supabase:', e);
+                        }
+                    }
+
+                    // 3. Notifica e retorna ao Dashboard
+                    sessionStorage.setItem('ajborges_toast_mensagem', `Ficha ${idExcluir} apagada com sucesso! Dados removidos do dashboard.`);
+                    window.location.href = 'dashboard-admin.html#fichas';
                 });
             }
 

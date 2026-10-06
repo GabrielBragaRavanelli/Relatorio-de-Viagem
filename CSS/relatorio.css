@@ -3041,6 +3041,20 @@ footer {
     color: #ffffff;
 }
 
+.btn-admin-excluir-ficha {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    color: #fca5a5 !important;
+    cursor: pointer;
+}
+
+.btn-admin-excluir-ficha:hover {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
 .btn-admin-aprovar-destaque {
     display: inline-flex;
     align-items: center;

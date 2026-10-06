@@ -275,14 +275,42 @@ async function uploadComprovanteSupabase(file, prefixo = 'comprovante') {
     }
 }
 
+/**
+ * Exclui permanentemente uma ficha de viagem do Supabase
+ */
+async function excluirFichaSupabase(idFicha) {
+    if (!supabaseClient) {
+        console.warn('Supabase não inicializado. Exclusão feita apenas localmente.');
+        return false;
+    }
+
+    try {
+        const { error } = await supabaseClient
+            .from('fichas_viagem')
+            .delete()
+            .eq('id', idFicha);
+
+        if (error) {
+            console.error('Erro ao excluir ficha no Supabase:', error);
+            return false;
+        }
+
+        console.log(`🗑️ Ficha ${idFicha} excluída do Supabase com sucesso.`);
+        return true;
+    } catch (err) {
+        console.error('Exceção ao excluir ficha no Supabase:', err);
+        return false;
+    }
+}
+
 // ==========================================================================
 // 5. ATUALIZAÇÃO EM TEMPO REAL (REALTIME) NO DASHBOARD
 // ==========================================================================
 
 /**
- * Escuta novas fichas ou alterações de status em tempo real
+ * Escuta novas fichas, alterações de status ou exclusões em tempo real
  */
-function escutarAlteracoesFichasSupabase(onNovaFicha, onAtualizacaoFicha) {
+function escutarAlteracoesFichasSupabase(onNovaFicha, onAtualizacaoFicha, onExclusaoFicha) {
     if (!supabaseClient) return null;
 
     const canal = supabaseClient
@@ -299,6 +327,12 @@ function escutarAlteracoesFichasSupabase(onNovaFicha, onAtualizacaoFicha) {
                 onAtualizacaoFicha(mapearFichaDoSupabase(payload.new));
             }
         })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'fichas_viagem' }, payload => {
+            console.log('⚡ Ficha excluída em tempo real no Supabase:', payload.old);
+            if (typeof onExclusaoFicha === 'function') {
+                onExclusaoFicha(payload.old ? payload.old.id : null);
+            }
+        })
         .subscribe();
 
     return canal;
@@ -308,5 +342,6 @@ function escutarAlteracoesFichasSupabase(onNovaFicha, onAtualizacaoFicha) {
 window.salvarFichaSupabase = salvarFichaSupabase;
 window.buscarFichasSupabase = buscarFichasSupabase;
 window.atualizarStatusFichaSupabase = atualizarStatusFichaSupabase;
+window.excluirFichaSupabase = excluirFichaSupabase;
 window.uploadComprovanteSupabase = uploadComprovanteSupabase;
 window.escutarAlteracoesFichasSupabase = escutarAlteracoesFichasSupabase;
