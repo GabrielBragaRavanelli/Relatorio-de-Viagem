@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputNome = document.getElementById('nome-motorista');
     const inputCpf = document.getElementById('cpf-cadastro');
     const inputTelefone = document.getElementById('telefone-motorista');
+    const inputEmail = document.getElementById('email-motorista');
     const inputSenha = document.getElementById('senha-cadastro');
     const inputConfirmarSenha = document.getElementById('confirmar-senha-cadastro');
     const senhaFeedback = document.getElementById('senha-feedback');
@@ -251,16 +252,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSubmit.innerHTML = `<span>Processando cadastro do motorista...</span>`;
             }
 
-            // Salva perfil no Supabase se disponível
+            // Salva perfil e credenciais no Supabase se disponível
             if (window.supabaseClient) {
                 try {
+                    const cpfLimpo = cpf.replace(/\D/g, '');
+                    const emailInformado = (inputEmail?.value || '').trim();
+                    const emailFinal = emailInformado || `${cpfLimpo}@motorista.ajborges.com`;
+
+                    // 1. Cria usuário no Supabase Auth com a senha digitada
+                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+                        email: emailFinal,
+                        password: senha,
+                        options: {
+                            data: {
+                                nome: nome,
+                                cpf: cpfLimpo,
+                                telefone: telefone || null,
+                                role: 'motorista'
+                            }
+                        }
+                    });
+
+                    if (authError && !authError.message.includes('already registered')) {
+                        console.warn('Aviso no signUp do Supabase:', authError);
+                    }
+
+                    // 2. Salva o perfil na tabela 'perfis'
                     await window.supabaseClient.from('perfis').upsert({
+                        id: authData?.user?.id || undefined,
                         nome: nome,
-                        cpf: cpf.replace(/\D/g, ''),
+                        cpf: cpfLimpo,
+                        email: emailFinal,
                         telefone: telefone || null,
                         role: 'motorista'
                     }, { onConflict: 'cpf' });
-                    console.log('✅ Perfil salvo no Supabase');
+
+                    console.log('✅ Motorista registrado no Supabase Auth e tabela perfis');
                 } catch(err) {
                     console.error('Erro ao salvar perfil no Supabase:', err);
                 }

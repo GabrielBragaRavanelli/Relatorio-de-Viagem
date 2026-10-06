@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Formulário do Motorista
     if (formMotorista) {
-        formMotorista.addEventListener('submit', (e) => {
+        formMotorista.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const cpfVal = (inputCpf?.value || '').trim();
@@ -232,55 +232,95 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Simulação de login bem-sucedido
             const submitBtn = formMotorista.querySelector('.btn-submit');
+            const textoOriginalBtn = submitBtn ? submitBtn.innerHTML : '<span>Acessar Relatório de Viagem</span>';
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span>Entrando no sistema...</span>`;
+                submitBtn.innerHTML = `<span>Validando credenciais do motorista...</span>`;
             }
 
-            // Busca o perfil real no Supabase se disponível
-            let nomeMotorista = '';
+            const cpfLimpo = cpfVal.replace(/\D/g, '');
+
             if (window.supabaseClient) {
-                window.supabaseClient
-                    .from('perfis')
-                    .select('nome')
-                    .eq('cpf', cpfVal.replace(/\D/g, ''))
-                    .maybeSingle()
-                    .then(({ data }) => {
-                        if (data && data.nome) {
-                            nomeMotorista = data.nome;
+                try {
+                    // 1. Procura se existe o motorista pelo CPF na tabela 'perfis'
+                    const { data: perfil, error: perfilError } = await window.supabaseClient
+                        .from('perfis')
+                        .select('*')
+                        .eq('cpf', cpfLimpo)
+                        .maybeSingle();
+
+                    if (perfilError) {
+                        console.warn('Aviso ao consultar perfis por CPF:', perfilError);
+                    }
+
+                    // Se não tiver perfil com esse CPF cadastrado
+                    if (!perfil) {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = textoOriginalBtn;
                         }
-                    })
-                    .finally(() => {
-                        // Salva dados da sessão do motorista logado
-                        localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                            role: 'motorista',
-                            id: 'MOT-' + cpfVal.replace(/\D/g, '').slice(-4),
-                            nome: nomeMotorista,
-                            cpf: cpfVal
-                        }));
+                        showToast('Motorista não cadastrado! Verifique seu CPF ou realize o cadastro.', 'error');
+                        return;
+                    }
 
-                        showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
+                    // Determina o e-mail cadastrado no Auth do Supabase
+                    const emailAuth = perfil.email || `${cpfLimpo}@motorista.ajborges.com`;
 
-                        setTimeout(() => {
-                            window.location.href = 'relatorio-viagem.html';
-                        }, 1000);
+                    // 2. Valida a senha real com o Supabase Auth
+                    const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+                        email: emailAuth,
+                        password: senhaVal
                     });
+
+                    if (authError) {
+                        console.error('Falha de login do motorista no Supabase:', authError);
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = textoOriginalBtn;
+                        }
+
+                        if (authError.message.includes('Invalid login credentials')) {
+                            showToast('Senha de motorista incorreta!', 'error');
+                        } else if (authError.message.includes('Email not confirmed')) {
+                            showToast('Cadastro pendente de confirmação no Supabase.', 'error');
+                        } else {
+                            showToast(`Erro ao autenticar: ${authError.message}`, 'error');
+                        }
+                        return;
+                    }
+
+                    // Usuário autenticado com sucesso!
+                    const usuarioSupabase = authData.user;
+                    const nomeMotorista = perfil.nome || usuarioSupabase.user_metadata?.nome || 'Motorista AJBorges';
+
+                    localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                        role: 'motorista',
+                        id: usuarioSupabase.id,
+                        nome: nomeMotorista,
+                        cpf: cpfVal,
+                        telefone: perfil.telefone || ''
+                    }));
+
+                    showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'relatorio-viagem.html';
+                    }, 1000);
+                } catch (err) {
+                    console.error('Erro inesperado no login do motorista:', err);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginalBtn;
+                    }
+                    showToast('Não foi possível conectar ao servidor de login.', 'error');
+                }
             } else {
-                // Fallback Local
-                localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                    role: 'motorista',
-                    id: 'MOT-104',
-                    nome: '',
-                    cpf: cpfVal
-                }));
-
-                showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'relatorio-viagem.html';
-                }, 1000);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = textoOriginalBtn;
+                }
+                showToast('Servidor de autenticação indisponível no momento.', 'error');
             }
         });
     }
