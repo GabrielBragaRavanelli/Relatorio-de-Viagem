@@ -95,14 +95,17 @@ function inicializarBancoDados() {
         appState.fichas = [];
     }
 
-    // Garante que o administrador esteja registrado como usuário ativo da sessão
-    const usuarioAtivo = localStorage.getItem(STORAGE_USER_KEY);
-    if (!usuarioAtivo) {
-        localStorage.setItem(STORAGE_USER_KEY, JSON.stringify({
-            role: 'admin',
-            nome: 'Administrador AJBorges',
-            email: 'operacional@ajborges.com'
-        }));
+    // Proteção de Rota: Apenas administradores autenticados podem acessar
+    const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_KEY);
+    let usuarioAtivo = null;
+    if (usuarioAtivoStr) {
+        try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+    }
+
+    if (!usuarioAtivo || usuarioAtivo.role !== 'admin') {
+        console.warn('Acesso não autorizado ao Dashboard. Redirecionando para login...');
+        window.location.href = 'Login.html#admin';
+        return;
     }
 }
 
@@ -630,6 +633,12 @@ function aprovarFichaDiretamente(fichaId) {
     appState.fichas[index].aprovadoPor = 'operacional@ajborges.com';
 
     salvarFichasNoStorage();
+
+    // Atualiza status no banco de dados Supabase
+    if (typeof window.atualizarStatusFichaSupabase === 'function') {
+        window.atualizarStatusFichaSupabase(fichaId, 'aprovado');
+    }
+
     calcularMetricasDashboard();
     renderizarTabelaFichas();
     atualizarGraficos();
@@ -1494,6 +1503,53 @@ function formatarNomeCliente(slug) {
     return slug || 'Cliente';
 }
 
+// Sincronização em Nuvem e Tempo Real com o Supabase
+async function sincronizarFichasComSupabase() {
+    if (typeof window.buscarFichasSupabase === 'function') {
+        try {
+            const fichasNuvem = await window.buscarFichasSupabase();
+            if (Array.isArray(fichasNuvem) && fichasNuvem.length > 0) {
+                console.log(`📥 ${fichasNuvem.length} ficha(s) carregada(s) do Supabase.`);
+                appState.fichas = fichasNuvem;
+                salvarFichasNoStorage();
+                calcularMetricasDashboard();
+                renderizarTabelaFichas();
+                atualizarGraficos();
+                preencherSecoesSecundarias();
+            }
+        } catch (e) {
+            console.warn('Não foi possível sincronizar com o Supabase de imediato:', e);
+        }
+    }
+
+    // Ativa escuta em tempo real (Realtime do Supabase)
+    if (typeof window.escutarAlteracoesFichasSupabase === 'function') {
+        window.escutarAlteracoesFichasSupabase(
+            (novaFicha) => {
+                const existe = appState.fichas.some(f => f.id === novaFicha.id);
+                if (!existe) {
+                    appState.fichas.unshift(novaFicha);
+                    salvarFichasNoStorage();
+                    calcularMetricasDashboard();
+                    renderizarTabelaFichas();
+                    atualizarGraficos();
+                    exibirToast(`🔔 Nova ficha recebida: ${novaFicha.id} (${novaFicha.motorista})`, 'info');
+                }
+            },
+            (fichaAtualizada) => {
+                const idx = appState.fichas.findIndex(f => f.id === fichaAtualizada.id);
+                if (idx >= 0) {
+                    appState.fichas[idx] = fichaAtualizada;
+                    salvarFichasNoStorage();
+                    calcularMetricasDashboard();
+                    renderizarTabelaFichas();
+                    atualizarGraficos();
+                }
+            }
+        );
+    }
+}
+
 // ==========================================================================
 // 11. EVENT LISTENERS E INICIALIZAÇÃO DO DOM
 // ==========================================================================
@@ -1506,6 +1562,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarTabelaFichas();
     inicializarGraficos();
     preencherSecoesSecundarias();
+
+    // Sincroniza com o Supabase e ativa o Realtime
+    sincronizarFichasComSupabase();
 
     // 2. Verifica se há mensagem de toast pendente vinda da aprovação de ficha
     const toastPendente = sessionStorage.getItem('ajborges_toast_mensagem');
@@ -1678,9 +1737,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 10. Botão de Logout (Sair)
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
+        btnLogout.addEventListener('click', async (e) => {
             e.preventDefault();
             if (confirm('Deseja realmente encerrar a sessão de Administrador?')) {
+                if (window.supabaseClient && window.supabaseClient.auth) {
+                    try { await window.supabaseClient.auth.signOut(); } catch(e) {}
+                }
                 localStorage.removeItem(STORAGE_USER_KEY);
                 sessionStorage.clear();
                 window.location.href = 'Login.html#admin';

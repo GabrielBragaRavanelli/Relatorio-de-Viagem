@@ -78,7 +78,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 70px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -98,7 +98,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 48px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -121,17 +121,16 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -159,10 +158,9 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -310,7 +308,7 @@ header {
 /* --- CONTEÚDO PRINCIPAL (NOSSOS FRETES) --- */
 
 main {
-    margin-top: 100px;
+    margin-top: 70px;
     width: 100%;
     background-color: var(--fundo-principal);
     display: flex;
@@ -633,7 +631,170 @@ main {
     line-height: 1.5;
 }
 
+/* ========================================================
+   BLOCO 3: COMO CARREGAR COM A AJBORGES (PASSO A PASSO)
+   ======================================================== */
+.como-carregar-section {
+    padding: 70px 24px;
+    background-color: var(--branco);
+    border-top: 1px solid var(--cinza-borda);
+    border-bottom: 1px solid var(--cinza-borda);
+}
 
+.como-carregar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+}
+
+.como-carregar-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.como-carregar-tag {
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    border: 1px solid rgba(61, 61, 144, 0.18);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+}
+
+.como-carregar-titulo {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--cinza-escuro);
+    line-height: 1.25;
+    margin-bottom: 12px;
+}
+
+.como-carregar-subtitulo {
+    font-size: 15px;
+    color: var(--cinza-texto);
+    line-height: 1.6;
+}
+
+.passos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+.passo-card {
+    position: relative;
+    background: var(--cinza-claro);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 18px;
+    padding: 36px 28px 30px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.passo-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--azul-ajborges-medio);
+    box-shadow: 0 12px 30px rgba(61, 61, 144, 0.12);
+}
+
+.passo-numero {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 32px;
+    font-weight: 900;
+    color: rgba(61, 61, 144, 0.15);
+    line-height: 1;
+}
+
+.passo-icone {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: var(--azul-ajborges);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(61, 61, 144, 0.25);
+}
+
+.passo-icone svg {
+    width: 24px;
+    height: 24px;
+}
+
+.passo-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cinza-escuro);
+    margin-bottom: 12px;
+}
+
+.passo-card p {
+    font-size: 14px;
+    color: var(--cinza-texto);
+    line-height: 1.65;
+}
+
+.como-carregar-cta {
+    width: 100%;
+}
+
+.como-carregar-cta-box {
+    background: linear-gradient(135deg, var(--azul-ajborges-escuro) 0%, var(--azul-ajborges) 100%);
+    border-radius: 18px;
+    padding: 28px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: 0 10px 30px rgba(61, 61, 144, 0.2);
+    color: #ffffff;
+}
+
+.cta-box-texto h4 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.cta-box-texto p {
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-cta-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #25d366;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 26px;
+    border-radius: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+}
+
+.btn-cta-whatsapp:hover {
+    background: #1eb956;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(37, 211, 102, 0.45);
+}
 
 /* RESPONSIVIDADE DE NOSSOS FRETES */
 @media (max-width: 1024px) {
@@ -643,6 +804,22 @@ main {
 
     .vantagens-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .passos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .como-carregar-cta-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 28px 24px;
+    }
+
+    .btn-cta-whatsapp {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -682,6 +859,14 @@ main {
     .btn-fretebras-whatsapp {
         width: 100%;
         justify-content: center;
+    }
+
+    .como-carregar-section {
+        padding: 50px 16px;
+    }
+
+    .como-carregar-titulo {
+        font-size: 24px;
     }
 
     .vantagens-section {

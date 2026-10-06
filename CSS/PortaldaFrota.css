@@ -93,7 +93,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 70px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -113,7 +113,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 48px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -136,17 +136,16 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -172,10 +171,9 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -417,7 +415,7 @@ main {
     font-size: 14.5px;
     color: var(--cinza-texto);
     line-height: 1.6;
-    margin-bottom: 30px;
+    margin-bottom: 26px;
 }
 
 .portal-beneficios-box {

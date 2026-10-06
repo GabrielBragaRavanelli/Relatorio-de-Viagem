@@ -92,7 +92,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 70px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -112,7 +112,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 48px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -135,17 +135,16 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -171,10 +170,9 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -325,7 +323,7 @@ main.login-main {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 140px 20px 60px;
+    padding: 110px 20px 60px;
     position: relative;
     overflow: hidden;
     background: radial-gradient(circle at 50% 20%, rgba(61, 61, 144, 0.08) 0%, rgba(244, 246, 251, 1) 70%);

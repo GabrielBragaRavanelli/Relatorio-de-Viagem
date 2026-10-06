@@ -251,6 +251,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSubmit.innerHTML = `<span>Processando cadastro do motorista...</span>`;
             }
 
+            // Salva perfil no Supabase se disponível
+            if (window.supabaseClient) {
+                try {
+                    await window.supabaseClient.from('perfis').upsert({
+                        nome: nome,
+                        cpf: cpf.replace(/\D/g, ''),
+                        telefone: telefone || null,
+                        role: 'motorista'
+                    }, { onConflict: 'cpf' });
+                    console.log('✅ Perfil salvo no Supabase');
+                } catch(err) {
+                    console.error('Erro ao salvar perfil no Supabase:', err);
+                }
+            }
+
             // Salva o CPF para preencher automaticamente na tela de login
             sessionStorage.setItem('ajborges_cpf_cadastrado', cpf);
 
@@ -258,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 window.location.href = 'Login.html#motorista';
-            }, 1600);
+            }, 1200);
         });
     }
 });

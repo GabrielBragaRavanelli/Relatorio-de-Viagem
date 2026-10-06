@@ -92,7 +92,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 70px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -112,7 +112,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 48px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -135,17 +135,16 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -173,10 +172,9 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 7px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -324,7 +322,7 @@ header {
 /* --- CONTEÚDO PRINCIPAL (SOBRE NÓS) --- */
 
 main {
-    margin-top: 100px;
+    margin-top: 70px;
     width: 100%;
     background-color: var(--fundo-principal);
     display: flex;
@@ -332,23 +330,35 @@ main {
 }
 
 /* ========================================================
-   SEÇÃO CONHEÇA A AJBORGES: FUNDO BANNER-AJBORGES-01 + 2 COLUNAS (TEXTO & MAPA)
+   BLOCO UNIFICADO 1 & 2: HERO + HISTÓRIA COM FUNDO CAMINHÃO AJBORGES
    ======================================================== */
 .sobrenos-topo-unificado {
     position: relative;
     width: 100%;
     overflow: hidden;
-    padding: 105px 24px 85px;
-    min-height: 580px;
+    padding: 105px 24px 115px;
+    min-height: 520px;
     color: var(--branco);
     background-color: #0b1120;
-    background-image: url('../Imagens/banner-ajborges-01.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+}
+
+.sobrenos-unificado-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.sobrenos-unificado-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+    filter: brightness(0.92);
 }
 
 .sobrenos-unificado-overlay {
@@ -359,170 +369,216 @@ main {
     height: 100%;
     background: linear-gradient(
         180deg,
-        rgba(11, 17, 32, 0.88) 0%,
-        rgba(25, 25, 78, 0.80) 40%,
-        rgba(20, 20, 65, 0.85) 70%,
-        rgba(11, 17, 32, 0.95) 100%
+        rgba(15, 23, 42, 0.94) 0%,
+        rgba(30, 30, 92, 0.85) 30%,
+        rgba(27, 27, 78, 0.88) 65%,
+        rgba(15, 23, 42, 0.96) 100%
     );
-    z-index: 1;
 }
 
 .sobrenos-unificado-container {
     position: relative;
     z-index: 2;
-    max-width: 1240px;
-    width: 100%;
+    max-width: 1100px;
     margin: 0 auto;
-}
-
-/* Layout em Grid: Coluna de Texto à Esquerda e Mapa à Direita */
-.sobrenos-grid-layout {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 48px;
-    align-items: center;
-    width: 100%;
-}
-
-.sobrenos-conteudo-col {
-    text-align: left;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 48px;
+}
+
+/* BLOCO 1: HERO */
+.sobrenos-hero-box {
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 35px 20px 10px;
 }
 
 .sobrenos-hero-titulo {
-    font-size: 42px;
+    font-size: 46px;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     letter-spacing: -0.5px;
     color: #ffffff;
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 .sobrenos-hero-subtitulo {
     font-size: 17.5px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.95);
-    margin-bottom: 22px;
-    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
-    font-weight: 500;
+    line-height: 1.68;
+    color: rgba(255, 255, 255, 0.92);
+    max-width: 760px;
+    margin: 0 auto;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* Narrativa da História (Texto fluido direto na coluna, sem card) */
-.sobrenos-historia-narrativa {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    margin-bottom: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+/* BLOCO 2: HISTÓRIA (CARD TRANSLÚCIDO EXECUTIVO) */
+.historia-bloco-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 44px 50px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: left;
 }
 
-.sobrenos-historia-narrativa p {
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 16px;
-    line-height: 1.75;
-    margin-bottom: 16px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
-    font-weight: 400;
+.historia-header-bloco {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.sobrenos-historia-narrativa p.historia-destaque {
-    font-size: 16.5px;
+.historia-tag-badge {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 5px 14px;
+    background: rgba(96, 165, 250, 0.2);
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #93c5fd;
+}
+
+.historia-bloco-card .historia-titulo {
+    font-size: 30px;
+    font-weight: 700;
     color: #ffffff;
+    line-height: 1.25;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.historia-textos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.historia-bloco-card .historia-paragrafo {
+    font-size: 15.5px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.historia-bloco-card .historia-paragrafo strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.historia-bloco-card .historia-destaque {
+    background: rgba(61, 61, 144, 0.45);
+    border-left: 4px solid #60a5fa;
+    padding: 18px 24px;
+    border-radius: 0 14px 14px 0;
+    font-size: 15.5px;
     line-height: 1.7;
-    margin-bottom: 16px;
-    font-weight: 400;
+    color: #ffffff;
+    font-weight: 500;
+    font-style: italic;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    margin: 6px 0;
 }
 
-.sobrenos-historia-narrativa p:last-child {
-    margin-bottom: 0;
-}
-
-.sobrenos-hero-acoes {
+.historia-acoes {
     display: flex;
     align-items: center;
     gap: 16px;
+    margin-top: 6px;
     flex-wrap: wrap;
 }
 
-.btn-hero-primario {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    color: var(--azul-ajborges-escuro);
-    font-size: 15px;
-    font-weight: 700;
-    padding: 13px 26px;
-    border-radius: 12px;
-    text-decoration: none;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    transition: all 0.25s ease;
-}
-
-.btn-hero-primario:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(255, 255, 255, 0.2);
-}
-
-.btn-hero-primario svg {
-    transition: transform 0.2s ease;
-}
-
-.btn-hero-primario:hover svg {
-    transform: translateX(4px);
-}
-
-.btn-hero-secundario {
+.btn-secundario-glass {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 13px 26px;
-    border-radius: 12px;
+    padding: 12px 24px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
     background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: #ffffff;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     transition: all 0.25s ease;
+    backdrop-filter: blur(8px);
 }
 
-.btn-hero-secundario:hover {
-    background: rgba(255, 255, 255, 0.24);
-    border-color: rgba(255, 255, 255, 0.55);
+.btn-secundario-glass:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
-/* Coluna Direita: Mapa do Brasil */
-.sobrenos-mapa-col {
+/* BLOCO 3: PILARES & COMPROMISSO OPERACIONAL */
+.sobrenos-pilares-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 24px 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.pilares-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.pilar-item {
     display: flex;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.pilar-icone {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    background: rgba(96, 165, 250, 0.18);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: #93c5fd;
+    display: flex;
     align-items: center;
-    width: 100%;
+    justify-content: center;
 }
 
-.img-mapa-brasil-sobrenos {
-    width: 100%;
-    height: auto;
-    max-width: 520px;
-    display: block;
-    object-fit: contain;
-    filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.45));
-    transition: transform 0.35s ease, filter 0.35s ease;
+.pilar-icone svg {
+    width: 22px;
+    height: 22px;
 }
 
-.img-mapa-brasil-sobrenos:hover {
-    transform: scale(1.03);
-    filter: drop-shadow(0 20px 42px rgba(0, 0, 0, 0.65));
+.pilar-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pilar-texto strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.pilar-texto span {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
 }
 
 /* SEÇÃO ESTATÍSTICAS */
@@ -869,57 +925,15 @@ main {
 /* SEÇÃO ESPECIALIDADES CORPORATIVAS (ALIMENTÍCIO & E-COMMERCE) */
 .especialidades-section {
     width: 100%;
-    background-color: #f8fafc;
-    padding: 70px 24px 60px 24px;
+    background-color: #ffffff;
+    padding: 85px 24px;
     border-bottom: 1px solid var(--cinza-borda);
-    position: relative;
-    overflow: hidden;
 }
 
 .especialidades-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    position: relative;
-    z-index: 2;
-}
-
-/* ==========================================================================
-   MARCA D'ÁGUA EM CARROSSEL DE FUNDO (OPACIDADE SUAVE 0.08)
-   ========================================================================== */
-.especialidades-watermark-carousel {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.watermark-item {
-    position: absolute;
-    width: 420px;
-    height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transform: scale(0.92);
-    transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--azul-ajborges);
-}
-
-.watermark-item.active {
-    opacity: 0.08;
-    transform: scale(1);
-}
-
-.watermark-item svg {
-    width: 100%;
-    height: 100%;
-    display: block;
 }
 
 .especialidades-header {
@@ -959,307 +973,169 @@ main {
     line-height: 1.65;
 }
 
-/* ==========================================================================
-   GRID DE CÁPSULAS CILÍNDRICAS HORIZONTAIS EXPANSÍVEIS
-   ========================================================================== */
-.especialidades-capsulas-grid {
+.especialidades-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
-    align-items: start;
-    position: relative;
-    z-index: 2;
-    max-width: 1180px;
-    margin: 0 auto;
-    min-height: 480px; /* Mantém a altura da seção fixa e estável, eliminando qualquer aumento embaixo quando os cards abrem */
+    gap: 32px;
+    align-items: stretch;
 }
 
-/* Card Retangular Horizontal Expansível */
-.capsula-card {
+.especialidade-card {
     background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(27, 27, 78, 0.06);
-    transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.35s ease,
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    cursor: pointer;
-    outline: none;
-    user-select: none;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: 0 8px 24px rgba(27, 27, 78, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
 }
 
-.capsula-card:hover,
-.capsula-card.expandido {
-    border-radius: 16px;
-    border-color: #93c5fd;
-    box-shadow: 0 16px 38px rgba(30, 30, 92, 0.12);
-    transform: translateY(-4px);
-}
-
-.capsula-card:focus-visible {
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+.especialidade-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(61, 61, 144, 0.14);
     border-color: #60a5fa;
 }
 
-/* Header sempre visível da cápsula */
-.capsula-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 28px;
-    gap: 16px;
-    min-height: 82px;
-    box-sizing: border-box;
-    transition: padding 0.35s ease;
-}
-
-.capsula-lead {
+.especialidade-card-header {
     display: flex;
     align-items: center;
     gap: 16px;
-    min-width: 0;
+    margin-bottom: 20px;
 }
 
-.capsula-badges-group {
+.especialidade-icone-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.capsula-badge {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-    transition: transform 0.25s ease;
-    overflow: hidden;
 }
 
-.badge-alimenticio {
+.especialidade-icone-box svg {
+    width: 28px;
+    height: 28px;
+    color: #ffffff;
+}
+
+.icone-alimenticio {
     background: linear-gradient(135deg, #1e1e5c 0%, #3d3d90 100%);
-    box-shadow: 0 3px 8px rgba(30, 30, 92, 0.25);
+    box-shadow: 0 8px 18px rgba(61, 61, 144, 0.25);
 }
 
-.badge-shopee {
-    background-color: #EE4D2D;
+.icone-ecommerce {
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+    box-shadow: 0 8px 18px rgba(234, 88, 12, 0.25);
 }
 
-.badge-ml {
-    background-color: #FFE600;
-}
-
-.capsula-badge svg {
-    display: block;
-}
-
-.capsula-info {
+.especialidade-header-texto {
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    gap: 4px;
 }
 
-.capsula-tag {
+.especialidade-categoria {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
     color: #64748b;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.capsula-titulo {
-    font-size: 19px;
-    font-weight: 800;
-    color: var(--azul-ajborges);
-    margin: 0;
-    line-height: 1.25;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.especialidade-nome {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
 }
 
-.capsula-action {
+.especialidade-descricao {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--cinza-texto);
+    margin-bottom: 24px;
+}
+
+.especialidade-destaques-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 18px;
+    background-color: #f8fafc;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+}
+
+.item-destaque-esp {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #f1f5f9;
-    color: #64748b;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.item-destaque-esp svg {
+    color: #10b981;
     flex-shrink: 0;
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-                background 0.3s ease,
-                color 0.3s ease;
 }
 
-.capsula-card:hover .capsula-action,
-.capsula-card.expandido .capsula-action {
-    transform: rotate(180deg);
-    background: rgba(30, 30, 92, 0.08);
-    color: var(--azul-ajborges);
-}
-
-/* Corpo expansível com transição suave nativa */
-.capsula-corpo {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.capsula-corpo-inner {
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    padding: 0 28px;
+.especialidade-parceiros-box {
+    margin-top: auto;
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
-.capsula-card:hover .capsula-corpo,
-.capsula-card.expandido .capsula-corpo {
-    grid-template-rows: 1fr;
-}
-
-.capsula-card:hover .capsula-corpo-inner,
-.capsula-card.expandido .capsula-corpo-inner {
-    opacity: 1;
-    transform: translateY(0);
-    padding: 4px 28px 26px 28px;
-    transition-delay: 0.08s;
-    min-height: 295px;
-    box-sizing: border-box;
-}
-
-.capsula-divisor {
-    height: 1px;
-    background: #f1f5f9;
-    margin: 4px 0 16px 0;
-}
-
-.capsula-descricao {
-    font-size: 15px;
-    color: #475569;
-    line-height: 1.6;
-    margin: 0 0 16px 0;
-    min-height: 72px;
-    display: flex;
-    align-items: flex-start;
-}
-
-.capsula-box-specs {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 16px 18px;
-    min-height: 168px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
-.capsula-specs-titulo {
+.parceiros-rotulo {
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--azul-ajborges);
-    margin: 0 0 10px 0;
+    letter-spacing: 0.5px;
+    color: #64748b;
 }
 
-.capsula-lista-specs {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: 1fr;
+.parceiros-tags-cluster {
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
-.capsula-lista-specs li {
-    position: relative;
-    padding-left: 20px;
-    font-size: 13.5px;
+.tag-parceiro {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
     font-weight: 600;
-    color: #1e293b;
-    line-height: 1.45;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
 }
 
-.capsula-lista-specs li::before {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--azul-ajborges);
+.tag-parceiro:hover {
+    background-color: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges);
+    border-color: var(--azul-ajborges-claro);
 }
 
-@media (max-width: 992px) {
-    .especialidades-capsulas-grid {
-        grid-template-columns: 1fr;
-        max-width: 640px;
-        min-height: 480px;
-    }
+.tag-parceiro-destaque {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
 }
 
-@media (max-width: 640px) {
-    .capsula-header {
-        padding: 14px 20px;
-        gap: 12px;
-    }
-
-    .capsula-card:hover .capsula-corpo-inner,
-    .capsula-card.expandido .capsula-corpo-inner {
-        padding: 4px 20px 22px 20px;
-    }
-
-    .capsula-badge {
-        width: 38px;
-        height: 38px;
-    }
-
-    .capsula-titulo {
-        font-size: 16px;
-    }
-
-    .capsula-tag {
-        font-size: 10px;
-    }
+.tag-parceiro-destaque:hover {
+    background-color: #ffedd5;
+    color: #9a3412;
 }
 
 @media (max-width: 900px) {
     .especialidades-grid {
         grid-template-columns: 1fr;
         gap: 24px;
-    }
-
-    .especialidade-card-reveal {
-        min-height: 310px;
-    }
-
-    .esp-card-face {
-        padding: 28px 22px;
-    }
-
-    .especialidade-nome {
-        font-size: 19px;
-    }
-
-    .esp-back-titulo {
-        font-size: 18px;
     }
 }
 
@@ -1342,43 +1218,11 @@ main {
 /* RESPONSIVIDADE DE SOBRE NÓS */
 @media (max-width: 1024px) {
     .sobrenos-topo-unificado {
-        padding: 80px 20px 70px;
-        min-height: auto;
+        padding: 60px 20px 70px;
     }
 
-    .sobrenos-grid-layout {
-        grid-template-columns: 1fr;
-        gap: 40px;
-        text-align: center;
-    }
-
-    .sobrenos-conteudo-col {
-        text-align: center;
-        align-items: center;
-    }
-
-    .sobrenos-hero-titulo {
-        text-align: center;
-    }
-
-    .sobrenos-hero-subtitulo {
-        text-align: center;
-    }
-
-    .sobrenos-historia-narrativa {
-        text-align: center;
-    }
-
-    .sobrenos-historia-narrativa p {
-        text-align: center;
-    }
-
-    .sobrenos-hero-acoes {
-        justify-content: center;
-    }
-
-    .img-mapa-brasil-sobrenos {
-        max-width: 440px;
+    .historia-bloco-card {
+        padding: 36px 32px;
     }
 
     .stats-container {
@@ -1418,38 +1262,35 @@ main {
 
 @media (max-width: 640px) {
     .sobrenos-topo-unificado {
-        padding: 65px 16px 55px;
-        min-height: auto;
+        padding: 44px 16px 55px;
     }
 
     .sobrenos-hero-titulo {
-        font-size: 30px;
+        font-size: 28px;
     }
 
     .sobrenos-hero-subtitulo {
-        font-size: 15.5px;
-        line-height: 1.55;
-    }
-
-    .sobrenos-historia-narrativa p {
         font-size: 14.5px;
-        line-height: 1.65;
     }
 
-    .img-mapa-brasil-sobrenos {
-        max-width: 310px;
+    .historia-bloco-card {
+        padding: 24px 18px;
+        border-radius: 16px;
+        gap: 16px;
     }
 
-    .sobrenos-hero-acoes {
-        flex-direction: column;
-        width: 100%;
-        gap: 12px;
+    .historia-bloco-card .historia-titulo {
+        font-size: 22px;
     }
 
-    .btn-hero-primario,
-    .btn-hero-secundario {
-        width: 100%;
-        justify-content: center;
+    .historia-bloco-card .historia-paragrafo {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .historia-bloco-card .historia-destaque {
+        font-size: 14px;
+        padding: 14px 16px;
     }
 
     .stats-section {

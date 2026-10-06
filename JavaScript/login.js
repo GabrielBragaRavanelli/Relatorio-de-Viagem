@@ -239,26 +239,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerHTML = `<span>Entrando no sistema...</span>`;
             }
 
-            // Salva dados da sessão do motorista logado
-            localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                role: 'motorista',
-                id: 'MOT-104',
-                nome: '',
-                cpf: cpfVal
-            }));
+            // Busca o perfil real no Supabase se disponível
+            let nomeMotorista = '';
+            if (window.supabaseClient) {
+                window.supabaseClient
+                    .from('perfis')
+                    .select('nome')
+                    .eq('cpf', cpfVal.replace(/\D/g, ''))
+                    .maybeSingle()
+                    .then(({ data }) => {
+                        if (data && data.nome) {
+                            nomeMotorista = data.nome;
+                        }
+                    })
+                    .finally(() => {
+                        // Salva dados da sessão do motorista logado
+                        localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                            role: 'motorista',
+                            id: 'MOT-' + cpfVal.replace(/\D/g, '').slice(-4),
+                            nome: nomeMotorista,
+                            cpf: cpfVal
+                        }));
 
-            showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
+                        showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
 
-            setTimeout(() => {
-                // Redireciona para o formulário de relatório de viagem vinculado
-                window.location.href = 'relatorio-viagem.html';
-            }, 1200);
+                        setTimeout(() => {
+                            window.location.href = 'relatorio-viagem.html';
+                        }, 1000);
+                    });
+            } else {
+                // Fallback Local
+                localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                    role: 'motorista',
+                    id: 'MOT-104',
+                    nome: '',
+                    cpf: cpfVal
+                }));
+
+                showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'relatorio-viagem.html';
+                }, 1000);
+            }
         });
     }
 
     // Formulário do Administrador
     if (formAdmin) {
-        formAdmin.addEventListener('submit', (e) => {
+        formAdmin.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const emailVal = formAdmin.querySelector('#email-admin')?.value.trim() || '';
@@ -275,24 +304,92 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const submitBtn = formAdmin.querySelector('.btn-submit');
+            const textoOriginalBtn = submitBtn ? submitBtn.innerHTML : '<span>Acessar Painel Gestor</span>';
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span>Autenticando gestão...</span>`;
+                submitBtn.innerHTML = `<span>Validando credenciais...</span>`;
             }
 
-            // Salva sessão administrativa
-            localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                role: 'admin',
-                nome: 'Administrador AJBorges',
-                email: emailVal || 'operacional@ajborges.com'
-            }));
+            // Autenticação Real com Supabase
+            if (window.supabaseClient) {
+                try {
+                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                        email: emailVal,
+                        password: senhaVal
+                    });
 
-            showToast('Autenticação de Administrador aprovada! Acessando painel...', 'success');
+                    if (error) {
+                        console.error('Falha de login no Supabase:', error);
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = textoOriginalBtn;
+                        }
+                        if (error.message.includes('Invalid login credentials')) {
+                            showToast('E-mail ou senha de administrador incorretos!', 'error');
+                        } else if (error.message.includes('Email not confirmed')) {
+                            showToast('E-mail ainda não confirmado no painel do Supabase.', 'error');
+                        } else {
+                            showToast(`Erro ao autenticar: ${error.message}`, 'error');
+                        }
+                        return;
+                    }
 
-            setTimeout(() => {
-                // Redireciona diretamente para o Dashboard Administrativo da AJBorges
-                window.location.href = 'dashboard-admin.html';
-            }, 1000);
+                    // Usuário autenticado com sucesso!
+                    const usuarioSupabase = data.user;
+                    console.log('✅ Administrador autenticado no Supabase:', usuarioSupabase);
+
+                    // Busca dados adicionais do perfil (se cadastrado)
+                    let nomeGestor = usuarioSupabase.user_metadata?.nome || 'Administrador AJBorges';
+                    try {
+                        const { data: perfil } = await window.supabaseClient
+                            .from('perfis')
+                            .select('nome, role')
+                            .eq('email', emailVal)
+                            .maybeSingle();
+
+                        if (perfil) {
+                            if (perfil.nome) nomeGestor = perfil.nome;
+                        } else {
+                            // Registra o perfil de admin caso ainda não exista na tabela
+                            await window.supabaseClient.from('perfis').insert({
+                                id: usuarioSupabase.id,
+                                nome: nomeGestor,
+                                email: emailVal,
+                                role: 'admin'
+                            });
+                        }
+                    } catch (ePerfil) {
+                        console.warn('Erro ao consultar tabela perfis:', ePerfil);
+                    }
+
+                    // Salva sessão administrativa segura
+                    localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
+                        role: 'admin',
+                        id: usuarioSupabase.id,
+                        nome: nomeGestor,
+                        email: emailVal
+                    }));
+
+                    showToast('Autenticação de Administrador aprovada! Acessando painel...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-admin.html';
+                    }, 1000);
+                } catch (err) {
+                    console.error('Erro inesperado no login do admin:', err);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = textoOriginalBtn;
+                    }
+                    showToast('Não foi possível conectar ao servidor de login.', 'error');
+                }
+            } else {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = textoOriginalBtn;
+                }
+                showToast('Servidor de autenticação indisponível no momento.', 'error');
+            }
         });
     }
 });
