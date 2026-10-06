@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -16,24 +16,28 @@
         <div class="header-AJBorges">
             <div class="logotipo-AJBorges">
                 <a href="index.html" class="logo-link" aria-label="Página inicial AJBorges Transportes">
-                    <img src="../Imagens/iconeAJb-prata.jpeg" alt="AJBorges Transportes">
+                    <img src="../Imagens/LOGO EM BRANCO.png" alt="AJBorges Transportes">
                 </a>
             </div>
             <nav class="header-links" aria-label="Navegação principal">
                 <ul class="lista-links">
                     <li class="dropdown-item" id="dropdown-portais">
-                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false" aria-haspopup="true">
+                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false"
+                            aria-haspopup="true">
                             <span>Portais &amp; Cadastros</span>
-                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
-                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu" aria-labelledby="dropdown-menu-btn">
+                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu"
+                            aria-labelledby="dropdown-menu-btn">
                             <a href="PortaldaFrota.html" class="dropdown-link" role="menuitem">
                                 <div class="dropdown-icon-box">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <rect x="1" y="3" width="15" height="13"></rect>
                                         <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
                                         <circle cx="5.5" cy="18.5" r="2.5"></circle>
@@ -49,7 +53,8 @@
                             <a href="FichaMultiCadastro.html" class="dropdown-link" role="menuitem">
                                 <div class="dropdown-icon-box">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="9" cy="7" r="4"></circle>
                                         <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -388,8 +393,8 @@
 
     <!-- Supabase SDK e Cliente de Banco de Dados -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../JavaScript/supabase-client.js?v=3.1"></script>
-    <script src="../JavaScript/login.js?v=3.1"></script>
+    <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/login.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dropdownItem = document.getElementById('dropdown-portais');
