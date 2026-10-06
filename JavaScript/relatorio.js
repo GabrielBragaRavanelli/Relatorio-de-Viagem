@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(uAtivo));
             }
         }
-    } catch(e) {}
+    } catch (e) { }
     if (inputMotorista && inputMotorista.value === 'Carlos Eduardo Ferreira') {
         inputMotorista.value = '';
     }
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         const salvoLocal = parseInt(localStorage.getItem(STORAGE_FICHA_KEY), 10);
         if (!isNaN(salvoLocal) && salvoLocal > maxNum) {
@@ -2115,8 +2115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Remove dados de seed mockados antigos se existirem
                     const limpa = lista.filter(f => {
                         if (!f || !f.id) return false;
-                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005', 
-                                         'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
+                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005',
+                            'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
                         return !mockIds.includes(f.id);
                     });
                     if (limpa.length !== lista.length) {
@@ -2124,7 +2124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     return limpa;
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         return [];
     }
@@ -2134,12 +2134,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Alternância de Perfil (Driver vs Admin)
-    window.alternarPerfil = function(novoRole) {
+    window.alternarPerfil = function (novoRole) {
         let usuario = null;
         try {
             usuario = JSON.parse(localStorage.getItem(STORAGE_USER_ACTIVE) || '{}');
-        } catch(e) { usuario = {}; }
-        
+        } catch (e) { usuario = {}; }
+
         if (novoRole === 'admin' || novoRole === 'diretoria') {
             usuario.role = 'admin';
             usuario.nome = usuario.nome || 'Administrador Central';
@@ -2153,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuario));
             exibirToast('Visão de MOTORISTA ativada (Campos corporativos bloqueados / Imposto Federal oculto)', 'info');
         }
-        
+
         const url = new URL(window.location.href);
         url.searchParams.delete('mode');
         window.history.replaceState({}, '', url.toString());
@@ -2170,13 +2170,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { 
+            try {
                 usuarioAtivo = JSON.parse(usuarioAtivoStr);
                 if (usuarioAtivo && usuarioAtivo.nome === 'Carlos Eduardo Ferreira') {
                     usuarioAtivo.nome = '';
                     localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
@@ -2374,7 +2374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     atualizarFichaNaBase(idAprovar, true);
                     sessionStorage.setItem('ajborges_toast_mensagem', `Relatório ${idAprovar} APROVADO e CONCLUÍDO com sucesso!`);
-                    
+
                     // Retorna suavemente ao Dashboard Administrativo na seção de fichas
                     setTimeout(() => {
                         window.location.href = 'dashboard-admin.html#fichas';
@@ -2525,7 +2525,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         let usuarioAtivo = null;
         if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
         }
         if (!usuarioAtivo || usuarioAtivo.role !== 'motorista') return;
 
@@ -2589,43 +2589,43 @@ document.addEventListener('DOMContentLoaded', () => {
             dadosAtualizados.dataEnvio = new Date().toLocaleString('pt-BR');
             dadosAtualizados.status = marcarComoAprovado ? 'aprovado' : 'pendente';
             todas.unshift(dadosAtualizados);
-        salvarListaFichasCentral(todas);
+            salvarListaFichasCentral(todas);
 
-        // Persistência em nuvem no Supabase
-        if (typeof window.salvarFichaSupabase === 'function') {
-            window.salvarFichaSupabase(dadosAtualizados);
+            // Persistência em nuvem no Supabase
+            if (typeof window.salvarFichaSupabase === 'function') {
+                window.salvarFichaSupabase(dadosAtualizados);
+            }
         }
-    }
 
-    // Modal de Minhas Viagens do Motorista
-    function abrirModalMinhasViagens() {
-        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-        let usuarioAtivo = null;
-        if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
-        }
-        if (!usuarioAtivo) return;
+        // Modal de Minhas Viagens do Motorista
+        function abrirModalMinhasViagens() {
+            const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+            let usuarioAtivo = null;
+            if (usuarioAtivoStr) {
+                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
+            }
+            if (!usuarioAtivo) return;
 
-        const todas = obterListaFichasCentral();
-        const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
+            const todas = obterListaFichasCentral();
+            const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
 
-        const modal = document.getElementById('modal-lista-minhas-viagens');
-        const tbody = document.getElementById('tabela-minhas-viagens-body');
-        const empty = document.getElementById('minhas-viagens-empty');
-        const sub = document.getElementById('subtitulo-motorista-minhas-viagens');
+            const modal = document.getElementById('modal-lista-minhas-viagens');
+            const tbody = document.getElementById('tabela-minhas-viagens-body');
+            const empty = document.getElementById('minhas-viagens-empty');
+            const sub = document.getElementById('subtitulo-motorista-minhas-viagens');
 
-        if (sub) sub.textContent = `Relatórios de ${usuarioAtivo.nome || 'Motorista'}`;
+            if (sub) sub.textContent = `Relatórios de ${usuarioAtivo.nome || 'Motorista'}`;
 
-        if (tbody) {
-            tbody.innerHTML = '';
-            if (minhas.length === 0) {
-                if (empty) empty.style.display = 'block';
-            } else {
-                if (empty) empty.style.display = 'none';
-                minhas.forEach(m => {
-                    const isPendente = m.status === 'pendente';
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (minhas.length === 0) {
+                    if (empty) empty.style.display = 'block';
+                } else {
+                    if (empty) empty.style.display = 'none';
+                    minhas.forEach(m => {
+                        const isPendente = m.status === 'pendente';
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
                         <td><strong>${m.id}</strong></td>
                         <td>${m.dataEnvio || m.dataSaida || '-'}</td>
                         <td>${m.destinoInicial || '-'} ➔ ${m.destinoFinal || 'SP'}</td>
@@ -2641,214 +2641,214 @@ document.addEventListener('DOMContentLoaded', () => {
                             </a>
                         </td>
                     `;
-                    tbody.appendChild(tr);
-                });
+                        tbody.appendChild(tr);
+                    });
+                }
             }
+
+            if (modal) modal.classList.add('ativo');
         }
 
-        if (modal) modal.classList.add('ativo');
-    }
-
-    // Fechar Modais
-    const btnFecharMinhasViagens = document.getElementById('btn-fechar-minhas-viagens');
-    const btnFecharMinhasViagensRodape = document.getElementById('btn-fechar-minhas-viagens-rodape');
-    if (btnFecharMinhasViagens) {
-        btnFecharMinhasViagens.addEventListener('click', () => {
-            document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
-        });
-    }
-    if (btnFecharMinhasViagensRodape) {
-        btnFecharMinhasViagensRodape.addEventListener('click', () => {
-            document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
-        });
-    }
-
-    // Modal Sem Login - Copiar Protocolo
-    const btnCopiarSemLogin = document.getElementById('btn-copiar-protocolo-sem-login');
-    if (btnCopiarSemLogin) {
-        btnCopiarSemLogin.addEventListener('click', () => {
-            const num = document.getElementById('modal-num-protocolo-sem-login')?.textContent || '';
-            navigator.clipboard.writeText(num).then(() => {
-                exibirToast(`Protocolo ${num} copiado para a área de transferência!`, 'sucesso');
+        // Fechar Modais
+        const btnFecharMinhasViagens = document.getElementById('btn-fechar-minhas-viagens');
+        const btnFecharMinhasViagensRodape = document.getElementById('btn-fechar-minhas-viagens-rodape');
+        if (btnFecharMinhasViagens) {
+            btnFecharMinhasViagens.addEventListener('click', () => {
+                document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
             });
-        });
-    }
-
-    // Modal Sem Login - Novo Envio
-    const btnNovoEnvioSemLogin = document.getElementById('btn-novo-envio-sem-login');
-    if (btnNovoEnvioSemLogin) {
-        btnNovoEnvioSemLogin.addEventListener('click', () => {
-            window.location.href = 'relatorio-viagem.html';
-        });
-    }
-
-    // Modal Com Login - Ir para Minhas Viagens
-    const btnModalIrMinhasViagens = document.getElementById('btn-modal-ir-minhas-viagens');
-    if (btnModalIrMinhasViagens) {
-        btnModalIrMinhasViagens.addEventListener('click', () => {
-            document.getElementById('modal-protocolo-com-login')?.classList.remove('ativo');
-            abrirModalMinhasViagens();
-        });
-    }
-
-    // Modal Com Login - Novo Envio
-    const btnNovoEnvioComLogin = document.getElementById('btn-novo-envio-com-login');
-    if (btnNovoEnvioComLogin) {
-        btnNovoEnvioComLogin.addEventListener('click', () => {
-            window.location.href = 'relatorio-viagem.html';
-        });
-    }
-
-    // =========================================================================
-    // FINALIZAR E ENVIAR RELATÓRIO DE VIAGEM (MOTORISTA)
-    // =========================================================================
-    const btnFinalizarRelatorioMl = document.getElementById('btn-finalizar-relatorio-ml');
-    if (btnFinalizarRelatorioMl) {
-        btnFinalizarRelatorioMl.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            const motoristaPreenchido = inputMotorista && inputMotorista.value.trim() !== '';
-            const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
-
-            // Valida identificação do motorista
-            if (!motoristaPreenchido) {
-                exibirToast('Por favor, informe o nome do Motorista.', 'erro');
-                if (inputMotorista) inputMotorista.focus();
-                return;
-            }
-
-            // Valida Imposto Federal obrigatório
-            if (!impostoFederalPreenchido) {
-                exibirToast('O valor do Imposto Federal é obrigatório no relatório.', 'erro');
-                if (inputMlImpFederal) inputMlImpFederal.focus();
-                return;
-            }
-
-            // Verifica se há pelo menos um frete ou abastecimento preenchido
-            const fretesAtuais = coletarFretesAtuais();
-            const abastsAtuais = coletarAbastecimentosAtuais();
-
-            if (fretesAtuais.length === 0 && abastsAtuais.length === 0) {
-                exibirToast('Lance pelo menos um frete ou abastecimento na operação.', 'erro');
-                return;
-            }
-
-            // Gera Identificador Único da Ficha (ex: AJB-2026-004)
-            const novoNumeroSeq = obterProximoNumeroFicha();
-            const novoIdFicha = formatarNumeroFicha(novoNumeroSeq);
-
-            // Recupera usuário ativo
-            const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-            let usuarioAtivo = null;
-            if (usuarioAtivoStr) {
-                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
-            }
-            const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
-
-            // Monta objeto completo da nova ficha
-            const agoraDataHora = new Date().toLocaleString('pt-BR', { 
-                day: '2-digit', month: '2-digit', year: 'numeric', 
-                hour: '2-digit', minute: '2-digit' 
+        }
+        if (btnFecharMinhasViagensRodape) {
+            btnFecharMinhasViagensRodape.addEventListener('click', () => {
+                document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
             });
+        }
 
-            const novaFicha = {
-                id: novoIdFicha,
-                protocolo: novoIdFicha,
-                dataEnvio: agoraDataHora,
-                dataSaida: inputDataSaida?.value || '24/09/2026',
-                dataChegada: inputDataChegada?.value || '24/09/2026',
-                motoristaId: isComLogin ? usuarioAtivo.id : 'anonimo',
-                motorista: inputMotorista.value.trim(),
-                origemEnvio: isComLogin ? 'motorista_com_login' : 'motorista_sem_login',
-                placas: inputPlacas?.value || 'A definir pela Gestão',
-                destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
-                destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
-                kmSaida: inputKmSaida?.value || '',
-                kmChegada: inputKmChegada?.value || '',
-                kmTotal: inputKmTotal?.value || '',
-                valorAdiantamento: inputAdiantamento?.value || '',
-                freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
-                retorno1: inputRetorno1?.value || '',
-                retorno2: inputRetorno2?.value || '',
-                retorno3: inputRetorno3?.value || '',
-                totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
-                vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
-                fretes: fretesAtuais,
-                abastecimentos: abastsAtuais,
-                totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
-                totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
-                mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
-                pedagios: [
-                    inputsPedagioMl[0]?.value || '',
-                    inputsPedagioMl[1]?.value || '',
-                    inputsPedagioMl[2]?.value || ''
-                ],
-                totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
-                impFederal: inputMlImpFederal?.value || '',
-                outrasDespesas: coletarOutrasDespesasAtuais(),
-                totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
-                resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
-                saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
-                anexos: arquivosComprovantesMl || [],
-                status: 'pendente'
-            };
+        // Modal Sem Login - Copiar Protocolo
+        const btnCopiarSemLogin = document.getElementById('btn-copiar-protocolo-sem-login');
+        if (btnCopiarSemLogin) {
+            btnCopiarSemLogin.addEventListener('click', () => {
+                const num = document.getElementById('modal-num-protocolo-sem-login')?.textContent || '';
+                navigator.clipboard.writeText(num).then(() => {
+                    exibirToast(`Protocolo ${num} copiado para a área de transferência!`, 'sucesso');
+                });
+            });
+        }
 
-            // Salva na fila central de fichas (Local e Nuvem)
-            const todasFichas = obterListaFichasCentral();
-            todasFichas.unshift(novaFicha);
-            salvarListaFichasCentral(todasFichas);
+        // Modal Sem Login - Novo Envio
+        const btnNovoEnvioSemLogin = document.getElementById('btn-novo-envio-sem-login');
+        if (btnNovoEnvioSemLogin) {
+            btnNovoEnvioSemLogin.addEventListener('click', () => {
+                window.location.href = 'relatorio-viagem.html';
+            });
+        }
 
-            // Envia para o Supabase
-            if (typeof window.salvarFichaSupabase === 'function') {
-                window.salvarFichaSupabase(novaFicha);
-            }
+        // Modal Com Login - Ir para Minhas Viagens
+        const btnModalIrMinhasViagens = document.getElementById('btn-modal-ir-minhas-viagens');
+        if (btnModalIrMinhasViagens) {
+            btnModalIrMinhasViagens.addEventListener('click', () => {
+                document.getElementById('modal-protocolo-com-login')?.classList.remove('ativo');
+                abrirModalMinhasViagens();
+            });
+        }
 
-            // Incrementa contador sequencial
-            localStorage.setItem(STORAGE_FICHA_KEY, novoNumeroSeq + 1);
+        // Modal Com Login - Novo Envio
+        const btnNovoEnvioComLogin = document.getElementById('btn-novo-envio-com-login');
+        if (btnNovoEnvioComLogin) {
+            btnNovoEnvioComLogin.addEventListener('click', () => {
+                window.location.href = 'relatorio-viagem.html';
+            });
+        }
 
-            // Limpa rascunho temporário
-            localStorage.removeItem(STORAGE_ML_KEY);
+        // =========================================================================
+        // FINALIZAR E ENVIAR RELATÓRIO DE VIAGEM (MOTORISTA)
+        // =========================================================================
+        const btnFinalizarRelatorioMl = document.getElementById('btn-finalizar-relatorio-ml');
+        if (btnFinalizarRelatorioMl) {
+            btnFinalizarRelatorioMl.addEventListener('click', (e) => {
+                e.preventDefault();
 
-            // Dispara feedback de acordo com o login do motorista
-            if (!isComLogin) {
-                // SEM LOGIN: Exibe modal com o protocolo único gerado
-                const modalSemLogin = document.getElementById('modal-protocolo-sem-login');
-                const elNum = document.getElementById('modal-num-protocolo-sem-login');
-                const elHora = document.getElementById('modal-data-envio-sem-login');
+                const motoristaPreenchido = inputMotorista && inputMotorista.value.trim() !== '';
+                const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
 
-                if (elNum) elNum.textContent = novoIdFicha;
-                if (elHora) elHora.textContent = agoraDataHora;
-                if (modalSemLogin) modalSemLogin.classList.add('ativo');
+                // Valida identificação do motorista
+                if (!motoristaPreenchido) {
+                    exibirToast('Por favor, informe o nome do Motorista.', 'erro');
+                    if (inputMotorista) inputMotorista.focus();
+                    return;
+                }
 
-                exibirToast(`Ficha ${novoIdFicha} transmitida com sucesso para a Gestão!`, 'sucesso');
-            } else {
-                // COM LOGIN: Exibe confirmação com status 🟡 Pendente de Aprovação
-                const modalComLogin = document.getElementById('modal-protocolo-com-login');
-                const elNum = document.getElementById('modal-num-protocolo-com-login');
+                // Valida Imposto Federal obrigatório
+                if (!impostoFederalPreenchido) {
+                    exibirToast('O valor do Imposto Federal é obrigatório no relatório.', 'erro');
+                    if (inputMlImpFederal) inputMlImpFederal.focus();
+                    return;
+                }
 
-                if (elNum) elNum.textContent = novoIdFicha;
-                if (modalComLogin) modalComLogin.classList.add('ativo');
+                // Verifica se há pelo menos um frete ou abastecimento preenchido
+                const fretesAtuais = coletarFretesAtuais();
+                const abastsAtuais = coletarAbastecimentosAtuais();
 
-                atualizarContadorMinhasViagens();
-                exibirToast(`Ficha ${novoIdFicha} vinculada ao seu cadastro e enviada com sucesso!`, 'sucesso');
-            }
-        });
-    }
+                if (fretesAtuais.length === 0 && abastsAtuais.length === 0) {
+                    exibirToast('Lance pelo menos um frete ou abastecimento na operação.', 'erro');
+                    return;
+                }
 
-    // Salvar progresso ao digitar nos campos e prevenir submit padrão
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-        });
-        form.addEventListener('input', () => {
-            salvarProgressoMl();
-        });
-    }
+                // Gera Identificador Único da Ficha (ex: AJB-2026-004)
+                const novoNumeroSeq = obterProximoNumeroFicha();
+                const novoIdFicha = formatarNumeroFicha(novoNumeroSeq);
 
-    window.carregarProgressoMl = carregarProgressoMl;
-    carregarProgressoMl();
+                // Recupera usuário ativo
+                const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+                let usuarioAtivo = null;
+                if (usuarioAtivoStr) {
+                    try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
+                }
+                const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
-    // Dispara a configuração completa do ciclo de vida
-    configurarCicloDeVidaViagem();
-});
+                // Monta objeto completo da nova ficha
+                const agoraDataHora = new Date().toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+
+                const novaFicha = {
+                    id: novoIdFicha,
+                    protocolo: novoIdFicha,
+                    dataEnvio: agoraDataHora,
+                    dataSaida: inputDataSaida?.value || '24/09/2026',
+                    dataChegada: inputDataChegada?.value || '24/09/2026',
+                    motoristaId: isComLogin ? usuarioAtivo.id : 'anonimo',
+                    motorista: inputMotorista.value.trim(),
+                    origemEnvio: isComLogin ? 'motorista_com_login' : 'motorista_sem_login',
+                    placas: inputPlacas?.value || 'A definir pela Gestão',
+                    destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
+                    destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                    kmSaida: inputKmSaida?.value || '',
+                    kmChegada: inputKmChegada?.value || '',
+                    kmTotal: inputKmTotal?.value || '',
+                    valorAdiantamento: inputAdiantamento?.value || '',
+                    freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
+                    retorno1: inputRetorno1?.value || '',
+                    retorno2: inputRetorno2?.value || '',
+                    retorno3: inputRetorno3?.value || '',
+                    totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
+                    vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+                    fretes: fretesAtuais,
+                    abastecimentos: abastsAtuais,
+                    totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
+                    totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+                    mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+                    pedagios: [
+                        inputsPedagioMl[0]?.value || '',
+                        inputsPedagioMl[1]?.value || '',
+                        inputsPedagioMl[2]?.value || ''
+                    ],
+                    totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
+                    impFederal: inputMlImpFederal?.value || '',
+                    outrasDespesas: coletarOutrasDespesasAtuais(),
+                    totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                    resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                    saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                    anexos: arquivosComprovantesMl || [],
+                    status: 'pendente'
+                };
+
+                // Salva na fila central de fichas (Local e Nuvem)
+                const todasFichas = obterListaFichasCentral();
+                todasFichas.unshift(novaFicha);
+                salvarListaFichasCentral(todasFichas);
+
+                // Envia para o Supabase
+                if (typeof window.salvarFichaSupabase === 'function') {
+                    window.salvarFichaSupabase(novaFicha);
+                }
+
+                // Incrementa contador sequencial
+                localStorage.setItem(STORAGE_FICHA_KEY, novoNumeroSeq + 1);
+
+                // Limpa rascunho temporário
+                localStorage.removeItem(STORAGE_ML_KEY);
+
+                // Dispara feedback de acordo com o login do motorista
+                if (!isComLogin) {
+                    // SEM LOGIN: Exibe modal com o protocolo único gerado
+                    const modalSemLogin = document.getElementById('modal-protocolo-sem-login');
+                    const elNum = document.getElementById('modal-num-protocolo-sem-login');
+                    const elHora = document.getElementById('modal-data-envio-sem-login');
+
+                    if (elNum) elNum.textContent = novoIdFicha;
+                    if (elHora) elHora.textContent = agoraDataHora;
+                    if (modalSemLogin) modalSemLogin.classList.add('ativo');
+
+                    exibirToast(`Ficha ${novoIdFicha} transmitida com sucesso para a Gestão!`, 'sucesso');
+                } else {
+                    // COM LOGIN: Exibe confirmação com status 🟡 Pendente de Aprovação
+                    const modalComLogin = document.getElementById('modal-protocolo-com-login');
+                    const elNum = document.getElementById('modal-num-protocolo-com-login');
+
+                    if (elNum) elNum.textContent = novoIdFicha;
+                    if (modalComLogin) modalComLogin.classList.add('ativo');
+
+                    atualizarContadorMinhasViagens();
+                    exibirToast(`Ficha ${novoIdFicha} vinculada ao seu cadastro e enviada com sucesso!`, 'sucesso');
+                }
+            });
+        }
+
+        // Salvar progresso ao digitar nos campos e prevenir submit padrão
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+            });
+            form.addEventListener('input', () => {
+                salvarProgressoMl();
+            });
+        }
+
+        window.carregarProgressoMl = carregarProgressoMl;
+        carregarProgressoMl();
+
+        // Dispara a configuração completa do ciclo de vida
+        configurarCicloDeVidaViagem();
+    });
 
