@@ -610,10 +610,20 @@ main.login-main {
     font-size: 14px;
 }
 
+/* Ocultar olho nativo do navegador Edge/IE */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
 /* Botão de Exibir/Ocultar Senha */
 .btn-toggle-password {
     position: absolute;
     right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 34px;
     height: 34px;
     display: flex;
@@ -624,6 +634,7 @@ main.login-main {
     cursor: pointer;
     border-radius: 6px;
     color: var(--cinza-placeholder);
+    z-index: 10;
     transition: color 0.2s ease, background-color 0.2s ease;
 }
 
@@ -635,10 +646,11 @@ main.login-main {
 .btn-toggle-password svg {
     width: 18px;
     height: 18px;
+    pointer-events: none;
 }
 
 .btn-toggle-password .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* Opções de Formulário (Lembrar / Esqueci senha) */

@@ -94,10 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const wrapper = button.closest('.input-wrapper');
             if (!wrapper) return;
 
-            const passwordInput = wrapper.querySelector('.input-password');
+            const passwordInput = wrapper.querySelector('.input-password') || wrapper.querySelector('input');
             const iconEye = button.querySelector('.icon-eye');
             const iconEyeOff = button.querySelector('.icon-eye-off');
 
@@ -105,9 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isPassword = passwordInput.type === 'password';
                 passwordInput.type = isPassword ? 'text' : 'password';
 
-                if (iconEye && iconEyeOff) {
+                if (iconEye) {
                     iconEye.classList.toggle('hidden', isPassword);
+                    iconEye.style.display = isPassword ? 'none' : 'block';
+                }
+                if (iconEyeOff) {
                     iconEyeOff.classList.toggle('hidden', !isPassword);
+                    iconEyeOff.style.display = isPassword ? 'block' : 'none';
                 }
 
                 button.setAttribute('title', isPassword ? 'Ocultar senha' : 'Exibir senha');
@@ -187,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
 
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             // Validação: Nome Completo
@@ -245,62 +250,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Processamento do Cadastro
+            // Processamento do Cadastro no Supabase
             const btnSubmit = form.querySelector('.btn-submit-cadastro');
+            const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Processando cadastro do motorista...</span>`;
+                btnSubmit.innerHTML = `<span>Gravando cadastro no Supabase...</span>`;
             }
 
-            // Salva perfil e credenciais no Supabase se disponível
-            if (window.supabaseClient) {
-                try {
-                    const cpfLimpo = cpf.replace(/\D/g, '');
-                    const emailInformado = (inputEmail?.value || '').trim();
-                    const emailFinal = emailInformado || `${cpfLimpo}@motorista.ajborges.com`;
+            try {
+                const inputEmail = document.getElementById('email-motorista');
+                const emailInformado = (inputEmail?.value || '').trim();
 
-                    // 1. Cria usuário no Supabase Auth com a senha digitada
-                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-                        email: emailFinal,
-                        password: senha,
-                        options: {
-                            data: {
-                                nome: nome,
-                                cpf: cpfLimpo,
-                                telefone: telefone || null,
-                                role: 'motorista'
-                            }
-                        }
-                    });
+                const resultado = await cadastrarMotoristaSupabase({
+                    nome,
+                    cpf,
+                    telefone,
+                    email: emailInformado,
+                    senha
+                });
 
-                    if (authError && !authError.message.includes('already registered')) {
-                        console.warn('Aviso no signUp do Supabase:', authError);
+                if (!resultado.sucesso) {
+                    showToast(resultado.erro || 'Erro ao realizar cadastro.', 'error', 5000);
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = textoOriginal;
                     }
+                    return;
+                }
 
-                    // 2. Salva o perfil na tabela 'perfis'
-                    await window.supabaseClient.from('perfis').upsert({
-                        id: authData?.user?.id || undefined,
-                        nome: nome,
-                        cpf: cpfLimpo,
-                        email: emailFinal,
-                        telefone: telefone || null,
-                        role: 'motorista'
-                    }, { onConflict: 'cpf' });
+                // Salva o CPF para preencher automaticamente na tela de login
+                sessionStorage.setItem('ajborges_cpf_cadastrado', cpf);
 
-                    console.log('✅ Motorista registrado no Supabase Auth e tabela perfis');
-                } catch(err) {
-                    console.error('Erro ao salvar perfil no Supabase:', err);
+                showToast('Cadastro realizado no Supabase com sucesso! Redirecionando...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'Login.html#motorista';
+                }, 1400);
+            } catch (err) {
+                console.error('Erro ao salvar no Supabase:', err);
+                showToast('Erro de comunicação com o Supabase. Tente novamente.', 'error');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = textoOriginal;
                 }
             }
-
-            // Salva o CPF para preencher automaticamente na tela de login
-            sessionStorage.setItem('ajborges_cpf_cadastrado', cpf);
-
-            showToast('Cadastro realizado com sucesso! Redirecionando para o login...', 'success');
-
-            setTimeout(() => {
-                window.location.href = 'Login.html#motorista';
-            }, 1200);
         });
     }
 });
