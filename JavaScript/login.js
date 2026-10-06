@@ -150,10 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const wrapper = button.closest('.input-wrapper');
             if (!wrapper) return;
 
-            const passwordInput = wrapper.querySelector('.input-password');
+            const passwordInput = wrapper.querySelector('.input-password') || wrapper.querySelector('input');
             const iconEye = button.querySelector('.icon-eye');
             const iconEyeOff = button.querySelector('.icon-eye-off');
 
@@ -161,9 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isPassword = passwordInput.type === 'password';
                 passwordInput.type = isPassword ? 'text' : 'password';
 
-                if (iconEye && iconEyeOff) {
+                if (iconEye) {
                     iconEye.classList.toggle('hidden', isPassword);
+                    iconEye.style.display = isPassword ? 'none' : 'block';
+                }
+                if (iconEyeOff) {
                     iconEyeOff.classList.toggle('hidden', !isPassword);
+                    iconEyeOff.style.display = isPassword ? 'block' : 'none';
                 }
 
                 button.setAttribute('title', isPassword ? 'Ocultar senha' : 'Exibir senha');
@@ -267,27 +272,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Determina o e-mail cadastrado no Auth do Supabase
                     const emailAuth = perfil.email || `${cpfLimpo}@motorista.ajborges.com`;
 
-                    // 2. Valida a senha real com o Supabase Auth
-                    const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
-                        email: emailAuth,
-                        password: senhaVal
-                    });
-
-                    if (authError) {
-                        console.error('Falha de login do motorista no Supabase:', authError);
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = textoOriginalBtn;
+                    // 2. Valida a senha com a tabela perfis ou Supabase Auth
+                    let senhaValida = false;
+                    if (perfil.senha) {
+                        senhaValida = (perfil.senha === senhaVal);
+                        if (!senhaValida) {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = textoOriginalBtn;
+                            }
+                            showToast('Senha incorreta para este CPF. Tente novamente!', 'error');
+                            return;
                         }
+                    } else {
+                        const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+                            email: emailAuth,
+                            password: senhaVal
+                        });
 
-                        if (authError.message.includes('Invalid login credentials')) {
-                            showToast('Senha de motorista incorreta!', 'error');
-                        } else if (authError.message.includes('Email not confirmed')) {
-                            showToast('Cadastro pendente de confirmação no Supabase.', 'error');
-                        } else {
-                            showToast(`Erro ao autenticar: ${authError.message}`, 'error');
+                        if (authError) {
+                            console.error('Falha de login do motorista no Supabase:', authError);
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = textoOriginalBtn;
+                            }
+
+                            if (authError.message.includes('Invalid login credentials')) {
+                                showToast('Senha de motorista incorreta!', 'error');
+                            } else if (authError.message.includes('Email not confirmed')) {
+                                showToast('Cadastro pendente de confirmação no Supabase.', 'error');
+                            } else {
+                                showToast(`Erro ao autenticar: ${authError.message}`, 'error');
+                            }
+                            return;
                         }
-                        return;
                     }
 
                     // Usuário autenticado com sucesso!

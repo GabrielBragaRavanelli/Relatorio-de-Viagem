@@ -345,3 +345,162 @@ window.atualizarStatusFichaSupabase = atualizarStatusFichaSupabase;
 window.excluirFichaSupabase = excluirFichaSupabase;
 window.uploadComprovanteSupabase = uploadComprovanteSupabase;
 window.escutarAlteracoesFichasSupabase = escutarAlteracoesFichasSupabase;
+
+// ==========================================================================
+// 6. OPERAÇÕES DE MOTORISTA E AUTENTICAÇÃO (PERFIS)
+// ==========================================================================
+
+async function buscarPerfilPorCpf(cpf) {
+    const cpfLimpo = (cpf || '').replace(/\D/g, '');
+    if (!cpfLimpo) return null;
+
+    try {
+        if (supabaseClient) {
+            const { data, error } = await supabaseClient
+                .from('perfis')
+                .select('*')
+                .eq('cpf', cpfLimpo)
+                .maybeSingle();
+
+            if (!error && data) return data;
+        }
+
+        const resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis?cpf=eq.${cpfLimpo}&select=*`, {
+            headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+            }
+        });
+        if (resp.ok) {
+            const rows = await resp.json();
+            return (rows && rows.length > 0) ? rows[0] : null;
+        }
+    } catch (e) {
+        console.error('Erro ao buscar perfil por CPF:', e);
+    }
+    return null;
+}
+
+async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha }) {
+    const cpfLimpo = (cpf || '').replace(/\D/g, '');
+    const emailFinal = (email || '').trim() || `${cpfLimpo}@motorista.ajborges.com`;
+
+    // 1. Verifica se CPF já existe no banco
+    const existente = await buscarPerfilPorCpf(cpfLimpo);
+    if (existente) {
+        return { sucesso: false, erro: 'Este CPF já está cadastrado no sistema.' };
+    }
+
+    let authUserId = null;
+
+    // 2. Cria conta no Supabase Auth
+    try {
+        if (supabaseClient) {
+            const { data: authData } = await supabaseClient.auth.signUp({
+                email: emailFinal,
+                password: senha,
+                options: {
+                    data: {
+                        nome: nome.trim(),
+                        cpf: cpfLimpo,
+                        telefone: (telefone || '').trim() || null,
+                        role: 'motorista'
+                    }
+                }
+            });
+            if (authData?.user) authUserId = authData.user.id;
+        }
+    } catch (eAuth) {
+        console.warn('Aviso no signUp:', eAuth);
+    }
+
+    // 3. Salva na tabela perfis (com senha caso coluna exista)
+    const payload = {
+        nome: nome.trim(),
+        cpf: cpfLimpo,
+        telefone: (telefone || '').trim() || null,
+        email: emailFinal,
+        role: 'motorista',
+        senha: senha
+    };
+    if (authUserId) payload.id = authUserId;
+
+    try {
+        let resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+            const errJson = await resp.json().catch(() => ({}));
+            if (errJson.message && errJson.message.toLowerCase().includes('senha')) {
+                delete payload.senha;
+                resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.anonKey,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                return { sucesso: false, erro: errJson.message || 'Erro ao salvar perfil.' };
+            }
+        }
+
+        if (resp.ok) {
+            const salvo = await resp.json();
+            return { sucesso: true, dados: salvo[0] || salvo };
+        } else {
+            const err = await resp.json().catch(() => ({}));
+            return { sucesso: false, erro: err.message || 'Erro ao gravar cadastro.' };
+        }
+    } catch (e) {
+        console.error('Erro de conexão ao salvar motorista:', e);
+        return { sucesso: false, erro: 'Falha de comunicação com o Supabase.' };
+    }
+}
+
+async function atualizarSenhaSupabase(cpf, novaSenha) {
+    const cpfLimpo = (cpf || '').replace(/\D/g, '');
+    if (!cpfLimpo) return { sucesso: false, erro: 'CPF inválido.' };
+
+    try {
+        const resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis?cpf=eq.${cpfLimpo}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ senha: novaSenha })
+        });
+
+        if (resp.ok) {
+            return { sucesso: true };
+        } else {
+            const err = await resp.json().catch(() => ({}));
+            if (err.message && err.message.toLowerCase().includes('senha')) {
+                return { sucesso: false, erro: 'A coluna "senha" precisa ser adicionada na tabela "perfis" do Supabase (tipo text).' };
+            }
+            return { sucesso: false, erro: err.message || 'Não foi possível atualizar a senha no banco.' };
+        }
+    } catch (e) {
+        console.error('Erro ao atualizar senha no Supabase:', e);
+        return { sucesso: false, erro: 'Falha de comunicação com o Supabase.' };
+    }
+}
+
+
+window.buscarPerfilPorCpf = buscarPerfilPorCpf;
+window.cadastrarMotoristaSupabase = cadastrarMotoristaSupabase;
+window.atualizarSenhaSupabase = atualizarSenhaSupabase;
+

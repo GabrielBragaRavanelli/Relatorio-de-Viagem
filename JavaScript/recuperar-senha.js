@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (formStep1) {
-        formStep1.addEventListener('submit', (e) => {
+        formStep1.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const cpfVal = (inputCpf?.value || '').trim();
@@ -208,11 +208,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            savedCpf = cpfVal;
-            atualizarSugestoesCpf(digitosCpf);
+            const btnSubmit = formStep1.querySelector('.btn-continuar');
+            const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<span>Verificando CPF no Supabase...</span>`;
+            }
 
-            showToast('Identificação confirmada! Defina sua nova senha.', 'info');
-            goToStep(2);
+            try {
+                // Consulta se o motorista existe no banco de dados do Supabase
+                const perfil = await buscarPerfilPorCpf(digitosCpf);
+
+                if (!perfil) {
+                    showToast('CPF não encontrado no sistema. Verifique o número ou faça seu cadastro.', 'error', 5000);
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = textoOriginal;
+                    }
+                    inputCpf?.focus();
+                    return;
+                }
+
+                savedCpf = cpfVal;
+                atualizarSugestoesCpf(digitosCpf);
+
+                showToast(`Motorista ${perfil.nome || ''} identificado! Crie sua nova senha.`, 'success', 3500);
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = textoOriginal;
+                }
+                goToStep(2);
+            } catch (err) {
+                console.error(err);
+                showToast('Falha ao conectar com o Supabase. Tente novamente.', 'error');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = textoOriginal;
+                }
+            }
         });
     }
 
@@ -224,10 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const wrapper = button.closest('.input-wrapper');
             if (!wrapper) return;
 
-            const passwordInput = wrapper.querySelector('.input-password');
+            const passwordInput = wrapper.querySelector('.input-password') || wrapper.querySelector('input');
             const iconEye = button.querySelector('.icon-eye');
             const iconEyeOff = button.querySelector('.icon-eye-off');
 
@@ -235,9 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isPassword = passwordInput.type === 'password';
                 passwordInput.type = isPassword ? 'text' : 'password';
 
-                if (iconEye && iconEyeOff) {
+                if (iconEye) {
                     iconEye.classList.toggle('hidden', isPassword);
+                    iconEye.style.display = isPassword ? 'none' : 'block';
+                }
+                if (iconEyeOff) {
                     iconEyeOff.classList.toggle('hidden', !isPassword);
+                    iconEyeOff.style.display = isPassword ? 'block' : 'none';
                 }
 
                 button.setAttribute('title', isPassword ? 'Ocultar senha' : 'Exibir senha');
@@ -345,9 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Submissão do Passo 2 (Salvar Senha)
+    // Submissão do Passo 2 (Salvar Senha no Supabase)
     if (formStep2) {
-        formStep2.addEventListener('submit', (e) => {
+        formStep2.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const senha = (inputNovaSenha?.value || '');
@@ -374,35 +412,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Feedback visual no botão
             const btnSubmit = formStep2.querySelector('.btn-concluir');
+            const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Salvando nova senha...</span>`;
+                btnSubmit.innerHTML = `<span>Salvando nova senha no Supabase...</span>`;
             }
 
-            // Armazena o CPF no sessionStorage para preenchimento imediato no Login
-            if (savedCpf) {
-                sessionStorage.setItem('ajborges_cpf_recuperado', savedCpf);
-            }
+            try {
+                const resultado = await atualizarSenhaSupabase(savedCpf, senha);
 
-            showToast('Senha alterada com sucesso!', 'success');
+                if (!resultado.sucesso) {
+                    showToast(resultado.erro || 'Erro ao atualizar senha no Supabase.', 'error', 5000);
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = textoOriginal;
+                    }
+                    return;
+                }
 
-            setTimeout(() => {
-                goToStep('success');
+                // Armazena o CPF no sessionStorage para preenchimento imediato no Login
+                if (savedCpf) {
+                    sessionStorage.setItem('ajborges_cpf_recuperado', savedCpf);
+                }
 
-                // Contagem regressiva de redirecionamento
-                let segundosRestantes = 3;
-                if (timerRedirectEl) timerRedirectEl.textContent = `${segundosRestantes}s`;
+                showToast('Senha atualizada com sucesso no Supabase!', 'success', 3500);
 
-                const redirectInterval = setInterval(() => {
-                    segundosRestantes--;
+                setTimeout(() => {
+                    goToStep('success');
+
+                    // Contagem regressiva de redirecionamento
+                    let segundosRestantes = 3;
                     if (timerRedirectEl) timerRedirectEl.textContent = `${segundosRestantes}s`;
 
-                    if (segundosRestantes <= 0) {
-                        clearInterval(redirectInterval);
-                        window.location.href = 'Login.html#motorista';
-                    }
-                }, 1000);
-            }, 500);
+                    const redirectInterval = setInterval(() => {
+                        segundosRestantes--;
+                        if (timerRedirectEl) timerRedirectEl.textContent = `${segundosRestantes}s`;
+
+                        if (segundosRestantes <= 0) {
+                            clearInterval(redirectInterval);
+                            window.location.href = 'Login.html#motorista';
+                        }
+                    }, 1000);
+                }, 500);
+            } catch (err) {
+                console.error('Erro ao atualizar senha:', err);
+                showToast('Falha ao conectar com o Supabase. Tente novamente.', 'error');
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = textoOriginal;
+                }
+            }
         });
     }
 });
