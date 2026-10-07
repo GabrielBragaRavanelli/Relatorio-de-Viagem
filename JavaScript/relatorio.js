@@ -3,6 +3,20 @@
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ------------------------------------------
+    // Route Guard: Proteção de Acesso
+    // ------------------------------------------
+    const STORAGE_USER_ACTIVE = 'ajborges_usuario_ativo';
+    const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+    let usuarioAtivo = null;
+    if (usuarioAtivoStr) {
+        try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
+    }
+    if (!usuarioAtivo) {
+        window.location.href = 'Login.html';
+        return;
+    }
+
     // Elementos do Formulário
     const form = document.getElementById('form-relatorio');
     const inputMotorista = document.getElementById('motorista');
@@ -46,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 0. Identificador Sequencial da Ficha (AJB-2026-XXX)
     // ------------------------------------------
     const STORAGE_CENTRAL_FICHAS = 'ajborges_fichas_viagem';
-    const STORAGE_USER_ACTIVE = 'ajborges_usuario_ativo';
 
     // Limpeza de exemplo mockado no armazenamento e input
     try {
@@ -758,42 +771,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!selectCli || !inputValFrete || !inputComissao) return;
 
+        // Identifica perfil ativo (Admin vs Motorista)
+        const urlParamsAtual = new URLSearchParams(window.location.search);
+        const modeUrlAtual = urlParamsAtual.get('mode');
+        const userSalvoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let userSalvo = null;
+        try { if (userSalvoStr) userSalvo = JSON.parse(userSalvoStr); } catch (e) {}
+        const isModoAdminAtivo = (modeUrlAtual === 'admin') || (userSalvo && (userSalvo.role === 'admin' || userSalvo.role === 'diretoria') && modeUrlAtual !== 'motorista');
+
         const tipoOperacao = selectCli.value;
 
-        // O campo VALOR FRETE é SEMPRE livre para digitação manual em todas as operações
-        inputValFrete.removeAttribute('readonly');
+        if (isModoAdminAtivo) {
+            // No Modo Administrador: 100% livre e editável com recálculo em tempo real
+            inputValFrete.removeAttribute('readonly');
+            inputValFrete.removeAttribute('disabled');
+            inputValFrete.classList.remove('campo-bloqueado-gestao');
 
-        if (tipoOperacao === 'mercado_livre') {
-            // Apenas a comissão é fixa em R$ 400,00 e bloqueada; frete livre
-            inputComissao.setAttribute('readonly', 'true');
-            inputComissao.dataset.editadoManual = '';
-            inputComissao.value = '400,00';
-        } else if (tipoOperacao === 'shopee') {
-            // Shopee: comissão bloqueada (readonly), calculada automaticamente a 11%
-            inputComissao.setAttribute('readonly', 'true');
-            inputComissao.dataset.editadoManual = '';
-            const valorNum = parseMoeda(inputValFrete.value);
-            if (valorNum > 0) {
-                const comissao11 = valorNum * 0.11;
-                inputComissao.value = formatarMoedaSemPrefixo(comissao11);
-            } else {
-                inputComissao.value = '';
-            }
-        } else if (tipoOperacao === 'alimenticio') {
-            // Alimentício: 11% retirado! Frete e comissão livres para preenchimento manual
             inputComissao.removeAttribute('readonly');
-            inputComissao.dataset.editadoManual = '';
-            if (acaoDisparadaPorSelect) {
-                inputComissao.value = '';
+            inputComissao.removeAttribute('disabled');
+            inputComissao.classList.remove('campo-bloqueado-gestao');
+
+            if (tipoOperacao === 'mercado_livre') {
+                if (acaoDisparadaPorSelect) inputComissao.value = '400,00';
+            } else if (tipoOperacao === 'shopee') {
+                const valorNum = parseMoeda(inputValFrete.value);
+                if (valorNum > 0 && (acaoDisparadaPorSelect || !inputComissao.dataset.editadoManual)) {
+                    inputComissao.value = formatarMoedaSemPrefixo(valorNum * 0.11);
+                }
+            } else if (tipoOperacao === 'alimenticio') {
+                if (acaoDisparadaPorSelect) inputComissao.value = '';
+            } else {
+                if (acaoDisparadaPorSelect) {
+                    inputValFrete.value = '';
+                    inputComissao.value = '';
+                }
             }
         } else {
-            // Vazio / Desmarcado
+            // No Modo Motorista: campos financeiros de frete protegidos com readonly
+            inputValFrete.setAttribute('readonly', 'true');
+            inputValFrete.classList.add('campo-bloqueado-gestao');
             inputComissao.setAttribute('readonly', 'true');
-            inputComissao.dataset.editadoManual = '';
-            if (acaoDisparadaPorSelect) {
-                inputValFrete.value = '';
+            inputComissao.classList.add('campo-bloqueado-gestao');
+
+            if (tipoOperacao === 'mercado_livre') {
+                inputComissao.value = '400,00';
+            } else if (tipoOperacao === 'shopee') {
+                const valorNum = parseMoeda(inputValFrete.value);
+                if (valorNum > 0) {
+                    inputComissao.value = formatarMoedaSemPrefixo(valorNum * 0.11);
+                } else {
+                    inputComissao.value = '';
+                }
+            } else if (tipoOperacao === 'alimenticio') {
+                if (acaoDisparadaPorSelect) inputComissao.value = '';
+            } else {
+                if (acaoDisparadaPorSelect) {
+                    inputValFrete.value = '';
+                    inputComissao.value = '';
+                }
             }
-            inputComissao.value = '';
         }
     }
 
@@ -2190,10 +2226,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnAdminSalvar = document.getElementById('btn-admin-salvar-alteracoes');
         const btnAdminExcluir = document.getElementById('btn-admin-excluir-ficha');
 
-        // Campos com governança corporativa da empresa
-        const camposGovernançaFrota = [
-            inputMotorista,
-            inputPlacas,
+        // -------------------------------------------------------------
+        // SEPARAÇÃO DOS CAMPOS DE GOVERNANÇA (Tarefas 1, 2, 3 e 4)
+        // -------------------------------------------------------------
+        // Grupo 1: Veículo e Motorista (Definido pela Administração no modo motorista)
+        const camposAdminVeiculo = [inputMotorista, inputPlacas].filter(Boolean);
+
+        // Grupo 2: Fretes da Empresa (Definido pela Frota no modo motorista)
+        const camposFretesFrota = [
+            inputFreteOrigem,
+            inputRetorno1,
+            inputRetorno2,
+            inputRetorno3,
+            inputTotalFrete,
+            inputVrComissao,
+            document.getElementById('ml-total-relacao-frete'),
+            document.getElementById('ml-total-relacao-comissao'),
+            document.getElementById('ml-total-relacao-descarga')
+        ].filter(Boolean);
+
+        // Grupo 3: Campos Operacionais Corporativos
+        const camposOperacionaisFrota = [
             inputDataSaida,
             inputDataChegada,
             inputKmSaida,
@@ -2202,20 +2255,13 @@ document.addEventListener('DOMContentLoaded', () => {
             inputDestinoInicial,
             inputDestinoFinal,
             inputAdiantamento,
-            inputFreteOrigem,
-            inputRetorno1,
-            inputRetorno2,
-            inputRetorno3,
-            inputTotalFrete,
-            inputVrComissao,
-            document.getElementById('ml-total-relacao-descarga'),
             document.getElementById('ml-pedagio-1'),
             document.getElementById('ml-pedagio-2'),
             document.getElementById('ml-pedagio-3'),
             document.getElementById('ml-total-pedagio')
         ].filter(Boolean);
 
-        const camposDescargaTabela = Array.from(document.querySelectorAll('.input-descarga-frete-ml'));
+        const camposTabelaFretes = Array.from(document.querySelectorAll('.input-valor-frete-ml, .input-comissao-frete-ml, .input-descarga-frete-ml'));
         const linhaImpostoFederal = document.getElementById('linha-imposto-federal');
         const badgeImpostoObrigatorio = document.getElementById('badge-imposto-obrigatorio');
         const inputMlImpFederal = document.getElementById('ml-imp-federal-valor');
@@ -2245,9 +2291,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const label = wrapper.querySelector('label') || wrapper.closest('.frete-coluna')?.querySelector('label');
-                if (label && !label.querySelector('.tag-bloqueado-frota')) {
+                if (label) {
+                    const tagExistente = label.querySelector('.tag-bloqueado-frota, .tag-bloqueado-adm');
+                    if (tagExistente) tagExistente.remove();
+
+                    const isAdm = rotulo.toLowerCase().includes('administra');
                     const tag = document.createElement('span');
-                    tag.className = 'tag-bloqueado-frota';
+                    tag.className = isAdm ? 'tag-bloqueado-adm' : 'tag-bloqueado-frota';
                     tag.innerHTML = `
                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -2282,10 +2332,115 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const tags = wrapper.querySelectorAll('.tag-bloqueado-frota, .tag-bloqueado-adm');
                 tags.forEach(t => t.remove());
-                const label = wrapper.closest('.frete-coluna')?.querySelector('label');
+                const label = wrapper.closest('.frete-coluna')?.querySelector('label') || wrapper.querySelector('label');
                 if (label) {
                     label.querySelectorAll('.tag-bloqueado-frota, .tag-bloqueado-adm').forEach(t => t.remove());
                 }
+            }
+        }
+
+        // TAREFA 4: Configuração da Seção Outras Despesas (100% liberada e editável para ambos os modos)
+        function configurarSecaoOutrasDespesas() {
+            const listaDespesas = document.querySelector('.card-outras-despesas .linhas-despesas-lista');
+            if (!listaDespesas) return;
+
+            // Garante que todas as linhas (exceto imposto federal) estejam liberadas
+            const inputsDespesasLivres = listaDespesas.querySelectorAll('.linha-despesa-composta:not(#linha-imposto-federal) input');
+            inputsDespesasLivres.forEach(inp => {
+                liberarCampoBloqueado(inp);
+                inp.removeAttribute('readonly');
+                inp.removeAttribute('disabled');
+            });
+
+            // Botão para adicionar novas linhas de despesas dinamicamente se ainda não existir
+            let containerAcoes = document.getElementById('container-adicionar-despesa-ml');
+            if (!containerAcoes) {
+                containerAcoes = document.createElement('div');
+                containerAcoes.id = 'container-adicionar-despesa-ml';
+                containerAcoes.style.padding = '8px 0';
+                containerAcoes.style.display = 'flex';
+                containerAcoes.style.justifyContent = 'flex-start';
+
+                const btnAddDespesa = document.createElement('button');
+                btnAddDespesa.type = 'button';
+                btnAddDespesa.id = 'btn-adicionar-linha-despesa-ml';
+                btnAddDespesa.className = 'btn-acao-secundaria btn-adicionar-despesa';
+                btnAddDespesa.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    + Adicionar Outra Despesa (Arla, Borracharia, Lavagem, Mecânica...)
+                `;
+                btnAddDespesa.style.cssText = `
+                    background: #f8fafc;
+                    border: 1.5px dashed #94a3b8;
+                    color: #1e3a8a;
+                    font-size: 11px;
+                    font-weight: 600;
+                    padding: 7px 12px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    width: 100%;
+                    justify-content: center;
+                `;
+                btnAddDespesa.addEventListener('mouseenter', () => {
+                    btnAddDespesa.style.background = '#eff6ff';
+                    btnAddDespesa.style.borderColor = '#3b82f6';
+                });
+                btnAddDespesa.addEventListener('mouseleave', () => {
+                    btnAddDespesa.style.background = '#f8fafc';
+                    btnAddDespesa.style.borderColor = '#94a3b8';
+                });
+
+                let contadorNovaDespesa = 4;
+                btnAddDespesa.addEventListener('click', () => {
+                    const novaLinha = document.createElement('div');
+                    novaLinha.className = 'linha-despesa-composta linha-despesa-dinamica';
+                    novaLinha.innerHTML = `
+                        <div class="desc-com-trava">
+                            <label for="ml-despesa-desc-${contadorNovaDespesa}">Descrição ${contadorNovaDespesa}</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="ml-despesa-desc-${contadorNovaDespesa}"
+                                    name="ml_despesa_desc_${contadorNovaDespesa}"
+                                    placeholder="Ex: Arla / Lavagem / Mecânica...">
+                            </div>
+                        </div>
+                        <div class="valor-com-rotulo">
+                            <label for="ml-despesa-valor-${contadorNovaDespesa}">Valor (R$)</label>
+                            <div class="input-wrapper input-moeda">
+                                <span class="input-prefixo">R$</span>
+                                <input type="text" id="ml-despesa-valor-${contadorNovaDespesa}"
+                                    name="ml_despesa_valor_${contadorNovaDespesa}" placeholder="0,00"
+                                    class="input-outra-despesa" inputmode="numeric">
+                            </div>
+                        </div>
+                    `;
+                    listaDespesas.appendChild(novaLinha);
+
+                    const inputValor = novaLinha.querySelector('.input-outra-despesa');
+                    const inputDesc = novaLinha.querySelector('input[type="text"]:not(.input-outra-despesa)');
+
+                    if (inputValor) {
+                        inputsOutrasDespesasValorMl.push(inputValor);
+                        aplicarMascaraMoeda(inputValor, () => {
+                            calcularTotaisDespesasMl();
+                            calcularIndicadoresViagemMl();
+                            salvarProgressoMl();
+                        });
+                    }
+                    if (inputDesc) {
+                        inputDesc.addEventListener('input', salvarProgressoMl);
+                        inputDesc.focus();
+                    }
+                    contadorNovaDespesa++;
+                });
+
+                containerAcoes.appendChild(btnAddDespesa);
+                listaDespesas.parentElement.insertBefore(containerAcoes, listaDespesas.nextSibling);
             }
         }
 
@@ -2308,35 +2463,58 @@ document.addEventListener('DOMContentLoaded', () => {
             if (barraAdmin) barraAdmin.classList.add('ativa');
             if (barraMotorista) barraMotorista.style.display = 'none';
 
-            // 1. Liberação total dos campos sob governança da empresa
-            camposGovernançaFrota.forEach(input => liberarCampoBloqueado(input));
-            camposDescargaTabela.forEach(input => {
+            // 1. Liberação total de Motorista e Placas (Tarefa 2)
+            camposAdminVeiculo.forEach(input => {
+                liberarCampoBloqueado(input);
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            });
+
+            // 2. Liberação total dos campos de frete com recálculo (Tarefa 3)
+            camposFretesFrota.forEach(input => liberarCampoBloqueado(input));
+            camposTabelaFretes.forEach(input => {
                 input.removeAttribute('readonly');
                 input.removeAttribute('disabled');
                 input.classList.remove('campo-bloqueado-gestao');
             });
+            document.querySelectorAll('.th-tag-gestao').forEach(t => t.style.display = 'none');
 
-            // 2. Imposto Federal visível e livremente editável
+            // 3. Liberação dos campos operacionais
+            camposOperacionaisFrota.forEach(input => liberarCampoBloqueado(input));
+
+            // 4. Seção Outras Despesas 100% liberada e editável (Tarefa 4)
+            configurarSecaoOutrasDespesas();
+
+            // 5. Imposto Federal visível e livremente editável
             if (linhaImpostoFederal) linhaImpostoFederal.classList.remove('oculto-motorista');
             if (badgeImpostoObrigatorio) badgeImpostoObrigatorio.classList.remove('oculto-motorista');
             if (inputMlImpFederal) {
                 liberarCampoBloqueado(inputMlImpFederal);
                 inputMlImpFederal.removeAttribute('readonly');
+                inputMlImpFederal.removeAttribute('disabled');
             }
 
-            // 3. Status de Pedágio
+            // 6. Status de Pedágio
             if (badgePedagio) badgePedagio.textContent = '3 Linhas';
 
-            // 4. Habilita seletores de data
+            // 7. Habilita seletores de data
             botoesPickerData.forEach(btn => {
+                btn.removeAttribute('disabled');
+                btn.disabled = false;
                 btn.style.pointerEvents = 'auto';
                 btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
             });
 
-            // Abre o formulário oficial automaticamente para conferência
+            // Abre o formulário oficial automaticamente para conferência/edição
             toggleFormularioUnificado(true, false);
 
             let fichaCarregada = null;
+            const tagAdmin = barraAdmin?.querySelector('.tag-gestor-destaque');
+            if (tagAdmin) {
+                tagAdmin.textContent = '🛡️ Gestão Operacional • Modo Administrador';
+            }
+
             if (fichaIdUrl) {
                 const todas = obterListaFichasCentral();
                 fichaCarregada = todas.find(f => f.id === fichaIdUrl);
@@ -2352,6 +2530,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminStatus.className = `status-pill ${aprovado ? 'status-concluido' : 'status-pendente'}`;
                         adminStatus.textContent = aprovado ? '🟢 Concluído / Aprovado' : '🟡 Pendente de Conferência';
                     }
+                }
+            } else {
+                // Criação de Nova Ficha pelo Administrador
+                if (adminTitulo) {
+                    adminTitulo.textContent = 'Lançamento de Nova Ficha • Todos os campos liberados para a Frota';
+                }
+                if (adminStatus) {
+                    adminStatus.className = 'status-pill status-concluido';
+                    adminStatus.textContent = '🟢 Modo de Edição Liberado';
                 }
             }
 
@@ -2456,22 +2643,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (barraAdmin) barraAdmin.classList.remove('ativa');
         if (barraMotorista) barraMotorista.style.display = 'flex';
 
-        // 1. Aplicação de Bloqueio nos Campos Sob Governança da Frota
-        camposGovernançaFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
-        camposDescargaTabela.forEach(input => {
+        // 1. TAREFA 2: Bloqueio rigoroso de Motorista e Placas com "Definido pela Administração"
+        camposAdminVeiculo.forEach(input => {
+            aplicarBloqueioCampo(input, 'Definido pela Administração');
+            input.setAttribute('disabled', 'true');
+        });
+
+        // 2. TAREFA 3: Bloqueio de Fretes com "Definido pela Frota"
+        camposFretesFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
+        camposTabelaFretes.forEach(input => {
             input.setAttribute('readonly', 'true');
             input.classList.add('campo-bloqueado-gestao');
         });
+        document.querySelectorAll('.th-tag-gestao').forEach(t => t.style.display = 'inline-flex');
 
-        // 2. Ocultação total do campo sensível: Imposto Federal (IRRF / INSS / SEST / SENAT)
+        // 3. Bloqueio de Campos Operacionais Corporativos
+        camposOperacionaisFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
+
+        // 4. TAREFA 4: Liberação Total da Seção "Outras Despesas" para Motorista
+        configurarSecaoOutrasDespesas();
+
+        // 5. Ocultação total do campo sensível: Imposto Federal (IRRF / INSS / SEST / SENAT)
         if (linhaImpostoFederal) linhaImpostoFederal.classList.add('oculto-motorista');
         if (badgeImpostoObrigatorio) badgeImpostoObrigatorio.classList.add('oculto-motorista');
 
-        // 3. Status de Pedágio
+        // 6. Status de Pedágio
         if (badgePedagio) badgePedagio.textContent = 'Definido pela Frota';
 
-        // 4. Desabilita seletores de data
+        // 7. Desabilita seletores de data
         botoesPickerData.forEach(btn => {
+            btn.setAttribute('disabled', 'true');
             btn.style.pointerEvents = 'none';
             btn.style.opacity = '0.4';
         });
@@ -2482,22 +2683,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Verifica estado do Motorista (Com Login ou Sem Login)
         const motoristaSaudacao = document.getElementById('motorista-saudacao-texto');
         const motoristaBotoesLogado = document.getElementById('motorista-botoes-logado');
-        const badgeTotalMinhas = document.getElementById('badge-total-minhas-viagens');
         const btnAbrirMinhasViagens = document.getElementById('btn-abrir-minhas-viagens');
 
         const isMotoristaLogado = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
         if (isMotoristaLogado) {
             const nomeMotoristaValido = (usuarioAtivo.nome && usuarioAtivo.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtivo.nome : '';
-            if (inputMotorista) {
-                inputMotorista.value = nomeMotoristaValido;
-                if (nomeMotoristaValido) {
-                    inputMotorista.setAttribute('readonly', 'true');
-                } else {
-                    inputMotorista.removeAttribute('readonly');
-                    inputMotorista.placeholder = 'Nome completo do motorista';
-                }
-            }
+
+            // TAREFA 2: Desativar preenchimento automático: NÃO preencher motorista nem placas na ficha!
+            // Os campos permanecem intactos/definidos pela administração.
+
             if (motoristaSaudacao) {
                 motoristaSaudacao.innerHTML = `Olá, <strong>${nomeMotoristaValido || 'Motorista'}</strong> • Conectado via Portal`;
             }
@@ -2542,27 +2737,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const dadosAtualizados = {
             id: idFicha,
             protocolo: idFicha,
+            motorista: inputMotorista?.value.trim() || usuarioAtivo?.nome || (index >= 0 ? todas[index].motorista : 'Motorista'),
+            motorista_cpf: (index >= 0 ? (todas[index].motorista_cpf || todas[index].motoristaCpf) : '') || usuarioAtivo?.cpf || '',
+            motoristaCpf: (index >= 0 ? (todas[index].motoristaCpf || todas[index].motorista_cpf) : '') || usuarioAtivo?.cpf || '',
+            placas: inputPlacas?.value.trim() || (index >= 0 ? todas[index].placas : '') || '',
             dataSaida: inputDataSaida?.value || '',
+            data_saida: inputDataSaida?.value || '',
             dataChegada: inputDataChegada?.value || '',
-            motorista: inputMotorista?.value.trim() || 'Motorista',
-            placas: inputPlacas?.value || '',
-            destinoInicial: inputDestinoInicial?.value || '',
-            destinoFinal: inputDestinoFinal?.value || '',
+            data_chegada: inputDataChegada?.value || '',
             kmSaida: inputKmSaida?.value || '',
+            km_saida: inputKmSaida?.value || '',
             kmChegada: inputKmChegada?.value || '',
+            km_chegada: inputKmChegada?.value || '',
             kmTotal: inputKmTotal?.value || '',
-            valorAdiantamento: inputAdiantamento?.value || '',
+            km_total: inputKmTotal?.value || '',
+            destinoInicial: inputDestinoInicial?.value || '',
+            destino_inicial: inputDestinoInicial?.value || '',
+            destinoFinal: inputDestinoFinal?.value || '',
+            destino_final: inputDestinoFinal?.value || '',
             freteOrigem: inputFreteOrigem?.value || '',
+            frete_origem: inputFreteOrigem?.value || '',
             retorno1: inputRetorno1?.value || '',
+            retorno_1: inputRetorno1?.value || '',
             retorno2: inputRetorno2?.value || '',
+            retorno_2: inputRetorno2?.value || '',
             retorno3: inputRetorno3?.value || '',
+            retorno_3: inputRetorno3?.value || '',
             totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
+            total_frete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
             vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+            vr_comissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+            valorAdiantamento: inputAdiantamento?.value || '',
+            valor_adiantamento: inputAdiantamento?.value || '',
             fretes: coletarFretesAtuais(),
             abastecimentos: coletarAbastecimentosAtuais(),
             totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
             totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
             mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+            media_km_l: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
             pedagios: [
                 inputsPedagioMl[0]?.value || '',
                 inputsPedagioMl[1]?.value || '',
@@ -2571,11 +2783,17 @@ document.addEventListener('DOMContentLoaded', () => {
             totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
             impFederal: inputMlImpFederal?.value || '',
             outrasDespesas: coletarOutrasDespesasAtuais(),
+            despesas_extras: coletarOutrasDespesasAtuais(),
             totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
+            total_despesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
             resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
             saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
-            anexos: arquivosComprovantesMl || []
+            saldo_comissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
+            anexos: arquivosComprovantesMl || [],
+            comprovantes: arquivosComprovantesMl || [],
+            dados_completos: null
         };
+        dadosAtualizados.dados_completos = { ...dadosAtualizados };
 
         if (marcarComoAprovado) {
             dadosAtualizados.status = 'aprovado';
@@ -2589,16 +2807,18 @@ document.addEventListener('DOMContentLoaded', () => {
             dadosAtualizados.dataEnvio = new Date().toLocaleString('pt-BR');
             dadosAtualizados.status = marcarComoAprovado ? 'aprovado' : 'pendente';
             todas.unshift(dadosAtualizados);
-            salvarListaFichasCentral(todas);
-
-            // Persistência em nuvem no Supabase
-            if (typeof window.salvarFichaSupabase === 'function') {
-                window.salvarFichaSupabase(dadosAtualizados);
-            }
         }
 
-        // Modal de Minhas Viagens do Motorista
-        function abrirModalMinhasViagens() {
+        salvarListaFichasCentral(todas);
+
+        // Persistência em nuvem no Supabase
+        if (typeof window.salvarFichaSupabase === 'function') {
+            window.salvarFichaSupabase(dadosAtualizados);
+        }
+    }
+
+    // Modal de Minhas Viagens do Motorista
+    function abrirModalMinhasViagens() {
             const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
             let usuarioAtivo = null;
             if (usuarioAtivoStr) {
@@ -2707,21 +2927,33 @@ document.addEventListener('DOMContentLoaded', () => {
             btnFinalizarRelatorioMl.addEventListener('click', (e) => {
                 e.preventDefault();
 
-                const motoristaPreenchido = inputMotorista && inputMotorista.value.trim() !== '';
+                // Recupera usuário ativo
+                const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+                let usuarioAtivo = null;
+                if (usuarioAtivoStr) {
+                    try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
+                }
+                const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
+
+                const motoristaIdentificado = (inputMotorista && inputMotorista.value.trim() !== '') || (isComLogin && usuarioAtivo?.nome);
                 const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
 
                 // Valida identificação do motorista
-                if (!motoristaPreenchido) {
+                if (!motoristaIdentificado) {
                     exibirToast('Por favor, informe o nome do Motorista.', 'erro');
-                    if (inputMotorista) inputMotorista.focus();
+                    if (inputMotorista && !inputMotorista.disabled && !inputMotorista.readOnly) inputMotorista.focus();
                     return;
                 }
 
                 // Valida Imposto Federal obrigatório
                 if (!impostoFederalPreenchido) {
-                    exibirToast('O valor do Imposto Federal é obrigatório no relatório.', 'erro');
-                    if (inputMlImpFederal) inputMlImpFederal.focus();
-                    return;
+                    if (usuarioAtivo && usuarioAtivo.role === 'motorista') {
+                        if (inputMlImpFederal) inputMlImpFederal.value = '0,00';
+                    } else {
+                        exibirToast('O valor do Imposto Federal é obrigatório no relatório.', 'erro');
+                        if (inputMlImpFederal) inputMlImpFederal.focus();
+                        return;
+                    }
                 }
 
                 // Verifica se há pelo menos um frete ou abastecimento preenchido
@@ -2737,46 +2969,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 const novoNumeroSeq = obterProximoNumeroFicha();
                 const novoIdFicha = formatarNumeroFicha(novoNumeroSeq);
 
-                // Recupera usuário ativo
-                const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-                let usuarioAtivo = null;
-                if (usuarioAtivoStr) {
-                    try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
-                }
-                const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
-
-                // Monta objeto completo da nova ficha
+                // Monta objeto completo da nova ficha com todas as colunas requeridas
                 const agoraDataHora = new Date().toLocaleString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: 'numeric',
                     hour: '2-digit', minute: '2-digit'
                 });
 
+                const nomeFinalMotorista = inputMotorista?.value.trim() || (isComLogin ? usuarioAtivo?.nome : '') || 'Motorista';
+
                 const novaFicha = {
                     id: novoIdFicha,
                     protocolo: novoIdFicha,
                     dataEnvio: agoraDataHora,
-                    dataSaida: inputDataSaida?.value || '24/09/2026',
-                    dataChegada: inputDataChegada?.value || '24/09/2026',
+                    motorista: nomeFinalMotorista,
+                    motorista_cpf: usuarioAtivo?.cpf || '',
+                    motoristaCpf: usuarioAtivo?.cpf || '',
                     motoristaId: isComLogin ? usuarioAtivo.id : 'anonimo',
-                    motorista: inputMotorista.value.trim(),
                     origemEnvio: isComLogin ? 'motorista_com_login' : 'motorista_sem_login',
-                    placas: inputPlacas?.value || 'A definir pela Gestão',
-                    destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
-                    destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                    placas: inputPlacas?.value.trim() || 'A definir pela Gestão',
+                    data_saida: inputDataSaida?.value || '',
+                    dataSaida: inputDataSaida?.value || '',
+                    data_chegada: inputDataChegada?.value || '',
+                    dataChegada: inputDataChegada?.value || '',
+                    km_saida: inputKmSaida?.value || '',
                     kmSaida: inputKmSaida?.value || '',
+                    km_chegada: inputKmChegada?.value || '',
                     kmChegada: inputKmChegada?.value || '',
+                    km_total: inputKmTotal?.value || '',
                     kmTotal: inputKmTotal?.value || '',
-                    valorAdiantamento: inputAdiantamento?.value || '',
+                    destino_inicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
+                    destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
+                    destino_final: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                    destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                    frete_origem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
                     freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
+                    retorno_1: inputRetorno1?.value || '',
                     retorno1: inputRetorno1?.value || '',
+                    retorno_2: inputRetorno2?.value || '',
                     retorno2: inputRetorno2?.value || '',
+                    retorno_3: inputRetorno3?.value || '',
                     retorno3: inputRetorno3?.value || '',
+                    total_frete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
                     totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
+                    vr_comissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
                     vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+                    valor_adiantamento: inputAdiantamento?.value || '',
+                    valorAdiantamento: inputAdiantamento?.value || '',
                     fretes: fretesAtuais,
                     abastecimentos: abastsAtuais,
                     totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
                     totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+                    media_km_l: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
                     mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
                     pedagios: [
                         inputsPedagioMl[0]?.value || '',
@@ -2786,12 +3029,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     totalPedagio: (parseMoeda(inputsPedagioMl[0]?.value) + parseMoeda(inputsPedagioMl[1]?.value) + parseMoeda(inputsPedagioMl[2]?.value)).toFixed(2).replace('.', ','),
                     impFederal: inputMlImpFederal?.value || '',
                     outrasDespesas: coletarOutrasDespesasAtuais(),
+                    despesas_extras: coletarOutrasDespesasAtuais(),
+                    total_despesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
                     totalDespesas: document.getElementById('ml-indicador-despesa-total')?.textContent?.replace('R$', '')?.trim() || '0,00',
                     resultadoViagem: document.getElementById('ml-indicador-resultado-viagem')?.textContent?.replace('R$', '')?.trim() || '0,00',
+                    saldo_comissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
                     saldoComissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
                     anexos: arquivosComprovantesMl || [],
+                    comprovantes: arquivosComprovantesMl || [],
+                    dados_completos: null,
                     status: 'pendente'
                 };
+                novaFicha.dados_completos = { ...novaFicha };
 
                 // Salva na fila central de fichas (Local e Nuvem)
                 const todasFichas = obterListaFichasCentral();

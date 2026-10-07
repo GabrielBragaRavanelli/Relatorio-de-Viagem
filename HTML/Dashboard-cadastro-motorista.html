@@ -23,6 +23,21 @@
     <!-- Folha de Estilos Base -->
     <link rel="stylesheet" href="../CSS/dashboard-admin.css">
 
+    <!-- Verificação de Sessão Administrativa (Route Guard) -->
+    <script>
+        (function () {
+            try {
+                const uStr = localStorage.getItem('ajborges_usuario_ativo');
+                const u = uStr ? JSON.parse(uStr) : null;
+                if (!u || (u.role !== 'admin' && u.role !== 'diretoria')) {
+                    window.location.href = 'Login.html#admin';
+                }
+            } catch (e) {
+                window.location.href = 'Login.html#admin';
+            }
+        })();
+    </script>
+
     <style>
         .motorista-badge-status {
             display: inline-flex;
@@ -557,6 +572,16 @@
 
     <!-- Script de Gestão Real Conectado Exclusivamente a FichaMultiCadastro -->
     <script>
+        // Verificação de Sessão Administrativa
+        const usuarioAtivoStr = localStorage.getItem('ajborges_usuario_ativo');
+        let usuarioAtivo = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
+        }
+        if (!usuarioAtivo || (usuarioAtivo.role !== 'admin' && usuarioAtivo.role !== 'diretoria')) {
+            window.location.href = 'Login.html#admin';
+        }
+
         const STORAGE_KEY = 'ajborges_cadastros_agregados';
         let filtroAtual = 'todos';
         let termoBusca = '';

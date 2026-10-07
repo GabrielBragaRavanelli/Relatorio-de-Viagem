@@ -52,7 +52,7 @@ if (window.supabase) {
  */
 function mapearFichaParaSupabase(ficha) {
     function parseNum(val) {
-        if (typeof val === 'number') return val;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
         if (!val) return 0;
         const limpo = String(val).replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
         const n = parseFloat(limpo);
@@ -62,33 +62,33 @@ function mapearFichaParaSupabase(ficha) {
     return {
         id: ficha.id,
         motorista: ficha.motorista || 'Motorista',
-        motorista_cpf: ficha.motoristaCpf || null,
+        motorista_cpf: ficha.motorista_cpf || ficha.motoristaCpf || null,
         placas: ficha.placas || null,
-        data_saida: ficha.dataSaida ? formatarDataParaIso(ficha.dataSaida) : null,
-        data_chegada: ficha.dataChegada ? formatarDataParaIso(ficha.dataChegada) : null,
-        km_saida: parseNum(ficha.kmSaida),
-        km_chegada: parseNum(ficha.kmChegada),
-        km_total: parseNum(ficha.kmTotal),
-        destino_inicial: ficha.destinoInicial || null,
-        destino_final: ficha.destinoFinal || null,
-        frete_origem: parseNum(ficha.freteOrigem),
-        retorno_1: parseNum(ficha.retorno1),
-        retorno_2: parseNum(ficha.retorno2),
-        retorno_3: parseNum(ficha.retorno3),
-        total_frete: parseNum(ficha.totalFrete),
-        vr_comissao: parseNum(ficha.vrComissao),
-        valor_adiantamento: parseNum(ficha.valorAdiantamento),
-        media_km_l: parseNum(ficha.mediaKmL),
-        saldo_comissao: parseNum(ficha.saldoComissao),
-        total_despesas: parseNum(ficha.totalDespesas),
+        data_saida: ficha.data_saida ? formatarDataParaIso(ficha.data_saida) : (ficha.dataSaida ? formatarDataParaIso(ficha.dataSaida) : null),
+        data_chegada: ficha.data_chegada ? formatarDataParaIso(ficha.data_chegada) : (ficha.dataChegada ? formatarDataParaIso(ficha.dataChegada) : null),
+        km_saida: parseNum(ficha.km_saida ?? ficha.kmSaida),
+        km_chegada: parseNum(ficha.km_chegada ?? ficha.kmChegada),
+        km_total: parseNum(ficha.km_total ?? ficha.kmTotal),
+        destino_inicial: ficha.destino_inicial || ficha.destinoInicial || null,
+        destino_final: ficha.destino_final || ficha.destinoFinal || null,
+        frete_origem: parseNum(ficha.frete_origem ?? ficha.freteOrigem),
+        retorno_1: parseNum(ficha.retorno_1 ?? ficha.retorno1),
+        retorno_2: parseNum(ficha.retorno_2 ?? ficha.retorno2),
+        retorno_3: parseNum(ficha.retorno_3 ?? ficha.retorno3),
+        total_frete: parseNum(ficha.total_frete ?? ficha.totalFrete),
+        vr_comissao: parseNum(ficha.vr_comissao ?? ficha.vrComissao),
+        valor_adiantamento: parseNum(ficha.valor_adiantamento ?? ficha.valorAdiantamento),
+        media_km_l: parseNum(ficha.media_km_l ?? ficha.mediaKmL),
+        saldo_comissao: parseNum(ficha.saldo_comissao ?? ficha.saldoComissao),
+        total_despesas: parseNum(ficha.total_despesas ?? ficha.totalDespesas),
         abastecimentos: ficha.abastecimentos || [],
-        comprovantes: ficha.anexos || ficha.comprovantes || [],
-        despesas_extras: ficha.outrasDespesas || [],
-        dados_completos: ficha, // Backup JSON de todos os campos
+        comprovantes: ficha.comprovantes || ficha.anexos || [],
+        despesas_extras: ficha.despesas_extras || ficha.outrasDespesas || [],
+        dados_completos: ficha.dados_completos || ficha,
         status: ficha.status || 'pendente',
-        origem_envio: ficha.origemEnvio || 'motorista_com_login',
-        aprovado_em: ficha.dataAprovacao ? new Date().toISOString() : null,
-        aprovado_por: ficha.aprovadoPor || null
+        origem_envio: ficha.origem_envio || ficha.origemEnvio || 'motorista_com_login',
+        aprovado_em: ficha.aprovado_em || (ficha.dataAprovacao ? new Date().toISOString() : null),
+        aprovado_por: ficha.aprovado_por || ficha.aprovadoPor || null
     };
 }
 
@@ -98,6 +98,26 @@ function mapearFichaParaSupabase(ficha) {
 function mapearFichaDoSupabase(registro) {
     if (!registro) return null;
     const completo = registro.dados_completos || {};
+
+    const abasts = registro.abastecimentos || completo.abastecimentos || [];
+    let totAbast = completo.totalAbastecimento;
+    let totLitros = completo.totalLitros;
+
+    if (!totAbast && Array.isArray(abasts) && abasts.length > 0) {
+        const somaAbast = abasts.reduce((acc, a) => {
+            const num = typeof a.valor === 'number' ? a.valor : parseFloat(String(a.valor || 0).replace(/[^\d,-]/g, '').replace(',', '.'));
+            return acc + (isNaN(num) ? 0 : num);
+        }, 0);
+        if (somaAbast > 0) totAbast = formatarMoedaBR(somaAbast);
+    }
+
+    if (!totLitros && Array.isArray(abasts) && abasts.length > 0) {
+        const somaL = abasts.reduce((acc, a) => {
+            const num = typeof a.litros === 'number' ? a.litros : parseFloat(String(a.litros || 0).replace(/[^\d,-]/g, '').replace(',', '.'));
+            return acc + (isNaN(num) ? 0 : num);
+        }, 0);
+        if (somaL > 0) totLitros = somaL.toString();
+    }
 
     return {
         ...completo,
@@ -120,7 +140,9 @@ function mapearFichaDoSupabase(registro) {
         mediaKmL: registro.media_km_l ? Number(registro.media_km_l).toFixed(2) : (completo.mediaKmL || '0.00'),
         saldoComissao: formatarMoedaBR(registro.saldo_comissao),
         totalDespesas: formatarMoedaBR(registro.total_despesas),
-        abastecimentos: registro.abastecimentos || completo.abastecimentos || [],
+        totalAbastecimento: totAbast || '0,00',
+        totalLitros: totLitros || '0,00',
+        abastecimentos: abasts,
         anexos: registro.comprovantes || completo.anexos || [],
         outrasDespesas: registro.despesas_extras || completo.outrasDespesas || [],
         status: registro.status || 'pendente',
@@ -285,17 +307,18 @@ async function excluirFichaSupabase(idFicha) {
     }
 
     try {
-        const { error } = await supabaseClient
+        const { data, error } = await supabaseClient
             .from('fichas_viagem')
             .delete()
-            .eq('id', idFicha);
+            .eq('id', idFicha)
+            .select();
 
         if (error) {
             console.error('Erro ao excluir ficha no Supabase:', error);
             return false;
         }
 
-        console.log(`🗑️ Ficha ${idFicha} excluída do Supabase com sucesso.`);
+        console.log(`🗑️ Ficha ${idFicha} excluída do Supabase com sucesso:`, data);
         return true;
     } catch (err) {
         console.error('Exceção ao excluir ficha no Supabase:', err);
@@ -383,7 +406,7 @@ async function buscarPerfilPorCpf(cpf) {
 
 async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha }) {
     const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    const emailFinal = (email || '').trim() || `${cpfLimpo}@motorista.ajborges.com`;
+    const emailFinal = (email || '').trim() || null;
 
     // 1. Verifica se CPF já existe no banco
     const existente = await buscarPerfilPorCpf(cpfLimpo);
@@ -393,28 +416,30 @@ async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha })
 
     let authUserId = null;
 
-    // 2. Cria conta no Supabase Auth
-    try {
-        if (supabaseClient) {
-            const { data: authData } = await supabaseClient.auth.signUp({
-                email: emailFinal,
-                password: senha,
-                options: {
-                    data: {
-                        nome: nome.trim(),
-                        cpf: cpfLimpo,
-                        telefone: (telefone || '').trim() || null,
-                        role: 'motorista'
+    // 2. Se houver e-mail válido, cria conta no Supabase Auth
+    if (emailFinal) {
+        try {
+            if (supabaseClient) {
+                const { data: authData } = await supabaseClient.auth.signUp({
+                    email: emailFinal,
+                    password: senha,
+                    options: {
+                        data: {
+                            nome: nome.trim(),
+                            cpf: cpfLimpo,
+                            telefone: (telefone || '').trim() || null,
+                            role: 'motorista'
+                        }
                     }
-                }
-            });
-            if (authData?.user) authUserId = authData.user.id;
+                });
+                if (authData?.user) authUserId = authData.user.id;
+            }
+        } catch (eAuth) {
+            console.warn('Aviso no signUp:', eAuth);
         }
-    } catch (eAuth) {
-        console.warn('Aviso no signUp:', eAuth);
     }
 
-    // 3. Salva na tabela perfis (com senha caso coluna exista)
+    // 3. Salva diretamente na tabela perfis (com senha)
     const payload = {
         nome: nome.trim(),
         cpf: cpfLimpo,

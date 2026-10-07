@@ -273,7 +273,7 @@ function calcularMetricasDashboard() {
 
     // Iteração sobre todas as fichas reais
     appState.fichas.forEach(f => {
-        const freteNum = parseValorMoeda(f.totalFrete);
+        const freteNum = parseValorMoeda(f.totalFrete ?? f.total_frete);
         totalEntrada += freteNum;
 
         // Distribuição por cliente
@@ -289,10 +289,23 @@ function calcularMetricasDashboard() {
             entradaShopee += freteNum;
         }
 
-        const dieselNum = parseValorMoeda(f.totalAbastecimento);
-        const comissaoNum = parseValorMoeda(f.vrComissao);
-        const pedagioNum = parseValorMoeda(f.totalPedagio);
-        const impostoNum = parseValorMoeda(f.impFederal);
+        // Diesel: totalAbastecimento ou soma de abastecimentos
+        let dieselNum = parseValorMoeda(f.totalAbastecimento);
+        if (dieselNum === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+            dieselNum = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.valor || a.total || 0), 0);
+        }
+
+        // Comissão
+        const comissaoNum = parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+
+        // Pedágios: totalPedagio ou soma dos pedágios
+        let pedagioNum = parseValorMoeda(f.totalPedagio);
+        if (pedagioNum === 0 && Array.isArray(f.pedagios) && f.pedagios.length > 0) {
+            pedagioNum = f.pedagios.reduce((acc, p) => acc + parseValorMoeda(p.valor || p || 0), 0);
+        }
+
+        // Imposto Federal
+        const impostoNum = parseValorMoeda(f.impFederal ?? f.imp_federal);
 
         saidaDiesel += dieselNum;
         saidaComissao += comissaoNum;
@@ -300,8 +313,15 @@ function calcularMetricasDashboard() {
         saidaImpostos += impostoNum;
         totalSaida += (dieselNum + comissaoNum + pedagioNum + impostoNum);
 
-        somaKmTotal += parseFloat(f.kmTotal || 0);
-        somaLitrosTotal += parseValorMoeda(f.totalLitros || 0);
+        let km = parseFloat(f.kmTotal ?? f.km_total ?? 0);
+        if (isNaN(km)) km = 0;
+        somaKmTotal += km;
+
+        let litrosNum = parseValorMoeda(f.totalLitros || 0);
+        if (litrosNum === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+            litrosNum = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
+        }
+        somaLitrosTotal += litrosNum;
     });
 
     const resultadoLiquido = totalEntrada - totalSaida;
@@ -368,7 +388,12 @@ function calcularMetricasDashboard() {
     let piorMotorista = null;
     let menorMedia = 999;
     appState.fichas.forEach(f => {
-        const med = parseFloat(f.mediaKmL || 0);
+        let med = parseFloat(f.mediaKmL ?? f.media_km_l ?? 0);
+        if (med === 0 && f.abastecimentos && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+            const km = parseFloat(f.kmTotal ?? f.km_total ?? 0);
+            const litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
+            if (km > 0 && litros > 0) med = km / litros;
+        }
         if (med > 0 && med < menorMedia) {
             menorMedia = med;
             piorMotorista = f.motorista || 'Motorista';
@@ -880,9 +905,19 @@ function obterDadosGraficosReais() {
     } else {
         // Agrupa por ficha ou por data da viagem
         labelsFin = appState.fichas.map(f => f.id || 'Ficha');
-        fatData = appState.fichas.map(f => parseValorMoeda(f.totalFrete));
+        fatData = appState.fichas.map(f => parseValorMoeda(f.totalFrete ?? f.total_frete));
         custoData = appState.fichas.map(f => {
-            return parseValorMoeda(f.totalAbastecimento) + parseValorMoeda(f.vrComissao) + parseValorMoeda(f.totalPedagio) + parseValorMoeda(f.impFederal);
+            let diesel = parseValorMoeda(f.totalAbastecimento);
+            if (diesel === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+                diesel = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.valor || a.total || 0), 0);
+            }
+            const comissao = parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+            let pedagio = parseValorMoeda(f.totalPedagio);
+            if (pedagio === 0 && Array.isArray(f.pedagios) && f.pedagios.length > 0) {
+                pedagio = f.pedagios.reduce((acc, p) => acc + parseValorMoeda(p.valor || p || 0), 0);
+            }
+            const imposto = parseValorMoeda(f.impFederal ?? f.imp_federal);
+            return diesel + comissao + pedagio + imposto;
         });
         lucroData = fatData.map((fat, i) => fat - custoData[i]);
     }
@@ -902,7 +937,7 @@ function obterDadosGraficosReais() {
                 else entradaShopee += v;
             });
         } else {
-            entradaShopee += parseValorMoeda(f.totalFrete);
+            entradaShopee += parseValorMoeda(f.totalFrete ?? f.total_frete);
         }
     });
 
@@ -929,7 +964,12 @@ function obterDadosGraficosReais() {
     const motoristasMediaMap = {};
     appState.fichas.forEach(f => {
         const m = f.motorista || 'Motorista';
-        const med = parseFloat(f.mediaKmL || 0);
+        let med = parseFloat(f.mediaKmL ?? f.media_km_l ?? 0);
+        if (med === 0 && f.abastecimentos && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+            const km = parseFloat(f.kmTotal ?? f.km_total ?? 0);
+            const litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
+            if (km > 0 && litros > 0) med = km / litros;
+        }
         if (med > 0) {
             if (!motoristasMediaMap[m]) motoristasMediaMap[m] = { soma: 0, count: 0 };
             motoristasMediaMap[m].soma += med;
@@ -1237,9 +1277,9 @@ function preencherSecoesSecundarias() {
                 motoristasMap[m] = { viagens: 0, freteTotal: 0, comissao: 0, adiantamentos: 0 };
             }
             motoristasMap[m].viagens += 1;
-            motoristasMap[m].freteTotal += parseValorMoeda(f.totalFrete);
-            motoristasMap[m].comissao += parseValorMoeda(f.vrComissao);
-            motoristasMap[m].adiantamentos += parseValorMoeda(f.valorAdiantamento);
+            motoristasMap[m].freteTotal += parseValorMoeda(f.totalFrete ?? f.total_frete);
+            motoristasMap[m].comissao += parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+            motoristasMap[m].adiantamentos += parseValorMoeda(f.valorAdiantamento ?? f.valor_adiantamento);
         });
 
         const nomes = Object.keys(motoristasMap);
@@ -1280,7 +1320,7 @@ function preencherSecoesSecundarias() {
                     listaAbast.push({
                         posto: ab.posto || 'Posto Conveniado',
                         nf: ab.nf || '-',
-                        data: f.dataSaida || f.dataEnvio || '-',
+                        data: f.dataSaida || f.data_saida || f.dataEnvio || '-',
                         motorista: f.motorista || 'Motorista',
                         litros: ab.litros || '0',
                         valor: ab.valor || '0,00'
@@ -1327,8 +1367,8 @@ function preencherSecoesSecundarias() {
                 if (!veiculosMap[f.placas]) {
                     veiculosMap[f.placas] = {
                         motorista: f.motorista || 'Motorista',
-                        kmAtual: f.kmChegada || f.kmSaida || '-',
-                        media: f.mediaKmL || '0.00',
+                        kmAtual: f.kmChegada || f.kmSaida || f.km_chegada || f.km_saida || '-',
+                        media: f.mediaKmL || (f.media_km_l ? Number(f.media_km_l).toFixed(2) : '0.00'),
                         status: f.status === 'pendente' ? 'Em Rota' : 'Disponível'
                     };
                 }
@@ -1370,10 +1410,18 @@ function preencherSecoesSecundarias() {
     if (containerDespesas) {
         let saidaDiesel = 0, saidaComissao = 0, saidaPedagios = 0, saidaImpostos = 0;
         appState.fichas.forEach(f => {
-            saidaDiesel += parseValorMoeda(f.totalAbastecimento);
-            saidaComissao += parseValorMoeda(f.vrComissao);
-            saidaPedagios += parseValorMoeda(f.totalPedagio);
-            saidaImpostos += parseValorMoeda(f.impFederal);
+            let diesel = parseValorMoeda(f.totalAbastecimento);
+            if (diesel === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+                diesel = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.valor || a.total || 0), 0);
+            }
+            saidaDiesel += diesel;
+            saidaComissao += parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+            let pedagio = parseValorMoeda(f.totalPedagio);
+            if (pedagio === 0 && Array.isArray(f.pedagios) && f.pedagios.length > 0) {
+                pedagio = f.pedagios.reduce((acc, p) => acc + parseValorMoeda(p.valor || p || 0), 0);
+            }
+            saidaPedagios += pedagio;
+            saidaImpostos += parseValorMoeda(f.impFederal ?? f.imp_federal);
         });
         const total = saidaDiesel + saidaComissao + saidaPedagios + saidaImpostos;
 
@@ -1551,8 +1599,17 @@ function exibirToast(mensagem, tipo = 'sucesso') {
 
 function parseValorMoeda(str) {
     if (typeof str === 'number') return isNaN(str) ? 0 : str;
-    if (!str || typeof str !== 'string') return 0;
-    const limpo = str.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+    if (str === null || str === undefined) return 0;
+    const s = String(str).trim();
+    if (!s) return 0;
+    // Se contém vírgula, segue formatação padrão brasileira (ex: 1.250,50 ou 1250,50)
+    if (s.includes(',')) {
+        const limpo = s.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+        const n = parseFloat(limpo);
+        return isNaN(n) ? 0 : n;
+    }
+    // Formato float puro ou string limpa (ex: 1250.50)
+    const limpo = s.replace(/[R$\s]/g, '');
     const n = parseFloat(limpo);
     return isNaN(n) ? 0 : n;
 }
@@ -1579,8 +1636,8 @@ async function sincronizarFichasComSupabase() {
     if (typeof window.buscarFichasSupabase === 'function') {
         try {
             const fichasNuvem = await window.buscarFichasSupabase();
-            if (Array.isArray(fichasNuvem) && fichasNuvem.length > 0) {
-                console.log(`📥 ${fichasNuvem.length} ficha(s) carregada(s) do Supabase.`);
+            if (Array.isArray(fichasNuvem)) {
+                console.log(`📥 ${fichasNuvem.length} ficha(s) sincronizada(s) do Supabase.`);
                 appState.fichas = fichasNuvem;
                 salvarFichasNoStorage();
                 calcularMetricasDashboard();
@@ -1821,16 +1878,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 10. Botão de Logout (Sair)
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
-        btnLogout.addEventListener('click', async (e) => {
+        btnLogout.addEventListener('click', (e) => {
             e.preventDefault();
-            if (confirm('Deseja realmente encerrar a sessão de Administrador?')) {
-                if (window.supabaseClient && window.supabaseClient.auth) {
-                    try { await window.supabaseClient.auth.signOut(); } catch(e) {}
-                }
-                localStorage.removeItem(STORAGE_USER_KEY);
-                sessionStorage.clear();
-                window.location.href = 'Login.html#admin';
-            }
+            fazerLogoutAdmin();
         });
     }
 
@@ -1868,3 +1918,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') fecharModalResumo();
     });
 });
+
+// ==========================================================================
+// 12. FUNÇÃO GLOBAL DE LOGOUT ADMINISTRATIVO
+// ==========================================================================
+function fazerLogoutAdmin() {
+    if (confirm('Deseja realmente encerrar a sessão de Administrador?')) {
+        localStorage.removeItem('ajborges_usuario_ativo');
+        sessionStorage.clear();
+        if (window.supabaseClient && window.supabaseClient.auth) {
+            window.supabaseClient.auth.signOut().catch(() => {});
+        }
+        window.location.href = 'Login.html#admin';
+    }
+}
+window.fazerLogoutAdmin = fazerLogoutAdmin;

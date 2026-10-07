@@ -9,6 +9,21 @@
     <link rel="shortcut icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
     <link rel="apple-touch-icon" href="../Imagens/iconeAJb-prata.jpeg">
     <title>Relatório de Viagem - AJBorges Transportes</title>
+
+    <!-- Verificação de Sessão (Route Guard) -->
+    <script>
+        (function () {
+            try {
+                const uStr = localStorage.getItem('ajborges_usuario_ativo');
+                const u = uStr ? JSON.parse(uStr) : null;
+                if (!u) {
+                    window.location.href = 'Login.html';
+                }
+            } catch (e) {
+                window.location.href = 'Login.html';
+            }
+        })();
+    </script>
 </head>
 
 <body>
@@ -33,7 +48,7 @@
                         </button>
                         <div class="dropdown-menu" id="dropdown-menu-list" role="menu"
                             aria-labelledby="dropdown-menu-btn">
-                            <a href="PortaldaFrota.html" class="dropdown-link" role="menuitem">
+                            <a href="Login.html" class="dropdown-link" role="menuitem">
                                 <div class="dropdown-icon-box">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -69,7 +84,7 @@
                         </div>
                     </li>
                     <li><a href="Nossosfretes.html">Nossos Fretes</a></li>
-                    <li><a href="Sobrenos.html">Sobre-nós</a></li>
+                    <li><a href="Sobrenos.html">Sobre Nós</a></li>
                     <li><a href="Contato.html">Contato</a></li>
                 </ul>
             </nav>
@@ -150,7 +165,7 @@
 
             <!-- Botão Voltar -->
             <div class="navegacao-topo">
-                <a href="PortaldaFrota.html" class="btn-voltar" id="btn-voltar-navegacao">
+                <a href="Login.html" class="btn-voltar" id="btn-voltar-navegacao">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -230,9 +245,8 @@
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <select id="motorista" name="motorista" required autocomplete="name">
-                                        <option value="">Selecione o motorista...</option>
-                                    </select>
+                                    <input type="text" id="motorista" name="motorista"
+                                        placeholder="Nome completo do motorista" autocomplete="name">
                                 </div>
                             </div>
 
@@ -248,9 +262,8 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <select id="placas" name="placas" required>
-                                        <option value="">Selecione a placa...</option>
-                                    </select>
+                                    <input type="text" id="placas" name="placas" placeholder="Ex: MHU-9157"
+                                        maxlength="8" autocomplete="off">
                                 </div>
                             </div>
                         </div>
@@ -2410,7 +2423,7 @@
             </div>
 
             <div class="modal-acoes-row">
-                <a href="PortaldaFrota.html" class="modal-btn-acao-secundario">Voltar ao Portal</a>
+                <a href="Login.html" class="modal-btn-acao-secundario">Voltar ao Portal</a>
                 <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-sem-login">
                     Novo Relatório de Viagem
                 </button>

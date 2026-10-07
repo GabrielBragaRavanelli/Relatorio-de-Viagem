@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputSenha = document.getElementById('senha-cadastro');
     const inputConfirmarSenha = document.getElementById('confirmar-senha-cadastro');
     const senhaFeedback = document.getElementById('senha-feedback');
-    const checkboxTermos = document.getElementById('termos-aceite');
     const togglePasswordButtons = document.querySelectorAll('.btn-toggle-password');
     const toast = document.getElementById('cadastro-toast');
 
@@ -240,13 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (senha !== confirmarSenha) {
                 showToast('As senhas digitadas não coincidem. Verifique e tente novamente.', 'error');
                 inputConfirmarSenha?.focus();
-                return;
-            }
-
-            // Validação: Termos
-            if (!checkboxTermos?.checked) {
-                showToast('É necessário aceitar a declaração dos termos para concluir o cadastro.', 'error');
-                checkboxTermos?.focus();
                 return;
             }
 

@@ -22,6 +22,21 @@
 
     <!-- Folha de Estilos Exclusiva da Página de Seleção -->
     <link rel="stylesheet" href="../CSS/escolhaDashboard.css">
+
+    <!-- Verificação de Sessão Administrativa (Route Guard) -->
+    <script>
+        (function () {
+            try {
+                const uStr = localStorage.getItem('ajborges_usuario_ativo');
+                const u = uStr ? JSON.parse(uStr) : null;
+                if (!u || (u.role !== 'admin' && u.role !== 'diretoria')) {
+                    window.location.href = 'Login.html#admin';
+                }
+            } catch (e) {
+                window.location.href = 'Login.html#admin';
+            }
+        })();
+    </script>
 </head>
 
 <body>

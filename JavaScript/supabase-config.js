@@ -103,7 +103,7 @@ async function buscarPerfilPorEmail(email) {
  */
 async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha }) {
     const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    const emailFinal = (email || '').trim() || `${cpfLimpo}@motorista.ajborges.com`;
+    const emailFinal = (email || '').trim() || null;
 
     // 1. Verifica se já existe perfil com esse CPF
     const existente = await buscarPerfilPorCpf(cpfLimpo);
@@ -113,32 +113,34 @@ async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha })
 
     let authUserId = null;
 
-    // 2. Tenta criar usuário no Supabase Auth
-    try {
-        const authResp = await fetch(`${SUPABASE_CONFIG.url}/auth/v1/signup`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_CONFIG.anonKey,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: emailFinal,
-                password: senha,
-                data: {
-                    nome: nome.trim(),
-                    cpf: cpfLimpo,
-                    telefone: (telefone || '').trim() || null,
-                    role: 'motorista'
-                }
-            })
-        });
+    // 2. Se houver e-mail válido, tenta criar usuário no Supabase Auth
+    if (emailFinal) {
+        try {
+            const authResp = await fetch(`${SUPABASE_CONFIG.url}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_CONFIG.anonKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: emailFinal,
+                    password: senha,
+                    data: {
+                        nome: nome.trim(),
+                        cpf: cpfLimpo,
+                        telefone: (telefone || '').trim() || null,
+                        role: 'motorista'
+                    }
+                })
+            });
 
-        if (authResp.ok) {
-            const authJson = await authResp.json();
-            authUserId = authJson.id || authJson.user?.id || null;
+            if (authResp.ok) {
+                const authJson = await authResp.json();
+                authUserId = authJson.id || authJson.user?.id || null;
+            }
+        } catch (eAuth) {
+            console.warn('Aviso no signUp do Supabase Auth:', eAuth);
         }
-    } catch (eAuth) {
-        console.warn('Aviso no signUp do Supabase Auth:', eAuth);
     }
 
     // 3. Grava registro na tabela 'perfis'

@@ -309,12 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Usuário autenticado com sucesso!
-                    const usuarioSupabase = authData.user;
-                    const nomeMotorista = perfil.nome || usuarioSupabase.user_metadata?.nome || 'Motorista AJBorges';
+                    const usuarioId = perfil.id || (typeof authData !== 'undefined' && authData?.user?.id) || 'motorista_' + cpfLimpo;
+                    const nomeMotorista = perfil.nome || (typeof authData !== 'undefined' && authData?.user?.user_metadata?.nome) || 'Motorista AJBorges';
 
                     localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
                         role: 'motorista',
-                        id: usuarioSupabase.id,
+                        id: usuarioId,
                         nome: nomeMotorista,
                         cpf: cpfVal,
                         telefone: perfil.telefone || ''
@@ -431,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Autenticação de Administrador aprovada! Acessando painel...', 'success');
 
                     setTimeout(() => {
-                        window.location.href = 'dashboard-admin.html';
+                        window.location.href = 'escolhaDashboard.html';
                     }, 1000);
                 } catch (err) {
                     console.error('Erro inesperado no login do admin:', err);
