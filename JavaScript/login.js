@@ -320,10 +320,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         telefone: perfil.telefone || ''
                     }));
 
+                    localStorage.removeItem('ajborges_relatorio_viagem_ml_draft');
                     showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
 
                     setTimeout(() => {
-                        window.location.href = 'relatorio-viagem.html';
+                        window.location.href = 'relatorio-viagem.html?novo=true';
                     }, 1000);
                 } catch (err) {
                     console.error('Erro inesperado no login do motorista:', err);

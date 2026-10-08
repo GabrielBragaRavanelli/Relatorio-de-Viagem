@@ -23,7 +23,7 @@ let chartConsumoInstance = null;
 let appState = {
     fichas: [],
     filtroStatus: 'pendente', // 'pendente' | 'aprovado' | 'todos'
-    filtroCliente: 'todos',
+    filtroMotorista: 'todos',
     filtroPeriodo: 'mes', // 'mes' | '30d' | 'semana'
     termoBusca: '',
     fichaSelecionadaModal: null,
@@ -52,11 +52,6 @@ const NOMES_DEMO_EXEMPLOS = [
     'Luciano Batista'
 ];
 
-const MOCK_IDS_EXEMPLOS = [
-    'AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005',
-    'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'
-];
-
 function inicializarBancoDados() {
     const dadosSalvos = localStorage.getItem(STORAGE_FICHAS_KEY);
     if (!dadosSalvos) {
@@ -65,15 +60,11 @@ function inicializarBancoDados() {
         try {
             const parsed = JSON.parse(dadosSalvos);
             if (Array.isArray(parsed)) {
-                // Filtra e expurga rigorosamente TODOS os dados de exemplo usados para demonstrar as planilhas
+                // Filtra e expurga apenas dados de exemplo marcados explicitamente
                 appState.fichas = parsed.filter(f => {
                     if (!f || !f.id) return false;
-                    // Se for qualquer motorista das planilhas de exemplo
+                    // Se for qualquer motorista das planilhas antigas de demonstração
                     if (NOMES_DEMO_EXEMPLOS.includes(f.motorista)) return false;
-                    // Se tiver ID de mock clássico e pertencer aos testes iniciais
-                    if (MOCK_IDS_EXEMPLOS.includes(f.id) && (!f.origemEnvio || f.origemEnvio === 'motorista_com_login' || f.origemEnvio === 'seed_sistema' || f.isExemplo)) {
-                        return false;
-                    }
                     if (f.origemEnvio === 'seed_sistema' || f.isExemplo || f.isDemonstrativo) {
                         return false;
                     }
@@ -452,20 +443,23 @@ function calcularMetricasDashboard() {
 
 function atualizarContadoresStatus() {
     const pendentes = appState.fichas.filter(f => f.status === 'pendente').length;
+    const aguardando = appState.fichas.filter(f => f.status === 'aguardando_confirmacao').length;
     const aprovadas = appState.fichas.filter(f => f.status === 'aprovado').length;
     const total = appState.fichas.length;
 
     const elContadorSidebar = document.getElementById('badge-pendentes-sidebar');
     const elContadorTabPendentes = document.getElementById('contador-tab-pendentes');
+    const elContadorTabAguardando = document.getElementById('contador-tab-aguardando');
     const elContadorTabAprovadas = document.getElementById('contador-tab-aprovadas');
     const elContadorTabTodas = document.getElementById('contador-tab-todas');
     const elHeaderCounter = document.getElementById('header-fichas-pendentes-counter');
 
-    if (elContadorSidebar) elContadorSidebar.textContent = pendentes;
+    if (elContadorSidebar) elContadorSidebar.textContent = pendentes + aguardando;
     if (elContadorTabPendentes) elContadorTabPendentes.textContent = pendentes;
+    if (elContadorTabAguardando) elContadorTabAguardando.textContent = aguardando;
     if (elContadorTabAprovadas) elContadorTabAprovadas.textContent = aprovadas;
     if (elContadorTabTodas) elContadorTabTodas.textContent = total;
-    if (elHeaderCounter) elHeaderCounter.textContent = `${pendentes} pendente${pendentes !== 1 ? 's' : ''}`;
+    if (elHeaderCounter) elHeaderCounter.textContent = `${pendentes + aguardando} pendente${(pendentes + aguardando) !== 1 ? 's' : ''}`;
 }
 
 function atualizarIndicadoresSecoesSecundarias(totais) {
@@ -503,18 +497,14 @@ function renderizarTabelaFichas() {
     // Filtra fichas pelo status atual
     let listaFiltrada = appState.fichas.filter(f => {
         if (appState.filtroStatus === 'pendente') return f.status === 'pendente';
+        if (appState.filtroStatus === 'aguardando_confirmacao') return f.status === 'aguardando_confirmacao';
         if (appState.filtroStatus === 'aprovado') return f.status === 'aprovado';
         return true;
     });
 
-    // Filtra pelo cliente selecionado
-    if (appState.filtroCliente !== 'todos') {
-        listaFiltrada = listaFiltrada.filter(f => {
-            if (f.fretes && Array.isArray(f.fretes)) {
-                return f.fretes.some(fr => fr.cliente === appState.filtroCliente);
-            }
-            return true;
-        });
+    // Filtra pelo motorista selecionado
+    if (appState.filtroMotorista && appState.filtroMotorista !== 'todos') {
+        listaFiltrada = listaFiltrada.filter(f => (f.motorista || '').trim().toLowerCase() === appState.filtroMotorista.trim().toLowerCase());
     }
 
     // Filtra pelo termo de busca (motorista, placa, rota, ficha)
@@ -535,6 +525,7 @@ function renderizarTabelaFichas() {
             elInfoRegistros.textContent = 'Nenhuma ficha registrada';
         } else {
             const tipoTexto = appState.filtroStatus === 'pendente' ? 'pendente(s)' : 
+                              appState.filtroStatus === 'aguardando_confirmacao' ? 'aguardando confirmação' :
                               appState.filtroStatus === 'aprovado' ? 'aprovada(s)' : 'registrada(s)';
             elInfoRegistros.textContent = `Exibindo ${listaFiltrada.length} ficha(s) ${tipoTexto}`;
         }
@@ -553,7 +544,16 @@ function renderizarTabelaFichas() {
         const tr = document.createElement('tr');
         tr.id = `row-ficha-${ficha.id}`;
 
-        const isPendente = ficha.status === 'pendente';
+        const statusFicha = ficha.status || 'pendente';
+        let statusBadgeHtml = '';
+        if (statusFicha === 'aprovado') {
+            statusBadgeHtml = `<span class="status-pill status-concluido">🟢 Concluído / Aprovado</span>`;
+        } else if (statusFicha === 'aguardando_confirmacao') {
+            statusBadgeHtml = `<span class="status-pill status-aguardando-confirmacao">🟠 Esperando Confirmação</span>`;
+        } else {
+            statusBadgeHtml = `<span class="status-pill status-pendente">🟡 Pendente de Conferência</span>`;
+        }
+
         const mediaNum = parseFloat(ficha.mediaKmL || 0);
 
         const metaAtual = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
@@ -586,9 +586,6 @@ function renderizarTabelaFichas() {
                 <span class="placa-box">${ficha.placas || 'Não informada'}</span>
             </td>
             <td>
-                <span class="rota-tag" title="${rotaStr}">${rotaStr}</span>
-            </td>
-            <td>
                 <span class="frete-val-destaque">R$ ${ficha.totalFrete || '0,00'}</span>
             </td>
             <td>
@@ -597,9 +594,7 @@ function renderizarTabelaFichas() {
                 </span>
             </td>
             <td>
-                <span class="status-pill ${isPendente ? 'status-pendente' : 'status-concluido'}">
-                    ${isPendente ? '🟡 Pendente de Conferência' : '🟢 Concluído / Aprovado'}
-                </span>
+                ${statusBadgeHtml}
             </td>
             <td class="col-acoes text-right">
                 <div class="table-actions-cell">
@@ -613,7 +608,7 @@ function renderizarTabelaFichas() {
                     <button type="button" class="btn-acao-resumo" data-ficha-id="${ficha.id}" title="Resumo rápido em modal">
                         👁️
                     </button>
-                    ${isPendente ? `
+                    ${statusFicha !== 'aprovado' ? `
                         <button type="button" class="btn-acao-aprovar-rapido" data-ficha-id="${ficha.id}" title="Aprovar Ficha Imediatamente">
                             ✓
                         </button>
@@ -758,7 +753,7 @@ function abrirModalResumoFicha(fichaId) {
     if (btnLinkCompleto) btnLinkCompleto.href = `relatorio-viagem.html?ficha=${ficha.id}&mode=admin`;
 
     if (btnAprovarDireto) {
-        btnAprovarDireto.style.display = ficha.status === 'pendente' ? 'inline-flex' : 'none';
+        btnAprovarDireto.style.display = ficha.status !== 'aprovado' ? 'inline-flex' : 'none';
         btnAprovarDireto.onclick = () => {
             aprovarFichaDiretamente(ficha.id);
             fecharModalResumo();
@@ -1631,6 +1626,61 @@ function formatarNomeCliente(slug) {
     return slug || 'Cliente';
 }
 
+// ==========================================================================
+// 10.1. FILTRO DINÂMICO DE MOTORISTAS (SUPABASE + FICHAS LOCAIS)
+// ==========================================================================
+
+async function carregarFiltroMotoristas() {
+    const selectMotorista = document.getElementById('filtro-motorista-select');
+    if (!selectMotorista) return;
+
+    const motoristaSelecionadoAntes = appState.filtroMotorista || 'todos';
+    const motoristasSet = new Set();
+
+    // a) Busca dinamicamente no Supabase todos os registros da tabela 'perfis' com role = 'motorista'
+    if (window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('perfis')
+                .select('nome')
+                .eq('role', 'motorista');
+            if (!error && Array.isArray(data)) {
+                data.forEach(p => {
+                    if (p.nome && p.nome.trim()) {
+                        motoristasSet.add(p.nome.trim());
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Erro ao consultar perfis de motoristas no Supabase:', e);
+        }
+    }
+
+    // b) Mescla com os motoristas já registrados nas fichas carregadas para não deixar ninguém de fora
+    if (Array.isArray(appState.fichas)) {
+        appState.fichas.forEach(f => {
+            if (f.motorista && f.motorista.trim() && f.motorista !== 'Motorista Não Identificado') {
+                motoristasSet.add(f.motorista.trim());
+            }
+        });
+    }
+
+    // c) Remove duplicatas e ordena alfabeticamente
+    const listaOrdenada = Array.from(motoristasSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    // d) Mantém a opção inicial "Todos os Motoristas"
+    selectMotorista.innerHTML = '<option value="todos">Todos os Motoristas</option>';
+    listaOrdenada.forEach(nome => {
+        const opt = document.createElement('option');
+        opt.value = nome;
+        opt.textContent = nome;
+        if (nome.toLowerCase() === motoristaSelecionadoAntes.toLowerCase()) {
+            opt.selected = true;
+        }
+        selectMotorista.appendChild(opt);
+    });
+}
+
 // Sincronização em Nuvem e Tempo Real com o Supabase
 async function sincronizarFichasComSupabase() {
     if (typeof window.buscarFichasSupabase === 'function') {
@@ -1644,6 +1694,7 @@ async function sincronizarFichasComSupabase() {
                 renderizarTabelaFichas();
                 atualizarGraficos();
                 preencherSecoesSecundarias();
+                carregarFiltroMotoristas();
             }
         } catch (e) {
             console.warn('Não foi possível sincronizar com o Supabase de imediato:', e);
@@ -1661,6 +1712,7 @@ async function sincronizarFichasComSupabase() {
                     calcularMetricasDashboard();
                     renderizarTabelaFichas();
                     atualizarGraficos();
+                    carregarFiltroMotoristas();
                     exibirToast(`🔔 Nova ficha recebida: ${novaFicha.id} (${novaFicha.motorista})`, 'info');
                 }
             },
@@ -1672,6 +1724,7 @@ async function sincronizarFichasComSupabase() {
                     calcularMetricasDashboard();
                     renderizarTabelaFichas();
                     atualizarGraficos();
+                    carregarFiltroMotoristas();
                 }
             },
             (idFichaExcluida) => {
@@ -1684,10 +1737,26 @@ async function sincronizarFichasComSupabase() {
                     renderizarTabelaFichas();
                     atualizarGraficos();
                     preencherSecoesSecundarias();
+                    carregarFiltroMotoristas();
                     exibirToast(`🗑️ Ficha ${idFichaExcluida} removida da gestão em tempo real.`, 'info');
                 }
             }
         );
+    }
+
+    // Conecta listener realtime no canal do Supabase da tabela 'perfis'
+    if (window.supabaseClient) {
+        try {
+            window.supabaseClient
+                .channel('realtime_perfis_filtro_motoristas')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'perfis' }, () => {
+                    console.log('⚡ Atualização em perfis de motoristas detectada.');
+                    carregarFiltroMotoristas();
+                })
+                .subscribe();
+        } catch (e) {
+            console.warn('Erro ao conectar realtime de perfis:', e);
+        }
     }
 }
 
@@ -1703,6 +1772,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarTabelaFichas();
     inicializarGraficos();
     preencherSecoesSecundarias();
+    carregarFiltroMotoristas();
 
     // Sincroniza com o Supabase e ativa o Realtime
     sincronizarFichasComSupabase();
@@ -1755,11 +1825,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. Filtro de cliente na tabela
-    const selectCliente = document.getElementById('filtro-cliente-select');
-    if (selectCliente) {
-        selectCliente.addEventListener('change', (e) => {
-            appState.filtroCliente = e.target.value;
+    // 6. Filtro de motorista na tabela
+    const selectMotorista = document.getElementById('filtro-motorista-select');
+    if (selectMotorista) {
+        selectMotorista.addEventListener('change', (e) => {
+            appState.filtroMotorista = e.target.value;
             renderizarTabelaFichas();
         });
     }

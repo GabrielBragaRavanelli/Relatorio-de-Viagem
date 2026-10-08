@@ -1159,6 +1159,7 @@ body.admin-body {
 }
 
 .dot-amarelo { background-color: var(--amarelo-alerta); box-shadow: 0 0 6px var(--amarelo-alerta-glow); }
+.dot-laranja { background-color: #f97316; box-shadow: 0 0 6px rgba(249, 115, 22, 0.4); }
 .dot-verde { background-color: var(--verde-sucesso); box-shadow: 0 0 6px var(--verde-sucesso-glow); }
 
 .tab-counter-badge {
@@ -1173,6 +1174,11 @@ body.admin-body {
 .tab-ficha-btn.active .badge-amarelo {
     background-color: #fef3c7;
     color: #b45309;
+}
+
+.tab-ficha-btn.active .badge-laranja {
+    background-color: #ffedd5;
+    color: #c2410c;
 }
 
 .tab-ficha-btn.active .badge-verde {
@@ -1360,6 +1366,12 @@ body.admin-body {
     background-color: #fef3c7;
     color: #92400e;
     border: 1px solid #fde68a;
+}
+
+.status-aguardando-confirmacao {
+    background-color: #ffedd5;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
 }
 
 .status-concluido {

@@ -9,9 +9,9 @@
     <title>AJBorges Gestão • Painel Administrativo</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
-    <link rel="shortcut icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
-    <link rel="apple-touch-icon" href="../Imagens/iconeAJb-prata.jpeg">
+    <link rel="icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
+    <link rel="shortcut icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
+    <link rel="apple-touch-icon" href="../Imagens/LOGO EM BRANCO.png">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -631,6 +631,11 @@
                                     <span>Pendentes de Conferência</span>
                                     <span class="tab-counter-badge badge-amarelo" id="contador-tab-pendentes">0</span>
                                 </button>
+                                <button type="button" class="tab-ficha-btn" data-status="aguardando_confirmacao" id="tab-fichas-aguardando">
+                                    <span class="tab-indicator-dot dot-laranja"></span>
+                                    <span>Esperando Confirmação</span>
+                                    <span class="tab-counter-badge badge-laranja" id="contador-tab-aguardando">0</span>
+                                </button>
                                 <button type="button" class="tab-ficha-btn" data-status="aprovado"
                                     id="tab-fichas-aprovadas">
                                     <span class="tab-indicator-dot dot-verde"></span>
@@ -648,12 +653,9 @@
                         <div class="tabela-toolbar">
                             <div class="toolbar-left">
                                 <div class="filtro-cliente-wrapper">
-                                    <label for="filtro-cliente-select">Filtrar Cliente:</label>
-                                    <select id="filtro-cliente-select" class="select-filtro-custom">
-                                        <option value="todos">Todos os Clientes</option>
-                                        <option value="shopee">Shopee</option>
-                                        <option value="mercado_livre">Mercado Livre</option>
-                                        <option value="alimenticio">Alimentício</option>
+                                    <label for="filtro-motorista-select">Filtrar Motorista:</label>
+                                    <select id="filtro-motorista-select" class="select-filtro-custom">
+                                        <option value="todos">Todos os Motoristas</option>
                                     </select>
                                 </div>
                             </div>
@@ -672,7 +674,6 @@
                                         <th>Data Envio</th>
                                         <th>Motorista</th>
                                         <th>Placas</th>
-                                        <th>Rota</th>
                                         <th>Frete Bruto</th>
                                         <th>Média Diesel</th>
                                         <th>Status</th>

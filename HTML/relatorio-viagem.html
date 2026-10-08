@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../CSS/relatorio.css">
-    <link rel="icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
-    <link rel="shortcut icon" type="image/jpeg" href="../Imagens/iconeAJb-prata.jpeg">
-    <link rel="apple-touch-icon" href="../Imagens/iconeAJb-prata.jpeg">
+    <link rel="icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
+    <link rel="shortcut icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
+    <link rel="apple-touch-icon" href="../Imagens/LOGO EM BRANCO.png">
     <title>Relatório de Viagem - AJBorges Transportes</title>
 
     <!-- Verificação de Sessão (Route Guard) -->
@@ -100,10 +100,6 @@
             <span class="status-pill status-pendente" id="admin-banner-status">🟡 Pendente de Conferência</span>
         </div>
         <div class="barra-admin-acoes">
-            <button type="button" class="btn-voltar-gestao btn-toggle-modo" id="btn-alternar-modo-motorista"
-                title="Alternar para visão do Motorista">
-                🚛 Visão Motorista
-            </button>
             <a href="dashboard-admin.html#fichas" class="btn-voltar-gestao"
                 title="Retornar à fila de conferência no Dashboard">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -148,18 +144,6 @@
                         <span id="motorista-subtexto-aviso">Dados do veículo, fretes e pedágios são definidos pela
                             Frota. Preencha seus abastecimentos e comprovantes.</span>
                     </div>
-                </div>
-                <div class="motorista-info-right">
-                    <div id="motorista-botoes-logado" style="display: none;">
-                        <button type="button" class="btn-minhas-viagens" id="btn-abrir-minhas-viagens">
-                            <span>Minhas Viagens</span>
-                            <span class="badge-contador-viagens" id="badge-total-minhas-viagens">0</span>
-                        </button>
-                    </div>
-                    <button type="button" class="btn-minhas-viagens btn-toggle-modo" id="btn-alternar-modo-admin"
-                        title="Alternar para visão do Administrador">
-                        🛡️ Visão Admin
-                    </button>
                 </div>
             </div>
 
@@ -262,7 +246,7 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <input type="text" id="placas" name="placas" placeholder="Ex: MHU-9157"
+                                    <input type="text" id="placas" name="placas" placeholder="Ex: GAB-1234"
                                         maxlength="8" autocomplete="off">
                                 </div>
                             </div>
@@ -2454,61 +2438,9 @@
                 </div>
             </div>
 
-            <div class="modal-acoes-row">
-                <button type="button" class="modal-btn-acao-secundario" id="btn-modal-ir-minhas-viagens">
-                    Ver em "Minhas Viagens"
-                </button>
-                <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-com-login">
+            <div class="modal-acoes-row" style="width: 100%; display: flex; justify-content: center;">
+                <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-com-login" style="width: 100%; justify-content: center; text-align: center;">
                     Preencher Novo Relatório
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ====================================================================
-         MODAL 3: "MINHAS VIAGENS" DO MOTORISTA LOGADO
-         ==================================================================== -->
-    <div class="modal-overlay-custom" id="modal-lista-minhas-viagens" aria-hidden="true" role="dialog">
-        <div class="modal-card-custom modal-minhas-viagens-card">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 16px;">
-                <div>
-                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #1e293b;">
-                        📱 Minhas Viagens • AJBorges
-                    </h3>
-                    <p style="font-size: 0.82rem; color: #64748b;" id="subtitulo-motorista-minhas-viagens">
-                        Histórico de relatórios enviados pelo motorista
-                    </p>
-                </div>
-                <button type="button" class="modal-close-btn" id="btn-fechar-minhas-viagens"
-                    style="font-size: 1.5rem; background: none; border: none; cursor: pointer; color: #64748b;">✕</button>
-            </div>
-
-            <div style="overflow-y: auto; max-height: 480px;">
-                <table class="tabela-minhas-viagens">
-                    <thead>
-                        <tr>
-                            <th>Nº Ficha</th>
-                            <th>Data Envio</th>
-                            <th>Rota</th>
-                            <th>Total Frete</th>
-                            <th>Status</th>
-                            <th style="text-align: right;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-minhas-viagens-body">
-                        <!-- Preenchido dinamicamente via relatorio.js -->
-                    </tbody>
-                </table>
-                <div id="minhas-viagens-empty"
-                    style="display: none; text-align: center; padding: 30px; color: #64748b;">
-                    Você ainda não enviou nenhum relatório com esta conta.
-                </div>
-            </div>
-
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 14px; text-align: right;">
-                <button type="button" class="modal-btn-acao-secundario" id="btn-fechar-minhas-viagens-rodape">
-                    Fechar
                 </button>
             </div>
         </div>

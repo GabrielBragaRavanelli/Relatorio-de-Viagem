@@ -362,6 +362,8 @@ function escutarAlteracoesFichasSupabase(onNovaFicha, onAtualizacaoFicha, onExcl
 }
 
 // Exportações globais para os outros scripts
+window.mapearFichaDoSupabase = mapearFichaDoSupabase;
+window.mapearFichaParaSupabase = mapearFichaParaSupabase;
 window.salvarFichaSupabase = salvarFichaSupabase;
 window.buscarFichasSupabase = buscarFichasSupabase;
 window.atualizarStatusFichaSupabase = atualizarStatusFichaSupabase;

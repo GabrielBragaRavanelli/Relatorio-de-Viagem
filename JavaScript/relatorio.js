@@ -12,9 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (usuarioAtivoStr) {
         try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
     }
+    const urlParamsInit = new URLSearchParams(window.location.search);
+    const modeUrlInit = urlParamsInit.get('mode');
+
     if (!usuarioAtivo) {
-        window.location.href = 'Login.html';
-        return;
+        if (modeUrlInit === 'admin') {
+            usuarioAtivo = { role: 'admin', nome: 'Administrador Central', email: 'admin@ajborges.com' };
+            localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
+        } else {
+            window.location.href = 'Login.html';
+            return;
+        }
+    } else if (modeUrlInit === 'admin' && usuarioAtivo.role !== 'admin') {
+        usuarioAtivo.role = 'admin';
+        localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
     }
 
     // Elementos do Formulário
@@ -66,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const uAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
         if (uAtivoStr) {
             const uAtivo = JSON.parse(uAtivoStr);
-            if (uAtivo && uAtivo.nome === 'Carlos Eduardo Ferreira') {
+            if (uAtivo && uAtivo.nome === 'Carlos Eduardo Ferreira' && uAtivo.role !== 'admin') {
                 uAtivo.nome = '';
                 localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(uAtivo));
             }
@@ -161,18 +172,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------------
-    // 1. Formatação de Placas (Maiúsculas e Hífen)
+    // 1. Formatação e Máscara Estrita de Placas (7 caracteres alfanuméricos)
     // ------------------------------------------
     if (inputPlacas) {
-        inputPlacas.addEventListener('input', (e) => {
-            let valor = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (valor.length > 3 && !valor.includes('-') && /^[A-Z]{3}[0-9]/.test(valor)) {
-                // Formato padrão antigo AAA-9999 ou Mercosul AAA9A99
-                if (/^[A-Z]{3}[0-9]{4}$/.test(valor)) {
-                    valor = valor.substring(0, 3) + '-' + valor.substring(3);
+        let apagandoPlaca = false;
+
+        inputPlacas.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                apagandoPlaca = true;
+                // Se terminar com '-', remove o hífen e a letra anterior para não travar o cursor
+                if (inputPlacas.value.endsWith('-')) {
+                    e.preventDefault();
+                    const limpo = inputPlacas.value.replace(/[^A-Z0-9]/g, '');
+                    inputPlacas.value = limpo.slice(0, -1);
                 }
+            } else {
+                apagandoPlaca = false;
             }
-            e.target.value = valor.substring(0, 8);
+        });
+
+        inputPlacas.addEventListener('input', (e) => {
+            // Converte automaticamente para maiúsculas e aceita apenas caracteres alfanuméricos (máximo 7)
+            let limpo = (e.target.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
+
+            if (limpo.length > 3) {
+                e.target.value = limpo.slice(0, 3) + '-' + limpo.slice(3);
+            } else if (limpo.length === 3) {
+                if (!apagandoPlaca && e.inputType !== 'deleteContentBackward') {
+                    e.target.value = limpo + '-';
+                } else {
+                    e.target.value = limpo;
+                }
+            } else {
+                e.target.value = limpo;
+            }
+        });
+
+        // Validação ao sair do campo (blur)
+        inputPlacas.addEventListener('blur', () => {
+            if (inputPlacas.readOnly || inputPlacas.disabled) return;
+            const limpo = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (limpo.length > 0 && limpo.length < 7) {
+                exibirToast('A placa deve conter obrigatoriamente exatamente 7 caracteres alfanuméricos (Ex: GAB-1234 ou GAB-1C34).', 'erro');
+                inputPlacas.focus();
+            }
         });
     }
 
@@ -563,9 +606,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Formatação de Litros: números inteiros (ex: 500 -> 500) ou decimais (ex: 1802.336 -> 1.802,336).
+    // Formatação de Litros: números inteiros (ex: 500 -> 500, 150000 -> 150.000) ou decimais (ex: 150000,50 -> 150.000,5).
     function formatarLitros(num) {
-        if (isNaN(num) || num === null || num === undefined || num === 0) return '0';
+        if (num === null || num === undefined || num === '') return '0';
+        if (typeof num === 'string') num = parseLitros(num);
+        if (isNaN(num) || num === 0) return '0';
         if (Number.isInteger(num)) {
             return num.toLocaleString('pt-BR');
         }
@@ -576,79 +621,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function parseLitros(str) {
-        if (!str) return 0;
+        if (str === null || str === undefined || str === '') return 0;
+        if (typeof str === 'number') return isNaN(str) ? 0 : str;
         let s = str.toString().trim();
         if (!s) return 0;
 
-        // Se contém vírgula e ponto (ex: "1.802,336" ou "1,802.336")
-        if (s.includes(',') && s.includes('.')) {
-            const lastComma = s.lastIndexOf(',');
-            const lastDot = s.lastIndexOf('.');
-            if (lastComma > lastDot) {
-                // Padrão brasileiro: milhar com ponto, decimal com vírgula (ex: 1.802,336)
-                s = s.replace(/\./g, '').replace(',', '.');
-            } else {
-                // Padrão americano: milhar com vírgula, decimal com ponto (ex: 1,802.336)
-                s = s.replace(/,/g, '');
-            }
-            const n = parseFloat(s);
-            return isNaN(n) ? 0 : n;
-        }
-
-        // Se contém vírgula (ex: "1802,336" ou "500,5")
+        // Se contém vírgula (ex: "150.000,50" -> 150000.5, "150000,5" -> 150000.5, "500,5" -> 500.5)
         if (s.includes(',')) {
             const partes = s.split(',');
             const intPart = partes[0].replace(/\D/g, '');
             const decPart = partes.slice(1).join('').replace(/\D/g, '');
-            const n = parseFloat((intPart || '0') + '.' + decPart);
+            const n = parseFloat((intPart || '0') + (decPart ? '.' + decPart : ''));
             return isNaN(n) ? 0 : n;
         }
 
-        // Se contém múltiplos pontos (ex: "1.802.336") - comum se foi formatado como milhar
-        const partesPonto = s.split('.');
-        if (partesPonto.length > 2) {
-            const digitos = s.replace(/\D/g, '');
-            if (digitos.length >= 4) {
-                // Últimos 3 dígitos são os mililitros/decimais (ex: 1802336 -> 1802.336)
-                const intPart = digitos.substring(0, digitos.length - 3);
-                const decPart = digitos.substring(digitos.length - 3);
-                const n = parseFloat(intPart + '.' + decPart);
-                return isNaN(n) ? 0 : n;
-            } else {
-                const n = parseFloat(digitos);
-                return isNaN(n) ? 0 : n;
-            }
-        }
-
-        // Se contém um único ponto (ex: "1802.336" ou "1.500" ou "500.5")
-        if (partesPonto.length === 2) {
-            const antes = partesPonto[0].replace(/\D/g, '');
-            const depois = partesPonto[1].replace(/\D/g, '');
-            // Se tem mais de 3 dígitos antes do ponto (ex: 1802.336), ou casas decimais != 3, é decimal
-            if (antes.length >= 4 || depois.length !== 3) {
-                const n = parseFloat((antes || '0') + '.' + depois);
-                return isNaN(n) ? 0 : n;
-            }
-            // Se tem <= 3 dígitos antes e exatamente 3 depois (ex: "1.500")
-            const n = parseFloat(antes + depois);
-            return isNaN(n) ? 0 : n;
-        }
-
-        // Somente dígitos numéricos sem separador
+        // Se NÃO contém vírgula: trata como inteiro em litros com ou sem separador de milhar pt-BR (ex: "150000" -> 150000, "150.000" -> 150000, "15.000" -> 15000, "500" -> 500)
+        // Elimina qualquer fatiamento arbitrário dos últimos 3 dígitos!
         const digitos = s.replace(/\D/g, '');
         if (!digitos) return 0;
-        const numInt = parseInt(digitos, 10);
-        // Se o valor for muito grande sem separador (ex: 1802336 Litros), os últimos 3 dígitos são ml
-        if (digitos.length >= 6 && numInt > 10000) {
-            const intPart = digitos.substring(0, digitos.length - 3);
-            const decPart = digitos.substring(digitos.length - 3);
-            return parseFloat(intPart + '.' + decPart);
-        }
-        return numInt;
+        const n = parseInt(digitos, 10);
+        return isNaN(n) ? 0 : n;
     }
 
     function formatarTextoLitros(val) {
-        if (!val) return '';
+        if (val === null || val === undefined || val === '') return '';
         const num = parseLitros(val);
         if (num === 0) return '';
         return formatarLitros(num);
@@ -657,27 +653,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function aplicarMascaraLitros(input, callback) {
         if (!input) return;
 
-        // Ao focar, desformata mantendo a precisão correta
+        // Ao focar no campo: mantém o número editável limpo sem truncar dígitos
+        // Remove pontos de milhar para facilitar a edição pelo usuário, preservando a vírgula se houver decimal
         input.addEventListener('focus', (e) => {
-            if (e.target.value) {
-                if (e.target.value.includes(',')) {
-                    const partes = e.target.value.split(',');
-                    e.target.value = partes[0].replace(/\./g, '') + ',' + partes[1];
-                } else if (e.target.value.includes('.')) {
-                    const valNum = parseLitros(e.target.value);
-                    if (Number.isInteger(valNum)) {
-                        e.target.value = valNum.toString();
-                    } else {
-                        e.target.value = valNum.toString().replace('.', ',');
-                    }
+            const val = e.target.value;
+            if (val) {
+                if (val.includes(',')) {
+                    const partes = val.split(',');
+                    e.target.value = partes[0].replace(/\./g, '') + ',' + partes.slice(1).join('').replace(/\./g, '');
+                } else {
+                    e.target.value = val.replace(/\./g, '');
                 }
             }
         });
 
-        // Durante a digitação: aceita dígitos e converte ponto em vírgula para manter padrão decimal pt-BR
+        // Durante a digitação: aceita dígitos e vírgula decimal (converte ponto em vírgula)
         input.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^0-9,\.]/g, '');
-            const partes = val.split(/[,.]/);
+            let val = e.target.value.replace(/\./g, ',');
+            val = val.replace(/[^0-9,]/g, '');
+            const partes = val.split(',');
             if (partes.length > 2) {
                 val = partes[0] + ',' + partes.slice(1).join('').substring(0, 3);
             } else if (partes.length === 2) {
@@ -687,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (callback) callback();
         });
 
-        // Ao perder o foco (blur): formata com separador de milhar e decimais corretos
+        // Ao perder o foco (blur): formata com separador de milhar pt-BR e decimais corretos
         input.addEventListener('blur', (e) => {
             if (e.target.value && e.target.value.trim() !== '') {
                 e.target.value = formatarTextoLitros(e.target.value);
@@ -977,20 +971,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputTotalValorCombustivelMl = document.getElementById('ml-total-valor-combustivel');
     const inputTotalLitrosCombustivelMl = document.getElementById('ml-total-litros-combustivel');
 
+    // Lista Oficial dos Postos de Combustíveis Conveniados da AJBorges
+    const POSTOS_COMBUSTIVEL_CONVENIADOS = [
+        "Açailândia MA - Posto Magnólia 06",
+        "Anaurilandia MS - Posto Lala (93)",
+        "Arapora GO - Posto Decio",
+        "Araquari SC - Posto Russi",
+        "Campo Grande MS - Posto Fortaleza (IDEAL)",
+        "Caxias do Sul RS - Posto Squizzato",
+        "Centralina MG - Posto Decio",
+        "Corumbataí SP - Monte Carlo",
+        "Coxilha RS - Posto Buffon",
+        "Dom Pedro de Alcântara RS - Posto Rota",
+        "Guará SP - Posto Monte Carlo",
+        "Gurupi TO - Posto Decio",
+        "Juiz de Fora MG - Posto Dom Pedro",
+        "Luz MG - Caxuxa Matriz",
+        "Marília SP - Posto Esmeralda",
+        "Marília SP - Posto Gigantão",
+        "Mimoso do Sul ES - Posto Cajú",
+        "Mirassol SP - Monte Carlo",
+        "Moema MG - Posto Caxuxa",
+        "Montes Claros MG - Posto D'Angelis",
+        "Nova Santa Rita RS - Posto Buffon",
+        "Olimpia SP - Posto Rei do Suco",
+        "Passo Fundo RS - Posto Buffon",
+        "Ribeirão Preto SP - Monte Carlo",
+        "Rio Claro SP - Monte Carlo",
+        "Santa Cecília SC - Posto Cesca & Cia",
+        "Santópolis do Aguapeí SP - Posto Monte Carlo",
+        "São Gonçalo do Sapucaí MG - Posto Caxuxa",
+        "São José do Rio Preto SP - Posto Monte Carlo I",
+        "Uberlandia MG - Posto Decio",
+        "Varzea Grande MT - Monte Carlo",
+        "Outro Posto / Não Listado"
+    ];
+
+    function popularSelectsPostosConvenidos() {
+        const selectsPosto = document.querySelectorAll('.input-posto');
+        selectsPosto.forEach(sel => {
+            const valAtual = sel.value;
+            sel.innerHTML = '<option value="">Selecione o posto...</option>';
+            POSTOS_COMBUSTIVEL_CONVENIADOS.forEach(nomePosto => {
+                const opt = document.createElement('option');
+                opt.value = nomePosto;
+                opt.textContent = nomePosto;
+                sel.appendChild(opt);
+            });
+            if (valAtual) {
+                sel.value = valAtual;
+            }
+        });
+    }
+
+    popularSelectsPostosConvenidos();
+
     for (let i = 1; i <= 10; i++) {
-        const inputPosto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const inputPosto = document.querySelector(`[name="posto_ml_${i}"]`);
         const inputNf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const inputKm = document.querySelector(`input[name="km_ml_${i}"]`);
         const inputValor = document.querySelector(`input[name="valor_ml_${i}"]`);
         const inputLitros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
         if (inputPosto) {
-            inputPosto.addEventListener('input', () => {
+            const atualizarPosto = () => {
                 salvarProgressoMl();
                 if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
                     atualizarListaLinhasAbastPreenchidasPopover();
                 }
-            });
+            };
+            inputPosto.addEventListener('change', atualizarPosto);
+            inputPosto.addEventListener('input', atualizarPosto);
         }
 
         if (inputNf) {
@@ -1580,7 +1631,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ações de Limpeza de Abastecimento ML
     function verificarLinhaAbastPreenchida(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const km = document.querySelector(`input[name="km_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1594,7 +1645,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function obterResumoLinhaAbast(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
         const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
@@ -1620,7 +1671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function limparLinhaAbast(i) {
-        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
         const km = document.querySelector(`input[name="km_ml_${i}"]`);
         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1684,7 +1735,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLimparAbastMlTodas) {
         btnLimparAbastMlTodas.addEventListener('click', () => {
             for (let i = 1; i <= 10; i++) {
-                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                 const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                 const km = document.querySelector(`input[name="km_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
@@ -1757,9 +1808,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15.8. Persistência de Dados (Salvar e Restaurar Rascunho)
     function salvarProgressoMl() {
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fichaUrl = urlParams.get('ficha');
+            const modeUrl = urlParams.get('mode');
+            const usuarioAtualStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+            let usuarioAtual = usuarioAtivo;
+            if (usuarioAtualStr) {
+                try { usuarioAtual = JSON.parse(usuarioAtualStr); } catch (e) { }
+            }
+            const isModoAdmin = (modeUrl === 'admin') || (usuarioAtual && (usuarioAtual.role === 'admin' || usuarioAtual.role === 'diretoria') && modeUrl !== 'motorista');
+
+            // Se estiver em modo admin ou editando uma ficha específica, retornar imediatamente sem salvar rascunho
+            if (fichaUrl || isModoAdmin || modeUrl === 'admin') {
+                return;
+            }
+
+            const isMotorista = (urlParams.get('mode') === 'motorista') || (usuarioAtual && usuarioAtual.role === 'motorista');
+
             const cabecalho = {
-                motorista: inputMotorista?.value || '',
-                placas: inputPlacas?.value || '',
+                motorista: (isMotorista && usuarioAtual?.nome && usuarioAtual.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtual.nome : (inputMotorista?.value || ''),
+                placas: isMotorista ? '' : (inputPlacas?.value || ''),
                 dataSaida: inputDataSaida?.value || '',
                 dataChegada: inputDataChegada?.value || '',
                 kmSaida: inputKmSaida?.value || '',
@@ -1792,7 +1860,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const abastecimentosMl = [];
             for (let i = 1; i <= 10; i++) {
                 abastecimentosMl.push({
-                    posto: document.querySelector(`input[name="posto_ml_${i}"]`)?.value || '',
+                    posto: document.querySelector(`[name="posto_ml_${i}"]`)?.value || '',
                     nf: document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '',
                     km: document.querySelector(`input[name="km_ml_${i}"]`)?.value || '',
                     valor: document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '',
@@ -1826,16 +1894,160 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function limparFormularioCompleto() {
+        if (form) form.reset();
+
+        // Zerar todos os campos de cabeçalho
+        if (inputPlacas) inputPlacas.value = '';
+        if (inputDataSaida) inputDataSaida.value = '';
+        if (inputDataChegada) inputDataChegada.value = '';
+        if (inputKmSaida) inputKmSaida.value = '';
+        if (inputKmChegada) inputKmChegada.value = '';
+        if (inputKmTotal) inputKmTotal.value = '';
+        if (inputDestinoInicial) inputDestinoInicial.value = '';
+        if (inputDestinoFinal) inputDestinoFinal.value = '';
+        if (inputAdiantamento) inputAdiantamento.value = '';
+        if (inputFreteOrigem) inputFreteOrigem.value = '';
+        if (inputRetorno1) inputRetorno1.value = '';
+        if (inputRetorno2) inputRetorno2.value = '';
+        if (inputRetorno3) inputRetorno3.value = '';
+        if (inputTotalFrete) inputTotalFrete.value = '';
+        if (inputVrComissao) inputVrComissao.value = '';
+
+        // Limpar as 8 linhas de frete
+        for (let i = 1; i <= 8; i++) {
+            const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
+            const cli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+            const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
+            const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+            const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+            const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
+            const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
+
+            if (dt) dt.value = '';
+            if (cli) cli.value = '';
+            if (og) og.value = '';
+            if (dst) dst.value = '';
+            if (vl) vl.value = '';
+            if (com) {
+                com.value = '';
+                com.dataset.editadoManual = '';
+            }
+            if (desc) desc.value = '';
+        }
+
+        // Limpar 10 linhas de abastecimento
+        for (let i = 1; i <= 10; i++) {
+            const posto = document.querySelector(`[name="posto_ml_${i}"]`);
+            const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
+            const km = document.querySelector(`input[name="km_ml_${i}"]`);
+            const vl = document.querySelector(`input[name="valor_ml_${i}"]`);
+            const lit = document.querySelector(`input[name="litros_ml_${i}"]`);
+
+            if (posto) posto.value = '';
+            if (nf) nf.value = '';
+            if (km) km.value = '';
+            if (vl) vl.value = '';
+            if (lit) lit.value = '';
+        }
+
+        // Limpar 3 pedágios e despesas extras
+        if (inputsPedagioMl[0]) inputsPedagioMl[0].value = '';
+        if (inputsPedagioMl[1]) inputsPedagioMl[1].value = '';
+        if (inputsPedagioMl[2]) inputsPedagioMl[2].value = '';
+        if (inputMlImpFederal) inputMlImpFederal.value = '';
+        if (inputMlDespesaDesc2) inputMlDespesaDesc2.value = '';
+        if (inputMlDespesaValor2) inputMlDespesaValor2.value = '';
+        if (inputMlDespesaDesc3) inputMlDespesaDesc3.value = '';
+        if (inputMlDespesaValor3) inputMlDespesaValor3.value = '';
+
+        // Zerar comprovantes anexos
+        arquivosComprovantesMl = [];
+        renderizarListaAnexosMl();
+
+        // Manter preenchido APENAS o nome do motorista autenticado
+        const usuarioAtualStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtual = usuarioAtivo;
+        if (usuarioAtualStr) {
+            try { usuarioAtual = JSON.parse(usuarioAtualStr); } catch (e) { }
+        }
+        if (inputMotorista) {
+            if (usuarioAtual && usuarioAtual.role === 'motorista' && usuarioAtual.nome && usuarioAtual.nome !== 'Carlos Eduardo Ferreira') {
+                inputMotorista.value = usuarioAtual.nome;
+            }
+        }
+
+        // Recalcular totais zerados
+        calcularKmTotal();
+        calcularTotaisFreteMl();
+        calcularTotaisAbastecimentoMl();
+        calcularTotaisDespesasMl();
+        calcularIndicadoresViagemMl();
+        if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+            atualizarListaLinhasPreenchidasPopover();
+        }
+        if (typeof atualizarListaLinhasAbastPreenchidasPopover === 'function') {
+            atualizarListaLinhasAbastPreenchidasPopover();
+        }
+    }
+
     function carregarProgressoMl() {
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fichaUrl = urlParams.get('ficha');
+            const novoUrl = urlParams.get('novo');
+            const usuarioAtualStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+            let usuarioAtual = usuarioAtivo;
+            if (usuarioAtualStr) {
+                try { usuarioAtual = JSON.parse(usuarioAtualStr); } catch (e) { }
+            }
+            const isMotorista = (urlParams.get('mode') === 'motorista') || (usuarioAtual && usuarioAtual.role === 'motorista');
+
+            // Se a URL contiver ficha ou novo=true, não restaurar rascunho e limpar a chave STORAGE_ML_KEY
+            if (fichaUrl || novoUrl === 'true' || urlParams.has('novo')) {
+                localStorage.removeItem(STORAGE_ML_KEY);
+                limparFormularioCompleto();
+                return;
+            }
+
             const salvo = localStorage.getItem(STORAGE_ML_KEY);
+            if (!salvo) {
+                limparFormularioCompleto();
+                return;
+            }
+
+            // Inicialização padrão para motorista
+            if (isMotorista) {
+                if (inputMotorista && usuarioAtual?.nome && usuarioAtual.nome !== 'Carlos Eduardo Ferreira') {
+                    inputMotorista.value = usuarioAtual.nome;
+                }
+                if (inputPlacas) {
+                    inputPlacas.value = '';
+                }
+            }
             if (salvo) {
                 const dados = JSON.parse(salvo);
 
                 // Restaurar cabeçalho
                 if (dados.cabecalho) {
-                    if (inputMotorista && dados.cabecalho.motorista) inputMotorista.value = dados.cabecalho.motorista;
-                    if (inputPlacas && dados.cabecalho.placas) inputPlacas.value = dados.cabecalho.placas;
+                    if (inputMotorista) {
+                        if (isMotorista && usuarioAtual?.nome && usuarioAtual.nome !== 'Carlos Eduardo Ferreira') {
+                            inputMotorista.value = usuarioAtual.nome;
+                        } else if (dados.cabecalho.motorista) {
+                            inputMotorista.value = dados.cabecalho.motorista;
+                        }
+                    }
+
+                    // TAREFA 3: Bloqueio de Rascunho para Placas no Modo Motorista
+                    // Se o usuário logado for com role 'motorista', NÃO restaure o valor de #placas a partir do rascunho local
+                    if (inputPlacas) {
+                        if (isMotorista) {
+                            inputPlacas.value = '';
+                        } else if (dados.cabecalho.placas) {
+                            inputPlacas.value = dados.cabecalho.placas;
+                        }
+                    }
+
                     if (inputDataSaida && dados.cabecalho.dataSaida) inputDataSaida.value = normalizarDataExibicao(dados.cabecalho.dataSaida);
                     if (inputDataChegada && dados.cabecalho.dataChegada) inputDataChegada.value = normalizarDataExibicao(dados.cabecalho.dataChegada);
                     if (inputKmSaida && dados.cabecalho.kmSaida) inputKmSaida.value = dados.cabecalho.kmSaida;
@@ -1929,13 +2141,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Array.isArray(dados.abastecimentos)) {
                     dados.abastecimentos.forEach((ab, idx) => {
                         const i = idx + 1;
-                        const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                        const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                         const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                         const km = document.querySelector(`input[name="km_ml_${i}"]`);
                         const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
                         const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-                        if (posto && ab.posto) { posto.value = ab.posto; temAbastPreenchido = true; }
+                        if (posto && ab.posto) {
+                            if (!Array.from(posto.options).some(o => o.value === ab.posto)) {
+                                const opt = document.createElement('option');
+                                opt.value = ab.posto;
+                                opt.textContent = ab.posto;
+                                posto.appendChild(opt);
+                            }
+                            posto.value = ab.posto;
+                            temAbastPreenchido = true;
+                        }
                         if (nf && ab.nf) { nf.value = ab.nf; temAbastPreenchido = true; }
                         if (km && ab.km) { km.value = ab.km; temAbastPreenchido = true; }
                         if (valor && ab.valor) { valor.value = ab.valor; temAbastPreenchido = true; }
@@ -2035,7 +2256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function coletarAbastecimentosAtuais() {
         const abasts = [];
         for (let i = 1; i <= 10; i++) {
-            const posto = document.querySelector(`input[name="posto_ml_${i}"]`)?.value || '';
+            const posto = document.querySelector(`[name="posto_ml_${i}"]`)?.value || '';
             const nf = document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '';
             const km = document.querySelector(`input[name="km_ml_${i}"]`)?.value || '';
             const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
@@ -2060,26 +2281,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ficha) return;
 
         // Cabeçalho
-        if (inputMotorista && ficha.motorista) inputMotorista.value = ficha.motorista;
-        if (inputPlacas && ficha.placas) inputPlacas.value = ficha.placas;
-        if (inputDataSaida && ficha.dataSaida) inputDataSaida.value = normalizarDataExibicao(ficha.dataSaida);
-        if (inputDataChegada && ficha.dataChegada) inputDataChegada.value = normalizarDataExibicao(ficha.dataChegada);
-        if (inputKmSaida && ficha.kmSaida) inputKmSaida.value = ficha.kmSaida;
-        if (inputKmChegada && ficha.kmChegada) inputKmChegada.value = ficha.kmChegada;
-        if (inputKmTotal && ficha.kmTotal) inputKmTotal.value = ficha.kmTotal;
-        if (inputDestinoInicial && ficha.destinoInicial) inputDestinoInicial.value = ficha.destinoInicial;
-        if (inputDestinoFinal && ficha.destinoFinal) inputDestinoFinal.value = ficha.destinoFinal;
-        if (inputAdiantamento && ficha.valorAdiantamento) inputAdiantamento.value = ficha.valorAdiantamento;
-        if (inputFreteOrigem && ficha.freteOrigem) inputFreteOrigem.value = ficha.freteOrigem;
-        if (inputRetorno1 && ficha.retorno1) inputRetorno1.value = ficha.retorno1;
-        if (inputRetorno2 && ficha.retorno2) inputRetorno2.value = ficha.retorno2;
-        if (inputRetorno3 && ficha.retorno3) inputRetorno3.value = ficha.retorno3;
-        if (inputTotalFrete && ficha.totalFrete) inputTotalFrete.value = ficha.totalFrete;
-        if (inputVrComissao && ficha.vrComissao) inputVrComissao.value = ficha.vrComissao;
+        const motoristaNome = ficha.motorista || ficha.motoristaNome || ficha.dados_completos?.motorista;
+        if (inputMotorista && motoristaNome) inputMotorista.value = motoristaNome;
+
+        const placasVal = ficha.placas || ficha.dados_completos?.placas;
+        if (inputPlacas && placasVal) inputPlacas.value = placasVal;
+
+        const dataSaidaVal = ficha.dataSaida || ficha.data_saida || ficha.dados_completos?.dataSaida;
+        if (inputDataSaida && dataSaidaVal) inputDataSaida.value = normalizarDataExibicao(dataSaidaVal);
+
+        const dataChegadaVal = ficha.dataChegada || ficha.data_chegada || ficha.dados_completos?.dataChegada;
+        if (inputDataChegada && dataChegadaVal) inputDataChegada.value = normalizarDataExibicao(dataChegadaVal);
+
+        const kmSaidaVal = ficha.kmSaida ?? ficha.km_saida ?? ficha.dados_completos?.kmSaida;
+        if (inputKmSaida && kmSaidaVal !== undefined && kmSaidaVal !== null) inputKmSaida.value = kmSaidaVal;
+
+        const kmChegadaVal = ficha.kmChegada ?? ficha.km_chegada ?? ficha.dados_completos?.kmChegada;
+        if (inputKmChegada && kmChegadaVal !== undefined && kmChegadaVal !== null) inputKmChegada.value = kmChegadaVal;
+
+        const kmTotalVal = ficha.kmTotal ?? ficha.km_total ?? ficha.dados_completos?.kmTotal;
+        if (inputKmTotal && kmTotalVal !== undefined && kmTotalVal !== null) inputKmTotal.value = kmTotalVal;
+
+        const destinoInicialVal = ficha.destinoInicial || ficha.destino_inicial || ficha.dados_completos?.destinoInicial;
+        if (inputDestinoInicial && destinoInicialVal) inputDestinoInicial.value = destinoInicialVal;
+
+        const destinoFinalVal = ficha.destinoFinal || ficha.destino_final || ficha.dados_completos?.destinoFinal;
+        if (inputDestinoFinal && destinoFinalVal) inputDestinoFinal.value = destinoFinalVal;
+
+        const adiantamentoVal = ficha.valorAdiantamento || ficha.valor_adiantamento || ficha.dados_completos?.valorAdiantamento;
+        if (inputAdiantamento && adiantamentoVal) inputAdiantamento.value = adiantamentoVal;
+
+        const freteOrigemVal = ficha.freteOrigem || ficha.frete_origem || ficha.dados_completos?.freteOrigem;
+        if (inputFreteOrigem && freteOrigemVal) inputFreteOrigem.value = freteOrigemVal;
+
+        const retorno1Val = ficha.retorno1 || ficha.retorno_1 || ficha.dados_completos?.retorno1;
+        if (inputRetorno1 && retorno1Val) inputRetorno1.value = retorno1Val;
+
+        const retorno2Val = ficha.retorno2 || ficha.retorno_2 || ficha.dados_completos?.retorno2;
+        if (inputRetorno2 && retorno2Val) inputRetorno2.value = retorno2Val;
+
+        const retorno3Val = ficha.retorno3 || ficha.retorno_3 || ficha.dados_completos?.retorno3;
+        if (inputRetorno3 && retorno3Val) inputRetorno3.value = retorno3Val;
+
+        const totalFreteVal = ficha.totalFrete || ficha.total_frete || ficha.dados_completos?.totalFrete;
+        if (inputTotalFrete && totalFreteVal) inputTotalFrete.value = totalFreteVal;
+
+        const vrComissaoVal = ficha.vrComissao || ficha.vr_comissao || ficha.dados_completos?.vrComissao;
+        if (inputVrComissao && vrComissaoVal) inputVrComissao.value = vrComissaoVal;
 
         // Fretes Operacionais
-        if (Array.isArray(ficha.fretes)) {
-            ficha.fretes.forEach((f, idx) => {
+        const fretesLista = Array.isArray(ficha.fretes) ? ficha.fretes : (Array.isArray(ficha.dados_completos?.fretes) ? ficha.dados_completos.fretes : []);
+        if (fretesLista.length > 0) {
+            fretesLista.forEach((f, idx) => {
                 const i = idx + 1;
                 const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
                 const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
@@ -2099,17 +2352,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Abastecimentos
-        if (Array.isArray(ficha.abastecimentos)) {
-            ficha.abastecimentos.forEach((ab, idx) => {
+        // Abastecimentos (Usa document.querySelector(`[name="posto_ml_${i}"]`) para contemplar <select> e <input>)
+        const abastLista = Array.isArray(ficha.abastecimentos) ? ficha.abastecimentos : (Array.isArray(ficha.dados_completos?.abastecimentos) ? ficha.dados_completos.abastecimentos : []);
+        if (abastLista.length > 0) {
+            abastLista.forEach((ab, idx) => {
                 const i = idx + 1;
-                const posto = document.querySelector(`input[name="posto_ml_${i}"]`);
+                const posto = document.querySelector(`[name="posto_ml_${i}"]`);
                 const nf = document.querySelector(`input[name="nf_ml_${i}"]`);
                 const km = document.querySelector(`input[name="km_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`);
                 const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
 
-                if (posto && ab.posto) posto.value = ab.posto;
+                if (posto && ab.posto) {
+                    if (posto.tagName === 'SELECT') {
+                        if (!Array.from(posto.options).some(o => o.value === ab.posto)) {
+                            const opt = document.createElement('option');
+                            opt.value = ab.posto;
+                            opt.textContent = ab.posto;
+                            posto.appendChild(opt);
+                        }
+                    }
+                    posto.value = ab.posto;
+                }
                 if (nf && ab.nf) nf.value = ab.nf;
                 if (km && ab.km) km.value = ab.km;
                 if (valor && ab.valor) valor.value = ab.valor;
@@ -2118,20 +2382,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Pedágios
-        if (Array.isArray(ficha.pedagios)) {
-            if (inputsPedagioMl[0] && ficha.pedagios[0]) inputsPedagioMl[0].value = ficha.pedagios[0];
-            if (inputsPedagioMl[1] && ficha.pedagios[1]) inputsPedagioMl[1].value = ficha.pedagios[1];
-            if (inputsPedagioMl[2] && ficha.pedagios[2]) inputsPedagioMl[2].value = ficha.pedagios[2];
+        const pedagiosLista = Array.isArray(ficha.pedagios) ? ficha.pedagios : (Array.isArray(ficha.dados_completos?.pedagios) ? ficha.dados_completos.pedagios : []);
+        if (pedagiosLista.length > 0) {
+            if (inputsPedagioMl[0] && pedagiosLista[0]) inputsPedagioMl[0].value = pedagiosLista[0];
+            if (inputsPedagioMl[1] && pedagiosLista[1]) inputsPedagioMl[1].value = pedagiosLista[1];
+            if (inputsPedagioMl[2] && pedagiosLista[2]) inputsPedagioMl[2].value = pedagiosLista[2];
         }
 
         // Imposto Federal
-        if (inputMlImpFederal && ficha.impFederal) {
-            inputMlImpFederal.value = ficha.impFederal;
+        const impFederalVal = ficha.impFederal || ficha.imp_federal || ficha.dados_completos?.impFederal;
+        if (inputMlImpFederal && impFederalVal) {
+            inputMlImpFederal.value = impFederalVal;
         }
 
-        // Anexos
-        if (Array.isArray(ficha.anexos)) {
-            arquivosComprovantesMl = ficha.anexos;
+        // Outras Despesas
+        const despesasExtras = Array.isArray(ficha.outrasDespesas) ? ficha.outrasDespesas : 
+            (Array.isArray(ficha.despesas_extras) ? ficha.despesas_extras : 
+            (Array.isArray(ficha.dados_completos?.outrasDespesas) ? ficha.dados_completos.outrasDespesas : 
+            (Array.isArray(ficha.dados_completos?.despesas_extras) ? ficha.dados_completos.despesas_extras : [])));
+        if (despesasExtras.length > 0) {
+            despesasExtras.forEach((item, index) => {
+                if (index === 0) {
+                    if (inputMlImpFederal && item.valor) inputMlImpFederal.value = item.valor;
+                } else if (index === 1) {
+                    if (inputMlDespesaDesc2 && item.desc) inputMlDespesaDesc2.value = item.desc;
+                    if (inputMlDespesaValor2 && item.valor) inputMlDespesaValor2.value = item.valor;
+                } else if (index === 2) {
+                    if (inputMlDespesaDesc3 && item.desc) inputMlDespesaDesc3.value = item.desc;
+                    if (inputMlDespesaValor3 && item.valor) inputMlDespesaValor3.value = item.valor;
+                }
+            });
+        }
+
+        // Anexos / Comprovantes
+        const anexosLista = Array.isArray(ficha.anexos) ? ficha.anexos : 
+            (Array.isArray(ficha.comprovantes) ? ficha.comprovantes : 
+            (Array.isArray(ficha.dados_completos?.anexos) ? ficha.dados_completos.anexos : 
+            (Array.isArray(ficha.dados_completos?.comprovantes) ? ficha.dados_completos.comprovantes : [])));
+        if (anexosLista.length > 0) {
+            arquivosComprovantesMl = anexosLista;
             renderizarListaAnexosMl();
         }
 
@@ -2148,17 +2437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const lista = JSON.parse(dados);
                 if (Array.isArray(lista)) {
-                    // Remove dados de seed mockados antigos se existirem
-                    const limpa = lista.filter(f => {
-                        if (!f || !f.id) return false;
-                        const mockIds = ['AJB-2026-001', 'AJB-2026-002', 'AJB-2026-003', 'AJB-2026-004', 'AJB-2026-005',
-                            'AJB-2026-006', 'AJB-2026-007', 'AJB-2026-008', 'AJB-2026-009', 'AJB-2026-010', 'AJB-2026-011'];
-                        return !mockIds.includes(f.id);
-                    });
-                    if (limpa.length !== lista.length) {
-                        localStorage.setItem(STORAGE_CENTRAL_FICHAS, JSON.stringify(limpa));
-                    }
-                    return limpa;
+                    return lista.filter(f => f && f.id);
                 }
             } catch (e) { }
         }
@@ -2198,7 +2477,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Configuração dos Modos (Admin vs Motorista)
-    function configurarCicloDeVidaViagem() {
+    async function configurarCicloDeVidaViagem() {
         const urlParams = new URLSearchParams(window.location.search);
         const fichaIdUrl = urlParams.get('ficha');
         const modeUrl = urlParams.get('mode');
@@ -2208,8 +2487,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (usuarioAtivoStr) {
             try {
                 usuarioAtivo = JSON.parse(usuarioAtivoStr);
-                if (usuarioAtivo && usuarioAtivo.nome === 'Carlos Eduardo Ferreira') {
+                if (usuarioAtivo && usuarioAtivo.nome === 'Carlos Eduardo Ferreira' && usuarioAtivo.role !== 'admin') {
                     usuarioAtivo.nome = '';
+                    localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
+                }
+                if (modeUrl === 'admin' && usuarioAtivo && usuarioAtivo.role !== 'admin') {
+                    usuarioAtivo.role = 'admin';
                     localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
                 }
             } catch (e) { }
@@ -2352,108 +2635,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 inp.removeAttribute('disabled');
             });
 
-            // Botão para adicionar novas linhas de despesas dinamicamente se ainda não existir
-            let containerAcoes = document.getElementById('container-adicionar-despesa-ml');
-            if (!containerAcoes) {
-                containerAcoes = document.createElement('div');
-                containerAcoes.id = 'container-adicionar-despesa-ml';
-                containerAcoes.style.padding = '8px 0';
-                containerAcoes.style.display = 'flex';
-                containerAcoes.style.justifyContent = 'flex-start';
-
-                const btnAddDespesa = document.createElement('button');
-                btnAddDespesa.type = 'button';
-                btnAddDespesa.id = 'btn-adicionar-linha-despesa-ml';
-                btnAddDespesa.className = 'btn-acao-secundaria btn-adicionar-despesa';
-                btnAddDespesa.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    + Adicionar Outra Despesa (Arla, Borracharia, Lavagem, Mecânica...)
-                `;
-                btnAddDespesa.style.cssText = `
-                    background: #f8fafc;
-                    border: 1.5px dashed #94a3b8;
-                    color: #1e3a8a;
-                    font-size: 11px;
-                    font-weight: 600;
-                    padding: 7px 12px;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    display: inline-flex;
-                    align-items: center;
-                    width: 100%;
-                    justify-content: center;
-                `;
-                btnAddDespesa.addEventListener('mouseenter', () => {
-                    btnAddDespesa.style.background = '#eff6ff';
-                    btnAddDespesa.style.borderColor = '#3b82f6';
-                });
-                btnAddDespesa.addEventListener('mouseleave', () => {
-                    btnAddDespesa.style.background = '#f8fafc';
-                    btnAddDespesa.style.borderColor = '#94a3b8';
-                });
-
-                let contadorNovaDespesa = 4;
-                btnAddDespesa.addEventListener('click', () => {
-                    const novaLinha = document.createElement('div');
-                    novaLinha.className = 'linha-despesa-composta linha-despesa-dinamica';
-                    novaLinha.innerHTML = `
-                        <div class="desc-com-trava">
-                            <label for="ml-despesa-desc-${contadorNovaDespesa}">Descrição ${contadorNovaDespesa}</label>
-                            <div class="input-wrapper">
-                                <input type="text" id="ml-despesa-desc-${contadorNovaDespesa}"
-                                    name="ml_despesa_desc_${contadorNovaDespesa}"
-                                    placeholder="Ex: Arla / Lavagem / Mecânica...">
-                            </div>
-                        </div>
-                        <div class="valor-com-rotulo">
-                            <label for="ml-despesa-valor-${contadorNovaDespesa}">Valor (R$)</label>
-                            <div class="input-wrapper input-moeda">
-                                <span class="input-prefixo">R$</span>
-                                <input type="text" id="ml-despesa-valor-${contadorNovaDespesa}"
-                                    name="ml_despesa_valor_${contadorNovaDespesa}" placeholder="0,00"
-                                    class="input-outra-despesa" inputmode="numeric">
-                            </div>
-                        </div>
-                    `;
-                    listaDespesas.appendChild(novaLinha);
-
-                    const inputValor = novaLinha.querySelector('.input-outra-despesa');
-                    const inputDesc = novaLinha.querySelector('input[type="text"]:not(.input-outra-despesa)');
-
-                    if (inputValor) {
-                        inputsOutrasDespesasValorMl.push(inputValor);
-                        aplicarMascaraMoeda(inputValor, () => {
-                            calcularTotaisDespesasMl();
-                            calcularIndicadoresViagemMl();
-                            salvarProgressoMl();
-                        });
-                    }
-                    if (inputDesc) {
-                        inputDesc.addEventListener('input', salvarProgressoMl);
-                        inputDesc.focus();
-                    }
-                    contadorNovaDespesa++;
-                });
-
-                containerAcoes.appendChild(btnAddDespesa);
-                listaDespesas.parentElement.insertBefore(containerAcoes, listaDespesas.nextSibling);
+            // Remover botão dinâmico caso exista
+            const containerExistente = document.getElementById('container-adicionar-despesa-ml');
+            if (containerExistente) {
+                containerExistente.remove();
             }
-        }
-
-        // Conecta botões de troca de visão (modo teste / apresentação)
-        const btnAlternarMotorista = document.getElementById('btn-alternar-modo-motorista');
-        const btnAlternarAdmin = document.getElementById('btn-alternar-modo-admin');
-        if (btnAlternarMotorista && !btnAlternarMotorista.dataset.bound) {
-            btnAlternarMotorista.dataset.bound = 'true';
-            btnAlternarMotorista.addEventListener('click', () => window.alternarPerfil('motorista'));
-        }
-        if (btnAlternarAdmin && !btnAlternarAdmin.dataset.bound) {
-            btnAlternarAdmin.dataset.bound = 'true';
-            btnAlternarAdmin.addEventListener('click', () => window.alternarPerfil('admin'));
         }
 
         // -------------------------------------------------------------
@@ -2469,6 +2655,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.removeAttribute('readonly');
                 input.removeAttribute('disabled');
             });
+            if (inputMotorista) {
+                liberarCampoBloqueado(inputMotorista);
+                inputMotorista.removeAttribute('readonly');
+                inputMotorista.removeAttribute('disabled');
+                inputMotorista.placeholder = 'Nome completo do motorista';
+            }
+            if (inputPlacas) {
+                liberarCampoBloqueado(inputPlacas);
+                inputPlacas.removeAttribute('readonly');
+                inputPlacas.removeAttribute('disabled');
+                inputPlacas.placeholder = 'Ex: GAB-1234';
+            }
 
             // 2. Liberação total dos campos de frete com recálculo (Tarefa 3)
             camposFretesFrota.forEach(input => liberarCampoBloqueado(input));
@@ -2518,7 +2716,56 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fichaIdUrl) {
                 const todas = obterListaFichasCentral();
                 fichaCarregada = todas.find(f => f.id === fichaIdUrl);
+
+                // Caso não encontre localmente ou se estiver conectado ao Supabase, faz a busca assíncrona diretamente no Supabase
+                if (!fichaCarregada || window.supabaseClient) {
+                    if (window.supabaseClient) {
+                        try {
+                            const { data: registro } = await window.supabaseClient
+                                .from('fichas_viagem')
+                                .select('*')
+                                .eq('id', fichaIdUrl)
+                                .maybeSingle();
+
+                            const mapearFn = typeof mapearFichaDoSupabase === 'function'
+                                ? mapearFichaDoSupabase
+                                : (typeof window.mapearFichaDoSupabase === 'function' ? window.mapearFichaDoSupabase : null);
+
+                            if (registro && mapearFn) {
+                                fichaCarregada = mapearFn(registro);
+                            }
+                        } catch (errSupabase) {
+                            console.warn('Erro ao consultar ficha no Supabase:', errSupabase);
+                        }
+                    }
+
+                    // Fallback em tempo real via window.buscarFichasSupabase() se ainda não constar
+                    if (!fichaCarregada && typeof window.buscarFichasSupabase === 'function') {
+                        try {
+                            const fichasSupabase = await window.buscarFichasSupabase();
+                            if (Array.isArray(fichasSupabase)) {
+                                const encontrada = fichasSupabase.find(f => f.id === fichaIdUrl);
+                                if (encontrada) {
+                                    fichaCarregada = encontrada;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Erro ao consultar fallback buscarFichasSupabase:', e);
+                        }
+                    }
+                }
+
                 if (fichaCarregada) {
+                    // Atualiza cache local para sincronização imediata
+                    const todasAtuais = obterListaFichasCentral();
+                    const idxExistente = todasAtuais.findIndex(f => f.id === fichaCarregada.id);
+                    if (idxExistente >= 0) {
+                        todasAtuais[idxExistente] = { ...todasAtuais[idxExistente], ...fichaCarregada };
+                    } else {
+                        todasAtuais.unshift(fichaCarregada);
+                    }
+                    salvarListaFichasCentral(todasAtuais);
+
                     atualizarDisplayNumeroFicha(fichaCarregada.id);
                     carregarFichaEmCampos(fichaCarregada);
 
@@ -2526,9 +2773,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminTitulo.innerHTML = `Conferência da Ficha: <strong>${fichaCarregada.id}</strong>`;
                     }
                     if (adminStatus) {
-                        const aprovado = fichaCarregada.status === 'aprovado';
-                        adminStatus.className = `status-pill ${aprovado ? 'status-concluido' : 'status-pendente'}`;
-                        adminStatus.textContent = aprovado ? '🟢 Concluído / Aprovado' : '🟡 Pendente de Conferência';
+                        const st = fichaCarregada.status || 'pendente';
+                        if (st === 'aprovado') {
+                            adminStatus.className = 'status-pill status-concluido';
+                            adminStatus.textContent = '🟢 Concluído / Aprovado';
+                        } else if (st === 'aguardando_confirmacao') {
+                            adminStatus.className = 'status-pill status-aguardando-confirmacao';
+                            adminStatus.textContent = '🟠 Esperando Confirmação';
+                        } else {
+                            adminStatus.className = 'status-pill status-pendente';
+                            adminStatus.textContent = '🟡 Pendente de Conferência';
+                        }
                     }
                 }
             } else {
@@ -2537,35 +2792,75 @@ document.addEventListener('DOMContentLoaded', () => {
                     adminTitulo.textContent = 'Lançamento de Nova Ficha • Todos os campos liberados para a Frota';
                 }
                 if (adminStatus) {
-                    adminStatus.className = 'status-pill status-concluido';
-                    adminStatus.textContent = '🟢 Modo de Edição Liberado';
+                    adminStatus.className = 'status-pill status-pendente';
+                    adminStatus.textContent = '🟡 Pendente de Conferência';
                 }
             }
 
             // Ação de Salvar Alterações pelo Administrador
             if (btnAdminSalvar) {
-                btnAdminSalvar.addEventListener('click', () => {
-                    const idSalvar = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
-                    atualizarFichaNaBase(idSalvar, false);
-                    exibirToast(`Alterações da ficha ${idSalvar} salvas com sucesso!`, 'sucesso');
+                btnAdminSalvar.addEventListener('click', async () => {
+                    if (inputPlacas && !inputPlacas.disabled && !inputPlacas.readOnly) {
+                        const limpo = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        if (limpo.length !== 7) {
+                            exibirToast('A placa do veículo deve conter exatamente 7 caracteres (Ex: GAB-1234 ou GAB-1C34).', 'erro');
+                            inputPlacas.focus();
+                            return;
+                        }
+                    }
+
+                    const idSalvar = (fichaCarregada && fichaCarregada.id) ? fichaCarregada.id : (fichaIdUrl || fichaNumeroAtual);
+                    const textoOriginal = btnAdminSalvar.innerHTML;
+                    btnAdminSalvar.innerHTML = `<span>⏳ Salvando...</span>`;
+                    btnAdminSalvar.disabled = true;
+
+                    try {
+                        const dadosSalvos = await atualizarFichaNaBase(idSalvar, false);
+                        if (dadosSalvos) {
+                            fichaCarregada = dadosSalvos;
+                        }
+                        sessionStorage.setItem('ajborges_toast_mensagem', `Ficha ${idSalvar} salva! Status: Esperando Confirmação`);
+                        window.location.href = 'dashboard-admin.html#fichas';
+                    } catch (e) {
+                        console.error('Erro ao salvar alterações da ficha:', e);
+                        exibirToast(`Erro ao salvar alterações da ficha ${idSalvar}`, 'erro');
+                        btnAdminSalvar.innerHTML = textoOriginal;
+                        btnAdminSalvar.disabled = false;
+                    }
                 });
             }
 
             // Ação de "Aprovar e Concluir Relatório" pelo Administrador
             if (btnAdminAprovar) {
-                btnAdminAprovar.addEventListener('click', () => {
+                btnAdminAprovar.addEventListener('click', async () => {
+                    if (inputPlacas && !inputPlacas.disabled && !inputPlacas.readOnly) {
+                        const limpo = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        if (limpo.length !== 7) {
+                            exibirToast('A placa do veículo deve conter exatamente 7 caracteres (Ex: GAB-1234).', 'erro');
+                            inputPlacas.focus();
+                            return;
+                        }
+                    }
+
                     const idAprovar = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
                     if (!confirm(`Confirmar a homologação e aprovação definitiva do Relatório de Viagem ${idAprovar}?`)) {
                         return;
                     }
 
-                    atualizarFichaNaBase(idAprovar, true);
-                    sessionStorage.setItem('ajborges_toast_mensagem', `Relatório ${idAprovar} APROVADO e CONCLUÍDO com sucesso!`);
+                    const textoOriginal = btnAdminAprovar.innerHTML;
+                    btnAdminAprovar.innerHTML = `<span>⏳ Aprovando...</span>`;
+                    btnAdminAprovar.disabled = true;
 
-                    // Retorna suavemente ao Dashboard Administrativo na seção de fichas
-                    setTimeout(() => {
+                    try {
+                        await atualizarFichaNaBase(idAprovar, true);
+                        sessionStorage.setItem('ajborges_toast_mensagem', `Relatório ${idAprovar} APROVADO e CONCLUÍDO com sucesso!`);
                         window.location.href = 'dashboard-admin.html#fichas';
-                    }, 500);
+                    } catch (e) {
+                        console.error('Erro ao aprovar ficha:', e);
+                        exibirToast(`Erro ao aprovar a ficha ${idAprovar}`, 'erro');
+                        btnAdminAprovar.innerHTML = textoOriginal;
+                        btnAdminAprovar.disabled = false;
+                    }
                 });
             }
 
@@ -2605,7 +2900,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // -------------------------------------------------------------
         if (isModoView && fichaIdUrl) {
             const todas = obterListaFichasCentral();
-            const fichaView = todas.find(f => f.id === fichaIdUrl);
+            let fichaView = todas.find(f => f.id === fichaIdUrl);
+
+            // Carregamento direto do Supabase no modo visualização
+            if (window.supabaseClient) {
+                try {
+                    const { data: registro } = await window.supabaseClient
+                        .from('fichas_viagem')
+                        .select('*')
+                        .eq('id', fichaIdUrl)
+                        .maybeSingle();
+
+                    const mapearFn = typeof mapearFichaDoSupabase === 'function'
+                        ? mapearFichaDoSupabase
+                        : (typeof window.mapearFichaDoSupabase === 'function' ? window.mapearFichaDoSupabase : null);
+
+                    if (registro && mapearFn) {
+                        fichaView = mapearFn(registro);
+                    }
+                } catch (e) {
+                    console.warn('Erro ao carregar ficha no modo view via Supabase:', e);
+                }
+            }
+
             if (fichaView) {
                 atualizarDisplayNumeroFicha(fichaView.id);
                 carregarFichaEmCampos(fichaView);
@@ -2627,7 +2944,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                         <div class="motorista-info-right">
-                            <button type="button" class="btn-minhas-viagens" onclick="window.history.back()">
+                            <button type="button" class="btn-voltar-gestao" onclick="window.history.back()">
                                 ⬅ Voltar
                             </button>
                         </div>
@@ -2646,8 +2963,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. TAREFA 2: Bloqueio rigoroso de Motorista e Placas com "Definido pela Administração"
         camposAdminVeiculo.forEach(input => {
             aplicarBloqueioCampo(input, 'Definido pela Administração');
-            input.setAttribute('disabled', 'true');
+            input.setAttribute('readonly', 'true');
         });
+
+        // Campo Placas (NUNCA Preencher Automaticamente no modo motorista)
+        if (inputPlacas) {
+            inputPlacas.value = '';
+            inputPlacas.placeholder = 'Aguardando definição da Gestão';
+            aplicarBloqueioCampo(inputPlacas, 'Definido pela Administração');
+            inputPlacas.setAttribute('readonly', 'true');
+            inputPlacas.setAttribute('disabled', 'true');
+        }
+
+        // Campo Motorista (Bloqueado como readonly com a tag Definido pela Administração)
+        if (inputMotorista) {
+            aplicarBloqueioCampo(inputMotorista, 'Definido pela Administração');
+            inputMotorista.setAttribute('readonly', 'true');
+            if (usuarioAtivo && usuarioAtivo.role === 'motorista' && usuarioAtivo.nome) {
+                const nomeValido = usuarioAtivo.nome !== 'Carlos Eduardo Ferreira' ? usuarioAtivo.nome : '';
+                if (nomeValido) {
+                    inputMotorista.value = nomeValido;
+                }
+            }
+        }
 
         // 2. TAREFA 3: Bloqueio de Fretes com "Definido pela Frota"
         camposFretesFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
@@ -2682,64 +3020,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Verifica estado do Motorista (Com Login ou Sem Login)
         const motoristaSaudacao = document.getElementById('motorista-saudacao-texto');
-        const motoristaBotoesLogado = document.getElementById('motorista-botoes-logado');
-        const btnAbrirMinhasViagens = document.getElementById('btn-abrir-minhas-viagens');
 
         const isMotoristaLogado = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
         if (isMotoristaLogado) {
             const nomeMotoristaValido = (usuarioAtivo.nome && usuarioAtivo.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtivo.nome : '';
 
-            // TAREFA 2: Desativar preenchimento automático: NÃO preencher motorista nem placas na ficha!
-            // Os campos permanecem intactos/definidos pela administração.
+            // TAREFA 1: Campo Motorista preenchido automaticamente com nome do perfil e mantido readonly
+            if (inputMotorista && nomeMotoristaValido) {
+                inputMotorista.value = nomeMotoristaValido;
+                aplicarBloqueioCampo(inputMotorista, 'Definido pela Administração');
+                inputMotorista.setAttribute('readonly', 'true');
+            }
+
+            // TAREFA 2: Campo Placas NUNCA preenchido automaticamente; permanece vazio e bloqueado
+            if (inputPlacas) {
+                inputPlacas.value = '';
+                inputPlacas.placeholder = 'Aguardando definição da Gestão';
+                aplicarBloqueioCampo(inputPlacas, 'Definido pela Administração');
+                inputPlacas.setAttribute('readonly', 'true');
+                inputPlacas.setAttribute('disabled', 'true');
+            }
 
             if (motoristaSaudacao) {
                 motoristaSaudacao.innerHTML = `Olá, <strong>${nomeMotoristaValido || 'Motorista'}</strong> • Conectado via Portal`;
-            }
-            if (motoristaBotoesLogado) {
-                motoristaBotoesLogado.style.display = 'block';
-            }
-
-            // Atualiza contador de "Minhas Viagens"
-            atualizarContadorMinhasViagens();
-
-            if (btnAbrirMinhasViagens) {
-                btnAbrirMinhasViagens.addEventListener('click', abrirModalMinhasViagens);
             }
         } else {
             if (motoristaSaudacao) {
                 motoristaSaudacao.innerHTML = `Portal da Frota • Modo Motorista`;
             }
-            if (motoristaBotoesLogado) {
-                motoristaBotoesLogado.style.display = 'none';
-            }
         }
     }
 
-    function atualizarContadorMinhasViagens() {
-        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-        let usuarioAtivo = null;
-        if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
-        }
-        if (!usuarioAtivo || usuarioAtivo.role !== 'motorista') return;
-
-        const todas = obterListaFichasCentral();
-        const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
-        const badge = document.getElementById('badge-total-minhas-viagens');
-        if (badge) badge.textContent = minhas.length;
-    }
-
-    function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
+    async function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
         let todas = obterListaFichasCentral();
         let index = todas.findIndex(f => f.id === idFicha);
+
+        const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
+        let usuarioAtivoSessao = null;
+        if (usuarioAtivoStr) {
+            try { usuarioAtivoSessao = JSON.parse(usuarioAtivoStr); } catch (e) { }
+        }
 
         const dadosAtualizados = {
             id: idFicha,
             protocolo: idFicha,
-            motorista: inputMotorista?.value.trim() || usuarioAtivo?.nome || (index >= 0 ? todas[index].motorista : 'Motorista'),
-            motorista_cpf: (index >= 0 ? (todas[index].motorista_cpf || todas[index].motoristaCpf) : '') || usuarioAtivo?.cpf || '',
-            motoristaCpf: (index >= 0 ? (todas[index].motoristaCpf || todas[index].motorista_cpf) : '') || usuarioAtivo?.cpf || '',
+            motorista: inputMotorista?.value.trim() || (index >= 0 ? todas[index].motorista : '') || usuarioAtivoSessao?.nome || 'Motorista',
+            motorista_cpf: (index >= 0 ? (todas[index].motorista_cpf || todas[index].motoristaCpf) : '') || usuarioAtivoSessao?.cpf || '',
+            motoristaCpf: (index >= 0 ? (todas[index].motoristaCpf || todas[index].motorista_cpf) : '') || usuarioAtivoSessao?.cpf || '',
             placas: inputPlacas?.value.trim() || (index >= 0 ? todas[index].placas : '') || '',
             dataSaida: inputDataSaida?.value || '',
             data_saida: inputDataSaida?.value || '',
@@ -2791,97 +3119,55 @@ document.addEventListener('DOMContentLoaded', () => {
             saldo_comissao: document.getElementById('ml-indicador-saldo-comissao')?.textContent?.replace('R$', '')?.trim() || '0,00',
             anexos: arquivosComprovantesMl || [],
             comprovantes: arquivosComprovantesMl || [],
+            origemEnvio: (index >= 0 && todas[index].origemEnvio) ? todas[index].origemEnvio : 'motorista_com_login',
             dados_completos: null
         };
         dadosAtualizados.dados_completos = { ...dadosAtualizados };
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeUrl = urlParams.get('mode');
+        const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivoSessao && (usuarioAtivoSessao.role === 'admin' || usuarioAtivoSessao.role === 'diretoria') && modeUrl !== 'motorista');
+
         if (marcarComoAprovado) {
             dadosAtualizados.status = 'aprovado';
             dadosAtualizados.dataAprovacao = new Date().toLocaleString('pt-BR');
-            dadosAtualizados.aprovadoPor = 'operacional@ajborges.com';
+            dadosAtualizados.aprovadoPor = usuarioAtivoSessao?.email || 'operacional@ajborges.com';
+        } else if (isModoAdmin) {
+            dadosAtualizados.status = 'aguardando_confirmacao';
+            dadosAtualizados.dataUltimaEdicao = new Date().toLocaleString('pt-BR');
+            dadosAtualizados.editadoPor = usuarioAtivoSessao?.nome || 'Gestão Operacional';
+        } else {
+            dadosAtualizados.status = (index >= 0 && todas[index].status) ? todas[index].status : 'pendente';
         }
 
         if (index >= 0) {
             todas[index] = { ...todas[index], ...dadosAtualizados };
         } else {
             dadosAtualizados.dataEnvio = new Date().toLocaleString('pt-BR');
-            dadosAtualizados.status = marcarComoAprovado ? 'aprovado' : 'pendente';
+            if (!dadosAtualizados.status) {
+                dadosAtualizados.status = marcarComoAprovado ? 'aprovado' : (isModoAdmin ? 'aguardando_confirmacao' : 'pendente');
+            }
             todas.unshift(dadosAtualizados);
         }
 
         salvarListaFichasCentral(todas);
 
-        // Persistência em nuvem no Supabase
+        // Limpar a chave temporária de rascunho
+        localStorage.removeItem(STORAGE_ML_KEY);
+
+        // Persistência obrigatória em nuvem no Supabase TANTO se for nova QUANTO se for edição (index >= 0)
         if (typeof window.salvarFichaSupabase === 'function') {
-            window.salvarFichaSupabase(dadosAtualizados);
+            try {
+                await window.salvarFichaSupabase(dadosAtualizados);
+                console.log(`✅ Ficha ${idFicha} sincronizada e salva no Supabase com sucesso.`);
+            } catch (errSupabase) {
+                console.warn('Erro ao salvar ficha no Supabase:', errSupabase);
+            }
         }
+
+        return dadosAtualizados;
     }
 
-    // Modal de Minhas Viagens do Motorista
-    function abrirModalMinhasViagens() {
-            const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-            let usuarioAtivo = null;
-            if (usuarioAtivoStr) {
-                try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
-            }
-            if (!usuarioAtivo) return;
-
-            const todas = obterListaFichasCentral();
-            const minhas = todas.filter(f => f.motoristaId === usuarioAtivo.id || f.motorista === usuarioAtivo.nome);
-
-            const modal = document.getElementById('modal-lista-minhas-viagens');
-            const tbody = document.getElementById('tabela-minhas-viagens-body');
-            const empty = document.getElementById('minhas-viagens-empty');
-            const sub = document.getElementById('subtitulo-motorista-minhas-viagens');
-
-            if (sub) sub.textContent = `Relatórios de ${usuarioAtivo.nome || 'Motorista'}`;
-
-            if (tbody) {
-                tbody.innerHTML = '';
-                if (minhas.length === 0) {
-                    if (empty) empty.style.display = 'block';
-                } else {
-                    if (empty) empty.style.display = 'none';
-                    minhas.forEach(m => {
-                        const isPendente = m.status === 'pendente';
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                        <td><strong>${m.id}</strong></td>
-                        <td>${m.dataEnvio || m.dataSaida || '-'}</td>
-                        <td>${m.destinoInicial || '-'} ➔ ${m.destinoFinal || 'SP'}</td>
-                        <td><strong style="color: #047857;">R$ ${m.totalFrete || '0,00'}</strong></td>
-                        <td>
-                            <span class="status-pill ${isPendente ? 'status-pendente' : 'status-concluido'}">
-                                ${isPendente ? '🟡 Pendente de Aprovação' : '🟢 Concluído'}
-                            </span>
-                        </td>
-                        <td style="text-align: right;">
-                            <a href="relatorio-viagem.html?ficha=${m.id}&mode=view" class="btn-minhas-viagens" style="padding: 4px 10px; font-size: 0.78rem;">
-                                Ver Ficha
-                            </a>
-                        </td>
-                    `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            }
-
-            if (modal) modal.classList.add('ativo');
-        }
-
-        // Fechar Modais
-        const btnFecharMinhasViagens = document.getElementById('btn-fechar-minhas-viagens');
-        const btnFecharMinhasViagensRodape = document.getElementById('btn-fechar-minhas-viagens-rodape');
-        if (btnFecharMinhasViagens) {
-            btnFecharMinhasViagens.addEventListener('click', () => {
-                document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
-            });
-        }
-        if (btnFecharMinhasViagensRodape) {
-            btnFecharMinhasViagensRodape.addEventListener('click', () => {
-                document.getElementById('modal-lista-minhas-viagens')?.classList.remove('ativo');
-            });
-        }
 
         // Modal Sem Login - Copiar Protocolo
         const btnCopiarSemLogin = document.getElementById('btn-copiar-protocolo-sem-login');
@@ -2898,16 +3184,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnNovoEnvioSemLogin = document.getElementById('btn-novo-envio-sem-login');
         if (btnNovoEnvioSemLogin) {
             btnNovoEnvioSemLogin.addEventListener('click', () => {
-                window.location.href = 'relatorio-viagem.html';
-            });
-        }
-
-        // Modal Com Login - Ir para Minhas Viagens
-        const btnModalIrMinhasViagens = document.getElementById('btn-modal-ir-minhas-viagens');
-        if (btnModalIrMinhasViagens) {
-            btnModalIrMinhasViagens.addEventListener('click', () => {
-                document.getElementById('modal-protocolo-com-login')?.classList.remove('ativo');
-                abrirModalMinhasViagens();
+                localStorage.removeItem(STORAGE_ML_KEY);
+                window.location.href = 'relatorio-viagem.html?novo=true';
             });
         }
 
@@ -2915,25 +3193,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnNovoEnvioComLogin = document.getElementById('btn-novo-envio-com-login');
         if (btnNovoEnvioComLogin) {
             btnNovoEnvioComLogin.addEventListener('click', () => {
-                window.location.href = 'relatorio-viagem.html';
+                localStorage.removeItem(STORAGE_ML_KEY);
+                window.location.href = 'relatorio-viagem.html?novo=true';
             });
         }
 
         // =========================================================================
-        // FINALIZAR E ENVIAR RELATÓRIO DE VIAGEM (MOTORISTA)
+        // FINALIZAR E ENVIAR RELATÓRIO DE VIAGEM (MOTORISTA / GESTÃO ADMIN)
         // =========================================================================
         const btnFinalizarRelatorioMl = document.getElementById('btn-finalizar-relatorio-ml');
         if (btnFinalizarRelatorioMl) {
-            btnFinalizarRelatorioMl.addEventListener('click', (e) => {
+            btnFinalizarRelatorioMl.addEventListener('click', async (e) => {
                 e.preventDefault();
 
-                // Recupera usuário ativo
+                // Recupera usuário ativo e modo
                 const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
                 let usuarioAtivo = null;
                 if (usuarioAtivoStr) {
                     try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
                 }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const modeUrl = urlParams.get('mode');
+                const fichaIdUrl = urlParams.get('ficha');
+                const isModoAdmin = (modeUrl === 'admin') || (usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
+
+                // SE FOR ADMINISTRADOR: Salva/atualiza com todos os campos e retorna imediatamente ao Dashboard
+                if (isModoAdmin) {
+                    if (inputPlacas && !inputPlacas.disabled && !inputPlacas.readOnly) {
+                        const limpo = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        if (limpo.length !== 7) {
+                            exibirToast('A placa do veículo deve conter exatamente 7 caracteres (Ex: GAB-1234 ou GAB-1C34).', 'erro');
+                            inputPlacas.focus();
+                            return;
+                        }
+                    }
+
+                    const idSalvar = fichaIdUrl || (fichaCarregada ? fichaCarregada.id : (typeof fichaNumeroAtual !== 'undefined' ? fichaNumeroAtual : formatarNumeroFicha(obterProximoNumeroFicha())));
+                    const textoOriginal = btnFinalizarRelatorioMl.innerHTML;
+                    btnFinalizarRelatorioMl.innerHTML = `<span>⏳ Salvando pela Gestão...</span>`;
+                    btnFinalizarRelatorioMl.disabled = true;
+
+                    try {
+                        await atualizarFichaNaBase(idSalvar, false);
+                        sessionStorage.setItem('ajborges_toast_mensagem', `Ficha ${idSalvar} salva! Status: Esperando Confirmação`);
+                        window.location.href = 'dashboard-admin.html#fichas';
+                    } catch (err) {
+                        console.error('Erro ao salvar ficha pelo administrador:', err);
+                        exibirToast(`Erro ao salvar a ficha ${idSalvar}`, 'erro');
+                        btnFinalizarRelatorioMl.innerHTML = textoOriginal;
+                        btnFinalizarRelatorioMl.disabled = false;
+                    }
+                    return;
+                }
+
                 const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
+
+                // Valida placa se foi preenchida
+                if (inputPlacas) {
+                    const limpoPlaca = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (limpoPlaca.length > 0 && limpoPlaca.length !== 7) {
+                        exibirToast('A placa deve conter obrigatoriamente exatamente 7 caracteres (Ex: GAB-1234 ou GAB-1C34).', 'erro');
+                        if (!inputPlacas.disabled && !inputPlacas.readOnly) inputPlacas.focus();
+                        return;
+                    }
+                }
 
                 const motoristaIdentificado = (inputMotorista && inputMotorista.value.trim() !== '') || (isComLogin && usuarioAtivo?.nome);
                 const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
@@ -3078,7 +3402,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (elNum) elNum.textContent = novoIdFicha;
                     if (modalComLogin) modalComLogin.classList.add('ativo');
 
-                    atualizarContadorMinhasViagens();
                     exibirToast(`Ficha ${novoIdFicha} vinculada ao seu cadastro e enviada com sucesso!`, 'sucesso');
                 }
             });
