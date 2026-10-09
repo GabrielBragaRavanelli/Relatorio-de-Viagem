@@ -58,6 +58,74 @@ function escapeHtmlAttr(str) {
         .replace(/>/g, '&gt;');
 }
 
+function obterStatusAcertoMotorista(nomeMotorista) {
+    if (!nomeMotorista) return 'nao_confirmado';
+    const statusMap = carregarStatusAcertos();
+    return (statusMap[nomeMotorista] === 'confirmado') ? 'confirmado' : 'nao_confirmado';
+}
+
+function parseMilharOuFloat(val) {
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    if (!val) return 0;
+    const str = String(val).trim();
+    if (str.includes(',')) {
+        return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+    }
+    return parseFloat(str.replace(/,/g, '')) || 0;
+}
+
+function obterMediaRealFicha(f) {
+    if (!f) return { valorNum: 0, texto: '0.00' };
+
+    // 1. Tenta calcular diretamente pelos dados reais da viagem (KM Total / Total Litros)
+    let km = 0;
+    if (f.kmTotal !== undefined && f.kmTotal !== null && f.kmTotal !== '') {
+        km = parseMilharOuFloat(f.kmTotal);
+    } else if (f.km_total !== undefined && f.km_total !== null && f.km_total !== '') {
+        km = parseMilharOuFloat(f.km_total);
+    }
+
+    let litros = 0;
+    if (f.totalLitros) {
+        litros = parseValorMoeda(f.totalLitros);
+    } else if (f.total_litros) {
+        litros = parseValorMoeda(f.total_litros);
+    }
+    if (litros === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+        litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
+    }
+
+    if (km > 0 && litros > 0) {
+        const mediaCalc = km / litros;
+        if (!isNaN(mediaCalc) && isFinite(mediaCalc) && mediaCalc > 0) {
+            return { valorNum: mediaCalc, texto: mediaCalc.toFixed(2) };
+        }
+    }
+
+    // 2. Se não calculou por KM/Litros, sanitiza mediaKmL ou media_km_l
+    let raw = f.mediaKmL ?? f.media_km_l ?? '';
+    let rawStr = String(raw).replace(/km\/l/gi, '').trim();
+    if (rawStr.includes(',')) {
+        rawStr = rawStr.replace(/\./g, '').replace(',', '.');
+    }
+    let num = parseFloat(rawStr);
+    if (isNaN(num) || num <= 0) {
+        return { valorNum: 0, texto: '0.00' };
+    }
+
+    // Corrige valor falso legado de 238 ou 238.00 (resultado de erro de escala de 2.38)
+    if (Math.abs(num - 238) < 0.1 || Math.abs(num - 2.38) < 0.01) {
+        if (km === 0 || litros === 0) {
+            return { valorNum: 0, texto: '0.00' };
+        }
+        return { valorNum: 2.38, texto: '2.38' };
+    }
+    if (num > 50) {
+        num = num / 100;
+    }
+
+    return { valorNum: num, texto: num.toFixed(2) };
+}
 
 // Instâncias globais de gráficos Chart.js
 let chartFinanceiroInstance = null;
@@ -114,6 +182,13 @@ function inicializarBancoDados() {
                         return false;
                     }
                     return true;
+                });
+
+                // Sanitiza médias para garantir que dados reais da viagem sejam calculados sem falhas legadas
+                appState.fichas.forEach(f => {
+                    const infoMed = obterMediaRealFicha(f);
+                    f.mediaKmL = infoMed.texto;
+                    f.media_km_l = infoMed.texto;
                 });
 
                 // Persiste o banco de dados limpo sem nenhum dado de exemplo
@@ -453,12 +528,7 @@ function calcularMetricasDashboard() {
     let piorMotorista = null;
     let menorMedia = 999;
     appState.fichas.forEach(f => {
-        let med = parseFloat(f.mediaKmL ?? f.media_km_l ?? 0);
-        if (med === 0 && f.abastecimentos && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
-            const km = parseFloat(f.kmTotal ?? f.km_total ?? 0);
-            const litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
-            if (km > 0 && litros > 0) med = km / litros;
-        }
+        const med = obterMediaRealFicha(f).valorNum;
         if (med > 0 && med < menorMedia) {
             menorMedia = med;
             piorMotorista = f.motorista || 'Motorista';
@@ -630,16 +700,18 @@ function renderizarTabelaFichas() {
         }
 
         const motoristaNome = ficha.motorista || 'Motorista';
-        const acertoConfirmado = statusAcertosMap[motoristaNome] === 'confirmado';
+        const acertoConfirmado = obterStatusAcertoMotorista(motoristaNome) === 'confirmado';
         const acertoBadgeHtml = acertoConfirmado
             ? `<span class="status-pill status-concluido">🟢 Acerto Confirmado</span>`
             : `<span class="status-pill status-pendente">🟡 Não Confirmado</span>`;
 
-        const mediaNum = parseFloat(ficha.mediaKmL || 0);
+        const mediaInfo = obterMediaRealFicha(ficha);
+        const mediaNum = mediaInfo.valorNum;
+        const mediaTexto = mediaInfo.texto;
 
         const metaAtual = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
         let mediaClass = 'diesel-bom';
-        if (metaAtual > 0) {
+        if (metaAtual > 0 && mediaNum > 0) {
             if (mediaNum < (metaAtual - 0.20)) mediaClass = 'diesel-alerta';
             else if (mediaNum < metaAtual) mediaClass = 'diesel-atencao';
         }
@@ -673,7 +745,7 @@ function renderizarTabelaFichas() {
             </td>
             <td>
                 <span class="diesel-badge ${mediaClass}">
-                    ${ficha.mediaKmL ? `${ficha.mediaKmL} km/l` : '0.00 km/l'}
+                    ${mediaNum > 0 ? `${mediaTexto} km/l` : '0.00 km/l'}
                 </span>
             </td>
             <td>
@@ -903,7 +975,7 @@ function abrirModalResumoFicha(fichaId) {
                     <div class="modal-info-linha"><span>Período:</span> <strong>${ficha.dataSaida || '-'} até ${ficha.dataChegada || '-'}</strong></div>
                     <div class="modal-info-linha"><span>KM Saída / Chegada:</span> <strong>${ficha.kmSaida || '-'} / ${ficha.kmChegada || '-'}</strong></div>
                     <div class="modal-info-linha"><span>KM Total Rodado:</span> <strong>${ficha.kmTotal || '0'} km</strong></div>
-                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${ficha.mediaKmL || '0.00'} km/l</strong></div>
+                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${obterMediaRealFicha(ficha).texto} km/l</strong></div>
                 </div>
                 <div class="modal-info-box">
                     <div class="modal-info-box-title">Fechamento Financeiro</div>
@@ -1045,12 +1117,7 @@ function obterDadosGraficosReais() {
     const motoristasMediaMap = {};
     appState.fichas.forEach(f => {
         const m = f.motorista || 'Motorista';
-        let med = parseFloat(f.mediaKmL ?? f.media_km_l ?? 0);
-        if (med === 0 && f.abastecimentos && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
-            const km = parseFloat(f.kmTotal ?? f.km_total ?? 0);
-            const litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
-            if (km > 0 && litros > 0) med = km / litros;
-        }
+        let med = obterMediaRealFicha(f).valorNum;
         if (med > 0) {
             if (!motoristasMediaMap[m]) motoristasMediaMap[m] = { soma: 0, count: 0 };
             motoristasMediaMap[m].soma += med;
@@ -1422,52 +1489,7 @@ function preencherSecoesSecundarias() {
     }
 
     // 4. Seção Combustível
-    const tbodyCombustivel = document.getElementById('tabela-combustivel-body');
-    if (tbodyCombustivel) {
-        const listaAbast = [];
-        appState.fichas.forEach(f => {
-            if (f.abastecimentos && Array.isArray(f.abastecimentos)) {
-                f.abastecimentos.forEach(ab => {
-                    listaAbast.push({
-                        posto: ab.posto || 'Posto Conveniado',
-                        nf: ab.nf || '-',
-                        data: f.dataSaida || f.data_saida || f.dataEnvio || '-',
-                        motorista: f.motorista || 'Motorista',
-                        litros: ab.litros || '0',
-                        valor: ab.valor || '0,00'
-                    });
-                });
-            }
-        });
-
-        if (listaAbast.length === 0) {
-            tbodyCombustivel.innerHTML = `
-                <tr>
-                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 28px;">
-                        Nenhum registro de abastecimento para conferência no momento.
-                    </td>
-                </tr>
-            `;
-        } else {
-            tbodyCombustivel.innerHTML = listaAbast.map(ab => {
-                const v = parseValorMoeda(ab.valor);
-                const l = parseValorMoeda(ab.litros);
-                const precoL = l > 0 ? (v / l).toFixed(2).replace('.', ',') : '0,00';
-                return `
-                    <tr>
-                        <td>${ab.posto}</td>
-                        <td>NF ${ab.nf}</td>
-                        <td>${ab.data}</td>
-                        <td>${ab.motorista}</td>
-                        <td>${ab.litros} L</td>
-                        <td>R$ ${precoL}</td>
-                        <td>R$ ${ab.valor}</td>
-                        <td><span class="status-pill status-concluido">✓ Lançado</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
-    }
+    renderizarTabelaCombustivel();
 
     // 5. Seção Frota
     const tbodyFrota = document.getElementById('tabela-frota-body');
@@ -1479,7 +1501,7 @@ function preencherSecoesSecundarias() {
                     veiculosMap[f.placas] = {
                         motorista: f.motorista || 'Motorista',
                         kmAtual: f.kmChegada || f.kmSaida || f.km_chegada || f.km_saida || '-',
-                        media: f.mediaKmL || (f.media_km_l ? Number(f.media_km_l).toFixed(2) : '0.00'),
+                        media: obterMediaRealFicha(f).texto,
                         status: f.status === 'pendente' ? 'Em Rota' : 'Disponível'
                     };
                 }
@@ -1627,6 +1649,113 @@ function preencherSecoesSecundarias() {
             `;
         }
     }
+}
+
+// ==========================================================================
+// 7.1. SEÇÃO CONFERÊNCIA DE COMBUSTÍVEL (CRUZAR POSTO X MOTORISTA COM FILTRO)
+// ==========================================================================
+
+function renderizarTabelaCombustivel() {
+    const tbodyCombustivel = document.getElementById('tabela-combustivel-body');
+    const selectFiltro = document.getElementById('filtro-combustivel-motorista');
+    const infoRegistros = document.getElementById('info-registros-combustivel');
+    if (!tbodyCombustivel) return;
+
+    const listaAbast = [];
+    const motoristasSet = new Set();
+
+    appState.fichas.forEach(f => {
+        const motNome = f.motorista || 'Motorista Não Identificado';
+        motoristasSet.add(motNome);
+
+        if (f.abastecimentos && Array.isArray(f.abastecimentos)) {
+            f.abastecimentos.forEach(ab => {
+                listaAbast.push({
+                    fichaId: f.id || 'Sem ID',
+                    posto: ab.posto || 'Posto Conveniado',
+                    nf: ab.nf || '-',
+                    data: f.dataSaida || f.data_saida || f.dataEnvio || '-',
+                    motorista: motNome,
+                    litros: ab.litros || '0',
+                    valor: ab.valor || '0,00'
+                });
+            });
+        }
+    });
+
+    // Popula o seletor de motoristas preservando o valor atualmente selecionado
+    if (selectFiltro) {
+        const motoristaAtual = selectFiltro.value || '';
+        const motoristasOrdenados = Array.from(motoristasSet).filter(Boolean).sort();
+
+        const htmlOpcoes = ['<option value="">Todos os Motoristas</option>'];
+        motoristasOrdenados.forEach(m => {
+            const sel = (m === motoristaAtual) ? 'selected' : '';
+            htmlOpcoes.push(`<option value="${escapeHtmlAttr(m)}" ${sel}>${m}</option>`);
+        });
+
+        const chaveSet = motoristasOrdenados.join('|');
+        if (selectFiltro.getAttribute('data-cache-chave') !== chaveSet) {
+            selectFiltro.innerHTML = htmlOpcoes.join('');
+            selectFiltro.value = motoristaAtual;
+            selectFiltro.setAttribute('data-cache-chave', chaveSet);
+        }
+
+        if (!selectFiltro.hasAttribute('data-filtro-ativo')) {
+            selectFiltro.setAttribute('data-filtro-ativo', 'true');
+            selectFiltro.addEventListener('change', () => {
+                renderizarTabelaCombustivel();
+            });
+        }
+    }
+
+    const filtroSelecionado = selectFiltro ? (selectFiltro.value || '').trim() : '';
+    const abastFiltrados = filtroSelecionado
+        ? listaAbast.filter(a => a.motorista.toLowerCase() === filtroSelecionado.toLowerCase())
+        : listaAbast;
+
+    if (infoRegistros) {
+        infoRegistros.textContent = `${abastFiltrados.length} abastecimento(s) encontrado(s)`;
+    }
+
+    if (abastFiltrados.length === 0) {
+        const msg = filtroSelecionado
+            ? `Nenhum abastecimento encontrado para o motorista "${filtroSelecionado}".`
+            : `Nenhum registro de abastecimento para conferência no momento.`;
+        tbodyCombustivel.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; color: #94a3b8; padding: 28px;">
+                    ${msg}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbodyCombustivel.innerHTML = abastFiltrados.map(ab => {
+        const v = parseValorMoeda(ab.valor);
+        const l = parseValorMoeda(ab.litros);
+        const precoL = l > 0 ? (v / l).toFixed(2).replace('.', ',') : '0,00';
+        return `
+            <tr>
+                <td><strong>${ab.posto}</strong></td>
+                <td>NF ${ab.nf}</td>
+                <td>
+                    <a href="relatorio-viagem.html?ficha=${encodeURIComponent(ab.fichaId)}&mode=admin" 
+                       class="td-ficha-id" 
+                       title="Visualizar Ficha ${ab.fichaId}">
+                        ${ab.fichaId}
+                    </a>
+                </td>
+                <td>${ab.data}</td>
+                <td>${ab.motorista}</td>
+                <td>${ab.litros} L</td>
+                <td>R$ ${precoL}</td>
+                <td><strong>R$ ${ab.valor}</strong></td>
+                <td><span class="status-pill status-concluido">✓ Lançado</span></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // ==========================================================================

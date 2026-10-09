@@ -178,6 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let apagandoPlaca = false;
 
         inputPlacas.addEventListener('keydown', (e) => {
+            if (inputPlacas.readOnly || inputPlacas.disabled) {
+                e.preventDefault();
+                return;
+            }
             if (e.key === 'Backspace') {
                 apagandoPlaca = true;
                 // Se terminar com '-', remove o hífen e a letra anterior para não travar o cursor
@@ -192,6 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         inputPlacas.addEventListener('input', (e) => {
+            if (inputPlacas.readOnly || inputPlacas.disabled) {
+                e.preventDefault();
+                return;
+            }
             // Converte automaticamente para maiúsculas e aceita apenas caracteres alfanuméricos (máximo 7)
             let limpo = (e.target.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
 
@@ -205,6 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 e.target.value = limpo;
+            }
+        });
+
+        inputPlacas.addEventListener('focus', () => {
+            if (inputPlacas.readOnly || inputPlacas.disabled) {
+                inputPlacas.blur();
             }
         });
 
@@ -353,6 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        inputTexto.addEventListener('click', (e) => {
+            if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
+                return;
+            }
+            abrirSeletorNativo();
+        });
+
         inputTexto.addEventListener('dblclick', (e) => {
             if (inputTexto.readOnly || inputTexto.disabled || inputTexto.hasAttribute('readonly') || inputTexto.closest('.campo-bloqueado-gestao')) {
                 e.preventDefault();
@@ -366,8 +387,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 return;
             }
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                abrirSeletorNativo();
+                return;
+            }
             if (e.ctrlKey || e.altKey || e.metaKey || [
-                'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
+                'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
             ].includes(e.key)) {
                 return;
             }
@@ -1832,14 +1858,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const cabecalho = {
                 motorista: (isMotorista && usuarioAtual?.nome && usuarioAtual.nome !== 'Carlos Eduardo Ferreira') ? usuarioAtual.nome : (inputMotorista?.value || ''),
-                placas: isMotorista ? '' : (inputPlacas?.value || ''),
+                placas: (inputPlacas?.value?.trim() && inputPlacas.value.trim() !== 'A definir pela Gestão') ? inputPlacas.value.trim() : '',
                 dataSaida: inputDataSaida?.value || '',
                 dataChegada: inputDataChegada?.value || '',
                 kmSaida: inputKmSaida?.value || '',
                 kmChegada: inputKmChegada?.value || '',
                 kmTotal: inputKmTotal?.value || '',
-                destinoInicial: inputDestinoInicial?.value || '',
-                destinoFinal: inputDestinoFinal?.value || '',
+                destinoInicial: inputDestinoInicial?.value?.trim() || '',
+                destinoFinal: inputDestinoFinal?.value?.trim() || '',
                 valorAdiantamento: inputAdiantamento?.value || '',
                 freteOrigem: inputFreteOrigem?.value || '',
                 retorno1: inputRetorno1?.value || '',
@@ -2043,13 +2069,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    // TAREFA 3: Bloqueio de Rascunho para Placas no Modo Motorista
-                    // Se o usuário logado for com role 'motorista', NÃO restaure o valor de #placas a partir do rascunho local
                     if (inputPlacas) {
-                        if (isMotorista) {
+                        const pl = dados.cabecalho.placas;
+                        if (pl && pl.trim() !== '' && pl.trim() !== 'A definir pela Gestão') {
+                            inputPlacas.value = pl.trim();
+                        } else {
                             inputPlacas.value = '';
-                        } else if (dados.cabecalho.placas) {
-                            inputPlacas.value = dados.cabecalho.placas;
                         }
                     }
 
@@ -2290,7 +2315,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputMotorista && motoristaNome) inputMotorista.value = motoristaNome;
 
         const placasVal = ficha.placas || ficha.dados_completos?.placas;
-        if (inputPlacas && placasVal) inputPlacas.value = placasVal;
+        if (inputPlacas) {
+            if (placasVal && placasVal.trim() !== '' && placasVal.trim() !== 'A definir pela Gestão') {
+                inputPlacas.value = placasVal.trim();
+            } else {
+                inputPlacas.value = '';
+            }
+        }
 
         const dataSaidaVal = ficha.dataSaida || ficha.data_saida || ficha.dados_completos?.dataSaida;
         if (inputDataSaida && dataSaidaVal) inputDataSaida.value = normalizarDataExibicao(dataSaidaVal);
@@ -2308,10 +2339,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputKmTotal && kmTotalVal !== undefined && kmTotalVal !== null) inputKmTotal.value = kmTotalVal;
 
         const destinoInicialVal = ficha.destinoInicial || ficha.destino_inicial || ficha.dados_completos?.destinoInicial;
-        if (inputDestinoInicial && destinoInicialVal) inputDestinoInicial.value = destinoInicialVal;
+        if (inputDestinoInicial) {
+            inputDestinoInicial.value = (destinoInicialVal && destinoInicialVal.trim() !== 'Origem') ? destinoInicialVal.trim() : '';
+        }
 
         const destinoFinalVal = ficha.destinoFinal || ficha.destino_final || ficha.dados_completos?.destinoFinal;
-        if (inputDestinoFinal && destinoFinalVal) inputDestinoFinal.value = destinoFinalVal;
+        if (inputDestinoFinal) {
+            inputDestinoFinal.value = (destinoFinalVal && destinoFinalVal.trim() !== 'Destino') ? destinoFinalVal.trim() : '';
+        }
 
         const adiantamentoVal = ficha.valorAdiantamento || ficha.valor_adiantamento || ficha.dados_completos?.valorAdiantamento;
         if (inputAdiantamento && adiantamentoVal) inputAdiantamento.value = adiantamentoVal;
@@ -2517,7 +2552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // -------------------------------------------------------------
         // SEPARAÇÃO DOS CAMPOS DE GOVERNANÇA (Tarefas 1, 2, 3 e 4)
         // -------------------------------------------------------------
-        // Grupo 1: Veículo e Motorista (Definido pela Administração no modo motorista)
+        // Grupo 1: Motorista e Veículo (Definido pela Gestão no modo motorista)
         const camposAdminVeiculo = [inputMotorista, inputPlacas].filter(Boolean);
 
         // Grupo 2: Fretes da Empresa (Definido pela Frota no modo motorista)
@@ -2670,6 +2705,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 liberarCampoBloqueado(inputPlacas);
                 inputPlacas.removeAttribute('readonly');
                 inputPlacas.removeAttribute('disabled');
+                inputPlacas.removeAttribute('tabindex');
+                inputPlacas.classList.remove('campo-bloqueado-gestao');
                 inputPlacas.placeholder = 'Ex: GAB-1234';
             }
 
@@ -2971,13 +3008,16 @@ document.addEventListener('DOMContentLoaded', () => {
             input.setAttribute('readonly', 'true');
         });
 
-        // Campo Placas (NUNCA Preencher Automaticamente no modo motorista)
+        // Campo Placas (Uso Exclusivo da Gestão - Bloqueado para o Motorista)
         if (inputPlacas) {
-            inputPlacas.value = '';
-            inputPlacas.placeholder = 'Aguardando definição da Gestão';
-            aplicarBloqueioCampo(inputPlacas, 'Definido pela Administração');
+            aplicarBloqueioCampo(inputPlacas, 'Definido pela Gestão');
             inputPlacas.setAttribute('readonly', 'true');
-            inputPlacas.setAttribute('disabled', 'true');
+            inputPlacas.setAttribute('tabindex', '-1');
+            inputPlacas.classList.add('campo-bloqueado-gestao');
+            inputPlacas.placeholder = 'Definido pela Gestão';
+            if (!inputPlacas.value || inputPlacas.value.trim() === 'A definir pela Gestão') {
+                inputPlacas.value = '';
+            }
         }
 
         // Campo Motorista (Bloqueado como readonly com a tag Definido pela Administração)
@@ -3038,13 +3078,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputMotorista.setAttribute('readonly', 'true');
             }
 
-            // TAREFA 2: Campo Placas NUNCA preenchido automaticamente; permanece vazio e bloqueado
+            // Campo Placas (Uso Exclusivo da Gestão - Bloqueado para o Motorista)
             if (inputPlacas) {
-                inputPlacas.value = '';
-                inputPlacas.placeholder = 'Aguardando definição da Gestão';
-                aplicarBloqueioCampo(inputPlacas, 'Definido pela Administração');
+                aplicarBloqueioCampo(inputPlacas, 'Definido pela Gestão');
                 inputPlacas.setAttribute('readonly', 'true');
-                inputPlacas.setAttribute('disabled', 'true');
+                inputPlacas.setAttribute('tabindex', '-1');
+                inputPlacas.classList.add('campo-bloqueado-gestao');
+                inputPlacas.placeholder = 'Definido pela Gestão';
+                if (!inputPlacas.value || inputPlacas.value.trim() === 'A definir pela Gestão') {
+                    inputPlacas.value = '';
+                }
             }
 
             if (motoristaSaudacao) {
@@ -3055,6 +3098,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 motoristaSaudacao.innerHTML = `Portal da Frota • Modo Motorista`;
             }
         }
+    }
+
+    function extrairMediaCombustivelMlParaSalvar() {
+        const el = document.getElementById('ml-indicador-media-combustivel');
+        if (el) {
+            const texto = el.textContent || '';
+            const match = texto.match(/(\d+(?:[.,]\d+)?)/);
+            if (match) {
+                const val = parseFloat(match[1].replace(',', '.'));
+                if (!isNaN(val) && val > 0) {
+                    return val.toFixed(2);
+                }
+            }
+        }
+        const kmTotal = parseMilhar(inputKmTotal ? inputKmTotal.value : 0);
+        const abastTotais = typeof calcularTotaisAbastecimentoMl === 'function' ? calcularTotaisAbastecimentoMl() : { litros: 0 };
+        if (kmTotal > 0 && abastTotais.litros > 0) {
+            const med = kmTotal / abastTotais.litros;
+            if (!isNaN(med) && isFinite(med) && med > 0) {
+                return med.toFixed(2);
+            }
+        }
+        return '0.00';
     }
 
     async function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
@@ -3073,7 +3139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             motorista: inputMotorista?.value.trim() || (index >= 0 ? todas[index].motorista : '') || usuarioAtivoSessao?.nome || 'Motorista',
             motorista_cpf: (index >= 0 ? (todas[index].motorista_cpf || todas[index].motoristaCpf) : '') || usuarioAtivoSessao?.cpf || '',
             motoristaCpf: (index >= 0 ? (todas[index].motoristaCpf || todas[index].motorista_cpf) : '') || usuarioAtivoSessao?.cpf || '',
-            placas: inputPlacas?.value.trim() || (index >= 0 ? todas[index].placas : '') || '',
+            placas: (inputPlacas?.value?.trim() && inputPlacas.value.trim() !== 'A definir pela Gestão') ? inputPlacas.value.trim() : ((index >= 0 ? todas[index].placas : '') || ''),
             dataSaida: inputDataSaida?.value || '',
             data_saida: inputDataSaida?.value || '',
             dataChegada: inputDataChegada?.value || '',
@@ -3084,10 +3150,10 @@ document.addEventListener('DOMContentLoaded', () => {
             km_chegada: inputKmChegada?.value || '',
             kmTotal: inputKmTotal?.value || '',
             km_total: inputKmTotal?.value || '',
-            destinoInicial: inputDestinoInicial?.value || '',
-            destino_inicial: inputDestinoInicial?.value || '',
-            destinoFinal: inputDestinoFinal?.value || '',
-            destino_final: inputDestinoFinal?.value || '',
+            destinoInicial: inputDestinoInicial?.value?.trim() || '',
+            destino_inicial: inputDestinoInicial?.value?.trim() || '',
+            destinoFinal: inputDestinoFinal?.value?.trim() || '',
+            destino_final: inputDestinoFinal?.value?.trim() || '',
             freteOrigem: inputFreteOrigem?.value || '',
             frete_origem: inputFreteOrigem?.value || '',
             retorno1: inputRetorno1?.value || '',
@@ -3106,8 +3172,10 @@ document.addEventListener('DOMContentLoaded', () => {
             abastecimentos: coletarAbastecimentosAtuais(),
             totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
             totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
-            mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
-            media_km_l: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+            mediaKmL: extrairMediaCombustivelMlParaSalvar(),
+            media_km_l: extrairMediaCombustivelMlParaSalvar(),
+            status_acerto: (index >= 0 && todas[index].status_acerto) ? todas[index].status_acerto : 'nao_confirmado',
+            statusAcerto: (index >= 0 && todas[index].statusAcerto) ? todas[index].statusAcerto : 'nao_confirmado',
             pedagios: [
                 inputsPedagioMl[0]?.value || '',
                 inputsPedagioMl[1]?.value || '',
@@ -3254,12 +3322,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
-                // Valida placa se foi preenchida
-                if (inputPlacas) {
+                // Valida placa apenas se o campo estiver liberado para edição (modo gestão)
+                if (inputPlacas && !inputPlacas.disabled && !inputPlacas.readOnly) {
                     const limpoPlaca = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
                     if (limpoPlaca.length > 0 && limpoPlaca.length !== 7) {
                         exibirToast('A placa deve conter obrigatoriamente exatamente 7 caracteres (Ex: GAB-1234 ou GAB-1C34).', 'erro');
-                        if (!inputPlacas.disabled && !inputPlacas.readOnly) inputPlacas.focus();
+                        inputPlacas.focus();
                         return;
                     }
                 }
@@ -3315,7 +3383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     motoristaCpf: usuarioAtivo?.cpf || '',
                     motoristaId: isComLogin ? usuarioAtivo.id : 'anonimo',
                     origemEnvio: isComLogin ? 'motorista_com_login' : 'motorista_sem_login',
-                    placas: inputPlacas?.value.trim() || 'A definir pela Gestão',
+                    placas: (inputPlacas?.value?.trim() && inputPlacas.value.trim() !== 'A definir pela Gestão') ? inputPlacas.value.trim() : '',
                     data_saida: inputDataSaida?.value || '',
                     dataSaida: inputDataSaida?.value || '',
                     data_chegada: inputDataChegada?.value || '',
@@ -3326,10 +3394,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     kmChegada: inputKmChegada?.value || '',
                     km_total: inputKmTotal?.value || '',
                     kmTotal: inputKmTotal?.value || '',
-                    destino_inicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
-                    destinoInicial: inputDestinoInicial?.value || (fretesAtuais[0]?.origem || 'Origem'),
-                    destino_final: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
-                    destinoFinal: inputDestinoFinal?.value || (fretesAtuais[fretesAtuais.length - 1]?.destino || 'Destino'),
+                    destino_inicial: inputDestinoInicial?.value?.trim() || '',
+                    destinoInicial: inputDestinoInicial?.value?.trim() || '',
+                    destino_final: inputDestinoFinal?.value?.trim() || '',
+                    destinoFinal: inputDestinoFinal?.value?.trim() || '',
                     frete_origem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
                     freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
                     retorno_1: inputRetorno1?.value || '',
@@ -3348,8 +3416,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     abastecimentos: abastsAtuais,
                     totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
                     totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
-                    media_km_l: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
-                    mediaKmL: document.getElementById('ml-calc-media-combustivel')?.textContent?.trim() || '2.38',
+                    media_km_l: extrairMediaCombustivelMlParaSalvar(),
+                    mediaKmL: extrairMediaCombustivelMlParaSalvar(),
                     pedagios: [
                         inputsPedagioMl[0]?.value || '',
                         inputsPedagioMl[1]?.value || '',
@@ -3367,9 +3435,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     anexos: arquivosComprovantesMl || [],
                     comprovantes: arquivosComprovantesMl || [],
                     dados_completos: null,
+                    status_acerto: 'nao_confirmado',
+                    statusAcerto: 'nao_confirmado',
                     status: 'pendente'
                 };
                 novaFicha.dados_completos = { ...novaFicha };
+
+                // Garante que o acerto com este motorista seja iniciado estritamente como não confirmado
+                try {
+                    const statusAcertosStr = localStorage.getItem('ajborges_acertos_status');
+                    const statusAcertos = statusAcertosStr ? JSON.parse(statusAcertosStr) : {};
+                    const nomeMot = inputMotorista?.value?.trim() || (isComLogin ? usuarioAtivo?.nome : '') || 'Motorista';
+                    if (nomeMot) {
+                        statusAcertos[nomeMot] = 'nao_confirmado';
+                        localStorage.setItem('ajborges_acertos_status', JSON.stringify(statusAcertos));
+                    }
+                } catch (e) { }
 
                 // Salva na fila central de fichas (Local e Nuvem)
                 const todasFichas = obterListaFichasCentral();

@@ -237,7 +237,7 @@
                             <!-- Placas -->
                             <div class="campo-grupo">
                                 <label for="placas">
-                                    PLACAS <span class="asterisco">*</span>
+                                    PLACAS <span class="tag-bloqueado-frota">Definido pela Gestão</span>
                                 </label>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -246,8 +246,8 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <input type="text" id="placas" name="placas" placeholder="Ex: GAB-1234"
-                                        maxlength="8" autocomplete="off">
+                                    <input type="text" id="placas" name="placas" placeholder="Definido pela Gestão"
+                                        maxlength="8" autocomplete="off" readonly="true" tabindex="-1" class="campo-bloqueado-gestao">
                                 </div>
                             </div>
                         </div>
@@ -384,7 +384,7 @@
                             <!-- Destino Inicial -->
                             <div class="campo-grupo">
                                 <label for="destino-inicial">
-                                    DESTINO: INICIAL <span class="asterisco">*</span>
+                                    DESTINO: INICIAL
                                 </label>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -393,7 +393,7 @@
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
-                                    <input type="text" id="destino-inicial" name="destino_inicial" required
+                                    <input type="text" id="destino-inicial" name="destino_inicial"
                                         placeholder="Ex: Marília - SP" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">

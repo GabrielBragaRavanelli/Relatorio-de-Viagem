@@ -2595,6 +2595,10 @@ footer {
     z-index: 2;
 }
 
+.btn-picker-data svg {
+    pointer-events: none;
+}
+
 .btn-picker-data:hover {
     color: var(--azul-ajborges);
     background-color: #f1f5f9;

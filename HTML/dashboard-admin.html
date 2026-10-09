@@ -818,12 +818,29 @@
                         <p>Cruzamento das Notas Fiscais dos postos conveniados com os lançamentos de abastecimento e KM.
                         </p>
                     </div>
+
+                    <!-- Barra de Ferramentas / Filtro de Combustível -->
+                    <div class="tabela-toolbar" style="margin-bottom: 16px;">
+                        <div class="toolbar-left">
+                            <div class="filtro-cliente-wrapper">
+                                <label for="filtro-combustivel-motorista">Filtrar Motorista:</label>
+                                <select id="filtro-combustivel-motorista" class="select-filtro-custom">
+                                    <option value="">Todos os Motoristas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="tabela-info-registros" id="info-registros-combustivel">0 abastecimentos encontrados</span>
+                        </div>
+                    </div>
+
                     <div class="placeholder-section-card">
                         <table class="tabela-fichas">
                             <thead>
                                 <tr>
                                     <th>Posto / Rede</th>
                                     <th>NF</th>
+                                    <th>Nº Ficha</th>
                                     <th>Data</th>
                                     <th>Motorista</th>
                                     <th>Litros</th>
