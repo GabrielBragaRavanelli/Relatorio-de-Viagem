@@ -13,6 +13,51 @@ const STORAGE_USER_KEY = 'ajborges_usuario_ativo';
 const STORAGE_CADASTROS_AGREGADOS_KEY = 'ajborges_cadastros_agregados';
 const STORAGE_CONFIG_META_DIESEL = 'ajborges_config_meta_diesel';
 const STORAGE_CONFIG_TAXA_BORGES = 'ajborges_config_taxa_borges';
+const STORAGE_ACERTOS_STATUS_KEY = 'ajborges_acertos_status';
+
+// Funções de Persistência e Controle de Status de Acerto com Motoristas
+function carregarStatusAcertos() {
+    try {
+        const dados = localStorage.getItem(STORAGE_ACERTOS_STATUS_KEY);
+        return dados ? JSON.parse(dados) : {};
+    } catch (e) {
+        console.error('Erro ao ler status dos acertos:', e);
+        return {};
+    }
+}
+
+function alternarConfirmacaoAcerto(nomeMotorista, novoStatus) {
+    if (!nomeMotorista) return;
+    try {
+        const statusMap = carregarStatusAcertos();
+        if (novoStatus === 'confirmado') {
+            statusMap[nomeMotorista] = 'confirmado';
+            localStorage.setItem(STORAGE_ACERTOS_STATUS_KEY, JSON.stringify(statusMap));
+            exibirToast(`Acerto com ${nomeMotorista} marcado como Confirmado!`, 'sucesso');
+        } else {
+            statusMap[nomeMotorista] = 'nao_confirmado';
+            localStorage.setItem(STORAGE_ACERTOS_STATUS_KEY, JSON.stringify(statusMap));
+            exibirToast(`Acerto com ${nomeMotorista} revertido para Não Confirmado.`, 'info');
+        }
+        renderizarTabelaFichas();
+        preencherSecoesSecundarias();
+    } catch (e) {
+        console.error('Erro ao salvar status de acerto:', e);
+    }
+}
+window.alternarConfirmacaoAcerto = alternarConfirmacaoAcerto;
+window.alternarStatusAcerto = alternarConfirmacaoAcerto;
+
+function escapeHtmlAttr(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 
 // Instâncias globais de gráficos Chart.js
 let chartFinanceiroInstance = null;
@@ -120,7 +165,7 @@ function carregarConfiguracoes() {
 
     if (metaSalva !== null) {
         const parsedMeta = parseNumeroBR(metaSalva);
-        if (!isNaN(parsedMeta) && parsedMeta > 0) {
+        if (!isNaN(parsedMeta) && parsedMeta >= 0) {
             appState.config.metaDiesel = parsedMeta;
         }
     }
@@ -139,61 +184,90 @@ function carregarConfiguracoes() {
     aplicarAtualizacoesConfiguracao(false);
 }
 
-function confirmarESalvarParametrosOperacionais() {
+function confirmarESalvarMetaDiesel() {
     const inputMeta = document.getElementById('config-meta-diesel');
-    const inputTaxa = document.getElementById('config-taxa-borges');
-    if (!inputMeta || !inputTaxa) return;
+    if (!inputMeta) return;
 
     const novaMeta = parseNumeroBR(inputMeta.value);
-    const novaTaxa = parseNumeroBR(inputTaxa.value);
 
-    // Validação da Meta de Diesel
-    if (isNaN(novaMeta) || novaMeta <= 0) {
-        alert('Por favor, informe uma Meta de Consumo Diesel válida maior que zero (ex: 2,40 km/l).');
+    // Validação da Meta de Diesel (aceita maior ou igual a zero)
+    if (isNaN(novaMeta) || novaMeta < 0) {
+        alert('Por favor, informe uma Meta de Consumo Diesel válida maior ou igual a zero (ex: 2,40 km/l ou 0,00 para sem meta).');
         inputMeta.focus();
         return;
     }
 
-    // Validação da Taxa Borges
+    const metaFmt = novaMeta.toFixed(2).replace('.', ',');
+
+    const confirmou = confirm(
+        `Deseja realmente confirmar a alteração da Meta de Consumo Diesel?\n\n` +
+        `• Nova Meta: ${metaFmt} km/l\n\n` +
+        `Os indicadores de consumo, auditorias e gráficos serão atualizados imediatamente.`
+    );
+
+    if (confirmou) {
+        appState.config.metaDiesel = novaMeta;
+        localStorage.setItem(STORAGE_CONFIG_META_DIESEL, novaMeta.toString());
+
+        inputMeta.value = metaFmt;
+
+        aplicarAtualizacoesConfiguracao(true);
+        renderizarTabelaFichas();
+
+        exibirToast(`Meta de consumo diesel confirmada: ${metaFmt} km/l.`, 'sucesso');
+    } else {
+        inputMeta.value = appState.config.metaDiesel.toFixed(2).replace('.', ',');
+        exibirToast('Alteração da Meta de Diesel cancelada. Valor mantido.', 'info');
+    }
+}
+window.confirmarESalvarMetaDiesel = confirmarESalvarMetaDiesel;
+
+function confirmarESalvarTaxaBorges() {
+    const inputTaxa = document.getElementById('config-taxa-borges');
+    if (!inputTaxa) return;
+
+    const novaTaxa = parseNumeroBR(inputTaxa.value);
+
+    // Validação da Taxa Borges (entre 0% e 100%)
     if (isNaN(novaTaxa) || novaTaxa < 0 || novaTaxa > 100) {
         alert('Por favor, informe um Percentual de Taxa Borges válido entre 0% e 100% (ex: 5,0%).');
         inputTaxa.focus();
         return;
     }
 
-    const metaFmt = novaMeta.toFixed(2).replace('.', ',');
     const taxaFmt = novaTaxa.toFixed(1).replace('.', ',');
 
     const confirmou = confirm(
-        `Deseja realmente confirmar a alteração dos parâmetros operacionais?\n\n` +
-        `• Meta de Consumo Diesel: ${metaFmt} km/l\n` +
-        `• Percentual Taxa Borges: ${taxaFmt}%\n\n` +
-        `Todas as contas, faturamento, auditorias e gráficos serão atualizados imediatamente de acordo com esses valores.`
+        `Deseja realmente confirmar a alteração do percentual da Taxa Borges?\n\n` +
+        `• Novo Percentual: ${taxaFmt}%\n\n` +
+        `A revisão de faturamento e receitas administrativas será atualizada imediatamente.`
     );
 
     if (confirmou) {
-        appState.config.metaDiesel = novaMeta;
         appState.config.taxaBorges = novaTaxa;
-        localStorage.setItem(STORAGE_CONFIG_META_DIESEL, novaMeta.toString());
         localStorage.setItem(STORAGE_CONFIG_TAXA_BORGES, novaTaxa.toString());
 
-        inputMeta.value = metaFmt;
         inputTaxa.value = taxaFmt;
 
         aplicarAtualizacoesConfiguracao(true);
         renderizarTabelaFichas();
 
-        exibirToast(`Parâmetros operacionais confirmados! Meta: ${metaFmt} km/l | Taxa: ${taxaFmt}%.`, 'sucesso');
+        exibirToast(`Taxa Borges confirmada: ${taxaFmt}%.`, 'sucesso');
     } else {
-        inputMeta.value = appState.config.metaDiesel.toFixed(2).replace('.', ',');
         inputTaxa.value = appState.config.taxaBorges.toFixed(1).replace('.', ',');
-        exibirToast('Alteração de parâmetros cancelada. Valores mantidos.', 'info');
+        exibirToast('Alteração da Taxa Borges cancelada. Valor mantido.', 'info');
     }
+}
+window.confirmarESalvarTaxaBorges = confirmarESalvarTaxaBorges;
+
+function confirmarESalvarParametrosOperacionais() {
+    confirmarESalvarMetaDiesel();
+    confirmarESalvarTaxaBorges();
 }
 
 function salvarConfiguracaoMetaDiesel(novaMeta) {
     const val = parseNumeroBR(novaMeta);
-    if (isNaN(val) || val <= 0) return false;
+    if (isNaN(val) || val < 0) return false;
     appState.config.metaDiesel = val;
     localStorage.setItem(STORAGE_CONFIG_META_DIESEL, val.toString());
     aplicarAtualizacoesConfiguracao(true);
@@ -393,7 +467,7 @@ function calcularMetricasDashboard() {
 
     const metaDiesel = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
 
-    if (piorMotorista && menorMedia < metaDiesel) {
+    if (piorMotorista && metaDiesel > 0 && menorMedia < metaDiesel) {
         if (elAlertaConsumoTexto) {
             elAlertaConsumoTexto.innerHTML = `${piorMotorista} está com a menor média (<strong>${menorMedia.toFixed(2)} km/l</strong>), abaixo da meta (${metaDiesel.toFixed(2)} km/l).`;
         }
@@ -540,6 +614,7 @@ function renderizarTabelaFichas() {
 
     if (emptyState) emptyState.style.display = 'none';
 
+    const statusAcertosMap = carregarStatusAcertos();
     listaFiltrada.forEach(ficha => {
         const tr = document.createElement('tr');
         tr.id = `row-ficha-${ficha.id}`;
@@ -554,12 +629,20 @@ function renderizarTabelaFichas() {
             statusBadgeHtml = `<span class="status-pill status-pendente">🟡 Pendente de Conferência</span>`;
         }
 
+        const motoristaNome = ficha.motorista || 'Motorista';
+        const acertoConfirmado = statusAcertosMap[motoristaNome] === 'confirmado';
+        const acertoBadgeHtml = acertoConfirmado
+            ? `<span class="status-pill status-concluido">🟢 Acerto Confirmado</span>`
+            : `<span class="status-pill status-pendente">🟡 Não Confirmado</span>`;
+
         const mediaNum = parseFloat(ficha.mediaKmL || 0);
 
         const metaAtual = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
         let mediaClass = 'diesel-bom';
-        if (mediaNum < (metaAtual - 0.20)) mediaClass = 'diesel-alerta';
-        else if (mediaNum < metaAtual) mediaClass = 'diesel-atencao';
+        if (metaAtual > 0) {
+            if (mediaNum < (metaAtual - 0.20)) mediaClass = 'diesel-alerta';
+            else if (mediaNum < metaAtual) mediaClass = 'diesel-atencao';
+        }
 
         const rotaStr = (ficha.destinoInicial && ficha.destinoFinal) 
             ? `${ficha.destinoInicial} ➔ ${ficha.destinoFinal}` 
@@ -595,6 +678,9 @@ function renderizarTabelaFichas() {
             </td>
             <td>
                 ${statusBadgeHtml}
+            </td>
+            <td>
+                ${acertoBadgeHtml}
             </td>
             <td class="col-acoes text-right">
                 <div class="table-actions-cell">
@@ -987,9 +1073,13 @@ function obterDadosGraficosReais() {
             const med = motoristasMediaMap[nome].soma / motoristasMediaMap[nome].count;
             labelsConsumo.push(nome);
             dataConsumo.push(parseFloat(med.toFixed(2)));
-            if (med < (meta - 0.20)) coresConsumo.push('#ef4444');
-            else if (med < meta) coresConsumo.push('#f59e0b');
-            else coresConsumo.push('#10b981');
+            if (meta > 0) {
+                if (med < (meta - 0.20)) coresConsumo.push('#ef4444');
+                else if (med < meta) coresConsumo.push('#f59e0b');
+                else coresConsumo.push('#10b981');
+            } else {
+                coresConsumo.push('#10b981');
+            }
         });
     }
 
@@ -1140,8 +1230,8 @@ function inicializarGraficos() {
                                 const val = context.parsed.x;
                                 if (val === 0) return ' Sem consumo registrado';
                                 const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
-                                const status = val < meta ? `(Abaixo da meta de ${meta.toFixed(2)} km/l)` : '(Dentro da meta)';
-                                return ` Média: ${val.toFixed(2)} km/l ${status}`;
+                                const status = (meta > 0 && val < meta) ? `(Abaixo da meta de ${meta.toFixed(2)} km/l)` : (meta > 0 ? '(Dentro da meta)' : '');
+                                return ` Média: ${val.toFixed(2)} km/l ${status}`.trim();
                             }
                         }
                     }
@@ -1214,7 +1304,7 @@ function preencherSecoesSecundarias() {
             containerViagens.innerHTML = `
                 <table class="tabela-fichas">
                     <thead>
-                        <tr><th>Viagem</th><th>Data</th><th>Motorista</th><th>Placas</th><th>Destino</th><th>Status</th></tr>
+                        <tr><th>Viagem</th><th>Data</th><th>Motorista</th><th>Placas</th><th>Status</th></tr>
                     </thead>
                     <tbody>
                         ${appState.fichas.slice(0, 10).map(f => `
@@ -1223,7 +1313,6 @@ function preencherSecoesSecundarias() {
                                 <td>${f.dataSaida || f.dataEnvio || '-'}</td>
                                 <td>${f.motorista || 'Motorista'}</td>
                                 <td><span class="placa-box">${f.placas || 'Não informada'}</span></td>
-                                <td>${f.destinoInicial || '-'} ➔ ${f.destinoFinal || '-'}</td>
                                 <td><span class="status-pill ${f.status === 'pendente' ? 'status-pendente' : 'status-concluido'}">${f.status === 'pendente' ? 'Em Conferência' : 'Concluído'}</span></td>
                             </tr>
                         `).join('')}
@@ -1240,7 +1329,7 @@ function preencherSecoesSecundarias() {
         if (fichasComPedagio.length === 0) {
             tbodyPedagios.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 28px;">
                         Nenhuma conciliação de pedágio disponível ou declarada nas viagens atuais.
                     </td>
                 </tr>
@@ -1251,7 +1340,6 @@ function preencherSecoesSecundarias() {
                     <tr>
                         <td><strong>${f.id}</strong></td>
                         <td>${f.motorista}</td>
-                        <td>${f.destinoInicial || '-'} ➔ ${f.destinoFinal || '-'}</td>
                         <td>Praças declaradas</td>
                         <td>R$ ${f.totalPedagio || '0,00'}</td>
                         <td>R$ ${f.totalPedagio || '0,00'}</td>
@@ -1262,7 +1350,7 @@ function preencherSecoesSecundarias() {
         }
     }
 
-    // 3. Seção Acerto Motoristas
+    // 3. Seção Acerto Motoristas (Controle Interno de Conferência)
     const tbodyAcertos = document.getElementById('tabela-acertos-body');
     if (tbodyAcertos) {
         const motoristasMap = {};
@@ -1287,9 +1375,22 @@ function preencherSecoesSecundarias() {
                 </tr>
             `;
         } else {
+            const statusAcertosMap = carregarStatusAcertos();
             tbodyAcertos.innerHTML = nomes.map(nome => {
                 const d = motoristasMap[nome];
                 const saldoLiquidar = d.comissao - d.adiantamentos;
+                const estaConfirmado = statusAcertosMap[nome] === 'confirmado';
+
+                const acoesHtml = estaConfirmado
+                    ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                           <span class="status-pill status-concluido">🟢 Confirmado</span>
+                           <button type="button" class="btn-desfazer-acerto" data-motorista="${escapeHtmlAttr(nome)}" title="Reverter status para Não Confirmado">Desfazer</button>
+                       </div>`
+                    : `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                           <span class="status-pill status-pendente">🟡 Não Confirmado</span>
+                           <button type="button" class="btn-acao-aprovar-rapido btn-confirmar-acerto" data-motorista="${escapeHtmlAttr(nome)}" title="Confirmar conferência do acerto">Confirmar</button>
+                       </div>`;
+
                 return `
                     <tr>
                         <td><strong>${nome}</strong></td>
@@ -1298,10 +1399,25 @@ function preencherSecoesSecundarias() {
                         <td><strong style="color: #4f46e5;">R$ ${formatarMoedaSemPrefixo(d.comissao)}</strong></td>
                         <td>R$ ${formatarMoedaSemPrefixo(d.adiantamentos)}</td>
                         <td><strong style="color: ${saldoLiquidar >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoedaSemPrefixo(saldoLiquidar)}</strong></td>
-                        <td><button type="button" class="btn-acao-resumo" onclick="exibirToast('Extrato de acerto gerado para ${nome}', 'info')">Emitir Acerto</button></td>
+                        <td>${acoesHtml}</td>
                     </tr>
                 `;
             }).join('');
+
+            // Eventos dos botões de ação interna
+            tbodyAcertos.querySelectorAll('.btn-confirmar-acerto').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const motorista = btn.getAttribute('data-motorista');
+                    alternarConfirmacaoAcerto(motorista, 'confirmado');
+                });
+            });
+
+            tbodyAcertos.querySelectorAll('.btn-desfazer-acerto').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const motorista = btn.getAttribute('data-motorista');
+                    alternarConfirmacaoAcerto(motorista, 'nao_confirmado');
+                });
+            });
         }
     }
 
@@ -1913,13 +2029,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnSalvarMeta) {
         btnSalvarMeta.addEventListener('click', () => {
-            confirmarESalvarParametrosOperacionais();
+            confirmarESalvarMetaDiesel();
         });
     }
 
     if (btnSalvarTaxa) {
         btnSalvarTaxa.addEventListener('click', () => {
-            confirmarESalvarParametrosOperacionais();
+            confirmarESalvarTaxaBorges();
         });
     }
 
@@ -1931,7 +2047,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputConfigMeta.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                confirmarESalvarParametrosOperacionais();
+                confirmarESalvarMetaDiesel();
             }
         });
     }
@@ -1940,7 +2056,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputConfigTaxa.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                confirmarESalvarParametrosOperacionais();
+                confirmarESalvarTaxaBorges();
             }
         });
     }

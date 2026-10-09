@@ -1448,6 +1448,29 @@ body.admin-body {
     border-color: #10b981;
 }
 
+.btn-desfazer-acerto {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    padding: 5px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: var(--transicao-rapida);
+}
+
+.btn-desfazer-acerto:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+
 .btn-acao-excluir {
     background-color: #fef2f2;
     border: 1px solid #fecaca;
