@@ -1195,6 +1195,31 @@ function padronizarDataBR(strData) {
     return { br: s, iso: s };
 }
 
+function extrairDataVidaReal(ficha) {
+    if (!ficha) return new Date().toLocaleDateString('pt-BR');
+    const d = ficha.dataEnvio || ficha.data_envio;
+    if (!d) return new Date().toLocaleDateString('pt-BR');
+    
+    // Se for timestamp ISO (ex: 2026-10-11T14:20:00)
+    if (typeof d === 'string' && d.includes('-') && !d.includes('/')) {
+        return new Date(d).toLocaleDateString('pt-BR');
+    }
+    // Se for string no padrão BR (ex: "11/10/2026, 14:28:00" ou "11/10/2026")
+    return String(d).split(',')[0].split(' ')[0].trim();
+}
+
+function converterDataBRparaISO(dataBR) {
+    if (!dataBR || dataBR === 'Sem Data') return '0000-00-00';
+    const partes = String(dataBR).split('/');
+    if (partes.length === 3) {
+        const dia = partes[0].padStart(2, '0');
+        const mes = partes[1].padStart(2, '0');
+        const ano = partes[2];
+        return `${ano}-${mes}-${dia}`;
+    }
+    return String(dataBR);
+}
+
 function obterDataFicha(ficha) {
     const raw = ficha.dataSaida || ficha.data_saida || ficha.dataEnvio || ficha.data_envio || ficha.dataCriacao || ficha.data || '';
     return padronizarDataBR(raw);
@@ -1230,21 +1255,22 @@ function renderizarTabelaFaturamentoDiario() {
     let totalGeralAcumulado = 0;
 
     fichas.forEach(f => {
-        const dataInfo = obterDataFicha(f);
+        const dataBR = extrairDataVidaReal(f);
+        const dataISO = converterDataBRparaISO(dataBR);
         const frete = parseValorMoeda(f.totalFrete ?? f.total_frete ?? 0);
         totalGeralAcumulado += frete;
 
-        if (!mapaDias[dataInfo.br]) {
-            mapaDias[dataInfo.br] = {
-                dataBR: dataInfo.br,
-                dataISO: dataInfo.iso,
+        if (!mapaDias[dataBR]) {
+            mapaDias[dataBR] = {
+                dataBR: dataBR,
+                dataISO: dataISO,
                 qtdViagens: 0,
                 totalFaturamento: 0
             };
         }
 
-        mapaDias[dataInfo.br].qtdViagens += 1;
-        mapaDias[dataInfo.br].totalFaturamento += frete;
+        mapaDias[dataBR].qtdViagens += 1;
+        mapaDias[dataBR].totalFaturamento += frete;
     });
 
     if (badgeTotal) {
@@ -1305,7 +1331,8 @@ function renderizarTabelaDespesasDiarias() {
     let totalGeralDespesas = 0;
 
     fichas.forEach(f => {
-        const dataInfo = obterDataFicha(f);
+        const dataBR = extrairDataVidaReal(f);
+        const dataISO = converterDataBRparaISO(dataBR);
 
         let diesel = parseValorMoeda(f.totalAbastecimento);
         if (diesel === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
@@ -1324,10 +1351,10 @@ function renderizarTabelaDespesasDiarias() {
         const totalCustoFicha = diesel + comissao + pedagio + imposto;
         totalGeralDespesas += totalCustoFicha;
 
-        if (!mapaDias[dataInfo.br]) {
-            mapaDias[dataInfo.br] = {
-                dataBR: dataInfo.br,
-                dataISO: dataInfo.iso,
+        if (!mapaDias[dataBR]) {
+            mapaDias[dataBR] = {
+                dataBR: dataBR,
+                dataISO: dataISO,
                 qtdLancamentos: 0,
                 totalDespesas: 0,
                 somaDiesel: 0,
@@ -1344,12 +1371,12 @@ function renderizarTabelaDespesasDiarias() {
         if (imposto > 0) qtd++;
         if (qtd === 0 && totalCustoFicha > 0) qtd = 1;
 
-        mapaDias[dataInfo.br].qtdLancamentos += qtd;
-        mapaDias[dataInfo.br].totalDespesas += totalCustoFicha;
-        mapaDias[dataInfo.br].somaDiesel += diesel;
-        mapaDias[dataInfo.br].somaPedagio += pedagio;
-        mapaDias[dataInfo.br].somaComissao += comissao;
-        mapaDias[dataInfo.br].somaOutras += imposto;
+        mapaDias[dataBR].qtdLancamentos += qtd;
+        mapaDias[dataBR].totalDespesas += totalCustoFicha;
+        mapaDias[dataBR].somaDiesel += diesel;
+        mapaDias[dataBR].somaPedagio += pedagio;
+        mapaDias[dataBR].somaComissao += comissao;
+        mapaDias[dataBR].somaOutras += imposto;
     });
 
     if (badgeTotal) {
