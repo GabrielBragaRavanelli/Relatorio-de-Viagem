@@ -128,7 +128,6 @@ function obterMediaRealFicha(f) {
 }
 
 // Instâncias globais de gráficos Chart.js
-let chartFinanceiroInstance = null;
 let chartClientesInstance = null;
 let chartConsumoInstance = null;
 
@@ -1157,76 +1156,250 @@ function obterDadosGraficosReais() {
     };
 }
 
-function inicializarGraficos() {
-    const dados = obterDadosGraficosReais();
+// ==========================================================================
+// 6. TABELAS DIÁRIAS DA FROTA (FATURAMENTO & DESPESAS CONSOLIDADAS POR DIA)
+// ==========================================================================
 
-    // 1. Gráfico Financeiro
-    const ctxFinanceiro = document.getElementById('chart-financeiro');
-    if (ctxFinanceiro) {
-        chartFinanceiroInstance = new Chart(ctxFinanceiro, {
-            type: 'bar',
-            data: {
-                labels: dados.financeiro.labels,
-                datasets: [
-                    {
-                        label: 'Faturamento Bruto',
-                        data: dados.financeiro.faturamento,
-                        backgroundColor: 'rgba(61, 61, 144, 0.85)',
-                        borderColor: '#3d3d90',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Custos da Frota',
-                        data: dados.financeiro.custos,
-                        backgroundColor: 'rgba(239, 68, 68, 0.75)',
-                        borderColor: '#ef4444',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Lucro Líquido',
-                        data: dados.financeiro.lucro,
-                        type: 'line',
-                        borderColor: '#10b981',
-                        backgroundColor: '#10b981',
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: R$ ${context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f1f5f9' },
-                        ticks: {
-                            callback: function(val) {
-                                return 'R$ ' + (val >= 1000 ? (val / 1000) + 'k' : val);
-                            }
-                        }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
+function padronizarDataBR(strData) {
+    if (!strData) return { br: 'Sem Data', iso: '0000-00-00' };
+    const s = String(strData).trim();
+    if (!s) return { br: 'Sem Data', iso: '0000-00-00' };
+
+    // Se já é DD/MM/AAAA ou DD/MM/AAAA HH:mm
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+        const dia = s.substring(0, 2);
+        const mes = s.substring(3, 5);
+        const ano = s.substring(6, 10);
+        return { br: `${dia}/${mes}/${ano}`, iso: `${ano}-${mes}-${dia}` };
     }
+
+    // Se é formato ISO YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+        const ano = s.substring(0, 4);
+        const mes = s.substring(5, 7);
+        const dia = s.substring(8, 10);
+        return { br: `${dia}/${mes}/${ano}`, iso: `${ano}-${mes}-${dia}` };
+    }
+
+    // Fallback Date
+    try {
+        const dt = new Date(s);
+        if (!isNaN(dt.getTime())) {
+            const dia = String(dt.getDate()).padStart(2, '0');
+            const mes = String(dt.getMonth() + 1).padStart(2, '0');
+            const ano = dt.getFullYear();
+            return { br: `${dia}/${mes}/${ano}`, iso: `${ano}-${mes}-${dia}` };
+        }
+    } catch (e) {}
+
+    return { br: s, iso: s };
+}
+
+function obterDataFicha(ficha) {
+    const raw = ficha.dataSaida || ficha.data_saida || ficha.dataEnvio || ficha.data_envio || ficha.dataCriacao || ficha.data || '';
+    return padronizarDataBR(raw);
+}
+
+function renderizarTabelaFaturamentoDiario() {
+    const tbody = document.getElementById('tbody-faturamento-diario');
+    const badgeTotal = document.getElementById('badge-total-faturamento-acumulado');
+    if (!tbody) return;
+
+    const fichas = appState.fichas || [];
+    if (fichas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="tabela-diaria-vazio">
+                    <div class="empty-state-diario">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <p>Nenhuma viagem com faturamento registrada.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (badgeTotal) badgeTotal.textContent = 'R$ 0,00';
+        return;
+    }
+
+    const mapaDias = {};
+    let totalGeralAcumulado = 0;
+
+    fichas.forEach(f => {
+        const dataInfo = obterDataFicha(f);
+        const frete = parseValorMoeda(f.totalFrete ?? f.total_frete ?? 0);
+        totalGeralAcumulado += frete;
+
+        if (!mapaDias[dataInfo.br]) {
+            mapaDias[dataInfo.br] = {
+                dataBR: dataInfo.br,
+                dataISO: dataInfo.iso,
+                qtdViagens: 0,
+                totalFaturamento: 0
+            };
+        }
+
+        mapaDias[dataInfo.br].qtdViagens += 1;
+        mapaDias[dataInfo.br].totalFaturamento += frete;
+    });
+
+    if (badgeTotal) {
+        badgeTotal.textContent = formatarMoeda(totalGeralAcumulado);
+    }
+
+    // Ordenar pelas datas mais recentes primeiro (decrescente)
+    const listaDias = Object.values(mapaDias).sort((a, b) => {
+        if (a.dataISO === '0000-00-00') return 1;
+        if (b.dataISO === '0000-00-00') return -1;
+        return b.dataISO.localeCompare(a.dataISO);
+    });
+
+    tbody.innerHTML = listaDias.map(item => {
+        const ticketMedio = item.qtdViagens > 0 ? (item.totalFaturamento / item.qtdViagens) : 0;
+        return `
+            <tr>
+                <td class="td-data-diaria">${item.dataBR}</td>
+                <td style="text-align: center;">
+                    <span class="badge-qtd-viagens" title="${item.qtdViagens} viagens">${item.qtdViagens}</span>
+                </td>
+                <td style="text-align: right;">
+                    <span class="val-faturamento-destaque">${formatarMoeda(item.totalFaturamento)}</span>
+                </td>
+                <td style="text-align: right;">
+                    <span class="val-ticket-medio">${formatarMoeda(ticketMedio)}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderizarTabelaDespesasDiarias() {
+    const tbody = document.getElementById('tbody-despesas-diarias');
+    const badgeTotal = document.getElementById('badge-total-despesas-acumulado');
+    if (!tbody) return;
+
+    const fichas = appState.fichas || [];
+    if (fichas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="tabela-diaria-vazio">
+                    <div class="empty-state-diario">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <p>Nenhuma despesa operacional registrada.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (badgeTotal) badgeTotal.textContent = 'R$ 0,00';
+        return;
+    }
+
+    const mapaDias = {};
+    let totalGeralDespesas = 0;
+
+    fichas.forEach(f => {
+        const dataInfo = obterDataFicha(f);
+
+        let diesel = parseValorMoeda(f.totalAbastecimento);
+        if (diesel === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+            diesel = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.valor || a.total || 0), 0);
+        }
+
+        const comissao = parseValorMoeda(f.vrComissao ?? f.vr_comissao ?? 0);
+
+        let pedagio = parseValorMoeda(f.totalPedagio);
+        if (pedagio === 0 && Array.isArray(f.pedagios) && f.pedagios.length > 0) {
+            pedagio = f.pedagios.reduce((acc, p) => acc + parseValorMoeda(p.valor || p || 0), 0);
+        }
+
+        const imposto = parseValorMoeda(f.impFederal ?? f.imp_federal ?? f.outrasDespesas ?? f.outrosCustos ?? 0);
+
+        const totalCustoFicha = diesel + comissao + pedagio + imposto;
+        totalGeralDespesas += totalCustoFicha;
+
+        if (!mapaDias[dataInfo.br]) {
+            mapaDias[dataInfo.br] = {
+                dataBR: dataInfo.br,
+                dataISO: dataInfo.iso,
+                qtdLancamentos: 0,
+                totalDespesas: 0,
+                somaDiesel: 0,
+                somaPedagio: 0,
+                somaComissao: 0,
+                somaOutras: 0
+            };
+        }
+
+        let qtd = 0;
+        if (diesel > 0) qtd++;
+        if (pedagio > 0) qtd++;
+        if (comissao > 0) qtd++;
+        if (imposto > 0) qtd++;
+        if (qtd === 0 && totalCustoFicha > 0) qtd = 1;
+
+        mapaDias[dataInfo.br].qtdLancamentos += qtd;
+        mapaDias[dataInfo.br].totalDespesas += totalCustoFicha;
+        mapaDias[dataInfo.br].somaDiesel += diesel;
+        mapaDias[dataInfo.br].somaPedagio += pedagio;
+        mapaDias[dataInfo.br].somaComissao += comissao;
+        mapaDias[dataInfo.br].somaOutras += imposto;
+    });
+
+    if (badgeTotal) {
+        badgeTotal.textContent = formatarMoeda(totalGeralDespesas);
+    }
+
+    // Ordenar decrescente por data mais recente
+    const listaDias = Object.values(mapaDias).sort((a, b) => {
+        if (a.dataISO === '0000-00-00') return 1;
+        if (b.dataISO === '0000-00-00') return -1;
+        return b.dataISO.localeCompare(a.dataISO);
+    });
+
+    tbody.innerHTML = listaDias.map(item => {
+        const categorias = [
+            { nome: 'Diesel', valor: item.somaDiesel, classe: 'badge-custo-diesel' },
+            { nome: 'Pedágios', valor: item.somaPedagio, classe: 'badge-custo-pedagio' },
+            { nome: 'Comissão', valor: item.somaComissao, classe: 'badge-custo-comissao' },
+            { nome: 'Diárias/Outros', valor: item.somaOutras, classe: 'badge-custo-outros' }
+        ];
+        categorias.sort((a, b) => b.valor - a.valor);
+        const principal = categorias[0].valor > 0 ? categorias[0] : { nome: 'Nenhum', classe: 'badge-custo-outros' };
+
+        return `
+            <tr>
+                <td class="td-data-diaria">${item.dataBR}</td>
+                <td style="text-align: center;">
+                    <span class="badge-qtd-despesas" title="${item.qtdLancamentos} lançamentos">${item.qtdLancamentos}</span>
+                </td>
+                <td style="text-align: right;">
+                    <span class="val-despesas-destaque">${formatarMoeda(item.totalDespesas)}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge-principal-custo ${principal.classe}">${principal.nome}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderizarTabelasDiarias() {
+    renderizarTabelaFaturamentoDiario();
+    renderizarTabelaDespesasDiarias();
+}
+
+function inicializarGraficos() {
+    // Renderiza as tabelas diárias consolidadas da frota
+    renderizarTabelasDiarias();
+
+    const dados = obterDadosGraficosReais();
 
     // 2. Gráfico Donut de Clientes
     const ctxClientes = document.getElementById('chart-clientes');
@@ -1324,15 +1497,10 @@ function inicializarGraficos() {
 }
 
 function atualizarGraficos() {
-    const dados = obterDadosGraficosReais();
+    // Atualiza as tabelas diárias com os dados sincronizados
+    renderizarTabelasDiarias();
 
-    if (chartFinanceiroInstance) {
-        chartFinanceiroInstance.data.labels = dados.financeiro.labels;
-        chartFinanceiroInstance.data.datasets[0].data = dados.financeiro.faturamento;
-        chartFinanceiroInstance.data.datasets[1].data = dados.financeiro.custos;
-        chartFinanceiroInstance.data.datasets[2].data = dados.financeiro.lucro;
-        chartFinanceiroInstance.update();
-    }
+    const dados = obterDadosGraficosReais();
 
     if (chartClientesInstance) {
         chartClientesInstance.data.labels = dados.clientes.labels;

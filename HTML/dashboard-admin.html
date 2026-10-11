@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <!-- Folha de Estilos do Dashboard -->
-    <link rel="stylesheet" href="../CSS/dashboard-admin.css">
+    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.0">
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
@@ -544,41 +544,94 @@
 
                     </div>
 
-                    <!-- 2. Linha de Gráficos BI (Chart.js via CDN) -->
-                    <div class="bi-charts-grid">
+                    <!-- 2. Tabelas Diárias da Frota: Faturamento & Despesas -->
+                    <div class="grid-tabelas-diarias">
 
-                        <!-- Gráfico 1: Faturamento vs Custo vs Lucro -->
-                        <div class="chart-card card-chart-financial">
-                            <div class="chart-card-header">
-                                <div>
-                                    <h3 class="chart-card-title">Evolução Financeira: Faturamento vs Custos vs Lucro
-                                    </h3>
-                                    <p class="chart-card-subtitle">Comparativo consolidado por período operacional</p>
+                        <!-- TABELA A: Faturamento Diário da Frota (Entradas) -->
+                        <div class="tabela-diaria-card card-faturamento-diario">
+                            <div class="tabela-diaria-header">
+                                <div class="header-info">
+                                    <div class="icone-header icone-faturamento" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                                            <polyline points="7 7 17 7 17 17"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="tabela-diaria-titulo">Faturamento por Dia</h3>
+                                        <p class="tabela-diaria-subtitulo">Receita bruta consolidada por data</p>
+                                    </div>
                                 </div>
-                                <div class="chart-badges">
-                                    <span class="badge-legend legend-faturamento">Faturamento</span>
-                                    <span class="badge-legend legend-custo">Custos</span>
-                                    <span class="badge-legend legend-lucro">Lucro Líquido</span>
+                                <div class="badge-total-container">
+                                    <span class="badge-total-acumulado badge-faturamento" id="badge-total-faturamento-acumulado">R$ 0,00</span>
                                 </div>
                             </div>
-                            <div class="chart-canvas-container">
-                                <canvas id="chart-financeiro"></canvas>
+                            <div class="tabela-diaria-scroll-container">
+                                <table class="tabela-diaria" id="tabela-faturamento-diario">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th style="text-align: center;">Qtd. Viagens</th>
+                                            <th style="text-align: right;">Faturamento Total</th>
+                                            <th style="text-align: right;">Média / Ticket</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-faturamento-diario">
+                                        <!-- Preenchido via JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
-                        <!-- Gráfico 3: Rendimento por Cliente -->
-                        <div class="chart-card card-chart-client">
-                            <div class="chart-card-header">
-                                <div>
-                                    <h3 class="chart-card-title">Rendimento por Cliente &amp; Operação</h3>
-                                    <p class="chart-card-subtitle">Distribuição da receita bruta por contratante</p>
+                        <!-- TABELA B: Despesas da Frota por Dia (Saídas) -->
+                        <div class="tabela-diaria-card card-despesas-diarias">
+                            <div class="tabela-diaria-header">
+                                <div class="header-info">
+                                    <div class="icone-header icone-despesas" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="7" y1="7" x2="17" y2="17"></line>
+                                            <polyline points="17 7 17 17 7 17"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="tabela-diaria-titulo">Despesas por Dia</h3>
+                                        <p class="tabela-diaria-subtitulo">Custos consolidados de diesel, pedágios e diárias</p>
+                                    </div>
+                                </div>
+                                <div class="badge-total-container">
+                                    <span class="badge-total-acumulado badge-despesas" id="badge-total-despesas-acumulado">R$ 0,00</span>
                                 </div>
                             </div>
-                            <div class="chart-canvas-container donut-container">
-                                <canvas id="chart-clientes"></canvas>
+                            <div class="tabela-diaria-scroll-container">
+                                <table class="tabela-diaria" id="tabela-despesas-diarias">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th style="text-align: center;">Qtd. Despesas</th>
+                                            <th style="text-align: right;">Total de Despesas</th>
+                                            <th style="text-align: center;">Principal Custo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-despesas-diarias">
+                                        <!-- Preenchido via JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Gráfico: Rendimento por Cliente & Operação -->
+                    <div class="chart-card card-chart-client chart-card-full">
+                        <div class="chart-card-header">
+                            <div>
+                                <h3 class="chart-card-title">Rendimento por Cliente &amp; Operação</h3>
+                                <p class="chart-card-subtitle">Distribuição da receita bruta por contratante</p>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container donut-container">
+                            <canvas id="chart-clientes"></canvas>
+                        </div>
                     </div>
 
                     <!-- 3. Gráfico de Consumo por Motorista (km/l) com Alerta de Quem Gasta Mais Diesel -->
@@ -1051,7 +1104,7 @@
     <!-- Scripts do Supabase e Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
-    <script src="../JavaScript/dashboard-admin.js"></script>
+    <script src="../JavaScript/dashboard-admin.js?v=2.0"></script>
 </body>
 
 </html>

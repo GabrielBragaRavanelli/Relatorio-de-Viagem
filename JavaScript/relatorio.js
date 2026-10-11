@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         input.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.altKey || e.metaKey || [
-                'Backspace', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
+                'Backspace', 'Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', 'Home', 'End'
             ].includes(e.key)) {
                 return;
             }
@@ -533,6 +533,624 @@ document.addEventListener('DOMContentLoaded', () => {
 
     aplicarValidacaoDestino(inputDestinoInicial);
     aplicarValidacaoDestino(inputDestinoFinal);
+
+    // ==========================================
+    // 3.1. Auto-complete Inteligente de Cidades do Brasil (API IBGE)
+    // ==========================================
+    const STORAGE_IBGE_CIDADES = 'ajborges_cidades_ibge';
+    const URL_IBGE_MUNICIPIOS = 'https://servicodados.ibge.gov.br/api/v1/localidades/municipios';
+
+    // Fallback gracioso com principais capitais e polos logísticos de carga do Brasil
+    const FALLBACK_CIDADES_IBGE = [
+        "São Paulo - SP", "Campinas - SP", "Santos - SP", "Guarulhos - SP", "São Bernardo do Campo - SP",
+        "Santo André - SP", "Osasco - SP", "São José dos Campos - SP", "Ribeirão Preto - SP", "Sorocaba - SP",
+        "Marília - SP", "Bauru - SP", "São José do Rio Preto - SP", "Piracicaba - SP", "Jundiaí - SP",
+        "Presidente Prudente - SP", "Araçatuba - SP", "Araraquara - SP", "Franca - SP", "Limeira - SP",
+        "Rio de Janeiro - RJ", "Niterói - RJ", "Duque de Caxias - RJ", "São Gonçalo - RJ", "Volta Redonda - RJ",
+        "Belo Horizonte - MG", "Uberlândia - MG", "Contagem - MG", "Juiz de Fora - MG", "Betim - MG",
+        "Montes Claros - MG", "Uberaba - MG", "Governador Valadares - MG", "Ipatinga - MG", "Pouso Alegre - MG",
+        "Curitiba - PR", "Londrina - PR", "Maringá - PR", "Ponta Grossa - PR", "Cascavel - PR", "Foz do Iguaçu - PR",
+        "Porto Alegre - RS", "Caxias do Sul - RS", "Canoas - RS", "Pelotas - RS", "Santa Maria - RS", "Passo Fundo - RS",
+        "Florianópolis - SC", "Joinville - SC", "Blumenau - SC", "Itajaí - SC", "Chapecó - SC", "Criciúma - SC",
+        "Goiânia - GO", "Aparecida de Goiânia - GO", "Anápolis - GO", "Rio Verde - GO", "Itumbiara - GO",
+        "Brasília - DF",
+        "Cuiabá - MT", "Várzea Grande - MT", "Rondonópolis - MT", "Sinop - MT", "Sorriso - MT", "Lucas do Rio Verde - MT",
+        "Campo Grande - MS", "Dourados - MS", "Três Lagoas - MS", "Corumbá - MS",
+        "Salvador - BA", "Feira de Santana - BA", "Vitória da Conquista - BA", "Camaçari - BA", "Itabuna - BA", "Luís Eduardo Magalhães - BA",
+        "Recife - PE", "Jaboatão dos Guararapes - PE", "Petrolina - PE", "Caruaru - PE",
+        "Fortaleza - CE", "Caucaia - CE", "Juazeiro do Norte - CE", "Sobral - CE",
+        "São Luís - MA", "Imperatriz - MA",
+        "Belém - PA", "Ananindeua - PA", "Santarém - PA", "Marabá - PA", "Parauapebas - PA",
+        "Manaus - AM",
+        "Vitória - ES", "Vila Velha - ES", "Serra - ES", "Cariacica - ES", "Linhares - ES",
+        "Natal - RN", "Mossoró - RN",
+        "João Pessoa - PB", "Campina Grande - PB",
+        "Maceió - AL", "Arapiraca - AL",
+        "Teresina - PI", "Parnaíba - PI",
+        "Aracaju - SE",
+        "Porto Velho - RO", "Ji-Paraná - RO", "Vilhena - RO", "Cacoal - RO",
+        "Palmas - TO", "Araguaína - TO", "Gurupi - TO",
+        "Macapá - AP", "Boa Vista - RR", "Rio Branco - AC"
+    ].sort((a, b) => a.localeCompare('pt-BR'));
+
+    let cacheCidadesIBGE = null;
+    let buscandoIBGEEmProgresso = false;
+
+    // Normalizador de texto para busca case-insensitive e sem acentos
+    function normalizarTextoBuscaIBGE(str) {
+        return (str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    // Escape seguro de caracteres HTML para renderização
+    function escapeHTMLAutocomplete(str) {
+        return (str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Regra de governança: verifica se o campo está bloqueado pela gestão
+    function campoEstaBloqueadoGovernança(campo) {
+        if (!campo) return true;
+        return campo.readOnly ||
+            campo.disabled ||
+            campo.hasAttribute('readonly') ||
+            campo.classList.contains('campo-bloqueado-gestao') ||
+            Boolean(campo.closest('.campo-bloqueado-gestao'));
+    }
+
+    // Função assíncrona de carregamento e cache das cidades do IBGE
+    async function obterCidadesIBGE() {
+        if (cacheCidadesIBGE && cacheCidadesIBGE.length > 0) {
+            return cacheCidadesIBGE;
+        }
+
+        // 1. Tenta carregar do localStorage
+        try {
+            const salvo = localStorage.getItem(STORAGE_IBGE_CIDADES);
+            if (salvo) {
+                const lista = JSON.parse(salvo);
+                if (Array.isArray(lista) && lista.length > 0) {
+                    cacheCidadesIBGE = lista;
+                    return cacheCidadesIBGE;
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao ler cache do IBGE no localStorage:', e);
+        }
+
+        // Fallback preliminar para resposta imediata
+        cacheCidadesIBGE = [...FALLBACK_CIDADES_IBGE];
+
+        if (buscandoIBGEEmProgresso) {
+            return cacheCidadesIBGE;
+        }
+        buscandoIBGEEmProgresso = true;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const resposta = await fetch(URL_IBGE_MUNICIPIOS, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!resposta.ok) {
+                throw new Error(`Falha HTTP ${resposta.status}`);
+            }
+
+            const dados = await resposta.json();
+            if (Array.isArray(dados) && dados.length > 0) {
+                const listaFormatada = dados.map((m) => {
+                    if (!m || !m.nome) return null;
+                    const uf = m?.microrregiao?.mesorregiao?.UF?.sigla ||
+                        m?.['regiao-imediata']?.['regiao-intermediaria']?.UF?.sigla || '';
+                    return uf ? `${m.nome} - ${uf}` : m.nome;
+                }).filter(Boolean);
+
+                listaFormatada.sort((a, b) => a.localeCompare('pt-BR'));
+
+                cacheCidadesIBGE = listaFormatada;
+
+                try {
+                    localStorage.setItem(STORAGE_IBGE_CIDADES, JSON.stringify(listaFormatada));
+                } catch (eStorage) {
+                    console.warn('Não foi possível gravar cidades no localStorage:', eStorage);
+                }
+            }
+        } catch (erro) {
+            console.warn('API IBGE indisponível ou offline. Usando fallback gracioso.', erro);
+            if (!cacheCidadesIBGE || cacheCidadesIBGE.length === 0) {
+                cacheCidadesIBGE = [...FALLBACK_CIDADES_IBGE];
+            }
+        } finally {
+            buscandoIBGEEmProgresso = false;
+        }
+
+        return cacheCidadesIBGE;
+    }
+
+    // Inicialização do módulo de auto-complete (Combobox / Select Pesquisável)
+    function inicializarAutoCompleteCidadesIBGE() {
+        // Dispara pré-carregamento em segundo plano
+        obterCidadesIBGE();
+
+        // Dropdown singleton flutuante anexado ao body (impede quebra em tabelas e overflow)
+        let dropdownEl = document.getElementById('ajborges-autocomplete-cidades-dropdown');
+        if (!dropdownEl) {
+            dropdownEl = document.createElement('ul');
+            dropdownEl.id = 'ajborges-autocomplete-cidades-dropdown';
+            dropdownEl.className = 'autocomplete-cidades-dropdown';
+            dropdownEl.setAttribute('role', 'listbox');
+            dropdownEl.setAttribute('aria-label', 'Sugestões de cidades do Brasil');
+            document.body.appendChild(dropdownEl);
+        }
+
+        let inputAtivo = null;
+        let indiceFoco = -1;
+        let debounceTimer = null;
+        let listaCompletaFiltrada = [];
+        let quantidadeItensRenderizados = 0;
+        let ultimoTermoBuscado = '';
+
+        const TAMANHO_LOTE_INICIAL = 45;
+        const TAMANHO_LOTE_SCROLL = 30;
+
+        function fecharTodasAsSetinhas() {
+            document.querySelectorAll('.btn-combobox-seta.aberto').forEach((btn) => btn.classList.remove('aberto'));
+            document.querySelectorAll('.combobox-aberto').forEach((wrap) => wrap.classList.remove('combobox-aberto'));
+        }
+
+        function atualizarEstadoSetinha(input, aberta) {
+            if (!input) return;
+            const wrapper = input.closest('.input-wrapper, .combobox-cidade-wrap');
+            const seta = wrapper ? wrapper.querySelector('.btn-combobox-seta') : null;
+            if (seta) {
+                if (aberta) {
+                    seta.classList.add('aberto');
+                    wrapper?.classList.add('combobox-aberto');
+                } else {
+                    seta.classList.remove('aberto');
+                    wrapper?.classList.remove('combobox-aberto');
+                }
+            }
+        }
+
+        function fecharDropdown() {
+            if (dropdownEl) {
+                dropdownEl.style.display = 'none';
+                dropdownEl.innerHTML = '';
+            }
+            fecharTodasAsSetinhas();
+            indiceFoco = -1;
+            listaCompletaFiltrada = [];
+            quantidadeItensRenderizados = 0;
+            ultimoTermoBuscado = '';
+            inputAtivo = null;
+        }
+
+        function isDropdownAberto() {
+            return dropdownEl && dropdownEl.style.display === 'block';
+        }
+
+        function posicionarDropdown(input) {
+            if (!dropdownEl || !input) return;
+            const rect = input.getBoundingClientRect();
+            if (rect.width === 0 && rect.height === 0) {
+                fecharDropdown();
+                return;
+            }
+
+            const scrollX = window.scrollX || window.pageXOffset || 0;
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+
+            const larguraMinima = Math.max(rect.width, 240);
+            let top = rect.bottom + scrollY + 4;
+            let left = rect.left + scrollX;
+
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            if (left + larguraMinima > viewportWidth - 12) {
+                left = Math.max(12, viewportWidth - larguraMinima - 12);
+            }
+
+            dropdownEl.style.top = `${top}px`;
+            dropdownEl.style.left = `${left}px`;
+            dropdownEl.style.minWidth = `${rect.width}px`;
+            dropdownEl.style.width = `${larguraMinima}px`;
+        }
+
+        function reposicionarSeAberto() {
+            if (isDropdownAberto() && inputAtivo) {
+                posicionarDropdown(inputAtivo);
+            }
+        }
+
+        window.addEventListener('resize', reposicionarSeAberto, { passive: true });
+        window.addEventListener('scroll', reposicionarSeAberto, { passive: true, capture: true });
+
+        // Filtragem dinâmica de cidades (ou lista completa quando campo vazio)
+        function filtrarCidades(termo) {
+            const lista = cacheCidadesIBGE || FALLBACK_CIDADES_IBGE;
+            const termoNorm = normalizarTextoBuscaIBGE(termo);
+
+            // Se o campo estiver vazio ou limpo, exibe todas as 5.500 cidades em ordem alfabética
+            if (!termoNorm) {
+                return lista;
+            }
+
+            const correspondenciasExatasInicio = [];
+            const correspondenciasInicio = [];
+            const correspondenciasMeio = [];
+
+            for (let i = 0; i < lista.length; i++) {
+                const cidade = lista[i];
+                const cidadeNorm = normalizarTextoBuscaIBGE(cidade);
+                const nomeNorm = cidadeNorm.split(' - ')[0] || cidadeNorm;
+
+                if (nomeNorm === termoNorm) {
+                    correspondenciasExatasInicio.push(cidade);
+                } else if (cidadeNorm.startsWith(termoNorm)) {
+                    correspondenciasInicio.push(cidade);
+                } else if (cidadeNorm.includes(termoNorm)) {
+                    correspondenciasMeio.push(cidade);
+                }
+            }
+
+            return [...correspondenciasExatasInicio, ...correspondenciasInicio, ...correspondenciasMeio];
+        }
+
+        function selecionarSugestao(valor) {
+            if (!inputAtivo) return;
+            inputAtivo.value = valor;
+            inputAtivo.dispatchEvent(new Event('input', { bubbles: true }));
+            inputAtivo.dispatchEvent(new Event('change', { bubbles: true }));
+            fecharDropdown();
+        }
+
+        function atualizarItemAtivoVisual(novoIndice) {
+            const itens = dropdownEl.querySelectorAll('.autocomplete-cidades-item');
+            if (!itens.length) return;
+
+            if (indiceFoco >= 0 && itens[indiceFoco]) {
+                itens[indiceFoco].classList.remove('ativo');
+                itens[indiceFoco].removeAttribute('aria-selected');
+            }
+
+            if (novoIndice < 0) {
+                indiceFoco = -1;
+                return;
+            }
+
+            if (novoIndice >= itens.length) {
+                novoIndice = 0;
+            } else if (novoIndice < 0) {
+                novoIndice = itens.length - 1;
+            }
+
+            indiceFoco = novoIndice;
+            const itemAtual = itens[indiceFoco];
+            if (itemAtual) {
+                itemAtual.classList.add('ativo');
+                itemAtual.setAttribute('aria-selected', 'true');
+                itemAtual.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        // Renderização em lotes sob demanda (Lazy Loading / Infinite Scroll)
+        function renderizarProximoBloco(termoBusca) {
+            if (!dropdownEl) return;
+            const totalDisponivel = listaCompletaFiltrada.length;
+            if (quantidadeItensRenderizados >= totalDisponivel) return;
+
+            const fim = Math.min(quantidadeItensRenderizados + TAMANHO_LOTE_SCROLL, totalDisponivel);
+            const fragment = document.createDocumentFragment();
+            const termoNorm = normalizarTextoBuscaIBGE(termoBusca);
+
+            for (let i = quantidadeItensRenderizados; i < fim; i++) {
+                const cidadeStr = listaCompletaFiltrada[i];
+                const li = document.createElement('li');
+                li.className = 'autocomplete-cidades-item';
+                li.setAttribute('role', 'option');
+                li.dataset.index = i;
+
+                const partes = cidadeStr.split(' - ');
+                const nomeCidade = partes[0] || cidadeStr;
+                const uf = partes[1] || '';
+
+                // Ícone pin
+                const spanIcone = document.createElement('span');
+                spanIcone.className = 'item-icone';
+                spanIcone.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+
+                // Nome da cidade com destaque se houver termo
+                const spanNome = document.createElement('span');
+                spanNome.className = 'item-nome';
+                if (termoNorm && termoNorm.length > 0) {
+                    const idxMatch = normalizarTextoBuscaIBGE(nomeCidade).indexOf(termoNorm);
+                    if (idxMatch >= 0) {
+                        const antes = nomeCidade.substring(0, idxMatch);
+                        const meio = nomeCidade.substring(idxMatch, idxMatch + termoBusca.length);
+                        const depois = nomeCidade.substring(idxMatch + termoBusca.length);
+                        spanNome.innerHTML = `${escapeHTMLAutocomplete(antes)}<mark>${escapeHTMLAutocomplete(meio)}</mark>${escapeHTMLAutocomplete(depois)}`;
+                    } else {
+                        spanNome.textContent = nomeCidade;
+                    }
+                } else {
+                    spanNome.textContent = nomeCidade;
+                }
+
+                // Badge de UF
+                const spanUf = document.createElement('span');
+                spanUf.className = 'item-uf';
+                spanUf.textContent = uf;
+
+                li.appendChild(spanIcone);
+                li.appendChild(spanNome);
+                if (uf) li.appendChild(spanUf);
+
+                // Seleção com o mouse
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selecionarSugestao(cidadeStr);
+                });
+
+                // Hover sincronizado
+                li.addEventListener('mouseenter', () => {
+                    atualizarItemAtivoVisual(i);
+                });
+
+                fragment.appendChild(li);
+            }
+
+            dropdownEl.appendChild(fragment);
+            quantidadeItensRenderizados = fim;
+        }
+
+        // Listener de Infinite Scroll no dropdown
+        dropdownEl.addEventListener('scroll', () => {
+            if (dropdownEl.scrollTop + dropdownEl.clientHeight >= dropdownEl.scrollHeight - 70) {
+                renderizarProximoBloco(ultimoTermoBuscado);
+            }
+        }, { passive: true });
+
+        // Abre o dropdown e carrega os primeiros itens
+        function exibirSugestoes(termo, input) {
+            if (campoEstaBloqueadoGovernança(input)) {
+                fecharDropdown();
+                return;
+            }
+
+            ultimoTermoBuscado = termo || '';
+            listaCompletaFiltrada = filtrarCidades(termo);
+            quantidadeItensRenderizados = 0;
+            indiceFoco = -1;
+            inputAtivo = input;
+            dropdownEl.innerHTML = '';
+            dropdownEl.scrollTop = 0;
+
+            fecharTodasAsSetinhas();
+            atualizarEstadoSetinha(input, true);
+
+            if (listaCompletaFiltrada.length === 0) {
+                const divVazio = document.createElement('div');
+                divVazio.className = 'autocomplete-cidades-vazio';
+                divVazio.textContent = 'Nenhuma cidade encontrada';
+                dropdownEl.appendChild(divVazio);
+            } else {
+                // Renderiza primeiro bloco sob demanda
+                const limiteInicial = Math.min(TAMANHO_LOTE_INICIAL, listaCompletaFiltrada.length);
+                const fragment = document.createDocumentFragment();
+                const termoNorm = normalizarTextoBuscaIBGE(termo);
+
+                for (let i = 0; i < limiteInicial; i++) {
+                    const cidadeStr = listaCompletaFiltrada[i];
+                    const li = document.createElement('li');
+                    li.className = 'autocomplete-cidades-item';
+                    li.setAttribute('role', 'option');
+                    li.dataset.index = i;
+
+                    const partes = cidadeStr.split(' - ');
+                    const nomeCidade = partes[0] || cidadeStr;
+                    const uf = partes[1] || '';
+
+                    const spanIcone = document.createElement('span');
+                    spanIcone.className = 'item-icone';
+                    spanIcone.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+
+                    const spanNome = document.createElement('span');
+                    spanNome.className = 'item-nome';
+                    if (termoNorm && termoNorm.length > 0) {
+                        const idxMatch = normalizarTextoBuscaIBGE(nomeCidade).indexOf(termoNorm);
+                        if (idxMatch >= 0) {
+                            const antes = nomeCidade.substring(0, idxMatch);
+                            const meio = nomeCidade.substring(idxMatch, idxMatch + termo.length);
+                            const depois = nomeCidade.substring(idxMatch + termo.length);
+                            spanNome.innerHTML = `${escapeHTMLAutocomplete(antes)}<mark>${escapeHTMLAutocomplete(meio)}</mark>${escapeHTMLAutocomplete(depois)}`;
+                        } else {
+                            spanNome.textContent = nomeCidade;
+                        }
+                    } else {
+                        spanNome.textContent = nomeCidade;
+                    }
+
+                    const spanUf = document.createElement('span');
+                    spanUf.className = 'item-uf';
+                    spanUf.textContent = uf;
+
+                    li.appendChild(spanIcone);
+                    li.appendChild(spanNome);
+                    if (uf) li.appendChild(spanUf);
+
+                    li.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        selecionarSugestao(cidadeStr);
+                    });
+
+                    li.addEventListener('mouseenter', () => {
+                        atualizarItemAtivoVisual(i);
+                    });
+
+                    fragment.appendChild(li);
+                }
+
+                dropdownEl.appendChild(fragment);
+                quantidadeItensRenderizados = limiteInicial;
+            }
+
+            posicionarDropdown(input);
+            dropdownEl.style.display = 'block';
+        }
+
+        // Alterna abertura ao clicar na setinha
+        function alternarDropdownParaInput(input) {
+            if (campoEstaBloqueadoGovernança(input)) return;
+
+            if (isDropdownAberto() && inputAtivo === input) {
+                fecharDropdown();
+            } else {
+                inputAtivo = input;
+                const valor = (input.value || '').trim();
+                exibirSugestoes(valor, input);
+                input.focus();
+            }
+        }
+
+        // Fechar ao clicar fora
+        document.addEventListener('pointerdown', (e) => {
+            if (!isDropdownAberto()) return;
+            if (dropdownEl.contains(e.target)) return;
+            if (inputAtivo && inputAtivo.contains(e.target)) return;
+
+            const wrap = inputAtivo?.closest('.input-wrapper, .combobox-cidade-wrap');
+            if (wrap && wrap.contains(e.target)) return;
+
+            fecharDropdown();
+        });
+
+        // Configuração de eventos e listeners nos inputs e botões
+        function vincularCampo(input) {
+            if (!input || input._autocompleteIBGEVinculado) return;
+            input._autocompleteIBGEVinculado = true;
+            input.setAttribute('autocomplete', 'off');
+
+            const wrapper = input.closest('.input-wrapper, .combobox-cidade-wrap');
+            const btnSeta = wrapper ? wrapper.querySelector('.btn-combobox-seta') : null;
+
+            // Governança: esconde a setinha se o campo já nascer bloqueado
+            if (campoEstaBloqueadoGovernança(input) && btnSeta) {
+                btnSeta.style.display = 'none';
+            }
+
+            // Clique na setinha chevron
+            if (btnSeta) {
+                btnSeta.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alternarDropdownParaInput(input);
+                });
+            }
+
+            // Clique no próprio campo: abre imediatamente o dropdown
+            input.addEventListener('click', () => {
+                if (campoEstaBloqueadoGovernança(input)) return;
+                if (!isDropdownAberto() || inputAtivo !== input) {
+                    inputAtivo = input;
+                    const valor = (input.value || '').trim();
+                    exibirSugestoes(valor, input);
+                }
+            });
+
+            // Digitação: filtra em tempo real (mesmo apagando ou digitando 1 letra)
+            input.addEventListener('input', () => {
+                if (campoEstaBloqueadoGovernança(input)) {
+                    fecharDropdown();
+                    return;
+                }
+
+                clearTimeout(debounceTimer);
+                const valor = (input.value || '').trim();
+
+                // Filtro dinâmico com debounce rápido de 60ms
+                debounceTimer = setTimeout(() => {
+                    inputAtivo = input;
+                    exibirSugestoes(valor, input);
+                }, 60);
+            });
+
+            // Teclado: Setas Cima/Baixo, Enter, Escape e Tab
+            input.addEventListener('keydown', (e) => {
+                if (campoEstaBloqueadoGovernança(input)) return;
+
+                if (isDropdownAberto()) {
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (indiceFoco >= quantidadeItensRenderizados - 5) {
+                            renderizarProximoBloco(ultimoTermoBuscado);
+                        }
+                        atualizarItemAtivoVisual(indiceFoco + 1);
+                        return;
+                    }
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        atualizarItemAtivoVisual(indiceFoco - 1);
+                        return;
+                    }
+                    if (e.key === 'Enter') {
+                        if (indiceFoco >= 0 && listaCompletaFiltrada[indiceFoco]) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            selecionarSugestao(listaCompletaFiltrada[indiceFoco]);
+                            return;
+                        }
+                    }
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        fecharDropdown();
+                        return;
+                    }
+                    if (e.key === 'Tab') {
+                        fecharDropdown();
+                        return;
+                    }
+                } else {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        alternarDropdownParaInput(input);
+                    }
+                }
+            });
+        }
+
+        // Mapeamento estrito dos campos solicitados:
+        // - Destino Inicial (#destino-inicial)
+        // - Destino Final (#destino-final)
+        // - Origem de cada linha de frete ("origem_frete_ml_1" a 8)
+        // - Destino de cada linha de frete ("destino_frete_ml_1" a 8)
+        function vincularTodosOsCampos() {
+            const campos = [
+                document.getElementById('destino-inicial'),
+                document.getElementById('destino-final')
+            ];
+
+            for (let i = 1; i <= 8; i++) {
+                const origem = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
+                const destino = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
+                if (origem) campos.push(origem);
+                if (destino) campos.push(destino);
+            }
+
+            campos.filter(Boolean).forEach(vincularCampo);
+        }
+
+        vincularTodosOsCampos();
+    }
+
+    inicializarAutoCompleteCidadesIBGE();
 
     // ------------------------------------------
     // 4. Cálculo Automático do KM Total

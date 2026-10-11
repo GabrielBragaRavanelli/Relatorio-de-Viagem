@@ -3482,4 +3482,199 @@ input.campo-bloqueado-gestao {
     background-color: #ecfdf5;
     color: #065f46;
     border: 1px solid #a7f3d0;
-}
+}
+
+/* ============================================================
+   Auto-complete Inteligente de Cidades IBGE (Select / Combobox)
+   ============================================================ */
+.combobox-cidade-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.combobox-cidade-wrap .input-tabela {
+    padding-right: 28px !important;
+}
+
+.input-wrapper:has(#destino-inicial) input,
+.input-wrapper:has(#destino-final) input,
+.input-wrapper.combobox-cidade-wrapper input {
+    padding-right: 36px !important;
+}
+
+.btn-combobox-seta {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    color: #64748b;
+    border-radius: 4px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    z-index: 4;
+}
+
+.input-wrapper .btn-combobox-seta {
+    right: 12px;
+    width: 24px;
+    height: 24px;
+}
+
+.btn-combobox-seta:hover {
+    color: var(--azul-ajborges, #3d3d90);
+    background-color: rgba(61, 61, 144, 0.08);
+}
+
+.btn-combobox-seta .chevron-cidade {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+}
+
+.btn-combobox-seta.aberto .chevron-cidade,
+.combobox-aberto .btn-combobox-seta .chevron-cidade {
+    transform: rotate(180deg);
+    color: var(--azul-ajborges, #3d3d90);
+}
+
+/* Regra de Governança: ocultar setinha no modo motorista travado pela gestão */
+.input-wrapper input[readonly] ~ .btn-combobox-seta,
+.input-wrapper input:disabled ~ .btn-combobox-seta,
+.combobox-cidade-wrap input[readonly] ~ .btn-combobox-seta,
+.combobox-cidade-wrap input:disabled ~ .btn-combobox-seta,
+.campo-bloqueado-gestao .btn-combobox-seta,
+.input-bloqueado-gestao ~ .btn-combobox-seta {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+.autocomplete-cidades-dropdown {
+    position: absolute;
+    z-index: 99999;
+    background: #ffffff;
+    border: 1px solid var(--cinza-borda, #cbd5e1);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(61, 61, 144, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 0;
+    margin: 0;
+    list-style: none;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.84rem;
+    color: var(--cinza-escuro, #1e293b);
+    box-sizing: border-box;
+    display: none;
+    animation: autocompleteFadeIn 0.15s ease-out;
+}
+
+@keyframes autocompleteFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar estilizada */
+.autocomplete-cidades-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.autocomplete-cidades-dropdown::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+.autocomplete-cidades-dropdown::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+}
+.autocomplete-cidades-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.autocomplete-cidades-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+    user-select: none;
+    line-height: 1.35;
+}
+
+.autocomplete-cidades-item:hover,
+.autocomplete-cidades-item.ativo {
+    background-color: var(--azul-ajborges-suave, #eef2ff);
+    color: var(--azul-ajborges, #3d3d90);
+    font-weight: 500;
+}
+
+.autocomplete-cidades-item .item-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.autocomplete-cidades-item:hover .item-icone,
+.autocomplete-cidades-item.ativo .item-icone {
+    color: var(--azul-ajborges, #3d3d90);
+}
+
+.autocomplete-cidades-item .item-nome {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-cidades-item .item-nome mark {
+    background: transparent;
+    color: var(--azul-ajborges, #3d3d90);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.autocomplete-cidades-item .item-uf {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 4px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.autocomplete-cidades-item:hover .item-uf,
+.autocomplete-cidades-item.ativo .item-uf {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.autocomplete-cidades-vazio,
+.autocomplete-cidades-carregando {
+    padding: 12px 14px;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-style: italic;
+    text-align: center;
+}
+

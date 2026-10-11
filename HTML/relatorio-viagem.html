@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/relatorio.css">
+    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.4">
     <link rel="icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
     <link rel="shortcut icon" type="image/png" href="../Imagens/LOGO EM BRANCO.png">
     <link rel="apple-touch-icon" href="../Imagens/LOGO EM BRANCO.png">
@@ -386,7 +386,7 @@
                                 <label for="destino-inicial">
                                     DESTINO: INICIAL
                                 </label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper combobox-cidade-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -397,6 +397,11 @@
                                         placeholder="Ex: Marília - SP" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">
+                                    <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                        <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
 
@@ -405,7 +410,7 @@
                                 <label for="destino-final">
                                     DESTINO: FINAL
                                 </label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper combobox-cidade-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -416,6 +421,11 @@
                                         placeholder="Ex: Santos - SP (opcional)" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">
+                                    <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                        <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -760,11 +770,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_1" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_1" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_1"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_1"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -841,11 +867,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_2" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_2" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_2"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_2"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -922,11 +964,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_3" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_3" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_3"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_3"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -1003,11 +1061,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_4" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_4" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_4"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_4"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -1084,11 +1158,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_5" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_5" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_5"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_5"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -1165,11 +1255,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_6" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_6" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_6"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_6"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -1246,11 +1352,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_7" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_7" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_7"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_7"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -1327,11 +1449,27 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="origem_frete_ml_8" class="input-tabela"
-                                                            placeholder="Cidade/UF Origem...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="origem_frete_ml_8" class="input-tabela"
+                                                                placeholder="Cidade/UF Origem..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
-                                                    <td><input type="text" name="destino_frete_ml_8"
-                                                            class="input-tabela" placeholder="Cidade/UF Destino...">
+                                                    <td>
+                                                        <div class="combobox-cidade-wrap">
+                                                            <input type="text" name="destino_frete_ml_8"
+                                                                class="input-tabela" placeholder="Cidade/UF Destino..." autocomplete="off">
+                                                            <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
+                                                                <svg class="chevron-cidade" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <div class="tabela-moeda-wrap">
@@ -2571,7 +2709,7 @@
     <!-- Supabase SDK e Cliente de Banco de Dados -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
-    <script src="../JavaScript/relatorio.js?v=2.2"></script>
+    <script src="../JavaScript/relatorio.js?v=2.4"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dropdownItem = document.getElementById('dropdown-portais');
