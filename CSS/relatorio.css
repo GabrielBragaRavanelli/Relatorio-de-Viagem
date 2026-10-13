@@ -321,8 +321,8 @@ header {
 
 main {
     flex: 1;
-    margin-top: 100px;
-    min-height: calc(100vh - 100px);
+    margin-top: var(--altura-header, 100px);
+    min-height: calc(100vh - var(--altura-header, 100px));
     background: linear-gradient(180deg, #f4f7fc 0%, #edf2f9 100%);
     padding: 40px 20px 70px;
     display: flex;
@@ -2982,7 +2982,8 @@ footer {
 .barra-admin-operacional {
     display: none;
     position: sticky;
-    top: 70px;
+    /* --altura-header é medida via JS (relatorio-viagem.html) a partir do header fixo */
+    top: var(--altura-header, 70px);
     left: 0;
     width: 100%;
     z-index: 950;

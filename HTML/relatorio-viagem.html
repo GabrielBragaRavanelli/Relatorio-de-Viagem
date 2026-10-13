@@ -2703,6 +2703,24 @@
     <script src="../JavaScript/auth.js"></script>
     <script src="../JavaScript/relatorio.js?v=2.4"></script>
     <script>
+        // Mede a altura real do header fixo e grava em --altura-header,
+        // usada pela .barra-admin-operacional para grudar logo abaixo dele.
+        (function () {
+            const header = document.querySelector('header');
+            if (!header) return;
+
+            function atualizarAlturaHeader() {
+                document.documentElement.style.setProperty('--altura-header', header.offsetHeight + 'px');
+            }
+
+            atualizarAlturaHeader();
+            if ('ResizeObserver' in window) {
+                new ResizeObserver(atualizarAlturaHeader).observe(header);
+            } else {
+                window.addEventListener('resize', atualizarAlturaHeader);
+            }
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
             const dropdownItem = document.getElementById('dropdown-portais');
             const dropdownBtn = document.getElementById('dropdown-menu-btn');
