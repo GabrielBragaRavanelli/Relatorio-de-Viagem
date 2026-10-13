@@ -3043,8 +3043,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 if (dst && f.destino) dst.value = f.destino;
                 if (vl && f.valor) vl.value = f.valor;
                 if (com && f.comissao) com.value = f.comissao;
+                // Mercado Livre tem comissão fixa de R$ 400,00. Se a ficha veio sem o valor
+                // (o banco descarta o que o motorista manda nesse campo), aplica a regra aqui.
+                if (com && f.cliente === 'mercado_livre' && !f.comissao) com.value = '400,00';
                 if (desc && f.descarga) desc.value = f.descarga;
             });
+            if (typeof calcularTotaisFreteMl === 'function') calcularTotaisFreteMl();
         }
 
         // Abastecimentos (Usa document.querySelector(`[name="posto_ml_${i}"]`) para contemplar <select> e <input>)
