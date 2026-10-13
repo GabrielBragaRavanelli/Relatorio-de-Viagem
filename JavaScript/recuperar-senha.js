@@ -160,18 +160,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. PASSO 1: IDENTIFICAÇÃO E MÁSCARA DO CPF
     // =========================================================================
 
-    function atualizarSugestoesCpf(cpfDigits) {
-        let prefix = '123456';
-        if (cpfDigits && cpfDigits.length >= 6) {
-            prefix = cpfDigits.slice(0, 6);
-        } else if (cpfDigits && cpfDigits.length > 0) {
-            prefix = cpfDigits.padEnd(6, '0');
-        }
-
-        if (exemplo1) exemplo1.textContent = `@${prefix}viagem`;
-        if (exemplo2) exemplo2.textContent = `${prefix}#2026`;
-        if (exemplo3) exemplo3.textContent = `${prefix}viagem@`;
+    // Sugestões de senha ALEATÓRIAS (nunca derivadas do CPF, que é fácil de descobrir)
+    function atualizarSugestoesCpf() {
+        const aleatorio = () => {
+            const a = new Uint32Array(1);
+            crypto.getRandomValues(a);
+            return String(a[0] % 1000000).padStart(6, '0');
+        };
+        if (exemplo1) exemplo1.textContent = `@${aleatorio()}Rota`;
+        if (exemplo2) exemplo2.textContent = `Frota#${aleatorio()}`;
+        if (exemplo3) exemplo3.textContent = `Viagem${aleatorio()}!`;
     }
+    atualizarSugestoesCpf();
 
     if (inputCpf) {
         inputCpf.addEventListener('input', (e) => {
@@ -187,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             e.target.value = value;
-            atualizarSugestoesCpf(value.replace(/\D/g, ''));
         });
 
         inputCpf.addEventListener('keypress', (e) => {
@@ -208,45 +207,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const btnSubmit = formStep1.querySelector('.btn-continuar');
+            const btnSubmit = formStep1.querySelector('button[type="submit"]');
             const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Verificando CPF no Supabase...</span>`;
+                btnSubmit.innerHTML = `<span>Enviando link...</span>`;
             }
 
             try {
-                // Consulta se o motorista existe no banco de dados do Supabase
-                const perfil = await buscarPerfilPorCpf(digitosCpf);
-
-                if (!perfil) {
-                    showToast('CPF não encontrado no sistema. Verifique o número ou faça seu cadastro.', 'error', 5000);
+                // A edge function responde sempre igual (não revela se o CPF existe)
+                // e envia o link para o e-mail JÁ cadastrado.
+                const r = await solicitarRecuperacaoSenha(digitosCpf);
+                if (!r.sucesso) {
+                    showToast(r.erro, 'error', 5000);
                     if (btnSubmit) {
                         btnSubmit.disabled = false;
                         btnSubmit.innerHTML = textoOriginal;
                     }
-                    inputCpf?.focus();
                     return;
                 }
-
-                savedCpf = cpfVal;
-                atualizarSugestoesCpf(digitosCpf);
-
-                showToast(`Motorista ${perfil.nome || ''} identificado! Crie sua nova senha.`, 'success', 3500);
-                if (btnSubmit) {
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = textoOriginal;
-                }
-                goToStep(2);
+                showToast(r.mensagem || 'Se o CPF estiver cadastrado, enviaremos um link para o e-mail do cadastro.', 'success', 8000);
+                if (btnSubmit) btnSubmit.innerHTML = `<span>Link enviado. Confira seu e-mail.</span>`;
             } catch (err) {
                 console.error(err);
-                showToast('Falha ao conectar com o Supabase. Tente novamente.', 'error');
+                showToast('Falha ao conectar com o servidor. Tente novamente.', 'error');
                 if (btnSubmit) {
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = textoOriginal;
                 }
             }
         });
+    }
+
+    // Chegou pelo link do e-mail: o Supabase abre uma sessão de recuperação
+    // e aí sim mostramos a etapa de nova senha.
+    let sessaoRecuperacao = false;
+    if (window.supabaseClient) {
+        window.supabaseClient.auth.onAuthStateChange((evento) => {
+            if (evento === 'PASSWORD_RECOVERY') {
+                sessaoRecuperacao = true;
+                goToStep(2);
+            }
+        });
+    }
+    if (window.ajbLinkRecuperacao && window.supabaseClient) {
+        window.supabaseClient.auth.getSession().then(({ data }) => {
+            if (data && data.session) {
+                sessaoRecuperacao = true;
+                goToStep(2);
+            }
+        });
+    }
+    const erroLink = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('error_description')
+        || new URLSearchParams(window.location.search).get('error_description');
+    if (erroLink) {
+        showToast('O link de recuperação é inválido ou expirou. Peça um novo link.', 'error', 7000);
+        history.replaceState(null, '', window.location.pathname);
     }
 
     // =========================================================================
@@ -388,6 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
         formStep2.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            if (!sessaoRecuperacao) {
+                showToast('Abra esta página pelo link enviado ao seu e-mail.', 'error', 5000);
+                goToStep(1);
+                return;
+            }
+
             const senha = (inputNovaSenha?.value || '');
             const confirmar = (inputConfirmarNovaSenha?.value || '');
             const regexEspecial = /[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]]/;
@@ -415,11 +437,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Salvando nova senha no Supabase...</span>`;
+                btnSubmit.innerHTML = `<span>Salvando nova senha...</span>`;
             }
 
             try {
-                const resultado = await atualizarSenhaSupabase(savedCpf, senha);
+                const resultado = await definirNovaSenhaSupabase(senha);
 
                 if (!resultado.sucesso) {
                     showToast(resultado.erro || 'Erro ao atualizar senha no Supabase.', 'error', 5000);
@@ -435,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('ajborges_cpf_recuperado', savedCpf);
                 }
 
-                showToast('Senha atualizada com sucesso no Supabase!', 'success', 3500);
+                showToast('Senha atualizada com sucesso!', 'success', 3500);
 
                 setTimeout(() => {
                     goToStep('success');

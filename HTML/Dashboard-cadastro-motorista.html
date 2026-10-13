@@ -25,17 +25,8 @@
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
-        (function () {
-            try {
-                const uStr = localStorage.getItem('ajborges_usuario_ativo');
-                const u = uStr ? JSON.parse(uStr) : null;
-                if (!u || (u.role !== 'admin' && u.role !== 'diretoria')) {
-                    window.location.href = 'Login.html#admin';
-                }
-            } catch (e) {
-                window.location.href = 'Login.html#admin';
-            }
-        })();
+        // Página fica oculta até a sessão ser validada no servidor (JavaScript/auth.js)
+        document.documentElement.style.visibility = 'hidden';
     </script>
 
     <style>
@@ -571,16 +562,15 @@
     </div>
 
     <!-- Script de Gestão Real Conectado Exclusivamente a FichaMultiCadastro -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/auth.js"></script>
     <script>
-        // Verificação de Sessão Administrativa
-        const usuarioAtivoStr = localStorage.getItem('ajborges_usuario_ativo');
-        let usuarioAtivo = null;
-        if (usuarioAtivoStr) {
-            try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
-        }
-        if (!usuarioAtivo || (usuarioAtivo.role !== 'admin' && usuarioAtivo.role !== 'diretoria')) {
-            window.location.href = 'Login.html#admin';
-        }
+        // Verificação de Sessão Administrativa: feita no servidor (JavaScript/auth.js).
+        // A página fica oculta até a sessão de admin/diretoria ser confirmada.
+        ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
+            window.ajbAuth.vigiarSessao('Login.html#admin');
+        });
 
         const STORAGE_KEY = 'ajborges_cadastros_agregados';
         let filtroAtual = 'todos';

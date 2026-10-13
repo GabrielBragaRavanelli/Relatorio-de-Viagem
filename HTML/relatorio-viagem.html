@@ -12,17 +12,8 @@
 
     <!-- Verificação de Sessão (Route Guard) -->
     <script>
-        (function () {
-            try {
-                const uStr = localStorage.getItem('ajborges_usuario_ativo');
-                const u = uStr ? JSON.parse(uStr) : null;
-                if (!u) {
-                    window.location.href = 'Login.html';
-                }
-            } catch (e) {
-                window.location.href = 'Login.html';
-            }
-        })();
+        // Página fica oculta até a sessão ser validada no servidor (JavaScript/auth.js)
+        document.documentElement.style.visibility = 'hidden';
     </script>
 </head>
 
@@ -2709,6 +2700,7 @@
     <!-- Supabase SDK e Cliente de Banco de Dados -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/auth.js"></script>
     <script src="../JavaScript/relatorio.js?v=2.4"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

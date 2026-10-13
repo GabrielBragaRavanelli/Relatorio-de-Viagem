@@ -212,12 +212,31 @@ function inicializarBancoDados() {
         try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) {}
     }
 
-    if (!usuarioAtivo || usuarioAtivo.role !== 'admin') {
+    if (!usuarioAtivo || (usuarioAtivo.role !== 'admin' && usuarioAtivo.role !== 'diretoria')) {
         console.warn('Acesso não autorizado ao Dashboard. Redirecionando para login...');
         window.location.href = 'Login.html#admin';
         return;
     }
 }
+
+// Escapa texto antes de montar HTML (evita script injetado em dados da ficha)
+function escaparHtml(valor) {
+    return String(valor ?? '').replace(/[&<>"'`]/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;'
+    }[c]));
+}
+
+// Abre comprovante privado com link temporário (bucket não é público)
+document.addEventListener('click', async (e) => {
+    const chip = e.target.closest && e.target.closest('.modal-anexo-chip[data-caminho]');
+    if (!chip || typeof window.obterLinkComprovante !== 'function') return;
+    const link = await window.obterLinkComprovante(chip.getAttribute('data-caminho'));
+    if (link) {
+        window.open(link, '_blank', 'noopener');
+    } else {
+        exibirToast('Não foi possível abrir o comprovante.', 'erro');
+    }
+});
 
 function salvarFichasNoStorage() {
     localStorage.setItem(STORAGE_FICHAS_KEY, JSON.stringify(appState.fichas));
@@ -956,12 +975,16 @@ function abrirModalResumoFicha(fichaId) {
 
         let anexosHtml = '';
         if (ficha.anexos && ficha.anexos.length > 0) {
-            anexosHtml = ficha.anexos.map(an => `
-                <div class="modal-anexo-chip">
+            anexosHtml = ficha.anexos.map(an => {
+                const nome = escaparHtml(an.name || an.nome || 'Comprovante');
+                const tamanho = an.size ? `${(an.size / 1024 / 1024).toFixed(2)} MB` : escaparHtml(an.tamanho || 'Anexo');
+                const caminho = an.path ? escaparHtml(an.path) : '';
+                return `
+                <div class="modal-anexo-chip"${caminho ? ` data-caminho="${caminho}" role="button" tabindex="0" title="Abrir comprovante" style="cursor:pointer"` : ''}>
                     <span>📎</span>
-                    <span>${an.nome || 'Comprovante'} (${an.tamanho || 'Anexo'})</span>
-                </div>
-            `).join('');
+                    <span>${nome} (${tamanho})</span>
+                </div>`;
+            }).join('');
         } else {
             anexosHtml = `<span style="font-size: 0.82rem; color: #94a3b8;">Nenhum comprovante anexado.</span>`;
         }
@@ -2204,7 +2227,9 @@ async function sincronizarFichasComSupabase() {
 // 11. EVENT LISTENERS E INICIALIZAÇÃO DO DOM
 // ==========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+// Só inicia depois que a sessão de admin/diretoria for validada no servidor (auth.js)
+ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
+    window.ajbAuth.vigiarSessao('Login.html#admin');
     // 1. Inicializa o banco de dados e carrega configurações dinâmicas
     inicializarBancoDados();
     carregarConfiguracoes();
@@ -2434,12 +2459,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================================================
 function fazerLogoutAdmin() {
     if (confirm('Deseja realmente encerrar a sessão de Administrador?')) {
-        localStorage.removeItem('ajborges_usuario_ativo');
-        sessionStorage.clear();
-        if (window.supabaseClient && window.supabaseClient.auth) {
-            window.supabaseClient.auth.signOut().catch(() => {});
-        }
-        window.location.href = 'Login.html#admin';
+        // Encerra a sessão no Supabase e apaga os dados de fichas guardados neste navegador
+        window.ajbAuth.sair('Login.html#admin');
     }
 }
 window.fazerLogoutAdmin = fazerLogoutAdmin;

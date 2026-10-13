@@ -24,17 +24,8 @@
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
-        (function () {
-            try {
-                const uStr = localStorage.getItem('ajborges_usuario_ativo');
-                const u = uStr ? JSON.parse(uStr) : null;
-                if (!u || (u.role !== 'admin' && u.role !== 'diretoria')) {
-                    window.location.href = 'Login.html#admin';
-                }
-            } catch (e) {
-                window.location.href = 'Login.html#admin';
-            }
-        })();
+        // Página fica oculta até a sessão ser validada no servidor (JavaScript/auth.js)
+        document.documentElement.style.visibility = 'hidden';
     </script>
 </head>
 
@@ -200,7 +191,7 @@
 
         <!-- Link Discreto para Voltar ao Login -->
         <div class="hub-back-row">
-            <a href="Login.html" class="link-voltar-login">
+            <a href="Login.html" class="link-voltar-login" onclick="event.preventDefault(); window.ajbAuth.sair('Login.html#admin');">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -212,6 +203,15 @@
         </div>
 
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/auth.js"></script>
+    <script>
+        ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
+            window.ajbAuth.vigiarSessao('Login.html#admin');
+        });
+    </script>
 </body>
 
 </html>

@@ -30,18 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const ex3 = document.getElementById('exemplo-senha-3');
         if (!ex1 && !ex2 && !ex3) return;
 
-        const digitosCpf = (inputCpf?.value || '').replace(/\D/g, '');
-        let prefix = '123456';
-        if (digitosCpf.length >= 6) {
-            prefix = digitosCpf.slice(0, 6);
-        } else if (digitosCpf.length > 0) {
-            prefix = digitosCpf.padEnd(6, '0');
-        }
-
-        if (ex1) ex1.textContent = `@${prefix}viagem`;
-        if (ex2) ex2.textContent = `${prefix}#2026`;
-        if (ex3) ex3.textContent = `${prefix}viagem@`;
+        // Sugestões ALEATÓRIAS: senha baseada no CPF é fácil de adivinhar
+        if (ex1 && ex1.dataset.gerado) return;
+        const aleatorio = () => {
+            const a = new Uint32Array(1);
+            crypto.getRandomValues(a);
+            return String(a[0] % 1000000).padStart(6, '0');
+        };
+        if (ex1) { ex1.textContent = `@${aleatorio()}Rota`; ex1.dataset.gerado = '1'; }
+        if (ex2) ex2.textContent = `Frota#${aleatorio()}`;
+        if (ex3) ex3.textContent = `Viagem${aleatorio()}!`;
     }
+    atualizarSugestaoSenha();
 
     // Máscara de CPF (000.000.000-00)
     if (inputCpf) {
@@ -218,6 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Validação: E-mail obrigatório (usado no login e na recuperação de senha)
+            const emailDigitado = (document.getElementById('email-motorista')?.value || '').trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailDigitado)) {
+                showToast('Informe um e-mail válido. Ele é usado para entrar e recuperar a senha.', 'error');
+                document.getElementById('email-motorista')?.focus();
+                return;
+            }
+
             // Validação: Senha mínima 6 caracteres
             const senha = inputSenha?.value || '';
             if (senha.length < 6) {
@@ -247,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Gravando cadastro no Supabase...</span>`;
+                btnSubmit.innerHTML = `<span>Gravando cadastro...</span>`;
             }
 
             try {
@@ -274,11 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Salva o CPF para preencher automaticamente na tela de login
                 sessionStorage.setItem('ajborges_cpf_cadastrado', cpf);
 
-                showToast('Cadastro realizado no Supabase com sucesso! Redirecionando...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'Login.html#motorista';
-                }, 1400);
+                if (resultado.confirmarEmail) {
+                    showToast('Cadastro realizado! Confirme pelo link enviado ao seu e-mail e depois faça o login.', 'success', 7000);
+                    setTimeout(() => { window.location.href = 'Login.html#motorista'; }, 6000);
+                } else {
+                    showToast('Cadastro realizado com sucesso! Redirecionando...', 'success');
+                    setTimeout(() => { window.location.href = 'Login.html#motorista'; }, 1400);
+                }
             } catch (err) {
                 console.error('Erro ao salvar no Supabase:', err);
                 showToast('Erro de comunicação com o Supabase. Tente novamente.', 'error');
