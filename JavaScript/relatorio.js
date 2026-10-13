@@ -2,31 +2,25 @@
 // AJBorges - Script do Relatório de Viagem
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', () => {
+// Só abre com sessão real do Supabase (motorista ou gestão). Ver JavaScript/auth.js
+ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessao) => {
     // ------------------------------------------
     // Route Guard: Proteção de Acesso
+    // O usuário vem da sessão validada no servidor (auth.js), não do localStorage.
     // ------------------------------------------
     const STORAGE_USER_ACTIVE = 'ajborges_usuario_ativo';
-    const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
-    let usuarioAtivo = null;
-    if (usuarioAtivoStr) {
-        try { usuarioAtivo = JSON.parse(usuarioAtivoStr); } catch (e) { }
-    }
-    const urlParamsInit = new URLSearchParams(window.location.search);
-    const modeUrlInit = urlParamsInit.get('mode');
+    let usuarioAtivo = usuarioSessao;
+    const ehGestao = usuarioSessao.role === 'admin' || usuarioSessao.role === 'diretoria';
 
-    if (!usuarioAtivo) {
-        if (modeUrlInit === 'admin') {
-            usuarioAtivo = { role: 'admin', nome: 'Administrador Central', email: 'admin@ajborges.com' };
-            localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
-        } else {
-            window.location.href = 'Login.html';
-            return;
-        }
-    } else if (modeUrlInit === 'admin' && usuarioAtivo.role !== 'admin') {
-        usuarioAtivo.role = 'admin';
-        localStorage.setItem(STORAGE_USER_ACTIVE, JSON.stringify(usuarioAtivo));
+    // ?mode=admin só vale para a gestão. Para o motorista, remove da URL
+    // (o resto do código lê a URL; a proteção real dos dados é a RLS do banco).
+    const urlParamsInit = new URLSearchParams(window.location.search);
+    if (urlParamsInit.get('mode') === 'admin' && !ehGestao) {
+        urlParamsInit.delete('mode');
+        const qs = urlParamsInit.toString();
+        history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
     }
+    window.ajbAuth.vigiarSessao('Login.html');
 
     // Elementos do Formulário
     const form = document.getElementById('form-relatorio');
@@ -130,7 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    atualizarDisplayNumeroFicha();
+    // O número definitivo é gerado pelo banco no momento do envio
+    if (numeroFichaDisplay) numeroFichaDisplay.textContent = 'Gerado no envio';
 
     // ------------------------------------------
     // 0.1. Acionamento do Card do Formulário Oficial
@@ -2005,19 +2000,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Arquivos reais (File) ainda não enviados ao Storage, ligados ao item da lista
+    const arquivosBinariosMl = new WeakMap();
+    const TIPOS_COMPROVANTE = ['application/pdf', 'image/png', 'image/jpeg'];
+
     function adicionarArquivosMl(novosArquivos) {
         let adicionados = 0;
         for (let i = 0; i < novosArquivos.length; i++) {
             const file = novosArquivos[i];
-            if (file.size > 15 * 1024 * 1024) {
-                exibirToast(`Arquivo "${file.name}" excede 15MB.`, 'erro');
+            if (!TIPOS_COMPROVANTE.includes(file.type)) {
+                exibirToast(`Arquivo "${file.name}" não é PDF, PNG ou JPG.`, 'erro');
                 continue;
             }
-            arquivosComprovantesMl.push({
+            if (file.size > 10 * 1024 * 1024) {
+                exibirToast(`Arquivo "${file.name}" excede 10MB.`, 'erro');
+                continue;
+            }
+            const item = {
                 name: file.name,
                 size: file.size,
                 type: file.type
-            });
+            };
+            arquivosBinariosMl.set(item, file);
+            arquivosComprovantesMl.push(item);
             adicionados++;
         }
 
@@ -2026,6 +2031,38 @@ document.addEventListener('DOMContentLoaded', () => {
             salvarProgressoMl();
             exibirToast(`${adicionados} arquivo(s) anexado(s) com sucesso!`, 'sucesso');
         }
+    }
+
+    /**
+     * Envia ao Storage os comprovantes ainda não enviados e devolve a lista
+     * final ({ name, size, type, path }). Lança erro se algum envio falhar.
+     */
+    async function enviarComprovantesPendentesMl(fichaId) {
+        const resultado = [];
+        let falhas = 0;
+        let semArquivo = 0;
+        for (const item of arquivosComprovantesMl) {
+            if (item && item.path) { resultado.push(item); continue; }
+            const file = arquivosBinariosMl.get(item);
+            if (!file) { semArquivo++; continue; }
+            const enviado = (typeof window.uploadComprovanteSupabase === 'function')
+                ? await window.uploadComprovanteSupabase(file, fichaId)
+                : null;
+            if (enviado) {
+                resultado.push(enviado);
+            } else {
+                falhas++;
+            }
+        }
+        if (falhas > 0) {
+            throw new Error(`${falhas} comprovante(s) não puderam ser enviados. Verifique a conexão e tente novamente.`);
+        }
+        if (semArquivo > 0) {
+            exibirToast(`${semArquivo} comprovante(s) ficaram de fora porque a página foi recarregada. Anexe novamente se precisar.`, 'erro');
+        }
+        arquivosComprovantesMl = resultado;
+        renderizarListaAnexosMl();
+        return resultado;
     }
 
     // 15.7. Lixeiras e Limpeza do Formulário ML
@@ -3742,6 +3779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
+        await enviarComprovantesPendentesMl(idFicha);
         let todas = obterListaFichasCentral();
         let index = todas.findIndex(f => f.id === idFicha);
 
@@ -3841,20 +3879,19 @@ document.addEventListener('DOMContentLoaded', () => {
             todas.unshift(dadosAtualizados);
         }
 
+        // Persistência obrigatória no Supabase: se falhar, NÃO finge que salvou
+        if (typeof window.salvarFichaSupabase !== 'function') {
+            throw new Error('Serviço de dados indisponível.');
+        }
+        const resultadoNuvem = await window.salvarFichaSupabase(dadosAtualizados);
+        if (!resultadoNuvem || !resultadoNuvem.success) {
+            throw new Error('O banco recusou a gravação da ficha.');
+        }
+
         salvarListaFichasCentral(todas);
 
         // Limpar a chave temporária de rascunho
         localStorage.removeItem(STORAGE_ML_KEY);
-
-        // Persistência obrigatória em nuvem no Supabase TANTO se for nova QUANTO se for edição (index >= 0)
-        if (typeof window.salvarFichaSupabase === 'function') {
-            try {
-                await window.salvarFichaSupabase(dadosAtualizados);
-                console.log(`✅ Ficha ${idFicha} sincronizada e salva no Supabase com sucesso.`);
-            } catch (errSupabase) {
-                console.warn('Erro ao salvar ficha no Supabase:', errSupabase);
-            }
-        }
 
         return dadosAtualizados;
     }
@@ -3920,18 +3957,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    const idSalvar = fichaIdUrl || (fichaCarregada ? fichaCarregada.id : (typeof fichaNumeroAtual !== 'undefined' ? fichaNumeroAtual : formatarNumeroFicha(obterProximoNumeroFicha())));
                     const textoOriginal = btnFinalizarRelatorioMl.innerHTML;
                     btnFinalizarRelatorioMl.innerHTML = `<span>⏳ Salvando pela Gestão...</span>`;
                     btnFinalizarRelatorioMl.disabled = true;
 
+                    let idSalvar = fichaIdUrl || (fichaCarregada ? fichaCarregada.id : null);
                     try {
+                        if (!idSalvar) {
+                            idSalvar = await window.reservarNumeroFichaSupabase();
+                            atualizarDisplayNumeroFicha(idSalvar);
+                        }
                         await atualizarFichaNaBase(idSalvar, false);
                         sessionStorage.setItem('ajborges_toast_mensagem', `Ficha ${idSalvar} salva! Status: Esperando Confirmação`);
                         window.location.href = 'dashboard-admin.html#fichas';
                     } catch (err) {
                         console.error('Erro ao salvar ficha pelo administrador:', err);
-                        exibirToast(`Erro ao salvar a ficha ${idSalvar}`, 'erro');
+                        exibirToast(`Erro ao salvar a ficha ${idSalvar || ''}: ${err.message || 'tente novamente.'}`, 'erro');
                         btnFinalizarRelatorioMl.innerHTML = textoOriginal;
                         btnFinalizarRelatorioMl.disabled = false;
                     }
@@ -3980,9 +4021,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Gera Identificador Único da Ficha (ex: AJB-2026-004)
-                const novoNumeroSeq = obterProximoNumeroFicha();
-                const novoIdFicha = formatarNumeroFicha(novoNumeroSeq);
+                const textoOriginalEnvio = btnFinalizarRelatorioMl.innerHTML;
+                const restaurarBotaoEnvio = () => {
+                    btnFinalizarRelatorioMl.innerHTML = textoOriginalEnvio;
+                    btnFinalizarRelatorioMl.disabled = false;
+                };
+                btnFinalizarRelatorioMl.innerHTML = `<span>⏳ Enviando ficha...</span>`;
+                btnFinalizarRelatorioMl.disabled = true;
+
+                // Número único da ficha gerado pelo banco (ex: AJB-2026-004)
+                let novoIdFicha;
+                try {
+                    novoIdFicha = await window.reservarNumeroFichaSupabase();
+                    atualizarDisplayNumeroFicha(novoIdFicha);
+                } catch (errNumero) {
+                    console.error('Erro ao reservar número da ficha:', errNumero);
+                    exibirToast('Não foi possível gerar o número da ficha. Verifique a conexão e tente novamente.', 'erro');
+                    restaurarBotaoEnvio();
+                    return;
+                }
+
+                // Envia os comprovantes para a pasta do motorista no Storage
+                try {
+                    await enviarComprovantesPendentesMl(novoIdFicha);
+                } catch (errUpload) {
+                    exibirToast(errUpload.message, 'erro');
+                    restaurarBotaoEnvio();
+                    return;
+                }
 
                 // Monta objeto completo da nova ficha com todas as colunas requeridas
                 const agoraDataHora = new Date().toLocaleString('pt-BR', {
@@ -4070,18 +4136,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } catch (e) { }
 
-                // Salva na fila central de fichas (Local e Nuvem)
+                // Envia para o Supabase e só confirma ao motorista se gravou de verdade
+                const resultadoEnvio = (typeof window.salvarFichaSupabase === 'function')
+                    ? await window.salvarFichaSupabase(novaFicha)
+                    : null;
+                if (!resultadoEnvio || !resultadoEnvio.success) {
+                    exibirToast('A ficha NÃO foi enviada. Verifique a conexão e tente novamente; seus dados continuam na tela.', 'erro');
+                    restaurarBotaoEnvio();
+                    return;
+                }
+
+                // Cópia local apenas para exibição
                 const todasFichas = obterListaFichasCentral();
                 todasFichas.unshift(novaFicha);
                 salvarListaFichasCentral(todasFichas);
-
-                // Envia para o Supabase
-                if (typeof window.salvarFichaSupabase === 'function') {
-                    window.salvarFichaSupabase(novaFicha);
-                }
-
-                // Incrementa contador sequencial
-                localStorage.setItem(STORAGE_FICHA_KEY, novoNumeroSeq + 1);
+                restaurarBotaoEnvio();
 
                 // Limpa rascunho temporário
                 localStorage.removeItem(STORAGE_ML_KEY);

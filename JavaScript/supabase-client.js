@@ -11,10 +11,10 @@ const SUPABASE_CONFIG = {
     anonKey: 'sb_publishable_JJpfaiILR7BJd8rYCCoi4A_uP50-Xwe' // Chave Pública
 };
 
-// Permite sobrescrever a URL caso o usuário configure via localStorage ou query param
-if (localStorage.getItem('ajborges_supabase_url')) {
-    SUPABASE_CONFIG.url = localStorage.getItem('ajborges_supabase_url');
-}
+
+// Guarda, antes do cliente ler e limpar a URL, se a página foi aberta pelo
+// link de recuperação de senha enviado por e-mail.
+window.ajbLinkRecuperacao = /type=recovery/.test(window.location.hash || '');
 
 // 2. Inicialização do Cliente Supabase
 let supabaseClient = null;
@@ -260,41 +260,65 @@ async function atualizarStatusFichaSupabase(idFicha, novoStatus, aprovadoPor = '
 // ==========================================================================
 
 /**
- * Envia uma imagem para o bucket 'comprovantes' no Supabase Storage
+ * Envia um comprovante para o bucket PRIVADO 'comprovantes'.
+ * Caminho: <id do usuário>/<id da ficha>/<arquivo>  (exigido pela política do storage)
+ * Retorna { path, name, size, type } ou null.
  */
-async function uploadComprovanteSupabase(file, prefixo = 'comprovante') {
-    if (!supabaseClient) return null;
+async function uploadComprovanteSupabase(file, fichaId) {
+    if (!supabaseClient || !file) return null;
 
     try {
-        const extensao = file.name ? file.name.split('.').pop() : 'jpg';
-        const nomeArquivo = `${prefixo}_${Date.now()}_${Math.random().toString(36).substring(7)}.${extensao}`;
-        const caminho = `viagens/${nomeArquivo}`;
+        const { data: sessao } = await supabaseClient.auth.getUser();
+        const uid = sessao && sessao.user ? sessao.user.id : null;
+        if (!uid) return null;
 
-        const { data, error } = await supabaseClient
+        const nomeSeguro = String(file.name || 'comprovante')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+        const pastaFicha = String(fichaId || 'sem-ficha').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const caminho = `${uid}/${pastaFicha}/${Date.now()}_${nomeSeguro}`;
+
+        const { error } = await supabaseClient
             .storage
             .from('comprovantes')
-            .upload(caminho, file, {
-                cacheControl: '3600',
-                upsert: false
-            });
+            .upload(caminho, file, { cacheControl: '3600', upsert: false, contentType: file.type || undefined });
 
         if (error) {
             console.error('Erro no upload do comprovante:', error);
             return null;
         }
-
-        // Obtém a URL pública do comprovante
-        const { data: urlData } = supabaseClient
-            .storage
-            .from('comprovantes')
-            .getPublicUrl(caminho);
-
-        console.log('✅ Foto enviada para o Supabase Storage:', urlData.publicUrl);
-        return urlData.publicUrl;
+        return { path: caminho, name: file.name, size: file.size, type: file.type };
     } catch (err) {
         console.error('Exceção no upload para o Supabase Storage:', err);
         return null;
     }
+}
+
+/**
+ * Gera um link temporário (10 min) para abrir um comprovante privado.
+ */
+async function obterLinkComprovante(caminho) {
+    if (!supabaseClient || !caminho) return null;
+    const { data, error } = await supabaseClient
+        .storage
+        .from('comprovantes')
+        .createSignedUrl(caminho, 600);
+    if (error) {
+        console.error('Erro ao gerar link do comprovante:', error);
+        return null;
+    }
+    return data.signedUrl;
+}
+
+/**
+ * Reserva o próximo número de ficha no banco (ex.: AJB-2026-004).
+ * Único para todos os motoristas e aparelhos.
+ */
+async function reservarNumeroFichaSupabase() {
+    if (!supabaseClient) throw new Error('Supabase não inicializado.');
+    const { data, error } = await supabaseClient.rpc('reservar_numero_ficha');
+    if (error || !data) throw (error || new Error('Não foi possível gerar o número da ficha.'));
+    return data;
 }
 
 /**
@@ -369,165 +393,123 @@ window.buscarFichasSupabase = buscarFichasSupabase;
 window.atualizarStatusFichaSupabase = atualizarStatusFichaSupabase;
 window.excluirFichaSupabase = excluirFichaSupabase;
 window.uploadComprovanteSupabase = uploadComprovanteSupabase;
+window.obterLinkComprovante = obterLinkComprovante;
+window.reservarNumeroFichaSupabase = reservarNumeroFichaSupabase;
 window.escutarAlteracoesFichasSupabase = escutarAlteracoesFichasSupabase;
 
 // ==========================================================================
-// 6. OPERAÇÕES DE MOTORISTA E AUTENTICAÇÃO (PERFIS)
+// 6. LOGIN, CADASTRO E RECUPERAÇÃO DE SENHA
+//    Login e recuperação passam pelas edge functions (limite de tentativas,
+//    papel validado no servidor). O navegador nunca lê a tabela perfis sem login.
 // ==========================================================================
 
-async function buscarPerfilPorCpf(cpf) {
-    const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    if (!cpfLimpo) return null;
-
-    try {
-        if (supabaseClient) {
-            const { data, error } = await supabaseClient
-                .from('perfis')
-                .select('*')
-                .eq('cpf', cpfLimpo)
-                .maybeSingle();
-
-            if (!error && data) return data;
-        }
-
-        const resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis?cpf=eq.${cpfLimpo}&select=*`, {
-            headers: {
-                'apikey': SUPABASE_CONFIG.anonKey,
-                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-            }
-        });
-        if (resp.ok) {
-            const rows = await resp.json();
-            return (rows && rows.length > 0) ? rows[0] : null;
-        }
-    } catch (e) {
-        console.error('Erro ao buscar perfil por CPF:', e);
-    }
-    return null;
+/**
+ * Chama uma edge function e devolve { ok, status, dados }.
+ */
+async function chamarEdgeFunction(nome, corpo) {
+    const resp = await fetch(`${SUPABASE_CONFIG.url}/functions/v1/${nome}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_CONFIG.anonKey
+        },
+        body: JSON.stringify(corpo)
+    });
+    let dados = {};
+    try { dados = await resp.json(); } catch (e) { /* resposta sem JSON */ }
+    return { ok: resp.ok, status: resp.status, dados };
 }
 
+/**
+ * Login pela edge function 'login'. tipo = 'motorista' (cpf) ou 'admin' (email).
+ * Em caso de sucesso grava a sessão no cliente Supabase.
+ */
+async function loginSupabase({ tipo, cpf, email, senha }) {
+    const corpo = tipo === 'admin'
+        ? { tipo: 'admin', email, senha }
+        : { tipo: 'motorista', cpf, senha };
+
+    const r = await chamarEdgeFunction('login', corpo);
+    if (!r.ok || !r.dados || !r.dados.sucesso) {
+        return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Não foi possível entrar. Tente novamente.' };
+    }
+    await window.ajbAuth.definirSessao(r.dados.session);
+    return { sucesso: true, usuario: r.dados.usuario };
+}
+
+/**
+ * Cadastro do motorista: só cria o usuário no Supabase Auth.
+ * O perfil (role = motorista) é criado pelo gatilho do banco.
+ */
 async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha }) {
+    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
+
     const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    const emailFinal = (email || '').trim() || null;
+    const emailFinal = (email || '').trim().toLowerCase();
+    if (!emailFinal) return { sucesso: false, erro: 'Informe seu e-mail. Ele é usado para entrar e recuperar a senha.' };
 
-    // 1. Verifica se CPF já existe no banco
-    const existente = await buscarPerfilPorCpf(cpfLimpo);
-    if (existente) {
-        return { sucesso: false, erro: 'Este CPF já está cadastrado no sistema.' };
-    }
-
-    let authUserId = null;
-
-    // 2. Se houver e-mail válido, cria conta no Supabase Auth
-    if (emailFinal) {
-        try {
-            if (supabaseClient) {
-                const { data: authData } = await supabaseClient.auth.signUp({
-                    email: emailFinal,
-                    password: senha,
-                    options: {
-                        data: {
-                            nome: nome.trim(),
-                            cpf: cpfLimpo,
-                            telefone: (telefone || '').trim() || null,
-                            role: 'motorista'
-                        }
-                    }
-                });
-                if (authData?.user) authUserId = authData.user.id;
-            }
-        } catch (eAuth) {
-            console.warn('Aviso no signUp:', eAuth);
-        }
-    }
-
-    // 3. Salva diretamente na tabela perfis (com senha)
-    const payload = {
-        nome: nome.trim(),
-        cpf: cpfLimpo,
-        telefone: (telefone || '').trim() || null,
+    const { data, error } = await supabaseClient.auth.signUp({
         email: emailFinal,
-        role: 'motorista',
-        senha: senha
-    };
-    if (authUserId) payload.id = authUserId;
-
-    try {
-        let resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_CONFIG.anonKey,
-                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!resp.ok) {
-            const errJson = await resp.json().catch(() => ({}));
-            if (errJson.message && errJson.message.toLowerCase().includes('senha')) {
-                delete payload.senha;
-                resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_CONFIG.anonKey,
-                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                return { sucesso: false, erro: errJson.message || 'Erro ao salvar perfil.' };
+        password: senha,
+        options: {
+            data: {
+                nome: (nome || '').trim(),
+                cpf: cpfLimpo,
+                telefone: (telefone || '').replace(/\D/g, '') || null
             }
         }
+    });
 
-        if (resp.ok) {
-            const salvo = await resp.json();
-            return { sucesso: true, dados: salvo[0] || salvo };
-        } else {
-            const err = await resp.json().catch(() => ({}));
-            return { sucesso: false, erro: err.message || 'Erro ao gravar cadastro.' };
+    if (error) {
+        const msg = String(error.message || '');
+        if (/database error|saving new user/i.test(msg)) {
+            return { sucesso: false, erro: 'Não foi possível concluir o cadastro. Verifique se o CPF ou o e-mail já estão cadastrados.' };
         }
-    } catch (e) {
-        console.error('Erro de conexão ao salvar motorista:', e);
-        return { sucesso: false, erro: 'Falha de comunicação com o Supabase.' };
+        if (/password/i.test(msg)) {
+            return { sucesso: false, erro: 'A senha não atende aos requisitos de segurança.' };
+        }
+        if (/rate limit|too many/i.test(msg)) {
+            return { sucesso: false, erro: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' };
+        }
+        return { sucesso: false, erro: 'Não foi possível concluir o cadastro. Tente novamente.' };
     }
+
+    // Não deixa a sessão do cadastro aberta: o motorista entra pela tela de login
+    if (data && data.session) {
+        await supabaseClient.auth.signOut().catch(() => {});
+    }
+    return { sucesso: true, confirmarEmail: !(data && data.session) };
 }
 
-async function atualizarSenhaSupabase(cpf, novaSenha) {
-    const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    if (!cpfLimpo) return { sucesso: false, erro: 'CPF inválido.' };
-
-    try {
-        const resp = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/perfis?cpf=eq.${cpfLimpo}`, {
-            method: 'PATCH',
-            headers: {
-                'apikey': SUPABASE_CONFIG.anonKey,
-                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ senha: novaSenha })
-        });
-
-        if (resp.ok) {
-            return { sucesso: true };
-        } else {
-            const err = await resp.json().catch(() => ({}));
-            if (err.message && err.message.toLowerCase().includes('senha')) {
-                return { sucesso: false, erro: 'A coluna "senha" precisa ser adicionada na tabela "perfis" do Supabase (tipo text).' };
-            }
-            return { sucesso: false, erro: err.message || 'Não foi possível atualizar a senha no banco.' };
-        }
-    } catch (e) {
-        console.error('Erro ao atualizar senha no Supabase:', e);
-        return { sucesso: false, erro: 'Falha de comunicação com o Supabase.' };
-    }
+/**
+ * Pede o link de redefinição de senha (edge function 'recuperar-senha').
+ * A resposta é sempre a mesma, exista ou não o cadastro.
+ */
+async function solicitarRecuperacaoSenha(cpf) {
+    const r = await chamarEdgeFunction('recuperar-senha', { cpf: (cpf || '').replace(/\D/g, '') });
+    if (r.status === 429) return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Muitas solicitações. Tente mais tarde.' };
+    if (!r.ok) return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Serviço indisponível no momento.' };
+    return { sucesso: true, mensagem: r.dados.mensagem };
 }
 
+/**
+ * Define a nova senha. Só funciona com a sessão de recuperação aberta
+ * pelo link enviado por e-mail.
+ */
+async function definirNovaSenhaSupabase(novaSenha) {
+    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
+    const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
+    if (error) {
+        const msg = String(error.message || '');
+        if (/different from the old/i.test(msg)) return { sucesso: false, erro: 'A nova senha precisa ser diferente da anterior.' };
+        if (/session|jwt|expired/i.test(msg)) return { sucesso: false, erro: 'O link expirou. Peça um novo link de recuperação.' };
+        return { sucesso: false, erro: 'Não foi possível salvar a nova senha.' };
+    }
+    await supabaseClient.auth.signOut().catch(() => {});
+    return { sucesso: true };
+}
 
-window.buscarPerfilPorCpf = buscarPerfilPorCpf;
+window.loginSupabase = loginSupabase;
 window.cadastrarMotoristaSupabase = cadastrarMotoristaSupabase;
-window.atualizarSenhaSupabase = atualizarSenhaSupabase;
-
+window.solicitarRecuperacaoSenha = solicitarRecuperacaoSenha;
+window.definirNovaSenhaSupabase = definirNovaSenhaSupabase;

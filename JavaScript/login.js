@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let toastTimer = null;
 
+    // Abrir a tela de login encerra qualquer sessão anterior neste aparelho
+    // (importante em celular/computador compartilhado)
+    if (window.supabaseClient) {
+        window.supabaseClient.auth.signOut({ scope: 'local' }).catch(() => {});
+    }
+    if (window.ajbAuth) window.ajbAuth.limparDadosLocais();
+
     // =========================================================================
     // 1. ALTERNÂNCIA DE ABAS (MOTORISTA / ADMINISTRADOR)
     // =========================================================================
@@ -215,7 +222,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // =========================================================================
     // 5. ENVIO E VALIDAÇÃO DOS FORMULÁRIOS
+    //    O login passa pela edge function 'login' (limite de tentativas e papel
+    //    conferido no servidor). O navegador não consulta a tabela perfis.
     // =========================================================================
+
+    function travarBotao(form, texto) {
+        const btn = form.querySelector('.btn-submit');
+        const original = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<span>${texto}</span>`;
+        }
+        return () => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        };
+    }
+
+    async function entrar(form, dadosLogin, textoAguarde, destino, mensagemOk) {
+        if (typeof window.loginSupabase !== 'function' || !window.supabaseClient) {
+            showToast('Servidor de autenticação indisponível no momento.', 'error');
+            return;
+        }
+        const destravar = travarBotao(form, textoAguarde);
+        try {
+            const r = await window.loginSupabase(dadosLogin);
+            if (!r.sucesso) {
+                destravar();
+                showToast(r.erro, 'error', 4500);
+                return;
+            }
+            showToast(mensagemOk, 'success');
+            setTimeout(() => { window.location.href = destino; }, 800);
+        } catch (err) {
+            console.error('Erro inesperado no login:', err);
+            destravar();
+            showToast('Não foi possível conectar ao servidor de login.', 'error');
+        }
+    }
 
     // Formulário do Motorista
     if (formMotorista) {
@@ -225,122 +271,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const cpfVal = (inputCpf?.value || '').trim();
             const senhaVal = formMotorista.querySelector('#senha-motorista')?.value || '';
 
-            // Validação simples de CPF completo
-            if (cpfVal.length < 14) {
+            if (cpfVal.replace(/\D/g, '').length !== 11) {
                 showToast('Por favor, informe um CPF válido no formato 000.000.000-00.', 'error');
                 inputCpf?.focus();
                 return;
             }
-
             if (!senhaVal) {
                 showToast('Por favor, digite sua senha de acesso.', 'error');
                 return;
             }
 
-            const submitBtn = formMotorista.querySelector('.btn-submit');
-            const textoOriginalBtn = submitBtn ? submitBtn.innerHTML : '<span>Acessar Relatório de Viagem</span>';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span>Validando credenciais do motorista...</span>`;
-            }
-
-            const cpfLimpo = cpfVal.replace(/\D/g, '');
-
-            if (window.supabaseClient) {
-                try {
-                    // 1. Procura se existe o motorista pelo CPF na tabela 'perfis'
-                    const { data: perfil, error: perfilError } = await window.supabaseClient
-                        .from('perfis')
-                        .select('*')
-                        .eq('cpf', cpfLimpo)
-                        .maybeSingle();
-
-                    if (perfilError) {
-                        console.warn('Aviso ao consultar perfis por CPF:', perfilError);
-                    }
-
-                    // Se não tiver perfil com esse CPF cadastrado
-                    if (!perfil) {
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = textoOriginalBtn;
-                        }
-                        showToast('Motorista não cadastrado! Verifique seu CPF ou realize o cadastro.', 'error');
-                        return;
-                    }
-
-                    // Determina o e-mail cadastrado no Auth do Supabase
-                    const emailAuth = perfil.email || `${cpfLimpo}@motorista.ajborges.com`;
-
-                    // 2. Valida a senha com a tabela perfis ou Supabase Auth
-                    let senhaValida = false;
-                    if (perfil.senha) {
-                        senhaValida = (perfil.senha === senhaVal);
-                        if (!senhaValida) {
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = textoOriginalBtn;
-                            }
-                            showToast('Senha incorreta para este CPF. Tente novamente!', 'error');
-                            return;
-                        }
-                    } else {
-                        const { data: authData, error: authError } = await window.supabaseClient.auth.signInWithPassword({
-                            email: emailAuth,
-                            password: senhaVal
-                        });
-
-                        if (authError) {
-                            console.error('Falha de login do motorista no Supabase:', authError);
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = textoOriginalBtn;
-                            }
-
-                            if (authError.message.includes('Invalid login credentials')) {
-                                showToast('Senha de motorista incorreta!', 'error');
-                            } else if (authError.message.includes('Email not confirmed')) {
-                                showToast('Cadastro pendente de confirmação no Supabase.', 'error');
-                            } else {
-                                showToast(`Erro ao autenticar: ${authError.message}`, 'error');
-                            }
-                            return;
-                        }
-                    }
-
-                    // Usuário autenticado com sucesso!
-                    const usuarioId = perfil.id || (typeof authData !== 'undefined' && authData?.user?.id) || 'motorista_' + cpfLimpo;
-                    const nomeMotorista = perfil.nome || (typeof authData !== 'undefined' && authData?.user?.user_metadata?.nome) || 'Motorista AJBorges';
-
-                    localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                        role: 'motorista',
-                        id: usuarioId,
-                        nome: nomeMotorista,
-                        cpf: cpfVal,
-                        telefone: perfil.telefone || ''
-                    }));
-
-                    localStorage.removeItem('ajborges_relatorio_viagem_ml_draft');
-                    showToast('Login de Motorista realizado com sucesso! Redirecionando...', 'success');
-
-                    setTimeout(() => {
-                        window.location.href = 'relatorio-viagem.html?novo=true';
-                    }, 1000);
-                } catch (err) {
-                    console.error('Erro inesperado no login do motorista:', err);
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = textoOriginalBtn;
-                    }
-                    showToast('Não foi possível conectar ao servidor de login.', 'error');
-                }
-            } else {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginalBtn;
-                }
-                showToast('Servidor de autenticação indisponível no momento.', 'error');
-            }
+            localStorage.removeItem('ajborges_relatorio_viagem_ml_draft');
+            await entrar(
+                formMotorista,
+                { tipo: 'motorista', cpf: cpfVal, senha: senhaVal },
+                'Validando credenciais do motorista...',
+                'relatorio-viagem.html?novo=true',
+                'Login realizado com sucesso! Redirecionando...'
+            );
         });
     }
 
@@ -356,99 +304,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Informe um e-mail corporativo válido.', 'error');
                 return;
             }
-
             if (!senhaVal) {
                 showToast('Informe a senha de gestor.', 'error');
                 return;
             }
 
-            const submitBtn = formAdmin.querySelector('.btn-submit');
-            const textoOriginalBtn = submitBtn ? submitBtn.innerHTML : '<span>Acessar Painel Gestor</span>';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span>Validando credenciais...</span>`;
-            }
-
-            // Autenticação Real com Supabase
-            if (window.supabaseClient) {
-                try {
-                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-                        email: emailVal,
-                        password: senhaVal
-                    });
-
-                    if (error) {
-                        console.error('Falha de login no Supabase:', error);
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = textoOriginalBtn;
-                        }
-                        if (error.message.includes('Invalid login credentials')) {
-                            showToast('E-mail ou senha de administrador incorretos!', 'error');
-                        } else if (error.message.includes('Email not confirmed')) {
-                            showToast('E-mail ainda não confirmado no painel do Supabase.', 'error');
-                        } else {
-                            showToast(`Erro ao autenticar: ${error.message}`, 'error');
-                        }
-                        return;
-                    }
-
-                    // Usuário autenticado com sucesso!
-                    const usuarioSupabase = data.user;
-                    console.log('✅ Administrador autenticado no Supabase:', usuarioSupabase);
-
-                    // Busca dados adicionais do perfil (se cadastrado)
-                    let nomeGestor = usuarioSupabase.user_metadata?.nome || 'Administrador AJBorges';
-                    try {
-                        const { data: perfil } = await window.supabaseClient
-                            .from('perfis')
-                            .select('nome, role')
-                            .eq('email', emailVal)
-                            .maybeSingle();
-
-                        if (perfil) {
-                            if (perfil.nome) nomeGestor = perfil.nome;
-                        } else {
-                            // Registra o perfil de admin caso ainda não exista na tabela
-                            await window.supabaseClient.from('perfis').insert({
-                                id: usuarioSupabase.id,
-                                nome: nomeGestor,
-                                email: emailVal,
-                                role: 'admin'
-                            });
-                        }
-                    } catch (ePerfil) {
-                        console.warn('Erro ao consultar tabela perfis:', ePerfil);
-                    }
-
-                    // Salva sessão administrativa segura
-                    localStorage.setItem('ajborges_usuario_ativo', JSON.stringify({
-                        role: 'admin',
-                        id: usuarioSupabase.id,
-                        nome: nomeGestor,
-                        email: emailVal
-                    }));
-
-                    showToast('Autenticação de Administrador aprovada! Acessando painel...', 'success');
-
-                    setTimeout(() => {
-                        window.location.href = 'escolhaDashboard.html';
-                    }, 1000);
-                } catch (err) {
-                    console.error('Erro inesperado no login do admin:', err);
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = textoOriginalBtn;
-                    }
-                    showToast('Não foi possível conectar ao servidor de login.', 'error');
-                }
-            } else {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = textoOriginalBtn;
-                }
-                showToast('Servidor de autenticação indisponível no momento.', 'error');
-            }
+            await entrar(
+                formAdmin,
+                { tipo: 'admin', email: emailVal, senha: senhaVal },
+                'Validando credenciais...',
+                'escolhaDashboard.html',
+                'Acesso de administrador aprovado! Acessando painel...'
+            );
         });
     }
 });

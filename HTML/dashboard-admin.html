@@ -28,17 +28,8 @@
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
-        (function () {
-            try {
-                const uStr = localStorage.getItem('ajborges_usuario_ativo');
-                const u = uStr ? JSON.parse(uStr) : null;
-                if (!u || (u.role !== 'admin' && u.role !== 'diretoria')) {
-                    window.location.href = 'Login.html#admin';
-                }
-            } catch (e) {
-                window.location.href = 'Login.html#admin';
-            }
-        })();
+        // Página fica oculta até a sessão ser validada no servidor (JavaScript/auth.js)
+        document.documentElement.style.visibility = 'hidden';
     </script>
 </head>
 
@@ -1104,6 +1095,7 @@
     <!-- Scripts do Supabase e Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/auth.js"></script>
     <script src="../JavaScript/dashboard-admin.js?v=2.0"></script>
 </body>
 
