@@ -1,15 +1,17 @@
 /**
  * Recuperação de Senha - AJBorges Transporte & Logística
- * Fluxo simplificado e direto para motoristas:
- * 1. Identificação por CPF
- * 2. Criação da Nova Senha
- * 3. Confirmação e Redirecionamento com CPF pré-preenchido no Login.
+ * 1. O motorista informa o E-MAIL cadastrado (se não existir, a tela bloqueia).
+ * 2. Recebe um CÓDIGO no e-mail e digita aqui mesmo.
+ * 3. Com o código confirmado, cria a senha nova (regra: 6 primeiros dígitos do
+ *    CPF + caractere especial + palavra de 4 letras, mínimo 11 caracteres).
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Estado do Fluxo ---
     let currentStep = 1;
-    let savedCpf = '';
+    let emailInformado = '';
+    let cpfRecuperado = '';
+    let codigoConfirmado = false;
     let toastTimer = null;
 
     // --- Elementos do DOM ---
@@ -36,7 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const formStep2 = document.getElementById('form-step-2');
 
     // Campos Passo 1
-    const inputCpf = document.getElementById('cpf-recuperar');
+    const inputEmail = document.getElementById('email-recuperar');
+    const inputCodigo = document.getElementById('codigo-recuperacao');
+    const blocoCodigo = document.getElementById('bloco-codigo');
+    const blocoNovaSenha = document.getElementById('bloco-nova-senha');
+    const btnConfirmarCodigo = document.getElementById('btn-confirmar-codigo');
+    const btnReenviarCodigo = document.getElementById('btn-reenviar-codigo');
+    const emailDestinoEl = document.getElementById('email-destino-codigo');
 
     // Campos Passo 2
     const inputNovaSenha = document.getElementById('nova-senha');
@@ -49,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const seg3 = document.getElementById('seg-3');
     const reqTamanho = document.getElementById('req-tamanho');
     const reqEspecial = document.getElementById('req-especial');
+    const reqCpf = document.getElementById('req-cpf');
+    const reqPalavra = document.getElementById('req-palavra');
     const conferenciaFeedback = document.getElementById('conferencia-feedback');
     const exemplo1 = document.getElementById('exemplo-senha-1');
     const exemplo2 = document.getElementById('exemplo-senha-2');
@@ -142,10 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Foco no campo apropriado
         setTimeout(() => {
-            if (targetStep === 1 && inputCpf) {
-                inputCpf.focus();
-            } else if (targetStep === 2 && inputNovaSenha) {
-                inputNovaSenha.focus();
+            if (targetStep === 1 && inputEmail) {
+                inputEmail.focus();
+            } else if (targetStep === 2) {
+                (codigoConfirmado ? inputNovaSenha : inputCodigo)?.focus();
             }
         }, 150);
 
@@ -156,118 +166,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // =========================================================================
-    // 3. PASSO 1: IDENTIFICAÇÃO E MÁSCARA DO CPF
+    // 3. ETAPA 1: E-MAIL CADASTRADO -> ENVIO DO CÓDIGO
     // =========================================================================
 
-    // Sugestões de senha ALEATÓRIAS (nunca derivadas do CPF, que é fácil de descobrir)
-    function atualizarSugestoesCpf() {
-        const aleatorio = () => {
-            const a = new Uint32Array(1);
-            crypto.getRandomValues(a);
-            return String(a[0] % 1000000).padStart(6, '0');
-        };
-        if (exemplo1) exemplo1.textContent = `@${aleatorio()}Rota`;
-        if (exemplo2) exemplo2.textContent = `Frota#${aleatorio()}`;
-        if (exemplo3) exemplo3.textContent = `Viagem${aleatorio()}!`;
+    function mostrarBlocoSenha(mostrar) {
+        if (blocoCodigo) blocoCodigo.hidden = mostrar;
+        if (blocoNovaSenha) blocoNovaSenha.hidden = !mostrar;
     }
-    atualizarSugestoesCpf();
 
-    if (inputCpf) {
-        inputCpf.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
+    function atualizarExemplos() {
+        const ex = window.ajbSenha.exemplos(cpfRecuperado || '123456');
+        if (exemplo1) exemplo1.textContent = ex[0];
+        if (exemplo2) exemplo2.textContent = ex[1];
+        if (exemplo3) exemplo3.textContent = ex[2];
+    }
 
-            if (value.length > 9) {
-                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
-            } else if (value.length > 6) {
-                value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
-            } else if (value.length > 3) {
-                value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    async function pedirCodigo(botao) {
+        const textoOriginal = botao ? botao.innerHTML : '';
+        if (botao) {
+            botao.disabled = true;
+            botao.innerHTML = '<span>Enviando código...</span>';
+        }
+        try {
+            const r = await solicitarRecuperacaoSenha(emailInformado);
+            if (!r.sucesso) {
+                showToast(r.erro, 'error', 6000);
+                return false;
             }
-
-            e.target.value = value;
-        });
-
-        inputCpf.addEventListener('keypress', (e) => {
-            if (!/\d/.test(e.key) && e.key !== 'Enter') e.preventDefault();
-        });
+            showToast('Código enviado! Confira seu e-mail (e a caixa de spam).', 'success', 6000);
+            return true;
+        } catch (err) {
+            console.error(err);
+            showToast('Falha ao conectar com o servidor. Tente novamente.', 'error');
+            return false;
+        } finally {
+            if (botao) {
+                botao.disabled = false;
+                botao.innerHTML = textoOriginal;
+            }
+        }
     }
 
     if (formStep1) {
         formStep1.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const cpfVal = (inputCpf?.value || '').trim();
-            const digitosCpf = cpfVal.replace(/\D/g, '');
-
-            if (digitosCpf.length !== 11) {
-                showToast('Informe um CPF completo válido (11 dígitos).', 'error');
-                inputCpf?.focus();
+            const email = (inputEmail?.value || '').trim().toLowerCase();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('Informe um e-mail válido.', 'error');
+                inputEmail?.focus();
                 return;
             }
+            emailInformado = email;
+            const ok = await pedirCodigo(formStep1.querySelector('button[type="submit"]'));
+            if (!ok) return;
 
-            const btnSubmit = formStep1.querySelector('button[type="submit"]');
-            const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
-            if (btnSubmit) {
-                btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Enviando link...</span>`;
+            codigoConfirmado = false;
+            cpfRecuperado = '';
+            if (emailDestinoEl) emailDestinoEl.textContent = email;
+            if (inputCodigo) inputCodigo.value = '';
+            mostrarBlocoSenha(false);
+            goToStep(2);
+        });
+    }
+
+    if (btnReenviarCodigo) {
+        btnReenviarCodigo.addEventListener('click', () => pedirCodigo(btnReenviarCodigo));
+    }
+
+    if (inputCodigo) {
+        inputCodigo.addEventListener('input', () => {
+            inputCodigo.value = inputCodigo.value.replace(/\D/g, '').slice(0, 8);
+        });
+        inputCodigo.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnConfirmarCodigo?.click();
             }
+        });
+    }
 
+    // =========================================================================
+    // 4. ETAPA 2: CÓDIGO -> NOVA SENHA
+    // =========================================================================
+
+    if (btnConfirmarCodigo) {
+        btnConfirmarCodigo.addEventListener('click', async () => {
+            const codigo = (inputCodigo?.value || '').trim();
+            if (codigo.length < 6) {
+                showToast('Digite o código que chegou no seu e-mail.', 'error');
+                inputCodigo?.focus();
+                return;
+            }
+            const textoOriginal = btnConfirmarCodigo.innerHTML;
+            btnConfirmarCodigo.disabled = true;
+            btnConfirmarCodigo.innerHTML = '<span>Conferindo código...</span>';
             try {
-                // A edge function responde sempre igual (não revela se o CPF existe)
-                // e envia o link para o e-mail JÁ cadastrado.
-                const r = await solicitarRecuperacaoSenha(digitosCpf);
+                const r = await verificarCodigoRecuperacao(emailInformado, codigo);
                 if (!r.sucesso) {
-                    showToast(r.erro, 'error', 5000);
-                    if (btnSubmit) {
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = textoOriginal;
-                    }
+                    showToast(r.erro, 'error', 6000);
                     return;
                 }
-                showToast(r.mensagem || 'Se o CPF estiver cadastrado, enviaremos um link para o e-mail do cadastro.', 'success', 8000);
-                if (btnSubmit) btnSubmit.innerHTML = `<span>Link enviado. Confira seu e-mail.</span>`;
+                codigoConfirmado = true;
+                cpfRecuperado = r.cpf || '';
+                atualizarExemplos();
+                avaliarSenha();
+                mostrarBlocoSenha(true);
+                inputNovaSenha?.focus();
+                showToast('Código confirmado! Agora crie sua nova senha.', 'success');
             } catch (err) {
                 console.error(err);
                 showToast('Falha ao conectar com o servidor. Tente novamente.', 'error');
-                if (btnSubmit) {
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = textoOriginal;
-                }
+            } finally {
+                btnConfirmarCodigo.disabled = false;
+                btnConfirmarCodigo.innerHTML = textoOriginal;
             }
         });
     }
-
-    // Chegou pelo link do e-mail: o Supabase abre uma sessão de recuperação
-    // e aí sim mostramos a etapa de nova senha.
-    let sessaoRecuperacao = false;
-    if (window.supabaseClient) {
-        window.supabaseClient.auth.onAuthStateChange((evento) => {
-            if (evento === 'PASSWORD_RECOVERY') {
-                sessaoRecuperacao = true;
-                goToStep(2);
-            }
-        });
-    }
-    if (window.ajbLinkRecuperacao && window.supabaseClient) {
-        window.supabaseClient.auth.getSession().then(({ data }) => {
-            if (data && data.session) {
-                sessaoRecuperacao = true;
-                goToStep(2);
-            }
-        });
-    }
-    const erroLink = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('error_description')
-        || new URLSearchParams(window.location.search).get('error_description');
-    if (erroLink) {
-        showToast('O link de recuperação é inválido ou expirou. Peça um novo link.', 'error', 7000);
-        history.replaceState(null, '', window.location.pathname);
-    }
-
-    // =========================================================================
-    // 4. PASSO 2: CRIAÇÃO E VALIDAÇÃO DA NOVA SENHA
-    // =========================================================================
 
     // Alternar visibilidade da senha (mostrar/ocultar)
     togglePasswordButtons.forEach(button => {
@@ -300,67 +316,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Medidor de força da senha e requisitos
+    function marcarRequisito(el, ok) {
+        if (!el) return;
+        el.classList.toggle('valido', !!ok);
+        const icone = el.querySelector('.req-icone');
+        if (icone) icone.textContent = ok ? '✓' : '✕';
+    }
+
+    // Requisitos da senha (mesma regra do cadastro) e medidor de força
     function avaliarSenha() {
         const senha = inputNovaSenha ? inputNovaSenha.value : '';
-        const regexEspecial = /[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]]/;
+        const r = window.ajbSenha.regras(senha, cpfRecuperado);
+        // Conta sem CPF (ex.: gestão): a regra do CPF não se aplica
+        const okCpf = cpfRecuperado ? r.cpf === true : true;
 
-        const temTamanho = senha.length >= 6;
-        const temEspecial = regexEspecial.test(senha);
-        const temNumero = /\d/.test(senha);
+        marcarRequisito(reqTamanho, r.tamanho);
+        marcarRequisito(reqCpf, okCpf);
+        marcarRequisito(reqEspecial, r.especial);
+        marcarRequisito(reqPalavra, r.palavra);
+        if (reqCpf) reqCpf.hidden = !cpfRecuperado;
 
-        // Atualiza requisitos visuais
-        if (reqTamanho) {
-            reqTamanho.classList.toggle('valido', temTamanho);
-            const icone = reqTamanho.querySelector('.req-icone');
-            if (icone) icone.textContent = temTamanho ? '✓' : '✕';
-        }
-
-        if (reqEspecial) {
-            reqEspecial.classList.toggle('valido', temEspecial);
-            const icone = reqEspecial.querySelector('.req-icone');
-            if (icone) icone.textContent = temEspecial ? '✓' : '✕';
-        }
-
-        // Reseta barras de força
-        if (seg1) seg1.className = 'barra-seg';
-        if (seg2) seg2.className = 'barra-seg';
-        if (seg3) seg3.className = 'barra-seg';
-
+        [seg1, seg2, seg3].forEach((s) => { if (s) s.className = 'barra-seg'; });
         if (!senha) {
             if (forcaTextoLabel) forcaTextoLabel.textContent = 'Aguardando senha...';
             return;
         }
-
-        let score = 0;
-        if (temTamanho) score++;
-        if (temEspecial) score++;
-        if (temNumero && senha.length >= 8) score++;
-
-        if (score === 1) {
-            if (seg1) seg1.className = 'barra-seg fraca';
-            if (forcaTextoLabel) {
-                forcaTextoLabel.textContent = 'Fraca';
-                forcaTextoLabel.style.color = 'var(--vermelho-perigo)';
-            }
-        } else if (score === 2) {
-            if (seg1) seg1.className = 'barra-seg media';
-            if (seg2) seg2.className = 'barra-seg media';
-            if (forcaTextoLabel) {
-                forcaTextoLabel.textContent = 'Boa';
-                forcaTextoLabel.style.color = 'var(--amarelo-alerta)';
-            }
-        } else if (score >= 3) {
-            if (seg1) seg1.className = 'barra-seg forte';
-            if (seg2) seg2.className = 'barra-seg forte';
-            if (seg3) seg3.className = 'barra-seg forte';
-            if (forcaTextoLabel) {
-                forcaTextoLabel.textContent = 'Excelente';
-                forcaTextoLabel.style.color = 'var(--verde-sucesso)';
-            }
+        const pontos = [r.tamanho, okCpf, r.especial, r.palavra].filter(Boolean).length;
+        let classe = 'fraca', texto = 'Fraca', cor = 'var(--vermelho-perigo)', barras = [seg1];
+        if (pontos === 4) { classe = 'forte'; texto = 'Atende a todos os requisitos'; cor = 'var(--verde-sucesso)'; barras = [seg1, seg2, seg3]; }
+        else if (pontos >= 2) { classe = 'media'; texto = 'Quase lá'; cor = 'var(--amarelo-alerta)'; barras = [seg1, seg2]; }
+        barras.forEach((s) => { if (s) s.className = `barra-seg ${classe}`; });
+        if (forcaTextoLabel) {
+            forcaTextoLabel.textContent = texto;
+            forcaTextoLabel.style.color = cor;
         }
     }
 
-    // Conferência das senhas em tempo real
     function verificarCoincidenciaSenhas() {
         const senha = inputNovaSenha ? inputNovaSenha.value : '';
         const confirmar = inputConfirmarNovaSenha ? inputConfirmarNovaSenha.value : '';
@@ -395,56 +386,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnVoltarPasso1) {
         btnVoltarPasso1.addEventListener('click', () => {
+            if (codigoConfirmado && window.supabaseClient) {
+                window.supabaseClient.auth.signOut({ scope: 'local' }).catch(() => {});
+            }
+            codigoConfirmado = false;
             goToStep(1);
         });
     }
 
-    // Submissão do Passo 2 (Salvar Senha no Supabase)
+    // Salvar a nova senha
     if (formStep2) {
         formStep2.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!sessaoRecuperacao) {
-                showToast('Abra esta página pelo link enviado ao seu e-mail.', 'error', 5000);
-                goToStep(1);
+            if (!codigoConfirmado) {
+                showToast('Confirme primeiro o código que chegou no seu e-mail.', 'error');
+                inputCodigo?.focus();
                 return;
             }
 
             const senha = (inputNovaSenha?.value || '');
             const confirmar = (inputConfirmarNovaSenha?.value || '');
-            const regexEspecial = /[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]]/;
-
-            if (senha.length < 6) {
-                showToast('A nova senha deve ter no mínimo 6 caracteres.', 'error');
+            // Conta sem CPF (ex.: gestão): vale a regra sem a parte do CPF
+            const regras = window.ajbSenha.regras(senha, cpfRecuperado);
+            const problema = cpfRecuperado
+                ? window.ajbSenha.erro(senha, cpfRecuperado)
+                : (!regras.tamanho || !regras.especial || !regras.palavra
+                    ? 'A senha precisa ter 11 caracteres, um caractere especial e uma palavra de 4 letras.' : null);
+            if (problema) {
+                showToast(problema, 'error', 5000);
                 inputNovaSenha?.focus();
                 return;
             }
-
-            if (!regexEspecial.test(senha)) {
-                showToast('A nova senha precisa conter pelo menos um caractere especial (como @, #, $, !).', 'error');
-                inputNovaSenha?.focus();
-                return;
-            }
-
             if (senha !== confirmar) {
                 showToast('As senhas não coincidem. Digite novamente.', 'error');
                 inputConfirmarNovaSenha?.focus();
                 return;
             }
 
-            // Feedback visual no botão
             const btnSubmit = formStep2.querySelector('.btn-concluir');
             const textoOriginal = btnSubmit ? btnSubmit.innerHTML : '';
             if (btnSubmit) {
                 btnSubmit.disabled = true;
-                btnSubmit.innerHTML = `<span>Salvando nova senha...</span>`;
+                btnSubmit.innerHTML = '<span>Salvando nova senha...</span>';
             }
 
             try {
                 const resultado = await definirNovaSenhaSupabase(senha);
-
                 if (!resultado.sucesso) {
-                    showToast(resultado.erro || 'Erro ao atualizar senha no Supabase.', 'error', 5000);
+                    showToast(resultado.erro || 'Erro ao salvar a nova senha.', 'error', 5000);
                     if (btnSubmit) {
                         btnSubmit.disabled = false;
                         btnSubmit.innerHTML = textoOriginal;
@@ -452,24 +442,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Armazena o CPF no sessionStorage para preenchimento imediato no Login
-                if (savedCpf) {
-                    sessionStorage.setItem('ajborges_cpf_recuperado', savedCpf);
-                }
-
                 showToast('Senha atualizada com sucesso!', 'success', 3500);
-
                 setTimeout(() => {
                     goToStep('success');
-
-                    // Contagem regressiva de redirecionamento
                     let segundosRestantes = 3;
                     if (timerRedirectEl) timerRedirectEl.textContent = `${segundosRestantes}s`;
-
                     const redirectInterval = setInterval(() => {
                         segundosRestantes--;
                         if (timerRedirectEl) timerRedirectEl.textContent = `${segundosRestantes}s`;
-
                         if (segundosRestantes <= 0) {
                             clearInterval(redirectInterval);
                             window.location.href = 'Login.html#motorista';
@@ -478,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 500);
             } catch (err) {
                 console.error('Erro ao atualizar senha:', err);
-                showToast('Falha ao conectar com o Supabase. Tente novamente.', 'error');
+                showToast('Falha ao conectar com o servidor. Tente novamente.', 'error');
                 if (btnSubmit) {
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = textoOriginal;
@@ -486,4 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    atualizarExemplos();
+    avaliarSenha();
 });

@@ -1091,3 +1091,180 @@ footer {
         padding: 16px 20px;
     }
 }
+/* ==========================================================================
+   Cadastro no Supabase: regra "anexo OU campos", acesso ao portal e modais
+   ========================================================================== */
+.aviso-regra-docs {
+    margin: 0 0 24px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: var(--azul-ajborges-suave);
+    border: 1px solid #c7d2fe;
+    color: var(--cinza-texto);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+.aviso-regra-docs strong { color: var(--azul-ajborges); }
+
+.selo-doc-anexado {
+    margin-left: auto;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--verde-sucesso-fundo);
+    border: 1px solid var(--verde-sucesso-borda);
+    color: var(--verde-sucesso-escuro);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.opcao-sem-carreta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px dashed var(--cinza-borda-hover);
+    font-weight: 600;
+    color: var(--cinza-escuro);
+    cursor: pointer;
+}
+.opcao-sem-carreta input { width: 18px; height: 18px; cursor: pointer; }
+
+.etapa-desativada .step-body > :not(.opcao-sem-carreta),
+.form-group.etapa-desativada {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.dica-senha {
+    margin: 8px 0 18px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eef2ff 0%, #ecfeff 100%);
+    border: 1px solid #c7d2fe;
+    color: var(--cinza-texto);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+.dica-senha strong { color: var(--azul-ajborges); }
+.exemplos-senha { display: grid; gap: 8px; margin-top: 12px; }
+.exemplos-senha > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 8px;
+}
+.exemplos-senha span { font-weight: 700; color: var(--azul-ajborges); font-size: 0.8rem; min-width: 80px; }
+.exemplos-senha code {
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px dashed #a5b4fc;
+    background: var(--azul-ajborges-suave);
+    color: var(--azul-ajborges-escuro);
+    font-weight: 700;
+}
+.exemplos-senha em { margin-left: auto; font-style: normal; color: var(--cinza-medio); font-size: 0.8rem; }
+
+.campo-senha { position: relative; }
+.campo-senha input { width: 100%; padding-right: 44px; }
+.btn-ver-senha {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.6;
+}
+.btn-ver-senha:hover { opacity: 1; }
+
+.checklist-senha {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 6px 16px;
+    margin: 6px 0 0;
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--cinza-medio);
+}
+.checklist-senha li::before { content: '○ '; }
+.checklist-senha li.ok { color: var(--verde-sucesso-escuro); font-weight: 600; }
+.checklist-senha li.ok::before { content: '✓ '; }
+
+.modal-cadastro {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.55);
+}
+.modal-cadastro.ativo { display: flex; }
+.modal-cadastro-caixa {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px;
+    border-radius: 16px;
+    background: var(--branco);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
+    text-align: center;
+}
+.modal-cadastro-caixa h3 { margin: 0 0 8px; color: var(--cinza-escuro); font-size: 1.3rem; }
+.modal-cadastro-caixa p { color: var(--cinza-texto); line-height: 1.5; }
+.resumo-cadastro {
+    display: grid;
+    gap: 6px;
+    margin: 16px 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--cinza-claro);
+    border: 1px solid var(--cinza-borda);
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--cinza-texto);
+}
+.modal-cadastro-botoes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+.btn-modal-pri, .btn-modal-sec {
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+.btn-modal-pri { background: var(--azul-ajborges); color: var(--branco); }
+.btn-modal-pri:hover { background: var(--azul-ajborges-escuro); }
+.btn-modal-pri:disabled { opacity: 0.6; cursor: wait; }
+.btn-modal-sec { background: var(--branco); color: var(--azul-ajborges); border-color: var(--cinza-borda-hover); }
+.btn-modal-sec:hover { background: var(--cinza-hover); }
+.icone-sucesso {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--verde-sucesso-fundo);
+    color: var(--verde-sucesso);
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 56px;
+}
+
+@media (max-width: 600px) {
+    .selo-doc-anexado { margin-left: 0; margin-top: 6px; white-space: normal; }
+    .exemplos-senha em { margin-left: 0; width: 100%; }
+    .btn-modal-pri, .btn-modal-sec { width: 100%; text-align: center; }
+}
+
+.step-title-row { flex-wrap: wrap; }

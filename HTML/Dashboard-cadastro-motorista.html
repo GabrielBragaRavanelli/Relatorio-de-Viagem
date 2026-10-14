@@ -278,6 +278,22 @@
             }
         }
     </style>
+    <style>
+        /* Detalhes do cadastro (Supabase) */
+        .driver-modal-content { max-width: 920px; width: calc(100% - 32px); max-height: calc(100vh - 48px); display: flex; flex-direction: column; }
+        #modal-body-content { overflow-y: auto; }
+        .cad-topo { display: grid; gap: 6px; padding: 14px 16px; margin-bottom: 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 0.88rem; color: #334155; }
+        .cad-secao { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px 16px; margin: 0 0 14px; }
+        .cad-secao legend { padding: 0 8px; font-weight: 700; color: #0f172a; font-size: 0.9rem; }
+        .cad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px 14px; }
+        .cad-campo { display: grid; gap: 4px; font-size: 0.75rem; color: #64748b; font-weight: 600; }
+        .cad-campo input { padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.88rem; color: #0f172a; background: #fff; }
+        .cad-campo input[readonly] { background: #f8fafc; border-color: transparent; }
+        .cad-docs { display: grid; gap: 8px; font-size: 0.88rem; }
+        .cad-doc { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .cad-doc-faltando { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        #modal-footer-actions { flex-wrap: wrap; }
+    </style>
 </head>
 
 <body class="admin-body">
@@ -570,251 +586,372 @@
         // A página fica oculta até a sessão de admin/diretoria ser confirmada.
         ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
             window.ajbAuth.vigiarSessao('Login.html#admin');
+            iniciarPainel();
         });
 
-        const STORAGE_KEY = 'ajborges_cadastros_agregados';
+        // =====================================================================
+        // Fichas de cadastro lidas do Supabase (tabela cadastros_agregados).
+        // Só admin/diretoria enxerga (RLS). Documentos no bucket privado
+        // "documentos-cadastro", abertos com link temporário.
+        // Aprovar libera o login do motorista; recusar mantém bloqueado.
+        // =====================================================================
+        let cadastros = [];
+        let perfisPorUsuario = {};
         let filtroAtual = 'todos';
         let termoBusca = '';
+        let cadastroAberto = null;
 
-        function obterCadastrosReais() {
-            try {
-                const dados = localStorage.getItem(STORAGE_KEY);
-                return dados ? JSON.parse(dados) : [];
-            } catch (e) {
-                console.error('Erro ao ler cadastros reais:', e);
-                return [];
-            }
+        const ROTULOS_STATUS = {
+            pendente: '<span class="motorista-badge-status status-pendente">⏳ Pendente</span>',
+            analise: '<span class="motorista-badge-status status-analise">🔍 Em Análise</span>',
+            aprovado: '<span class="motorista-badge-status status-aprovado">✓ Aprovado</span>',
+            recusado: '<span class="motorista-badge-status status-reprovado">✕ Recusado</span>'
+        };
+
+        const SECOES = [
+            ['Empresa (PJ)', [['nome-empresa', 'Nome da empresa'], ['cnpj', 'CNPJ'], ['telefone-empresa', 'Telefone da empresa'], ['responsavel', 'Responsável']]],
+            ['Motorista', [['motorista-nome', 'Nome'], ['motorista-sobrenome', 'Sobrenome'], ['cpf', 'CPF'], ['celular', 'Celular'],
+                ['nascimento', 'Nascimento'], ['rg', 'RG'], ['rg-uf', 'UF do RG'], ['cidade-nasc', 'Cidade de nascimento'], ['mae', 'Nome da mãe']]],
+            ['CNH', [['cnh-registro', 'Registro'], ['cnh-emissao', 'Emissão'], ['cnh-primeira', '1ª habilitação'], ['cnh-uf', 'UF'],
+                ['cnh-validade', 'Validade'], ['cnh-categoria', 'Categoria'], ['cnh-seguranca', 'Código de segurança']]],
+            ['Endereço do motorista', [['mot-endereco', 'Endereço'], ['mot-cidade', 'Cidade'], ['mot-estado', 'Estado'], ['mot-cep', 'CEP']]],
+            ['Cavalo mecânico', [['veic-placa', 'Placa'], ['veic-marca', 'Marca'], ['veic-modelo', 'Modelo'], ['veic-cor', 'Cor'], ['veic-ano', 'Ano'],
+                ['veic-cidade-emp', 'Cidade de emplacamento'], ['veic-uf', 'UF'], ['veic-tipologia', 'Tipologia'], ['veic-carroceria', 'Carroceria'],
+                ['veic-renavam', 'RENAVAM'], ['veic-chassi', 'Chassi'], ['rastreador-pri', 'Rastreador primário'], ['id-rastreador-pri', 'ID rastreador primário'],
+                ['rastreador-sec', 'Rastreador secundário'], ['id-rastreador-sec', 'ID rastreador secundário'], ['rntrc', 'RNTRC/ANTT'], ['val-rntrc', 'Validade RNTRC']]],
+            ['Proprietário do cavalo', [['prop-doc', 'CPF/CNPJ'], ['prop-mae', 'Nome da mãe'], ['prop-endereco', 'Endereço'], ['prop-cidade', 'Cidade'],
+                ['prop-estado', 'Estado'], ['prop-cep', 'CEP']]],
+            ['Carreta', [['carreta-placa', 'Placa'], ['carreta-marca', 'Marca'], ['carreta-modelo', 'Modelo'], ['carreta-cor', 'Cor'], ['carreta-ano', 'Ano'],
+                ['carreta-chassi', 'Chassi'], ['carreta-renavam', 'RENAVAM'], ['carreta-cidade-emp', 'Cidade de emplacamento'], ['carreta-uf', 'UF'],
+                ['carreta-rntrc', 'RNTRC/ANTT']]],
+            ['Proprietário da carreta', [['prop-carreta-doc', 'CPF/CNPJ'], ['prop-carreta-mae', 'Nome da mãe'], ['prop-carreta-endereco', 'Endereço'],
+                ['prop-carreta-cidade', 'Cidade'], ['prop-carreta-estado', 'Estado'], ['prop-carreta-cep', 'CEP']]]
+        ];
+
+        const NOMES_DOCUMENTOS = {
+            cnh: 'CNH', residencia: 'Comprovante de residência', crlv_cavalo: 'CRLV do cavalo',
+            crlv_carreta: 'CRLV da carreta', rntrc: 'RNTRC/ANTT', complementares: 'Complementar'
+        };
+
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"'`]/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;'
+            }[c]));
         }
 
-        function salvarCadastrosReais(lista) {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
-            } catch (e) {
-                console.error('Erro ao salvar no storage:', e);
-            }
+        function formatarCpf(cpf) {
+            const d = String(cpf || '').replace(/\D/g, '');
+            return d.length === 11 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : d;
         }
 
-        function atualizarMetricas(cadastros) {
+        function formatarData(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function aviso(msg) {
+            alert(msg);
+        }
+
+        async function carregarCadastros() {
+            const c = window.supabaseClient;
+            if (!c) return;
+            const { data, error } = await c.from('cadastros_agregados')
+                .select('*')
+                .order('criado_em', { ascending: false });
+            if (error) {
+                console.error('Erro ao carregar cadastros:', error);
+                document.getElementById('driver-table-body').innerHTML =
+                    '<tr><td colspan="7" style="padding: 36px; text-align: center; color: #b91c1c;">Não foi possível carregar os cadastros. Atualize a página.</td></tr>';
+                return;
+            }
+            cadastros = data || [];
+
+            const ids = cadastros.map((x) => x.user_id).filter(Boolean);
+            perfisPorUsuario = {};
+            if (ids.length) {
+                const { data: perfis } = await c.from('perfis')
+                    .select('id, status, senha_alterada_em').in('id', ids);
+                (perfis || []).forEach((p) => { perfisPorUsuario[p.id] = p; });
+            }
+            renderTabela();
+        }
+
+        function atualizarMetricas() {
             const total = cadastros.length;
-            const pendentes = cadastros.filter(c => c.status === 'pendente').length;
-            const analise = cadastros.filter(c => c.status === 'analise').length;
-            const aprovados = cadastros.filter(c => c.status === 'aprovado').length;
-
+            const n = (s) => cadastros.filter((c) => c.status === s).length;
             document.getElementById('kpi-total-cadastros').textContent = total;
-            document.getElementById('kpi-pendentes-analise').textContent = pendentes;
-            document.getElementById('kpi-em-analise').textContent = analise;
-            document.getElementById('kpi-aprovados').textContent = aprovados;
-
-            document.getElementById('badge-total-count').textContent = total;
-            document.getElementById('badge-pendente-count').textContent = pendentes;
-
+            document.getElementById('kpi-pendentes-analise').textContent = n('pendente');
+            document.getElementById('kpi-em-analise').textContent = n('analise');
+            document.getElementById('kpi-aprovados').textContent = n('aprovado');
+            const badgeTotal = document.getElementById('badge-total-count');
+            if (badgeTotal) badgeTotal.textContent = total;
+            const badgePend = document.getElementById('badge-pendente-count');
+            if (badgePend) badgePend.textContent = n('pendente');
             document.getElementById('btn-tab-todos').textContent = `Todos (${total})`;
-            document.getElementById('btn-tab-pendentes').textContent = `Pendentes (${pendentes})`;
-            document.getElementById('btn-tab-analise').textContent = `Em Análise (${analise})`;
-            document.getElementById('btn-tab-aprovados').textContent = `Aprovados (${aprovados})`;
+            document.getElementById('btn-tab-pendentes').textContent = `Pendentes (${n('pendente')})`;
+            document.getElementById('btn-tab-analise').textContent = `Em Análise (${n('analise')})`;
+            document.getElementById('btn-tab-aprovados').textContent = `Aprovados (${n('aprovado')})`;
+            const btnRec = document.getElementById('btn-tab-recusados');
+            if (btnRec) btnRec.textContent = `Recusados (${n('recusado')})`;
         }
 
         function renderTabela() {
-            const cadastros = obterCadastrosReais();
-            atualizarMetricas(cadastros);
-
+            atualizarMetricas();
             const tbody = document.getElementById('driver-table-body');
             if (!tbody) return;
 
-            // Filtro por tab e termo de busca
-            const filtrados = cadastros.filter(c => {
-                const matchTab = filtroAtual === 'todos' || c.status === filtroAtual;
-                const matchBusca = termoBusca === '' ||
-                    (c.nome && c.nome.toLowerCase().includes(termoBusca)) ||
-                    (c.documento && c.documento.includes(termoBusca)) ||
-                    (c.placa && c.placa.toLowerCase().includes(termoBusca)) ||
-                    (c.empresa && c.empresa.toLowerCase().includes(termoBusca));
-                return matchTab && matchBusca;
+            const filtrados = cadastros.filter((c) => {
+                if (filtroAtual !== 'todos' && c.status !== filtroAtual) return false;
+                if (!termoBusca) return true;
+                const d = c.dados || {};
+                const alvo = [c.nome, c.cpf, formatarCpf(c.cpf), c.email, d['veic-placa'], d['carreta-placa'], d['nome-empresa'], d.cnpj]
+                    .filter(Boolean).join(' ').toLowerCase();
+                return alvo.includes(termoBusca);
             });
 
-            // Se não houver fichas cadastradas
             if (filtrados.length === 0) {
-                if (cadastros.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state-box">
-                                    <div class="empty-icon-circle">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10 9 9 9 8 9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <h3 class="empty-title">Nenhuma ficha cadastrada até o momento</h3>
-                                    <p class="empty-desc">
-                                        Este painel está conectado exclusivamente ao formulário <strong>Seja um Agregado Conosco</strong>. Quando um motorista ou transportadora enviar sua ficha cadastral, os dados aparecerão aqui em tempo real.
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" style="padding: 36px; text-align: center; color: #64748b;">
-                                Nenhuma ficha encontrada para o filtro ou termo de busca selecionado.
-                            </td>
-                        </tr>
-                    `;
-                }
+                tbody.innerHTML = `<tr><td colspan="7" style="padding: 36px; text-align: center; color: #64748b;">
+                    ${cadastros.length === 0 ? 'Nenhum cadastro recebido até o momento. Quando um motorista enviar o formulário <strong>Seja um Agregado Conosco</strong>, ele aparece aqui.' : 'Nenhum cadastro encontrado para o filtro ou a busca.'}
+                </td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = filtrados.map(c => {
-                const iniciais = (c.nome || 'M').split(' ').map(n => n[0]).slice(0, 2).join('');
-                let statusBadge = '';
-                if (c.status === 'pendente') statusBadge = `<span class="motorista-badge-status status-pendente">⏳ Pendente</span>`;
-                else if (c.status === 'analise') statusBadge = `<span class="motorista-badge-status status-analise">🔍 Em Análise</span>`;
-                else if (c.status === 'aprovado') statusBadge = `<span class="motorista-badge-status status-aprovado">✓ Homologado</span>`;
-                else statusBadge = `<span class="motorista-badge-status status-reprovado">✕ Recusado</span>`;
-
+            tbody.innerHTML = filtrados.map((c) => {
+                const d = c.dados || {};
+                const iniciais = (c.nome || 'M').split(' ').filter(Boolean).map((n) => n[0]).slice(0, 2).join('').toUpperCase();
+                const docs = Array.isArray(c.documentos) ? c.documentos : [];
+                const temDoc = (campo) => docs.some((x) => x.campo === campo);
+                const placa = d['veic-placa'] || (temDoc('crlv_cavalo') ? 'no CRLV anexado' : '—');
+                const cnh = d['cnh-registro'] ? `${esc(d['cnh-registro'])} (Cat. ${esc(d['cnh-categoria'] || '—')})` : (temDoc('cnh') ? 'CNH anexada' : '—');
                 return `
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 16px 20px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div class="driver-avatar-circle">${iniciais}</div>
+                                <div class="driver-avatar-circle">${esc(iniciais)}</div>
                                 <div>
-                                    <div style="font-weight: 600; color: #0f172a;">${c.nome || 'Sem Nome'}</div>
-                                    <div style="font-size: 0.78rem; color: #64748b;">Doc: ${c.documento || 'Não informado'} &bull; ${c.telefone || ''}</div>
-                                    ${c.empresa && c.empresa !== 'Autônomo' ? `<div style="font-size: 0.75rem; color: #059669; font-weight: 500;">Empresa: ${c.empresa}</div>` : ''}
+                                    <div style="font-weight: 600; color: #0f172a;">${esc(c.nome || 'Sem nome')}</div>
+                                    <div style="font-size: 0.78rem; color: #64748b;">CPF ${esc(formatarCpf(c.cpf))} &bull; ${esc(c.celular || '')}</div>
+                                    ${c.tipo === 'pj' && d['nome-empresa'] ? `<div style="font-size: 0.75rem; color: #059669; font-weight: 500;">Empresa: ${esc(d['nome-empresa'])}</div>` : ''}
                                 </div>
                             </div>
                         </td>
-                        <td style="padding: 16px;">
-                            <span style="font-weight: 500; color: #334155;">${c.tipo}</span>
-                            <div style="font-size: 0.75rem; color: #64748b;">Cat. CNH: <strong>${c.categoria || 'E'}</strong></div>
-                        </td>
-                        <td style="padding: 16px;">
-                            <div style="font-weight: 500; color: #0f172a;">${c.veiculo || 'Cavalo Mecânico'}</div>
-                            <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${c.placa || 'Sem placa'}</strong></div>
-                        </td>
-                        <td style="padding: 16px;">
-                            <span style="font-size: 0.82rem; color: #334155;">${c.cnh || 'Informada'}</span>
-                        </td>
-                        <td style="padding: 16px; color: #64748b; font-size: 0.82rem;">${c.data || 'Hoje'}</td>
-                        <td style="padding: 16px;">${statusBadge}</td>
+                        <td style="padding: 16px;"><span style="font-weight: 500; color: #334155;">${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</span>
+                            <div style="font-size: 0.75rem; color: #64748b;">${docs.length} documento(s)</div></td>
+                        <td style="padding: 16px;"><div style="font-weight: 500; color: #0f172a;">${esc(d['veic-modelo'] || 'Cavalo mecânico')}</div>
+                            <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${esc(placa)}</strong>${c.sem_carreta ? ' &bull; sem carreta' : ''}</div></td>
+                        <td style="padding: 16px;"><span style="font-size: 0.82rem; color: #334155;">${cnh}</span></td>
+                        <td style="padding: 16px; color: #64748b; font-size: 0.82rem;">${formatarData(c.criado_em)}</td>
+                        <td style="padding: 16px;">${ROTULOS_STATUS[c.status] || esc(c.status)}</td>
                         <td style="padding: 16px 20px; text-align: right;">
                             <div class="table-action-btns" style="justify-content: flex-end;">
-                                <button type="button" class="btn-action-small" onclick="abrirModal('${c.id}')">Ver Detalhes</button>
-                                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" onclick="alterarStatus('${c.id}', 'aprovado')">Aprovar</button>` : ''}
-                                <button type="button" class="btn-action-small btn-action-delete" title="Excluir ficha" onclick="excluirFicha('${c.id}')">✕</button>
+                                <button type="button" class="btn-action-small" data-acao="abrir" data-id="${esc(c.id)}">Ver detalhes</button>
+                                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Aprovar</button>` : ''}
                             </div>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             }).join('');
         }
 
-        function abrirModal(id) {
-            const cadastros = obterCadastrosReais();
-            const ficha = cadastros.find(c => c.id === id);
-            if (!ficha) return;
+        async function decidir(id, decisao) {
+            const c = cadastros.find((x) => x.id === id);
+            if (!c) return;
+            let motivo = null;
+            if (decisao === 'aprovado' && !confirm(`Aprovar o cadastro de ${c.nome}? O motorista passa a conseguir entrar no Portal da Frota.`)) return;
+            if (decisao === 'recusado') {
+                motivo = prompt(`Motivo da recusa do cadastro de ${c.nome} (opcional):`, '');
+                if (motivo === null) return;
+            }
+            const { error } = await window.supabaseClient.rpc('analisar_cadastro', {
+                p_id: id, p_decisao: decisao, p_motivo: motivo
+            });
+            if (error) {
+                console.error('Erro ao analisar cadastro:', error);
+                return aviso('Não foi possível salvar a decisão. Tente novamente.');
+            }
+            await carregarCadastros();
+            if (cadastroAberto === id) abrirModal(id);
+        }
 
-            const modal = document.getElementById('driver-modal');
-            const title = document.getElementById('modal-title');
-            const body = document.getElementById('modal-body-content');
-            const footer = document.getElementById('modal-footer-actions');
+        async function abrirDocumento(caminho) {
+            const { data, error } = await window.supabaseClient.storage
+                .from('documentos-cadastro').createSignedUrl(caminho, 600);
+            if (error || !data) return aviso('Não foi possível abrir o documento. Ele pode não ter sido enviado.');
+            window.open(data.signedUrl, '_blank', 'noopener');
+        }
 
-            title.textContent = `Ficha de Cadastro • ${ficha.nome}`;
-            body.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">Nome / Razão:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.nome}</p></div>
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">CPF / CNPJ:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.documento || 'Não informado'}</p></div>
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">Telefone / Celular:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.telefone || 'Não informado'}</p></div>
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">Tipo de Cadastro:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.tipo}</p></div>
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">Veículo:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.veiculo || 'Cavalo Mecânico'}</p></div>
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">Placa Cavalo:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.placa || 'Sem placa'}</p></div>
-                    ${ficha.carretaPlaca ? `<div><strong style="color: #64748b; font-size: 0.8rem;">Placa Carreta:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.carretaPlaca}</p></div>` : ''}
-                    <div><strong style="color: #64748b; font-size: 0.8rem;">CNH / Categoria:</strong><p style="font-size: 0.95rem; font-weight: 600;">${ficha.cnh || 'Informada'} (Cat. ${ficha.categoria || 'E'})</p></div>
+        async function listarArquivosEnviados(c) {
+            if (!c.user_id) return new Set();
+            const pasta = `${c.user_id}/${c.id}`;
+            const { data } = await window.supabaseClient.storage.from('documentos-cadastro').list(pasta, { limit: 100 });
+            return new Set((data || []).map((f) => `${pasta}/${f.name}`));
+        }
+
+        async function abrirModal(id) {
+            const c = cadastros.find((x) => x.id === id);
+            if (!c) return;
+            cadastroAberto = id;
+            const d = c.dados || {};
+            const perfil = perfisPorUsuario[c.user_id] || {};
+            const docs = Array.isArray(c.documentos) ? c.documentos : [];
+
+            document.getElementById('modal-title').textContent = `Cadastro • ${c.nome || ''}`;
+            const corpo = document.getElementById('modal-body-content');
+
+            const secoes = SECOES.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)')
+                .filter(([titulo]) => !c.sem_carreta || !titulo.includes('arreta'))
+                .map(([titulo, campos]) => `
+                    <fieldset class="cad-secao">
+                        <legend>${esc(titulo)}</legend>
+                        <div class="cad-grid">
+                            ${campos.map(([k, rotulo]) => `
+                                <label class="cad-campo">
+                                    <span>${esc(rotulo)}</span>
+                                    <input type="text" data-campo="${esc(k)}" value="${esc(d[k] || '')}" readonly placeholder="—">
+                                </label>`).join('')}
+                        </div>
+                    </fieldset>`).join('');
+
+            corpo.innerHTML = `
+                <div class="cad-topo">
+                    <div>${ROTULOS_STATUS[c.status] || ''} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${c.sem_carreta ? ' · sem carreta' : ''}</div>
+                    <div>Enviado em <b>${formatarData(c.criado_em)}</b></div>
+                    <div>E-mail de acesso: <b>${esc(c.email || '—')}</b></div>
+                    <div>Senha: <b>definida pelo motorista</b> (nunca é exibida)${perfil.senha_alterada_em ? ` · alterada em <b>${formatarData(perfil.senha_alterada_em)}</b>` : ''}</div>
+                    ${c.analisado_por ? `<div>Última análise: <b>${esc(c.analisado_por)}</b> em ${formatarData(c.analisado_em)}</div>` : ''}
+                    ${c.status === 'recusado' && c.motivo_recusa ? `<div style="color:#b91c1c;">Motivo da recusa: <b>${esc(c.motivo_recusa)}</b></div>` : ''}
                 </div>
-                <div style="padding: 14px 18px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
-                    <strong style="font-size: 0.85rem; color: #1e293b;">Origem do Envio:</strong>
-                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Formulário Oficial Seja um Agregado Conosco em ${ficha.data}.</p>
-                </div>
-            `;
+                <fieldset class="cad-secao">
+                    <legend>Documentos</legend>
+                    <div id="cad-lista-docs" class="cad-docs">Carregando documentos...</div>
+                </fieldset>
+                ${secoes}`;
 
-            footer.innerHTML = `
-                <button type="button" class="btn-action-small" onclick="fecharModal()">Fechar</button>
-                ${ficha.status !== 'analise' ? `<button type="button" class="btn-action-small" onclick="alterarStatus('${ficha.id}', 'analise'); fecharModal();">Colocar em Análise</button>` : ''}
-                ${ficha.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" onclick="alterarStatus('${ficha.id}', 'aprovado'); fecharModal();">Homologar &amp; Aprovar</button>` : ''}
-            `;
+            document.getElementById('modal-footer-actions').innerHTML = `
+                <button type="button" class="btn-action-small" data-acao="fechar">Fechar</button>
+                <button type="button" class="btn-action-small" data-acao="editar" id="btn-editar-dados">Completar / editar dados</button>
+                <button type="button" class="btn-action-small" data-acao="salvar-dados" id="btn-salvar-dados" style="display:none;">Salvar dados</button>
+                ${c.status !== 'analise' && c.status !== 'aprovado' ? `<button type="button" class="btn-action-small" data-acao="analise" data-id="${esc(c.id)}">Colocar em análise</button>` : ''}
+                ${c.status !== 'recusado' ? `<button type="button" class="btn-action-small btn-action-delete" data-acao="recusar" data-id="${esc(c.id)}">Recusar</button>` : ''}
+                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Aprovar cadastro</button>` : ''}`;
 
-            modal.classList.add('active');
+            document.getElementById('driver-modal').classList.add('active');
+
+            const enviados = await listarArquivosEnviados(c);
+            const lista = document.getElementById('cad-lista-docs');
+            if (!lista || cadastroAberto !== id) return;
+            lista.innerHTML = docs.length === 0 ? 'Nenhum documento anexado.' : docs.map((doc) => {
+                const ok = enviados.has(doc.path);
+                return `<div class="cad-doc ${ok ? '' : 'cad-doc-faltando'}">
+                    <span>📎 <b>${esc(NOMES_DOCUMENTOS[doc.campo] || doc.campo)}</b> · ${esc(doc.nome)}</span>
+                    ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não chegou a ser enviado</em>'}
+                </div>`;
+            }).join('');
         }
 
         function fecharModal() {
-            const modal = document.getElementById('driver-modal');
-            if (modal) modal.classList.remove('active');
+            document.getElementById('driver-modal')?.classList.remove('active');
+            cadastroAberto = null;
         }
 
-        function alterarStatus(id, novoStatus) {
-            const cadastros = obterCadastrosReais();
-            const ficha = cadastros.find(c => c.id === id);
-            if (ficha) {
-                ficha.status = novoStatus;
-                salvarCadastrosReais(cadastros);
+        async function salvarDados() {
+            const c = cadastros.find((x) => x.id === cadastroAberto);
+            if (!c) return;
+            const dados = { ...(c.dados || {}) };
+            document.querySelectorAll('#modal-body-content input[data-campo]').forEach((inp) => {
+                const v = inp.value.replace(/[<>"'`]/g, '').trim().slice(0, 200);
+                if (v) dados[inp.getAttribute('data-campo')] = v; else delete dados[inp.getAttribute('data-campo')];
+            });
+            const nome = `${dados['motorista-nome'] || ''} ${dados['motorista-sobrenome'] || ''}`.trim() || c.nome;
+            const { error } = await window.supabaseClient.from('cadastros_agregados')
+                .update({ dados, nome, celular: dados.celular || c.celular })
+                .eq('id', c.id);
+            if (error) {
+                console.error('Erro ao salvar dados:', error);
+                return aviso('Não foi possível salvar os dados.');
+            }
+            await carregarCadastros();
+            abrirModal(c.id);
+        }
+
+        function atualizarUsuarioLateral() {
+            try {
+                const u = JSON.parse(localStorage.getItem('ajborges_usuario_ativo') || 'null');
+                if (!u) return;
+                const emailEl = document.querySelector('.sidebar-footer .user-email');
+                const avatarEl = document.querySelector('.sidebar-footer .user-avatar-circle');
+                const papelEl = document.querySelector('.sidebar-footer .role-tag');
+                if (emailEl) emailEl.textContent = u.email || '';
+                const partes = String(u.nome || '').trim().split(/\s+/).filter(Boolean);
+                const iniciais = partes.length ? (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : '')) : String(u.email || '').slice(0, 2);
+                if (avatarEl) avatarEl.textContent = iniciais.toUpperCase();
+                if (papelEl) papelEl.textContent = u.role === 'diretoria' ? 'Diretoria' : 'Administrador';
+            } catch (e) { /* ignora */ }
+        }
+
+        function iniciarPainel() {
+            atualizarUsuarioLateral();
+            carregarCadastros();
+
+            document.getElementById('driver-search-input')?.addEventListener('input', (e) => {
+                termoBusca = e.target.value.toLowerCase().trim();
                 renderTabela();
+            });
+
+            const container = document.getElementById('tab-filter-container');
+            if (container && !document.getElementById('btn-tab-recusados')) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-action-small';
+                btn.id = 'btn-tab-recusados';
+                btn.setAttribute('data-tab', 'recusado');
+                btn.textContent = 'Recusados (0)';
+                container.appendChild(btn);
             }
-        }
-
-        function excluirFicha(id) {
-            if (confirm('Tem certeza que deseja remover esta ficha cadastral?')) {
-                const cadastros = obterCadastrosReais();
-                const filtrados = cadastros.filter(c => c.id !== id);
-                salvarCadastrosReais(filtrados);
-                renderTabela();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderTabela();
-
-            // Busca
-            const inputBusca = document.getElementById('driver-search-input');
-            if (inputBusca) {
-                inputBusca.addEventListener('input', (e) => {
-                    termoBusca = e.target.value.toLowerCase().trim();
-                    renderTabela();
-                });
-            }
-
-            // Tabs de Filtro
-            const filterButtons = document.querySelectorAll('#tab-filter-container button');
-            filterButtons.forEach(btn => {
+            const botoesFiltro = document.querySelectorAll('#tab-filter-container button');
+            botoesFiltro.forEach((btn) => {
                 btn.addEventListener('click', () => {
-                    filterButtons.forEach(b => {
-                        b.style.background = '#ffffff';
-                        b.style.color = '#1e293b';
-                        b.style.borderColor = '#cbd5e1';
-                    });
-                    btn.style.background = '#059669';
-                    btn.style.color = '#ffffff';
-                    btn.style.borderColor = '#059669';
-
+                    botoesFiltro.forEach((b) => { b.style.background = '#ffffff'; b.style.color = '#1e293b'; b.style.borderColor = '#cbd5e1'; });
+                    btn.style.background = '#059669'; btn.style.color = '#ffffff'; btn.style.borderColor = '#059669';
                     filtroAtual = btn.getAttribute('data-tab');
                     renderTabela();
                 });
             });
 
-            // Fechar modal
-            const btnCloseModal = document.getElementById('btn-close-modal');
-            if (btnCloseModal) btnCloseModal.addEventListener('click', fecharModal);
+            // Um único ouvinte para todos os botões da tabela e do modal
+            document.addEventListener('click', (e) => {
+                const alvo = e.target.closest('[data-acao]');
+                if (!alvo) return;
+                const id = alvo.getAttribute('data-id');
+                switch (alvo.getAttribute('data-acao')) {
+                    case 'abrir': abrirModal(id); break;
+                    case 'aprovar': decidir(id, 'aprovado'); break;
+                    case 'recusar': decidir(id, 'recusado'); break;
+                    case 'analise': decidir(id, 'analise'); break;
+                    case 'fechar': fecharModal(); break;
+                    case 'abrir-doc': abrirDocumento(alvo.getAttribute('data-caminho')); break;
+                    case 'editar':
+                        document.querySelectorAll('#modal-body-content input[data-campo]').forEach((inp) => { inp.readOnly = false; });
+                        alvo.style.display = 'none';
+                        document.getElementById('btn-salvar-dados').style.display = '';
+                        break;
+                    case 'salvar-dados': salvarDados(); break;
+                    default: break;
+                }
+            });
 
+            document.getElementById('btn-close-modal')?.addEventListener('click', fecharModal);
             const modal = document.getElementById('driver-modal');
-            if (modal) {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) fecharModal();
-                });
-            }
-        });
+            modal?.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
+
+            // Mantém a lista atualizada
+            setInterval(() => { if (!cadastroAberto) carregarCadastros(); }, 60000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && !cadastroAberto) carregarCadastros();
+            });
+        }
     </script>
 </body>
 

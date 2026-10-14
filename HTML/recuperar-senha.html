@@ -9,6 +9,10 @@
     <link rel="shortcut icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="apple-touch-icon" href="../Imagens/logo-header-1x.png">
     <title>Recuperar Senha - AJBorges Transportes</title>
+    <style>
+        .bloco-codigo { display: grid; gap: 14px; }
+        #bloco-nova-senha[hidden], #bloco-codigo[hidden], .req-item[hidden] { display: none; }
+    </style>
 </head>
 
 <body>
@@ -147,15 +151,15 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="pane-title">Informe seu CPF cadastrado</h2>
-                            <p class="pane-desc">Enviaremos um link para o e-mail do seu cadastro. Abra o link para criar a nova senha.
+                            <h2 class="pane-title">Informe seu e-mail cadastrado</h2>
+                            <p class="pane-desc">Vamos enviar um código de verificação para o seu e-mail. Depois é só digitar o código aqui e criar a nova senha.
                             </p>
                         </div>
                     </div>
 
                     <form id="form-step-1" novalidate>
                         <div class="form-group">
-                            <label for="cpf-recuperar">CPF do Motorista <span class="obrigatorio">*</span></label>
+                            <label for="email-recuperar">E-mail cadastrado <span class="obrigatorio">*</span></label>
                             <div class="input-wrapper">
                                 <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -163,14 +167,14 @@
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                <input type="text" id="cpf-recuperar" name="cpf" class="form-input"
-                                    placeholder="000.000.000-00" maxlength="14" inputmode="numeric"
-                                    autocomplete="username" required autofocus>
+                                <input type="email" id="email-recuperar" name="email" class="form-input"
+                                    placeholder="seuemail@exemplo.com" maxlength="254" inputmode="email"
+                                    autocomplete="email" required autofocus>
                             </div>
                         </div>
 
                         <button type="submit" class="btn-action-primary">
-                            <span>Enviar link por e-mail</span>
+                            <span>Enviar código</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -198,6 +202,28 @@
                         </div>
                     </div>
 
+                    <!-- Código recebido por e-mail -->
+                    <div id="bloco-codigo" class="bloco-codigo">
+                        <p class="pane-desc">Enviamos um código para <strong id="email-destino-codigo"></strong>.
+                            Ele pode levar alguns minutos para chegar (confira também o spam).</p>
+                        <div class="form-group">
+                            <label for="codigo-recuperacao">Código de verificação <span class="obrigatorio">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="codigo-recuperacao" class="form-input" inputmode="numeric"
+                                    autocomplete="one-time-code" maxlength="8" placeholder="000000">
+                            </div>
+                        </div>
+                        <div class="botoes-duplos">
+                            <button type="button" id="btn-reenviar-codigo" class="btn-action-secondary">
+                                <span>Reenviar código</span>
+                            </button>
+                            <button type="button" id="btn-confirmar-codigo" class="btn-action-primary">
+                                <span>Confirmar código</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="bloco-nova-senha" hidden>
                     <!-- Bloco de Dica/Sugestão de Senha (Idêntico ao Cadastro) -->
                     <div class="dica-senha-card">
                         <div class="dica-senha-header">
@@ -210,28 +236,27 @@
                             <strong>Dica para facilitar sua senha:</strong>
                         </div>
                         <p class="dica-senha-texto">
-                            Para facilitar a memorização, sugerimos usar os <strong>6 primeiros dígitos do seu
-                                CPF</strong> combinados com um <strong>caractere especial obrigatório</strong> (como
-                            <code>@</code>, <code>#</code>, <code>$</code> ou <code>!</code>). Você tem total
-                            liberdade para colocar o caractere especial no <strong>início</strong>, no
-                            <strong>meio</strong> ou no <strong>final</strong>, e acrescentar outras informações ou
-                            palavras.
+                            Use os <strong>6 primeiros dígitos do seu CPF</strong> com um <strong>caractere
+                                especial</strong> (como <code>@</code>, <code>#</code>, <code>$</code> ou
+                            <code>!</code>) e uma <strong>palavra de pelo menos 4 letras</strong>. O caractere pode ficar
+                            no <strong>início</strong>, no <strong>meio</strong> ou no <strong>final</strong>. Mínimo de
+                            <strong>11 caracteres</strong>.
                         </p>
                         <div class="dica-senha-exemplos-container">
                             <div class="exemplo-item">
                                 <span class="exemplo-tag">Exemplo 1:</span>
                                 <span class="exemplo-codigo" id="exemplo-senha-1">@123456viagem</span>
-                                <span class="exemplo-nota">Caractere no início + CPF + algo mais</span>
+                                <span class="exemplo-nota">Caractere no início + CPF + palavra</span>
                             </div>
                             <div class="exemplo-item">
                                 <span class="exemplo-tag">Exemplo 2:</span>
                                 <span class="exemplo-codigo" id="exemplo-senha-2">123456#2026</span>
-                                <span class="exemplo-nota">CPF + caractere no meio + algo mais</span>
+                                <span class="exemplo-nota">Palavra + caractere no meio + CPF</span>
                             </div>
                             <div class="exemplo-item">
                                 <span class="exemplo-tag">Exemplo 3:</span>
                                 <span class="exemplo-codigo" id="exemplo-senha-3">123456viagem@</span>
-                                <span class="exemplo-nota">CPF + algo mais + caractere no final</span>
+                                <span class="exemplo-nota">Palavra + CPF + caractere no final</span>
                             </div>
                         </div>
                     </div>
@@ -248,8 +273,8 @@
                                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                 </svg>
                                 <input type="password" id="nova-senha" name="nova_senha"
-                                    class="form-input input-password" placeholder="Digite a nova senha (mín. 6 dígitos)"
-                                    autocomplete="new-password" required minlength="6">
+                                    class="form-input input-password" placeholder="Mínimo de 11 caracteres"
+                                    autocomplete="new-password" required minlength="11" maxlength="72">
                                 <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha"
                                     aria-label="Mostrar ou ocultar senha">
                                     <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -283,11 +308,19 @@
                             <ul class="requisitos-lista">
                                 <li id="req-tamanho" class="req-item">
                                     <span class="req-icone">✕</span>
-                                    <span>Mínimo de 6 caracteres</span>
+                                    <span>Mínimo de 11 caracteres</span>
+                                </li>
+                                <li id="req-cpf" class="req-item">
+                                    <span class="req-icone">✕</span>
+                                    <span>Os 6 primeiros dígitos do seu CPF</span>
                                 </li>
                                 <li id="req-especial" class="req-item">
                                     <span class="req-icone">✕</span>
                                     <span>Pelo menos um caractere especial (ex: @, #, $, !)</span>
+                                </li>
+                                <li id="req-palavra" class="req-item">
+                                    <span class="req-icone">✕</span>
+                                    <span>Uma palavra com pelo menos 4 letras</span>
                                 </li>
                             </ul>
                         </div>
@@ -305,7 +338,7 @@
                                 </svg>
                                 <input type="password" id="confirmar-nova-senha" name="confirmar_senha"
                                     class="form-input input-password" placeholder="Repita a nova senha"
-                                    autocomplete="new-password" required minlength="6">
+                                    autocomplete="new-password" required minlength="11" maxlength="72">
                                 <button type="button" class="btn-toggle-password" title="Mostrar/ocultar senha"
                                     aria-label="Mostrar ou ocultar senha">
                                     <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -336,7 +369,7 @@
                                     <line x1="19" y1="12" x2="5" y2="12"></line>
                                     <polyline points="12 19 5 12 12 5"></polyline>
                                 </svg>
-                                <span>Alterar CPF</span>
+                                <span>Alterar e-mail</span>
                             </button>
                             <button type="submit" class="btn-action-primary btn-concluir">
                                 <span>Redefinir e Salvar Senha</span>
@@ -348,6 +381,7 @@
                             </button>
                         </div>
                     </form>
+                    </div>
                 </section>
 
                 <!-- ================================================================= -->
@@ -521,6 +555,7 @@
     <!-- Supabase SDK e Cliente de Banco de Dados -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
+    <script src="../JavaScript/senha.js"></script>
     <script src="../JavaScript/recuperar-senha.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

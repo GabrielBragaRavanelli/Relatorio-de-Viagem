@@ -12,10 +12,6 @@ const SUPABASE_CONFIG = {
 };
 
 
-// Guarda, antes do cliente ler e limpar a URL, se a página foi aberta pelo
-// link de recuperação de senha enviado por e-mail.
-window.ajbLinkRecuperacao = /type=recovery/.test(window.location.hash || '');
-
 // 2. Inicialização do Cliente Supabase
 let supabaseClient = null;
 
@@ -479,63 +475,56 @@ async function loginSupabase({ tipo, cpf, email, senha }) {
 }
 
 /**
- * Cadastro do motorista: só cria o usuário no Supabase Auth.
- * O perfil (role = motorista) é criado pelo gatilho do banco.
+ * Envia a ficha "Seja um Agregado Conosco" para a edge function 'solicitar-cadastro'.
+ * A conta nasce PENDENTE. Devolve { sucesso, uploads: [{indice, path, token}] }
+ * para o navegador enviar os documentos ao bucket privado.
  */
-async function cadastrarMotoristaSupabase({ nome, cpf, telefone, email, senha }) {
-    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
-
-    const cpfLimpo = (cpf || '').replace(/\D/g, '');
-    const emailFinal = (email || '').trim().toLowerCase();
-    if (!emailFinal) return { sucesso: false, erro: 'Informe seu e-mail. Ele é usado para entrar e recuperar a senha.' };
-
-    const { data, error } = await supabaseClient.auth.signUp({
-        email: emailFinal,
-        password: senha,
-        options: {
-            data: {
-                nome: (nome || '').trim(),
-                cpf: cpfLimpo,
-                telefone: (telefone || '').replace(/\D/g, '') || null
-            }
-        }
-    });
-
-    if (error) {
-        const msg = String(error.message || '');
-        if (/database error|saving new user/i.test(msg)) {
-            return { sucesso: false, erro: 'Não foi possível concluir o cadastro. Verifique se o CPF ou o e-mail já estão cadastrados.' };
-        }
-        if (/password/i.test(msg)) {
-            return { sucesso: false, erro: 'A senha não atende aos requisitos de segurança.' };
-        }
-        if (/rate limit|too many/i.test(msg)) {
-            return { sucesso: false, erro: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' };
-        }
-        return { sucesso: false, erro: 'Não foi possível concluir o cadastro. Tente novamente.' };
+async function solicitarCadastroAgregado(corpo) {
+    const r = await chamarEdgeFunction('solicitar-cadastro', corpo);
+    if (!r.ok || !r.dados || !r.dados.sucesso) {
+        return {
+            sucesso: false,
+            erro: (r.dados && r.dados.erro) || 'Não foi possível enviar o cadastro. Tente novamente.',
+            faltando: r.dados && r.dados.faltando
+        };
     }
-
-    // Não deixa a sessão do cadastro aberta: o motorista entra pela tela de login
-    if (data && data.session) {
-        await supabaseClient.auth.signOut().catch(() => {});
-    }
-    return { sucesso: true, confirmarEmail: !(data && data.session) };
+    return { sucesso: true, cadastroId: r.dados.cadastro_id, uploads: r.dados.uploads || [] };
 }
 
 /**
- * Pede o link de redefinição de senha (edge function 'recuperar-senha').
- * A resposta é sempre a mesma, exista ou não o cadastro.
+ * Esqueci a senha - etapa 1: pede o código para o e-mail cadastrado.
+ * Se o e-mail não estiver cadastrado, a edge function responde 404.
  */
-async function solicitarRecuperacaoSenha(cpf) {
-    const r = await chamarEdgeFunction('recuperar-senha', { cpf: (cpf || '').replace(/\D/g, '') });
-    if (r.status === 429) return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Muitas solicitações. Tente mais tarde.' };
-    if (!r.ok) return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Serviço indisponível no momento.' };
+async function solicitarRecuperacaoSenha(email) {
+    const r = await chamarEdgeFunction('recuperar-senha', { email: (email || '').trim().toLowerCase() });
+    if (!r.ok) return { sucesso: false, status: r.status, erro: (r.dados && r.dados.erro) || 'Serviço indisponível no momento.' };
     return { sucesso: true, mensagem: r.dados.mensagem };
 }
 
 /**
- * Define a nova senha. Só funciona com a sessão de recuperação aberta
- * pelo link enviado por e-mail.
+ * Esqueci a senha - etapa 2: confere o código recebido por e-mail e abre a
+ * sessão de recuperação. Devolve { sucesso, cpf } (o CPF serve para conferir a regra da senha).
+ */
+async function verificarCodigoRecuperacao(email, codigo) {
+    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+        email: (email || '').trim().toLowerCase(),
+        token: String(codigo || '').replace(/\s/g, ''),
+        type: 'recovery'
+    });
+    if (error || !data || !data.session) {
+        return { sucesso: false, erro: 'Código inválido ou expirado. Confira o e-mail ou peça um novo código.' };
+    }
+    let cpf = '';
+    try {
+        const { data: perfil } = await supabaseClient.from('perfis').select('cpf').eq('id', data.user.id).maybeSingle();
+        cpf = (perfil && perfil.cpf) || '';
+    } catch (e) { /* segue sem CPF */ }
+    return { sucesso: true, cpf };
+}
+
+/**
+ * Esqueci a senha - etapa 2: grava a senha nova (precisa da sessão aberta pelo código).
  */
 async function definirNovaSenhaSupabase(novaSenha) {
     if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
@@ -543,7 +532,7 @@ async function definirNovaSenhaSupabase(novaSenha) {
     if (error) {
         const msg = String(error.message || '');
         if (/different from the old/i.test(msg)) return { sucesso: false, erro: 'A nova senha precisa ser diferente da anterior.' };
-        if (/session|jwt|expired/i.test(msg)) return { sucesso: false, erro: 'O link expirou. Peça um novo link de recuperação.' };
+        if (/session|jwt|expired/i.test(msg)) return { sucesso: false, erro: 'O código expirou. Peça um novo código.' };
         return { sucesso: false, erro: 'Não foi possível salvar a nova senha.' };
     }
     await supabaseClient.auth.signOut().catch(() => {});
@@ -551,6 +540,7 @@ async function definirNovaSenhaSupabase(novaSenha) {
 }
 
 window.loginSupabase = loginSupabase;
-window.cadastrarMotoristaSupabase = cadastrarMotoristaSupabase;
+window.solicitarCadastroAgregado = solicitarCadastroAgregado;
+window.verificarCodigoRecuperacao = verificarCodigoRecuperacao;
 window.solicitarRecuperacaoSenha = solicitarRecuperacaoSenha;
 window.definirNovaSenhaSupabase = definirNovaSenhaSupabase;
