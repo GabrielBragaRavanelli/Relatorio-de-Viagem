@@ -225,7 +225,7 @@ async function buscarFichasSupabase() {
 /**
  * Atualiza o status de aprovação de uma ficha
  */
-async function atualizarStatusFichaSupabase(idFicha, novoStatus, aprovadoPor = 'operacional@ajborges.com', dadosExtras = {}) {
+async function atualizarStatusFichaSupabase(idFicha, novoStatus, aprovadoPor = null, dadosExtras = {}) {
     if (!supabaseClient) return false;
 
     try {

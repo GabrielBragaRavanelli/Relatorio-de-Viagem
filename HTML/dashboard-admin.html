@@ -287,11 +287,12 @@
             <!-- Rodapé da Sidebar (Informações do Gestor & Logout) -->
             <div class="sidebar-footer">
                 <div class="user-profile-badge">
-                    <div class="user-avatar-circle" id="user-avatar-initials">GO</div>
+                    <!-- Preenchido com o usuário logado (dashboard-admin.js → preencherUsuarioSidebar) -->
+                    <div class="user-avatar-circle" id="user-avatar-initials"></div>
                     <div class="user-details">
-                        <span class="user-email" id="sidebar-user-email">operacional@ajborges.com</span>
+                        <span class="user-email" id="sidebar-user-email"></span>
                         <div class="user-role-row">
-                            <span class="role-tag">Administrador</span>
+                            <span class="role-tag" id="sidebar-user-role">Administrador</span>
                             <span class="pulse-online" title="Conectado"></span>
                         </div>
                     </div>

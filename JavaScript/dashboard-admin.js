@@ -224,6 +224,37 @@ function escaparHtml(valor) {
     }[c]));
 }
 
+// Usuário logado (cache gravado pelo auth.js depois de validar a sessão no servidor)
+function obterUsuarioLogado() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || 'null') || {};
+    } catch (e) {
+        return {};
+    }
+}
+
+// Iniciais: primeira letra do primeiro e do último nome; sem nome, 2 primeiras letras do e-mail
+function obterIniciaisUsuario(nome, email) {
+    const partes = String(nome || '').trim().split(/\s+/).filter(Boolean);
+    if (partes.length >= 2) return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return String(email || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || '?';
+}
+
+function preencherUsuarioSidebar() {
+    const usuario = obterUsuarioLogado();
+    const elAvatar = document.getElementById('user-avatar-initials');
+    const elEmail = document.getElementById('sidebar-user-email');
+    const elPapel = document.getElementById('sidebar-user-role');
+
+    if (elAvatar) elAvatar.textContent = obterIniciaisUsuario(usuario.nome, usuario.email);
+    if (elEmail) {
+        elEmail.textContent = usuario.email || '';
+        elEmail.title = usuario.nome ? `${usuario.nome} • ${usuario.email || ''}` : (usuario.email || '');
+    }
+    if (elPapel) elPapel.textContent = usuario.role === 'diretoria' ? 'DIRETORIA' : 'ADMINISTRADOR';
+}
+
 // Abre comprovante privado com link temporário (bucket não é público)
 document.addEventListener('click', async (e) => {
     const chip = e.target.closest && e.target.closest('.modal-anexo-chip[data-caminho]');
@@ -838,13 +869,14 @@ function aprovarFichaDiretamente(fichaId) {
 
     appState.fichas[index].status = 'aprovado';
     appState.fichas[index].dataAprovacao = new Date().toLocaleString('pt-BR');
-    appState.fichas[index].aprovadoPor = 'operacional@ajborges.com';
+    const emailGestor = obterUsuarioLogado().email || null;
+    appState.fichas[index].aprovadoPor = emailGestor;
 
     salvarFichasNoStorage();
 
     // Atualiza status no banco de dados Supabase
     if (typeof window.atualizarStatusFichaSupabase === 'function') {
-        window.atualizarStatusFichaSupabase(fichaId, 'aprovado');
+        window.atualizarStatusFichaSupabase(fichaId, 'aprovado', emailGestor);
     }
 
     calcularMetricasDashboard();
@@ -2339,6 +2371,7 @@ async function sincronizarFichasComSupabase() {
 // Só inicia depois que a sessão de admin/diretoria for validada no servidor (auth.js)
 ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
     window.ajbAuth.vigiarSessao('Login.html#admin');
+    preencherUsuarioSidebar();
     // 1. Inicializa o banco de dados e carrega configurações dinâmicas
     inicializarBancoDados();
     carregarConfiguracoes();
