@@ -84,43 +84,52 @@
 
     <!-- Barra de Ações Rápidas do Administrador (Ativada no modo admin) -->
     <div class="barra-admin-operacional" id="barra-admin-operacional">
-        <div class="barra-admin-info">
-            <span class="tag-gestor-destaque">🛡️ Gestão Operacional</span>
-            <span class="titulo-admin-ficha" id="admin-banner-ficha-titulo">Conferência da Ficha:
-                <strong>#0001</strong></span>
-            <span class="status-pill status-pendente" id="admin-banner-status">🟡 Pendente de Conferência</span>
-        </div>
-        <div class="barra-admin-acoes">
-            <a href="dashboard-admin.html#fichas" class="btn-voltar-gestao"
-                title="Retornar à fila de conferência no Dashboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-                <span>Voltar ao Dashboard</span>
-            </a>
-            <button type="button" class="btn-voltar-gestao" id="btn-admin-salvar-alteracoes">
-                💾 Salvar Alterações
-            </button>
-            <button type="button" class="btn-voltar-gestao btn-admin-excluir-ficha" id="btn-admin-excluir-ficha"
-                title="Apagar esta ficha permanentemente e remover dados do Dashboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-                <span>Apagar Ficha</span>
-            </button>
-            <button type="button" class="btn-admin-aprovar-destaque" id="btn-admin-aprovar-concluir">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span>Aprovar e Concluir Relatório</span>
-            </button>
+        <div class="barra-admin-container">
+            <div class="barra-admin-info">
+                <span class="tag-gestor-destaque">🛡️ Gestão Operacional</span>
+                <span class="titulo-admin-ficha" id="admin-banner-ficha-titulo">Conferência da Ficha:
+                    <strong>#0001</strong></span>
+                <span class="status-pill status-pendente" id="admin-banner-status">🟡 Pendente de Conferência</span>
+            </div>
+            <div class="barra-admin-acoes">
+                <a href="dashboard-admin.html#fichas" class="btn-voltar-gestao"
+                    title="Retornar à fila de conferência no Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Voltar ao Dashboard</span>
+                </a>
+                <button type="button" class="btn-voltar-gestao btn-admin-salvar" id="btn-admin-salvar-alteracoes"
+                    title="Salvar alterações na ficha">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>Salvar Alterações</span>
+                </button>
+                <button type="button" class="btn-voltar-gestao btn-admin-excluir-ficha" id="btn-admin-excluir-ficha"
+                    title="Apagar esta ficha permanentemente e remover dados do Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    <span>Apagar Ficha</span>
+                </button>
+                <button type="button" class="btn-admin-aprovar-destaque" id="btn-admin-aprovar-concluir">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Aprovar e Concluir Relatório</span>
+                </button>
+            </div>
         </div>
     </div>
 

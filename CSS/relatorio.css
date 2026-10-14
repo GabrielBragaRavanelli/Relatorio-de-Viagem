@@ -2987,20 +2987,21 @@ footer {
     left: 0;
     width: 100%;
     z-index: 950;
-    background: linear-gradient(90deg, #0d111b 0%, #1e1e3f 100%);
-    border-bottom: 2px solid #6366f1;
+    background: linear-gradient(180deg, #121626 0%, #0b0f1a 100%);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.35);
     color: #ffffff;
-    padding: 12px 32px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    padding: 14px 24px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     animation: slideDownBanner 0.3s ease;
 }
 
 .barra-admin-operacional.ativa {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
+    width: 100%;
 }
 
 @keyframes slideDownBanner {
@@ -3008,89 +3009,254 @@ footer {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.barra-admin-info {
+.barra-admin-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 14px;
 }
 
+/* Linha 1: Informações da Ficha */
+.barra-admin-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
 .tag-gestor-destaque {
-    background: #6366f1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 9999px;
+    background: #4f46e5;
+    border: 1px solid #6366f1;
     color: #ffffff;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-sizing: border-box;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .titulo-admin-ficha {
-    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
     font-weight: 600;
-    color: #f8fafc;
+    color: #e2e8f0;
+    line-height: 1.2;
 }
 
+.titulo-admin-ficha strong {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.barra-admin-info .status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    box-sizing: border-box;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Linha 2: Ações do Administrador */
 .barra-admin-acoes {
     display: flex;
     align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 12px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.btn-voltar-gestao {
+.barra-admin-acoes > * {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #cbd5e1;
-    text-decoration: none;
-    padding: 8px 14px;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 18px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 600;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    line-height: 1;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-voltar-gestao:hover {
-    background: rgba(255, 255, 255, 0.2);
+.barra-admin-acoes svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.barra-admin-acoes > *:hover:not(:disabled) {
+    transform: translateY(-1.5px);
+    filter: brightness(1.08);
+}
+
+.barra-admin-acoes > *:active:not(:disabled) {
+    transform: translateY(0);
+    filter: brightness(0.96);
+}
+
+.barra-admin-acoes > *:focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+}
+
+.barra-admin-acoes > *:disabled,
+.barra-admin-acoes > *.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+    filter: grayscale(0.4);
+    pointer-events: none;
+}
+
+/* Botão Neutro: Voltar ao Dashboard */
+.btn-voltar-gestao {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-voltar-gestao:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.28);
     color: #ffffff;
 }
 
-.btn-admin-excluir-ficha {
-    background: rgba(239, 68, 68, 0.15) !important;
-    border-color: rgba(239, 68, 68, 0.4) !important;
-    color: #fca5a5 !important;
-    cursor: pointer;
+/* Botão Azul/Roxo: Salvar Alterações */
+#btn-admin-salvar-alteracoes,
+.btn-admin-salvar {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: #ffffff;
+    border: 1px solid #6366f1;
+    box-shadow: 0 3px 12px rgba(79, 70, 229, 0.35);
 }
 
-.btn-admin-excluir-ficha:hover {
+#btn-admin-salvar-alteracoes:hover:not(:disabled),
+.btn-admin-salvar:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border-color: #818cf8;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+    color: #ffffff;
+}
+
+/* Botão Vermelho Discreto: Apagar Ficha */
+.btn-admin-excluir-ficha,
+#btn-admin-excluir-ficha {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    color: #fca5a5 !important;
+    box-shadow: none;
+}
+
+.btn-admin-excluir-ficha:hover:not(:disabled),
+#btn-admin-excluir-ficha:hover:not(:disabled) {
     background: #ef4444 !important;
     border-color: #ef4444 !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
 }
 
-.btn-admin-aprovar-destaque {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+/* Botão Verde em Destaque: Aprovar e Concluir */
+.btn-admin-aprovar-destaque,
+#btn-admin-aprovar-concluir {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #ffffff;
-    border: none;
-    padding: 9px 20px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-    transition: all 0.2s ease;
+    border: 1px solid #10b981;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
 }
 
-.btn-admin-aprovar-destaque:hover {
+.btn-admin-aprovar-destaque:hover:not(:disabled),
+#btn-admin-aprovar-concluir:hover:not(:disabled) {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-1px);
+    border-color: #34d399;
     box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+    color: #ffffff;
+}
+
+/* Responsividade Mobile (até 768px) */
+@media (max-width: 768px) {
+    .barra-admin-operacional {
+        padding: 12px 16px;
+    }
+
+    .barra-admin-container {
+        gap: 12px;
+    }
+
+    .barra-admin-info {
+        gap: 8px;
+    }
+
+    .barra-admin-acoes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+        max-width: 580px;
+        margin: 0 auto;
+    }
+
+    .barra-admin-acoes > * {
+        width: 100%;
+        min-width: 0;
+        padding: 0 10px;
+        font-size: 0.82rem;
+        gap: 6px;
+    }
+
+    .barra-admin-acoes > * span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .barra-admin-acoes {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
 }
 
 /* Barra de Modo Motorista */
