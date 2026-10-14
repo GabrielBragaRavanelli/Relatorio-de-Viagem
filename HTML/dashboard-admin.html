@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <!-- Folha de Estilos do Dashboard -->
-    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.0">
+    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.1">
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
@@ -818,15 +818,37 @@
                         <h2>💰 Acerto com Motoristas (Comissões &amp; Diárias)</h2>
                         <p>Apuração de saldos líquidos a pagar, abatimento de adiantamentos e comissões por cliente.</p>
                     </div>
-                    <div class="placeholder-section-card">
+
+                    <!-- Barra de Ferramentas / Filtros de Acertos -->
+                    <div class="tabela-toolbar" style="margin-bottom: 16px;">
+                        <div class="toolbar-left toolbar-filtros-linha">
+                            <div class="filtro-cliente-wrapper">
+                                <label for="filtro-acertos-motorista">Motorista:</label>
+                                <select id="filtro-acertos-motorista" class="select-filtro-custom">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="filtro-cliente-wrapper">
+                                <label for="busca-acertos-ficha">Ficha:</label>
+                                <input type="search" id="busca-acertos-ficha" class="input-filtro-custom"
+                                    placeholder="Ex.: AJB-2026-035" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="tabela-info-registros" id="info-registros-acertos">0 ficha(s)</span>
+                        </div>
+                    </div>
+
+                    <div class="placeholder-section-card tabela-fichas-responsive">
                         <table class="tabela-fichas">
                             <thead>
                                 <tr>
+                                    <th>Ficha</th>
+                                    <th>Data da Viagem</th>
                                     <th>Motorista</th>
-                                    <th>Viagens Realizadas</th>
-                                    <th>Total Frete Gerado</th>
+                                    <th>Total Frete</th>
                                     <th>Comissão Apurada</th>
-                                    <th>Adiantamentos Pagos</th>
+                                    <th>Adiantamento</th>
                                     <th>Saldo a Liquidar</th>
                                     <th>Ações</th>
                                 </tr>
@@ -1096,7 +1118,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
-    <script src="../JavaScript/dashboard-admin.js?v=2.0"></script>
+    <script src="../JavaScript/dashboard-admin.js?v=2.1"></script>
 </body>
 
 </html>

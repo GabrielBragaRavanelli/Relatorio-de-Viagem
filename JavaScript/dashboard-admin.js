@@ -13,36 +13,34 @@ const STORAGE_USER_KEY = 'ajborges_usuario_ativo';
 const STORAGE_CADASTROS_AGREGADOS_KEY = 'ajborges_cadastros_agregados';
 const STORAGE_CONFIG_META_DIESEL = 'ajborges_config_meta_diesel';
 const STORAGE_CONFIG_TAXA_BORGES = 'ajborges_config_taxa_borges';
-const STORAGE_ACERTOS_STATUS_KEY = 'ajborges_acertos_status';
 
-// Funções de Persistência e Controle de Status de Acerto com Motoristas
-function carregarStatusAcertos() {
-    try {
-        const dados = localStorage.getItem(STORAGE_ACERTOS_STATUS_KEY);
-        return dados ? JSON.parse(dados) : {};
-    } catch (e) {
-        console.error('Erro ao ler status dos acertos:', e);
-        return {};
+// Status do Acerto com o Motorista: salvo POR FICHA no banco (dados_completos.statusAcerto)
+async function alternarConfirmacaoAcerto(fichaId, novoStatus) {
+    const ficha = appState.fichas.find(f => f.id === fichaId);
+    if (!ficha) return;
+
+    const statusAcerto = novoStatus === 'confirmado' ? 'confirmado' : 'nao_confirmado';
+
+    if (typeof window.atualizarStatusAcertoSupabase !== 'function') {
+        exibirToast('Sem conexão com o banco. O status do acerto não foi salvo.', 'erro');
+        return;
     }
-}
 
-function alternarConfirmacaoAcerto(nomeMotorista, novoStatus) {
-    if (!nomeMotorista) return;
-    try {
-        const statusMap = carregarStatusAcertos();
-        if (novoStatus === 'confirmado') {
-            statusMap[nomeMotorista] = 'confirmado';
-            localStorage.setItem(STORAGE_ACERTOS_STATUS_KEY, JSON.stringify(statusMap));
-            exibirToast(`Acerto com ${nomeMotorista} marcado como Confirmado!`, 'sucesso');
-        } else {
-            statusMap[nomeMotorista] = 'nao_confirmado';
-            localStorage.setItem(STORAGE_ACERTOS_STATUS_KEY, JSON.stringify(statusMap));
-            exibirToast(`Acerto com ${nomeMotorista} revertido para Não Confirmado.`, 'info');
-        }
-        renderizarTabelaFichas();
-        preencherSecoesSecundarias();
-    } catch (e) {
-        console.error('Erro ao salvar status de acerto:', e);
+    const salvou = await window.atualizarStatusAcertoSupabase(fichaId, statusAcerto);
+    if (!salvou) {
+        exibirToast(`Não foi possível salvar o acerto da ficha ${fichaId}. Tente novamente.`, 'erro');
+        return;
+    }
+
+    ficha.statusAcerto = statusAcerto;
+    salvarFichasNoStorage();
+    renderizarTabelaFichas();
+    preencherSecoesSecundarias();
+
+    if (statusAcerto === 'confirmado') {
+        exibirToast(`Acerto da ficha ${fichaId} marcado como Confirmado!`, 'sucesso');
+    } else {
+        exibirToast(`Acerto da ficha ${fichaId} revertido para Não Confirmado.`, 'info');
     }
 }
 window.alternarConfirmacaoAcerto = alternarConfirmacaoAcerto;
@@ -58,10 +56,9 @@ function escapeHtmlAttr(str) {
         .replace(/>/g, '&gt;');
 }
 
-function obterStatusAcertoMotorista(nomeMotorista) {
-    if (!nomeMotorista) return 'nao_confirmado';
-    const statusMap = carregarStatusAcertos();
-    return (statusMap[nomeMotorista] === 'confirmado') ? 'confirmado' : 'nao_confirmado';
+// Sem valor salvo = não confirmado
+function obterStatusAcertoFicha(ficha) {
+    return (ficha && ficha.statusAcerto === 'confirmado') ? 'confirmado' : 'nao_confirmado';
 }
 
 function parseMilharOuFloat(val) {
@@ -702,7 +699,6 @@ function renderizarTabelaFichas() {
 
     if (emptyState) emptyState.style.display = 'none';
 
-    const statusAcertosMap = carregarStatusAcertos();
     listaFiltrada.forEach(ficha => {
         const tr = document.createElement('tr');
         tr.id = `row-ficha-${ficha.id}`;
@@ -717,8 +713,7 @@ function renderizarTabelaFichas() {
             statusBadgeHtml = `<span class="status-pill status-pendente">🟡 Pendente de Conferência</span>`;
         }
 
-        const motoristaNome = ficha.motorista || 'Motorista';
-        const acertoConfirmado = obterStatusAcertoMotorista(motoristaNome) === 'confirmado';
+        const acertoConfirmado = obterStatusAcertoFicha(ficha) === 'confirmado';
         const acertoBadgeHtml = acertoConfirmado
             ? `<span class="status-pill status-concluido">🟢 Acerto Confirmado</span>`
             : `<span class="status-pill status-pendente">🟡 Não Confirmado</span>`;
@@ -1635,76 +1630,8 @@ function preencherSecoesSecundarias() {
         }
     }
 
-    // 3. Seção Acerto Motoristas (Controle Interno de Conferência)
-    const tbodyAcertos = document.getElementById('tabela-acertos-body');
-    if (tbodyAcertos) {
-        const motoristasMap = {};
-        appState.fichas.forEach(f => {
-            const m = f.motorista || 'Motorista';
-            if (!motoristasMap[m]) {
-                motoristasMap[m] = { viagens: 0, freteTotal: 0, comissao: 0, adiantamentos: 0 };
-            }
-            motoristasMap[m].viagens += 1;
-            motoristasMap[m].freteTotal += parseValorMoeda(f.totalFrete ?? f.total_frete);
-            motoristasMap[m].comissao += parseValorMoeda(f.vrComissao ?? f.vr_comissao);
-            motoristasMap[m].adiantamentos += parseValorMoeda(f.valorAdiantamento ?? f.valor_adiantamento);
-        });
-
-        const nomes = Object.keys(motoristasMap);
-        if (nomes.length === 0) {
-            tbodyAcertos.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
-                        Nenhum acerto de motorista pendente. Aguardando relatórios de viagem.
-                    </td>
-                </tr>
-            `;
-        } else {
-            const statusAcertosMap = carregarStatusAcertos();
-            tbodyAcertos.innerHTML = nomes.map(nome => {
-                const d = motoristasMap[nome];
-                const saldoLiquidar = d.comissao - d.adiantamentos;
-                const estaConfirmado = statusAcertosMap[nome] === 'confirmado';
-
-                const acoesHtml = estaConfirmado
-                    ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                           <span class="status-pill status-concluido">🟢 Confirmado</span>
-                           <button type="button" class="btn-desfazer-acerto" data-motorista="${escapeHtmlAttr(nome)}" title="Reverter status para Não Confirmado">Desfazer</button>
-                       </div>`
-                    : `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                           <span class="status-pill status-pendente">🟡 Não Confirmado</span>
-                           <button type="button" class="btn-acao-aprovar-rapido btn-confirmar-acerto" data-motorista="${escapeHtmlAttr(nome)}" title="Confirmar conferência do acerto">Confirmar</button>
-                       </div>`;
-
-                return `
-                    <tr>
-                        <td><strong>${nome}</strong></td>
-                        <td>${d.viagens} viagem(ns)</td>
-                        <td>R$ ${formatarMoedaSemPrefixo(d.freteTotal)}</td>
-                        <td><strong style="color: #4f46e5;">R$ ${formatarMoedaSemPrefixo(d.comissao)}</strong></td>
-                        <td>R$ ${formatarMoedaSemPrefixo(d.adiantamentos)}</td>
-                        <td><strong style="color: ${saldoLiquidar >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoedaSemPrefixo(saldoLiquidar)}</strong></td>
-                        <td>${acoesHtml}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Eventos dos botões de ação interna
-            tbodyAcertos.querySelectorAll('.btn-confirmar-acerto').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const motorista = btn.getAttribute('data-motorista');
-                    alternarConfirmacaoAcerto(motorista, 'confirmado');
-                });
-            });
-
-            tbodyAcertos.querySelectorAll('.btn-desfazer-acerto').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const motorista = btn.getAttribute('data-motorista');
-                    alternarConfirmacaoAcerto(motorista, 'nao_confirmado');
-                });
-            });
-        }
-    }
+    // 3. Seção Acerto Motoristas (uma linha por ficha)
+    renderizarTabelaAcertos();
 
     // 4. Seção Combustível
     renderizarTabelaCombustivel();
@@ -1867,6 +1794,104 @@ function preencherSecoesSecundarias() {
             `;
         }
     }
+}
+
+// ==========================================================================
+// 7.0. SEÇÃO ACERTO COM MOTORISTAS (UMA LINHA POR FICHA, FILTROS E STATUS NO BANCO)
+// ==========================================================================
+
+function renderizarTabelaAcertos() {
+    const tbodyAcertos = document.getElementById('tabela-acertos-body');
+    const selectMotorista = document.getElementById('filtro-acertos-motorista');
+    const inputBuscaFicha = document.getElementById('busca-acertos-ficha');
+    const infoRegistros = document.getElementById('info-registros-acertos');
+    if (!tbodyAcertos) return;
+
+    const fichas = appState.fichas || [];
+
+    // Popula o select com os motoristas das fichas, preservando a seleção atual
+    if (selectMotorista) {
+        const selecionado = selectMotorista.value || '';
+        const nomes = Array.from(new Set(fichas.map(f => (f.motorista || '').trim()).filter(Boolean)))
+            .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const chave = nomes.join('|');
+        if (selectMotorista.getAttribute('data-cache-chave') !== chave) {
+            selectMotorista.innerHTML = '<option value="">Todos</option>' +
+                nomes.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
+            selectMotorista.value = nomes.includes(selecionado) ? selecionado : '';
+            selectMotorista.setAttribute('data-cache-chave', chave);
+        }
+    }
+
+    const filtroMotorista = selectMotorista ? selectMotorista.value : '';
+    const termoFicha = inputBuscaFicha ? inputBuscaFicha.value.trim().toLowerCase() : '';
+
+    const lista = fichas
+        .filter(f => !filtroMotorista || (f.motorista || '').trim() === filtroMotorista)
+        .filter(f => !termoFicha || String(f.id || '').toLowerCase().includes(termoFicha))
+        .map(f => ({ ficha: f, data: obterDataFicha(f) }))
+        // Mesmo motorista agrupado (uma ficha embaixo da outra), viagens mais recentes primeiro
+        .sort((a, b) => {
+            const porNome = (a.ficha.motorista || '').localeCompare(b.ficha.motorista || '', 'pt-BR');
+            if (porNome !== 0) return porNome;
+            if (a.data.iso !== b.data.iso) return b.data.iso.localeCompare(a.data.iso);
+            return String(b.ficha.id || '').localeCompare(String(a.ficha.id || ''));
+        });
+
+    if (infoRegistros) infoRegistros.textContent = `${lista.length} ficha(s)`;
+
+    if (lista.length === 0) {
+        const msg = fichas.length === 0
+            ? 'Nenhum acerto de motorista pendente. Aguardando relatórios de viagem.'
+            : 'Nenhuma ficha encontrada para os filtros selecionados.';
+        tbodyAcertos.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; color: #94a3b8; padding: 28px;">${msg}</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbodyAcertos.innerHTML = lista.map(({ ficha: f, data }) => {
+        const frete = parseValorMoeda(f.totalFrete ?? f.total_frete);
+        const comissao = parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+        const adiantamento = parseValorMoeda(f.valorAdiantamento ?? f.valor_adiantamento);
+        const saldoLiquidar = comissao - adiantamento;
+        const id = escaparHtml(f.id);
+        const dataViagem = data.iso === '0000-00-00' ? '—' : escaparHtml(data.br);
+
+        const acoesHtml = obterStatusAcertoFicha(f) === 'confirmado'
+            ? `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                   <span class="status-pill status-concluido">🟢 Confirmado</span>
+                   <button type="button" class="btn-desfazer-acerto" data-ficha-id="${id}" title="Reverter status para Não Confirmado">Desfazer</button>
+               </div>`
+            : `<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                   <span class="status-pill status-pendente">🟡 Não Confirmado</span>
+                   <button type="button" class="btn-acao-aprovar-rapido btn-confirmar-acerto" data-ficha-id="${id}" title="Confirmar conferência do acerto">Confirmar</button>
+               </div>`;
+
+        return `
+            <tr>
+                <td><span class="td-ficha-id">${id}</span></td>
+                <td>${dataViagem}</td>
+                <td><strong>${escaparHtml(f.motorista || 'Motorista')}</strong></td>
+                <td>R$ ${formatarMoedaSemPrefixo(frete)}</td>
+                <td><strong style="color: #4f46e5;">R$ ${formatarMoedaSemPrefixo(comissao)}</strong></td>
+                <td>R$ ${formatarMoedaSemPrefixo(adiantamento)}</td>
+                <td><strong style="color: ${saldoLiquidar >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoedaSemPrefixo(saldoLiquidar)}</strong></td>
+                <td>${acoesHtml}</td>
+            </tr>
+        `;
+    }).join('');
+
+    tbodyAcertos.querySelectorAll('.btn-confirmar-acerto, .btn-desfazer-acerto').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const novoStatus = btn.classList.contains('btn-confirmar-acerto') ? 'confirmado' : 'nao_confirmado';
+            btn.disabled = true;
+            await alternarConfirmacaoAcerto(btn.getAttribute('data-ficha-id'), novoStatus);
+            btn.disabled = false;
+        });
+    });
 }
 
 // ==========================================================================
@@ -2187,6 +2212,7 @@ async function sincronizarFichasComSupabase() {
                     calcularMetricasDashboard();
                     renderizarTabelaFichas();
                     atualizarGraficos();
+                    renderizarTabelaAcertos();
                     carregarFiltroMotoristas();
                 }
             },
@@ -2298,6 +2324,12 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
             renderizarTabelaFichas();
         });
     }
+
+    // 6.1 Filtros da aba Acerto com Motoristas
+    const selectAcertosMotorista = document.getElementById('filtro-acertos-motorista');
+    const inputBuscaAcertos = document.getElementById('busca-acertos-ficha');
+    if (selectAcertosMotorista) selectAcertosMotorista.addEventListener('change', renderizarTabelaAcertos);
+    if (inputBuscaAcertos) inputBuscaAcertos.addEventListener('input', renderizarTabelaAcertos);
 
     // 7. Busca global em tempo real
     const inputBusca = document.getElementById('global-search-input');

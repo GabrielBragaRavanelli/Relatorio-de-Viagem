@@ -255,6 +255,46 @@ async function atualizarStatusFichaSupabase(idFicha, novoStatus, aprovadoPor = '
     }
 }
 
+/**
+ * Grava o status do acerto com o motorista em dados_completos.statusAcerto
+ * da própria ficha ('confirmado' | 'nao_confirmado'). Preserva o restante
+ * de dados_completos (lê o valor atual antes de atualizar).
+ */
+async function atualizarStatusAcertoSupabase(idFicha, statusAcerto) {
+    if (!supabaseClient) return false;
+
+    try {
+        const { data: atual, error: erroLeitura } = await supabaseClient
+            .from('fichas_viagem')
+            .select('dados_completos')
+            .eq('id', idFicha)
+            .maybeSingle();
+
+        if (erroLeitura || !atual) {
+            console.error('Erro ao ler a ficha para atualizar o acerto:', erroLeitura);
+            return false;
+        }
+
+        const dadosCompletos = { ...(atual.dados_completos || {}), statusAcerto };
+
+        const { data, error } = await supabaseClient
+            .from('fichas_viagem')
+            .update({ dados_completos: dadosCompletos })
+            .eq('id', idFicha)
+            .select('id');
+
+        // Sem linhas retornadas = a RLS não permitiu a alteração
+        if (error || !Array.isArray(data) || data.length === 0) {
+            console.error('Erro ao salvar status do acerto no Supabase:', error);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error('Exceção ao salvar status do acerto no Supabase:', err);
+        return false;
+    }
+}
+
 // ==========================================================================
 // 4. UPLOAD DE FOTOS E COMPROVANTES (SUPABASE STORAGE)
 // ==========================================================================
@@ -391,6 +431,7 @@ window.mapearFichaParaSupabase = mapearFichaParaSupabase;
 window.salvarFichaSupabase = salvarFichaSupabase;
 window.buscarFichasSupabase = buscarFichasSupabase;
 window.atualizarStatusFichaSupabase = atualizarStatusFichaSupabase;
+window.atualizarStatusAcertoSupabase = atualizarStatusAcertoSupabase;
 window.excluirFichaSupabase = excluirFichaSupabase;
 window.uploadComprovanteSupabase = uploadComprovanteSupabase;
 window.obterLinkComprovante = obterLinkComprovante;

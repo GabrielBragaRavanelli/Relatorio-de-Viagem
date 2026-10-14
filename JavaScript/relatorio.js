@@ -4123,17 +4123,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 };
                 novaFicha.dados_completos = { ...novaFicha };
 
-                // Garante que o acerto com este motorista seja iniciado estritamente como não confirmado
-                try {
-                    const statusAcertosStr = localStorage.getItem('ajborges_acertos_status');
-                    const statusAcertos = statusAcertosStr ? JSON.parse(statusAcertosStr) : {};
-                    const nomeMot = inputMotorista?.value?.trim() || (isComLogin ? usuarioAtivo?.nome : '') || 'Motorista';
-                    if (nomeMot) {
-                        statusAcertos[nomeMot] = 'nao_confirmado';
-                        localStorage.setItem('ajborges_acertos_status', JSON.stringify(statusAcertos));
-                    }
-                } catch (e) { }
-
                 // Envia para o Supabase e só confirma ao motorista se gravou de verdade
                 const resultadoEnvio = (typeof window.salvarFichaSupabase === 'function')
                     ? await window.salvarFichaSupabase(novaFicha)

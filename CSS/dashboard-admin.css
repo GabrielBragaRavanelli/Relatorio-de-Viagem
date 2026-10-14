@@ -427,6 +427,8 @@ body.admin-body {
 
 .admin-main-wrapper {
     flex: 1;
+    /* Permite encolher: tabela larga rola dentro do card em vez de alargar a página */
+    min-width: 0;
     margin-left: var(--sidebar-largura);
     display: flex;
     flex-direction: column;
@@ -1494,6 +1496,36 @@ body.admin-body {
 
 .select-filtro-custom:focus {
     border-color: #6366f1;
+}
+
+/* Campo de texto/data com o mesmo visual do select de filtro */
+.input-filtro-custom {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--cor-texto-primario);
+    outline: none;
+    min-width: 0;
+}
+
+.input-filtro-custom:focus {
+    border-color: #6366f1;
+}
+
+/* Vários filtros lado a lado na mesma barra (quebram linha em telas estreitas) */
+.toolbar-filtros-linha {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.tabela-toolbar:has(.toolbar-filtros-linha) {
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .tabela-info-registros {
