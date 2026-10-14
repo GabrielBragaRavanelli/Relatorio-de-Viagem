@@ -136,6 +136,7 @@ let appState = {
     filtroPeriodo: 'mes', // 'mes' | '30d' | 'semana'
     termoBusca: '',
     fichaSelecionadaModal: null,
+    motoristasCadastrados: [], // perfis com role = 'motorista' ({ id, nome, cpf })
     config: {
         metaDiesel: 2.40,
         taxaBorges: 5.0
@@ -1637,51 +1638,7 @@ function preencherSecoesSecundarias() {
     renderizarTabelaCombustivel();
 
     // 5. Seção Frota
-    const tbodyFrota = document.getElementById('tabela-frota-body');
-    if (tbodyFrota) {
-        const veiculosMap = {};
-        appState.fichas.forEach(f => {
-            if (f.placas) {
-                if (!veiculosMap[f.placas]) {
-                    veiculosMap[f.placas] = {
-                        motorista: f.motorista || 'Motorista',
-                        kmAtual: f.kmChegada || f.kmSaida || f.km_chegada || f.km_saida || '-',
-                        media: obterMediaRealFicha(f).texto,
-                        status: f.status === 'pendente' ? 'Em Rota' : 'Disponível'
-                    };
-                }
-            }
-        });
-
-        const placas = Object.keys(veiculosMap);
-        if (placas.length === 0) {
-            tbodyFrota.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">
-                        Nenhum veículo registrado em viagens ativas no momento.
-                    </td>
-                </tr>
-            `;
-        } else {
-            tbodyFrota.innerHTML = placas.map(p => {
-                const v = veiculosMap[p];
-                const partes = p.split('/');
-                const cavalo = partes[0]?.trim() || p;
-                const carreta = partes[1]?.trim() || '-';
-                return `
-                    <tr>
-                        <td><strong>${cavalo}</strong></td>
-                        <td>${carreta}</td>
-                        <td>Veículo Pesado</td>
-                        <td>${v.motorista}</td>
-                        <td>${v.kmAtual} km</td>
-                        <td><span class="diesel-badge diesel-bom">${v.media} km/l</span></td>
-                        <td><span class="status-pill ${v.status === 'Em Rota' ? 'status-pendente' : 'status-concluido'}">${v.status}</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
-    }
+    renderizarTabelaFrota();
 
     // 6. Seção Despesas Gerais
     const containerDespesas = document.getElementById('container-despesas-resumo');
@@ -1892,6 +1849,131 @@ function renderizarTabelaAcertos() {
             btn.disabled = false;
         });
     });
+}
+
+// ==========================================================================
+// 7.0.1. SEÇÃO GESTÃO DE FROTA (FILTRO POR MOTORISTA CADASTRADO)
+// ==========================================================================
+
+function somenteDigitos(valor) {
+    return String(valor ?? '').replace(/\D/g, '');
+}
+
+function normalizarNomePessoa(nome) {
+    return String(nome ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+// Ex.: 11166686822 -> ***.666.868-**
+function mascararCpf(cpf) {
+    const d = somenteDigitos(cpf);
+    if (d.length !== 11) return '';
+    return `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**`;
+}
+
+// Ficha pertence ao motorista cadastrado? CPF quando os dois lados têm; senão, nome
+function fichaEhDoMotorista(ficha, perfil) {
+    if (!ficha || !perfil) return false;
+    const cpfPerfil = somenteDigitos(perfil.cpf);
+    const cpfFicha = somenteDigitos(ficha.motoristaCpf ?? ficha.motorista_cpf);
+    if (cpfPerfil && cpfFicha) return cpfPerfil === cpfFicha;
+    return normalizarNomePessoa(ficha.motorista) !== '' &&
+        normalizarNomePessoa(ficha.motorista) === normalizarNomePessoa(perfil.nome);
+}
+
+async function carregarMotoristasCadastrados() {
+    if (!window.supabaseClient) return;
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('perfis')
+            .select('id, nome, cpf')
+            .eq('role', 'motorista')
+            .order('nome', { ascending: true });
+        if (error) {
+            console.warn('Erro ao carregar motoristas cadastrados:', error);
+            return;
+        }
+        appState.motoristasCadastrados = Array.isArray(data) ? data : [];
+        renderizarTabelaFrota();
+    } catch (e) {
+        console.warn('Erro ao carregar motoristas cadastrados:', e);
+    }
+}
+
+function renderizarTabelaFrota() {
+    const tbodyFrota = document.getElementById('tabela-frota-body');
+    const selectMotorista = document.getElementById('filtro-frota-motorista');
+    const infoRegistros = document.getElementById('info-registros-frota');
+    if (!tbodyFrota) return;
+
+    const perfis = appState.motoristasCadastrados || [];
+
+    // Popula o select com os motoristas cadastrados (nome + CPF mascarado), preservando a seleção
+    if (selectMotorista) {
+        const selecionado = selectMotorista.value || '';
+        const chave = perfis.map(p => `${p.id}:${p.nome}:${p.cpf}`).join('|');
+        if (selectMotorista.getAttribute('data-cache-chave') !== chave) {
+            selectMotorista.innerHTML = '<option value="">Todos</option>' + perfis.map(p => {
+                const cpfMascarado = mascararCpf(p.cpf);
+                const rotulo = cpfMascarado ? `${p.nome || 'Sem nome'} (${cpfMascarado})` : (p.nome || 'Sem nome');
+                return `<option value="${escaparHtml(p.id)}">${escaparHtml(rotulo)}</option>`;
+            }).join('');
+            selectMotorista.value = perfis.some(p => String(p.id) === selecionado) ? selecionado : '';
+            selectMotorista.setAttribute('data-cache-chave', chave);
+        }
+    }
+
+    const idSelecionado = selectMotorista ? selectMotorista.value : '';
+    const perfilSelecionado = idSelecionado ? perfis.find(p => String(p.id) === idSelecionado) : null;
+    const fichas = perfilSelecionado
+        ? appState.fichas.filter(f => fichaEhDoMotorista(f, perfilSelecionado))
+        : appState.fichas;
+
+    // Um veículo por placa (fichas vêm da mais recente para a mais antiga)
+    const veiculosMap = {};
+    fichas.forEach(f => {
+        if (f.placas && !veiculosMap[f.placas]) {
+            veiculosMap[f.placas] = {
+                motorista: f.motorista || 'Motorista',
+                kmAtual: f.kmChegada || f.kmSaida || f.km_chegada || f.km_saida || '-',
+                media: obterMediaRealFicha(f).texto,
+                status: f.status === 'pendente' ? 'Em Rota' : 'Disponível'
+            };
+        }
+    });
+
+    const placas = Object.keys(veiculosMap);
+    if (infoRegistros) infoRegistros.textContent = `${placas.length} veículo(s)`;
+
+    if (placas.length === 0) {
+        const msg = perfilSelecionado
+            ? 'Nenhum veículo encontrado nas fichas deste motorista.'
+            : 'Nenhum veículo registrado em viagens ativas no momento.';
+        tbodyFrota.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: #94a3b8; padding: 28px;">${msg}</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbodyFrota.innerHTML = placas.map(p => {
+        const v = veiculosMap[p];
+        const partes = p.split('/');
+        const cavalo = partes[0]?.trim() || p;
+        const carreta = partes[1]?.trim() || '-';
+        return `
+            <tr>
+                <td><strong>${escaparHtml(cavalo)}</strong></td>
+                <td>${escaparHtml(carreta)}</td>
+                <td>Veículo Pesado</td>
+                <td>${escaparHtml(v.motorista)}</td>
+                <td>${escaparHtml(v.kmAtual)} km</td>
+                <td><span class="diesel-badge diesel-bom">${escaparHtml(v.media)} km/l</span></td>
+                <td><span class="status-pill ${v.status === 'Em Rota' ? 'status-pendente' : 'status-concluido'}">${v.status}</span></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // ==========================================================================
@@ -2241,6 +2323,7 @@ async function sincronizarFichasComSupabase() {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'perfis' }, () => {
                     console.log('⚡ Atualização em perfis de motoristas detectada.');
                     carregarFiltroMotoristas();
+                    carregarMotoristasCadastrados();
                 })
                 .subscribe();
         } catch (e) {
@@ -2264,6 +2347,7 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
     inicializarGraficos();
     preencherSecoesSecundarias();
     carregarFiltroMotoristas();
+    carregarMotoristasCadastrados();
 
     // Sincroniza com o Supabase e ativa o Realtime
     sincronizarFichasComSupabase();
@@ -2330,6 +2414,10 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
     const inputBuscaAcertos = document.getElementById('busca-acertos-ficha');
     if (selectAcertosMotorista) selectAcertosMotorista.addEventListener('change', renderizarTabelaAcertos);
     if (inputBuscaAcertos) inputBuscaAcertos.addEventListener('input', renderizarTabelaAcertos);
+
+    // 6.2 Filtro de motorista cadastrado na aba Gestão de Frota
+    const selectFrotaMotorista = document.getElementById('filtro-frota-motorista');
+    if (selectFrotaMotorista) selectFrotaMotorista.addEventListener('change', renderizarTabelaFrota);
 
     // 7. Busca global em tempo real
     const inputBusca = document.getElementById('global-search-input');

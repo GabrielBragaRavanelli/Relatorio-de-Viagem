@@ -936,7 +936,23 @@
                         <p>Status operacional de cavalos mecânicos, semirreboques, odômetros e manutenções programadas.
                         </p>
                     </div>
-                    <div class="placeholder-section-card">
+
+                    <!-- Barra de Ferramentas / Filtro por Motorista Cadastrado -->
+                    <div class="tabela-toolbar" style="margin-bottom: 16px;">
+                        <div class="toolbar-left">
+                            <div class="filtro-cliente-wrapper">
+                                <label for="filtro-frota-motorista">Motorista:</label>
+                                <select id="filtro-frota-motorista" class="select-filtro-custom">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="tabela-info-registros" id="info-registros-frota">0 veículo(s)</span>
+                        </div>
+                    </div>
+
+                    <div class="placeholder-section-card tabela-fichas-responsive">
                         <table class="tabela-fichas">
                             <thead>
                                 <tr>
