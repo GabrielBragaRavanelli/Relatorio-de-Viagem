@@ -3409,10 +3409,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             toggleFormularioUnificado(true, false);
 
             let fichaCarregada = null;
-            const tagAdmin = barraAdmin?.querySelector('.tag-gestor-destaque');
-            if (tagAdmin) {
-                tagAdmin.textContent = '🛡️ Gestão Operacional • Modo Administrador';
-            }
 
             if (fichaIdUrl) {
                 const todas = obterListaFichasCentral();

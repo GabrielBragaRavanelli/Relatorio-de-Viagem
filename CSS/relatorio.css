@@ -3009,49 +3009,29 @@ footer {
     to { transform: translateY(0); opacity: 1; }
 }
 
+/* Linha única: botões à esquerda, ficha + status à direita */
 .barra-admin-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px 24px;
 }
 
-/* Linha 1: Informações da Ficha */
+/* Informações da Ficha (direita) */
 .barra-admin-info {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 12px;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.tag-gestor-destaque {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 30px;
-    padding: 0 14px;
-    border-radius: 9999px;
-    background: #4f46e5;
-    border: 1px solid #6366f1;
-    color: #ffffff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-sizing: border-box;
-    line-height: 1;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    /* Se a linha não couber, a ficha desce e continua alinhada à direita */
+    margin-left: auto;
+    text-align: right;
 }
 
 .titulo-admin-ficha {
@@ -3088,16 +3068,13 @@ footer {
     white-space: nowrap;
 }
 
-/* Linha 2: Ações do Administrador */
+/* Ações do Administrador (esquerda) */
 .barra-admin-acoes {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 12px;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    gap: 10px;
 }
 
 .barra-admin-acoes > * {
@@ -3106,7 +3083,7 @@ footer {
     justify-content: center;
     gap: 8px;
     height: 42px;
-    padding: 0 18px;
+    padding: 0 16px;
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 600;
@@ -3214,14 +3191,77 @@ footer {
     color: #ffffff;
 }
 
+/* Notebooks (901px–1440px): espaçamento mais compacto para manter a linha única */
+@media (min-width: 901px) and (max-width: 1440px) {
+    .barra-admin-operacional {
+        padding: 14px 20px;
+    }
+
+    .barra-admin-container {
+        gap: 12px 16px;
+    }
+
+    .barra-admin-acoes {
+        gap: 8px;
+    }
+
+    .barra-admin-acoes > * {
+        padding: 0 12px;
+        font-size: 0.82rem;
+        gap: 6px;
+    }
+
+    .barra-admin-info {
+        gap: 10px;
+    }
+
+    .titulo-admin-ficha {
+        font-size: 0.88rem;
+    }
+
+    .titulo-admin-ficha strong {
+        font-size: 1.05rem;
+    }
+
+    .barra-admin-info .status-pill {
+        padding: 0 12px;
+    }
+}
+
+/* Até 900px: ficha + status em cima, botões embaixo, tudo centralizado */
+@media (max-width: 900px) {
+    .barra-admin-container {
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .barra-admin-info {
+        order: -1;
+        justify-content: center;
+        margin-left: 0;
+        text-align: center;
+    }
+
+    /* Em telas estreitas o número da ficha desce inteiro, sem quebrar no hífen */
+    .titulo-admin-ficha {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+
+    .titulo-admin-ficha strong {
+        white-space: nowrap;
+    }
+
+    .barra-admin-acoes {
+        justify-content: center;
+    }
+}
+
 /* Responsividade Mobile (até 768px) */
 @media (max-width: 768px) {
     .barra-admin-operacional {
         padding: 12px 16px;
-    }
-
-    .barra-admin-container {
-        gap: 12px;
     }
 
     .barra-admin-info {
@@ -3240,15 +3280,14 @@ footer {
     .barra-admin-acoes > * {
         width: 100%;
         min-width: 0;
-        padding: 0 10px;
+        height: auto;
+        min-height: 42px;
+        padding: 8px 10px;
         font-size: 0.82rem;
         gap: 6px;
-    }
-
-    .barra-admin-acoes > * span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
     }
 }
 
