@@ -1596,6 +1596,9 @@ function atualizarGraficos() {
         }
         chartConsumoInstance.update();
     }
+
+    // Mantém a aba Análises em dia quando os dados mudam
+    renderizarAnalisesSeVisivel();
 }
 
 // ==========================================================================
@@ -2116,6 +2119,487 @@ function renderizarTabelaCombustivel() {
 }
 
 // ==========================================================================
+// 7.2. ABA ANÁLISES (TABELAS, COMPARAÇÕES E GRÁFICOS A PARTIR DAS FICHAS)
+// ==========================================================================
+
+// Instâncias Chart.js da aba (destruídas e recriadas a cada renderização)
+const chartsAnalises = {};
+
+const MESES_ABREV = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+function formatarNumeroBR(num, casas = 0) {
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+}
+
+// Valor calculável vira texto; divisão por zero / dado ausente vira "—"
+function textoOuTraco(valor, formatar) {
+    return (typeof valor === 'number' && isFinite(valor)) ? formatar(valor) : '—';
+}
+
+function dividirOuNulo(a, b) {
+    return b > 0 ? a / b : null;
+}
+
+/**
+ * Valores de uma ficha, com as mesmas regras usadas no restante do dashboard.
+ * despesas = diesel + pedágio + imposto federal + outras (sem a comissão).
+ */
+function obterValoresFichaAnalise(f) {
+    let diesel = parseValorMoeda(f.totalAbastecimento);
+    if (diesel === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+        diesel = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.valor || a.total || 0), 0);
+    }
+
+    let pedagio = parseValorMoeda(f.totalPedagio);
+    if (pedagio === 0 && Array.isArray(f.pedagios) && f.pedagios.length > 0) {
+        pedagio = f.pedagios.reduce((acc, p) => acc + parseValorMoeda(p.valor || p || 0), 0);
+    }
+
+    const imposto = parseValorMoeda(f.impFederal ?? f.imp_federal);
+
+    // Outras despesas: itens da lista, exceto o Imposto Federal (já contado acima)
+    const listaOutras = Array.isArray(f.outrasDespesas) ? f.outrasDespesas : [];
+    const outras = listaOutras.reduce((acc, d) => {
+        if (!d || normalizarNomePessoa(d.desc) === 'imposto federal') return acc;
+        return acc + parseValorMoeda(d.valor);
+    }, 0);
+
+    let litros = parseValorMoeda(f.totalLitros || 0);
+    if (litros === 0 && Array.isArray(f.abastecimentos) && f.abastecimentos.length > 0) {
+        litros = f.abastecimentos.reduce((acc, a) => acc + parseValorMoeda(a.litros || 0), 0);
+    }
+
+    const frete = parseValorMoeda(f.totalFrete ?? f.total_frete);
+    const comissao = parseValorMoeda(f.vrComissao ?? f.vr_comissao);
+    const km = parseMilharOuFloat(f.kmTotal ?? f.km_total ?? 0);
+    const despesas = diesel + pedagio + imposto + outras;
+
+    return { frete, comissao, diesel, pedagio, imposto, outras, despesas, km, litros, resultado: frete - despesas - comissao };
+}
+
+function somarValoresAnalise(lista) {
+    const total = { fichas: 0, frete: 0, comissao: 0, diesel: 0, pedagio: 0, imposto: 0, outras: 0, despesas: 0, km: 0, litros: 0, resultado: 0 };
+    lista.forEach(({ v }) => {
+        total.fichas += 1;
+        Object.keys(v).forEach(k => { total[k] += v[k]; });
+    });
+    return total;
+}
+
+// Classe do selo de consumo (mesma regra da tabela de fichas)
+function classeConsumoDiesel(media) {
+    const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+    if (!(media > 0) || !(meta > 0)) return 'diesel-bom';
+    if (media < (meta - 0.20)) return 'diesel-alerta';
+    if (media < meta) return 'diesel-atencao';
+    return 'diesel-bom';
+}
+
+function montarTabelaAnalise(cabecalhos, linhas, msgVazio = 'Sem dados para os filtros selecionados.') {
+    if (linhas.length === 0) return `<div class="analises-vazio">${msgVazio}</div>`;
+    const ths = cabecalhos.map(c => `<th${c.num ? ' class="td-num"' : ''}${c.title ? ` title="${escaparHtml(c.title)}"` : ''}>${c.texto}</th>`).join('');
+    return `
+        <table class="tabela-fichas">
+            <thead><tr>${ths}</tr></thead>
+            <tbody>${linhas.join('')}</tbody>
+        </table>
+    `;
+}
+
+function destruirGraficoAnalise(chave) {
+    if (chartsAnalises[chave]) {
+        chartsAnalises[chave].destroy();
+        delete chartsAnalises[chave];
+    }
+}
+
+// Recria o gráfico (ou esconde a área quando não há dados)
+function renderizarGraficoAnalise(chave, canvasId, boxId, config, temDados) {
+    destruirGraficoAnalise(chave);
+    const canvas = document.getElementById(canvasId);
+    const box = document.getElementById(boxId);
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    const existente = Chart.getChart(canvas);
+    if (existente) existente.destroy();
+
+    if (box) box.style.display = temDados ? '' : 'none';
+    if (!temDados) return;
+
+    chartsAnalises[chave] = new Chart(canvas, config);
+}
+
+function preencherOpcoesFiltroAnalise(select, valores, rotuloTodos) {
+    if (!select) return;
+    const selecionado = select.value || '';
+    const chave = valores.join('|');
+    if (select.getAttribute('data-cache-chave') === chave) return;
+    select.innerHTML = `<option value="">${rotuloTodos}</option>` +
+        valores.map(v => `<option value="${escaparHtml(v)}">${escaparHtml(v)}</option>`).join('');
+    select.value = valores.includes(selecionado) ? selecionado : '';
+    select.setAttribute('data-cache-chave', chave);
+}
+
+function obterFichasFiltradasAnalise() {
+    const dataDe = document.getElementById('analises-data-de')?.value || '';
+    const dataAte = document.getElementById('analises-data-ate')?.value || '';
+    const motorista = document.getElementById('analises-filtro-motorista')?.value || '';
+    const placa = document.getElementById('analises-filtro-placa')?.value || '';
+    const status = document.getElementById('analises-filtro-status')?.value || 'aprovado';
+
+    return (appState.fichas || [])
+        .filter(f => f && f.id)
+        .filter(f => status === 'todas' || f.status === 'aprovado')
+        .filter(f => !motorista || (f.motorista || '').trim() === motorista)
+        .filter(f => !placa || (f.placas || '').trim() === placa)
+        .map(f => ({ ficha: f, data: obterDataFicha(f), v: obterValoresFichaAnalise(f) }))
+        .filter(({ data }) => {
+            if (!dataDe && !dataAte) return true;
+            const temData = /^\d{4}-\d{2}-\d{2}$/.test(data.iso) && data.iso !== '0000-00-00';
+            if (!temData) return false;
+            if (dataDe && data.iso < dataDe) return false;
+            if (dataAte && data.iso > dataAte) return false;
+            return true;
+        });
+}
+
+function renderizarAnalises() {
+    const secao = document.getElementById('view-analises');
+    if (!secao) return;
+
+    // Opções dos filtros a partir de todas as fichas
+    const todas = appState.fichas || [];
+    preencherOpcoesFiltroAnalise(
+        document.getElementById('analises-filtro-motorista'),
+        Array.from(new Set(todas.map(f => (f.motorista || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+        'Todos'
+    );
+    preencherOpcoesFiltroAnalise(
+        document.getElementById('analises-filtro-placa'),
+        Array.from(new Set(todas.map(f => (f.placas || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'pt-BR')),
+        'Todas'
+    );
+
+    const lista = obterFichasFiltradasAnalise();
+    const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+
+    const elInfo = document.getElementById('analises-info-registros');
+    if (elInfo) elInfo.textContent = `${lista.length} ficha(s) analisada(s)`;
+    const elMeta = document.getElementById('analises-meta-diesel');
+    if (elMeta) elMeta.textContent = formatarNumeroBR(meta, 2);
+
+    const moeda = (n) => formatarMoeda(n);
+    const kmTxt = (n) => `${formatarNumeroBR(n, 0)} km`;
+    const kmlTxt = (n) => `${formatarNumeroBR(n, 2)} km/l`;
+
+    // ---------------- 1. Cards de resumo ----------------
+    const total = somarValoresAnalise(lista);
+    const mediaGeral = dividirOuNulo(total.km, total.litros);
+    const elResumo = document.getElementById('analises-resumo');
+    if (elResumo) {
+        const cards = [
+            { classe: 'card-frota-kpi', rotulo: 'Fichas', valor: formatarNumeroBR(total.fichas, 0) },
+            { classe: 'card-frota-kpi', rotulo: 'KM rodados', valor: lista.length ? kmTxt(total.km) : '—' },
+            { classe: 'card-entrada', rotulo: 'Frete total', valor: moeda(total.frete) },
+            { classe: 'card-saida', rotulo: 'Comissão total', valor: moeda(total.comissao) },
+            { classe: 'card-saida', rotulo: 'Despesas totais', valor: moeda(total.despesas), nota: 'Diesel + pedágio + imposto + outras' },
+            { classe: 'card-resultado', rotulo: 'Resultado', valor: moeda(total.resultado), nota: 'Frete − despesas − comissão' },
+            { classe: 'card-frota-kpi', rotulo: 'Média km/l', valor: textoOuTraco(mediaGeral, kmlTxt), nota: `Meta: ${formatarNumeroBR(meta, 2)} km/l` }
+        ];
+        elResumo.innerHTML = cards.map(c => `
+            <div class="kpi-card ${c.classe}">
+                <span class="kpi-label">${c.rotulo}</span>
+                <h3 class="kpi-value">${c.valor}</h3>
+                ${c.nota ? `<span class="kpi-meta-text">${c.nota}</span>` : ''}
+            </div>
+        `).join('');
+    }
+
+    // ---------------- 2. Por motorista ----------------
+    const porMotorista = {};
+    lista.forEach(item => {
+        const nome = (item.ficha.motorista || '').trim() || 'Motorista não identificado';
+        (porMotorista[nome] = porMotorista[nome] || []).push(item);
+    });
+    const motoristas = Object.keys(porMotorista)
+        .map(nome => ({ nome, t: somarValoresAnalise(porMotorista[nome]) }))
+        .sort((a, b) => b.t.frete - a.t.frete);
+
+    const elTabMot = document.getElementById('analises-tabela-motoristas');
+    if (elTabMot) {
+        elTabMot.innerHTML = montarTabelaAnalise([
+            { texto: 'Motorista' }, { texto: 'Fichas', num: true }, { texto: 'KM', num: true },
+            { texto: 'Frete', num: true }, { texto: 'Comissão', num: true }, { texto: 'Diesel', num: true },
+            { texto: 'Pedágio', num: true }, { texto: 'Imp. Federal', num: true }, { texto: 'Outras desp.', num: true },
+            { texto: 'Média km/l', num: true },
+            { texto: 'Custo/km', num: true, title: '(Despesas + comissão) ÷ KM rodados' }
+        ], motoristas.map(({ nome, t }) => {
+            const media = dividirOuNulo(t.km, t.litros);
+            const custoKm = dividirOuNulo(t.despesas + t.comissao, t.km);
+            return `
+                <tr>
+                    <td><strong>${escaparHtml(nome)}</strong></td>
+                    <td class="td-num">${t.fichas}</td>
+                    <td class="td-num">${t.km > 0 ? kmTxt(t.km) : '—'}</td>
+                    <td class="td-num">${moeda(t.frete)}</td>
+                    <td class="td-num">${moeda(t.comissao)}</td>
+                    <td class="td-num">${moeda(t.diesel)}</td>
+                    <td class="td-num">${moeda(t.pedagio)}</td>
+                    <td class="td-num">${moeda(t.imposto)}</td>
+                    <td class="td-num">${moeda(t.outras)}</td>
+                    <td class="td-num">${media !== null ? `<span class="diesel-badge ${classeConsumoDiesel(media)}">${kmlTxt(media)}</span>` : '—'}</td>
+                    <td class="td-num">${textoOuTraco(custoKm, n => `R$ ${formatarNumeroBR(n, 2)}`)}</td>
+                </tr>
+            `;
+        }));
+    }
+
+    renderizarGraficoAnalise('motoristas', 'chart-analises-motoristas', 'analises-box-chart-motoristas', {
+        type: 'bar',
+        data: {
+            labels: motoristas.map(m => m.nome),
+            datasets: [
+                { label: 'Frete', data: motoristas.map(m => m.t.frete), backgroundColor: '#10b981', borderRadius: 6 },
+                { label: 'Comissão', data: motoristas.map(m => m.t.comissao), backgroundColor: '#8b5cf6', borderRadius: 6 },
+                { label: 'Despesas', data: motoristas.map(m => m.t.despesas), backgroundColor: '#ef4444', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
+                tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatarMoeda(ctx.parsed.y)}` } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: (val) => `R$ ${formatarNumeroBR(val, 0)}` } }
+            }
+        }
+    }, motoristas.length > 0);
+
+    // ---------------- 3. Por placa / veículo ----------------
+    const porPlaca = {};
+    lista.forEach(item => {
+        const placa = (item.ficha.placas || '').trim() || 'Placa não informada';
+        (porPlaca[placa] = porPlaca[placa] || []).push(item);
+    });
+    const placas = Object.keys(porPlaca)
+        .map(placa => ({ placa, t: somarValoresAnalise(porPlaca[placa]) }))
+        .sort((a, b) => b.t.km - a.t.km);
+
+    const elTabPlaca = document.getElementById('analises-tabela-placas');
+    if (elTabPlaca) {
+        elTabPlaca.innerHTML = montarTabelaAnalise([
+            { texto: 'Placa' }, { texto: 'Fichas', num: true }, { texto: 'KM', num: true }, { texto: 'Litros', num: true },
+            { texto: 'Média km/l', num: true }, { texto: 'vs. Meta', num: true }, { texto: 'Diesel', num: true },
+            { texto: 'Diesel/km', num: true }
+        ], placas.map(({ placa, t }) => {
+            const media = dividirOuNulo(t.km, t.litros);
+            const dieselKm = dividirOuNulo(t.diesel, t.km);
+            let vsMeta = '—';
+            if (media !== null && meta > 0) {
+                const dif = media - meta;
+                const pct = (dif / meta) * 100;
+                vsMeta = `<span class="diesel-badge ${classeConsumoDiesel(media)}">${dif >= 0 ? '+' : ''}${formatarNumeroBR(pct, 1)}%</span>`;
+            }
+            return `
+                <tr>
+                    <td><span class="placa-box">${escaparHtml(placa)}</span></td>
+                    <td class="td-num">${t.fichas}</td>
+                    <td class="td-num">${t.km > 0 ? kmTxt(t.km) : '—'}</td>
+                    <td class="td-num">${t.litros > 0 ? `${formatarNumeroBR(t.litros, 2)} L` : '—'}</td>
+                    <td class="td-num">${textoOuTraco(media, kmlTxt)}</td>
+                    <td class="td-num">${vsMeta}</td>
+                    <td class="td-num">${moeda(t.diesel)}</td>
+                    <td class="td-num">${textoOuTraco(dieselKm, n => `R$ ${formatarNumeroBR(n, 2)}`)}</td>
+                </tr>
+            `;
+        }));
+    }
+
+    // ---------------- 4. Por operação (Relação de Fretes) ----------------
+    const porOperacao = {};
+    lista.forEach(({ ficha }) => {
+        (Array.isArray(ficha.fretes) ? ficha.fretes : []).forEach(fr => {
+            if (!fr) return;
+            const nome = formatarNomeCliente(fr.cliente);
+            const o = porOperacao[nome] = porOperacao[nome] || { fretes: 0, valor: 0, comissao: 0 };
+            o.fretes += 1;
+            o.valor += parseValorMoeda(fr.valor);
+            o.comissao += parseValorMoeda(fr.comissao);
+        });
+    });
+    const operacoes = Object.keys(porOperacao).map(nome => ({ nome, ...porOperacao[nome] })).sort((a, b) => b.valor - a.valor);
+    const elTabOper = document.getElementById('analises-tabela-operacoes');
+    if (elTabOper) {
+        elTabOper.innerHTML = montarTabelaAnalise([
+            { texto: 'Operação' }, { texto: 'Fretes', num: true }, { texto: 'Valor de frete', num: true },
+            { texto: 'Comissão', num: true }, { texto: 'Ticket médio', num: true }
+        ], operacoes.map(o => `
+            <tr>
+                <td><strong>${escaparHtml(o.nome)}</strong></td>
+                <td class="td-num">${o.fretes}</td>
+                <td class="td-num">${moeda(o.valor)}</td>
+                <td class="td-num">${moeda(o.comissao)}</td>
+                <td class="td-num">${textoOuTraco(dividirOuNulo(o.valor, o.fretes), moeda)}</td>
+            </tr>
+        `), 'Nenhum frete na Relação de Fretes das fichas filtradas.');
+    }
+
+    // ---------------- 5. Evolução mensal ----------------
+    const porMes = {};
+    let semData = 0;
+    lista.forEach(({ data, v }) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(data.iso) || data.iso === '0000-00-00') { semData += 1; return; }
+        const mes = data.iso.slice(0, 7);
+        const m = porMes[mes] = porMes[mes] || { frete: 0, despesas: 0, resultado: 0 };
+        m.frete += v.frete;
+        m.despesas += v.despesas;
+        m.resultado += v.resultado;
+    });
+    const meses = Object.keys(porMes).sort();
+    renderizarGraficoAnalise('mensal', 'chart-analises-mensal', 'analises-box-chart-mensal', {
+        type: 'line',
+        data: {
+            labels: meses.map(m => `${MESES_ABREV[parseInt(m.slice(5, 7), 10) - 1] || m.slice(5, 7)}/${m.slice(0, 4)}`),
+            datasets: [
+                { label: 'Frete', data: meses.map(m => porMes[m].frete), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.12)', tension: 0.3, pointRadius: 4 },
+                { label: 'Despesas', data: meses.map(m => porMes[m].despesas), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.12)', tension: 0.3, pointRadius: 4 },
+                { label: 'Resultado', data: meses.map(m => porMes[m].resultado), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.12)', tension: 0.3, pointRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
+                tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatarMoeda(ctx.parsed.y)}` } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { callback: (val) => `R$ ${formatarNumeroBR(val, 0)}` } }
+            }
+        }
+    }, meses.length > 0);
+    const elNotaMensal = document.getElementById('analises-nota-mensal');
+    if (elNotaMensal) {
+        elNotaMensal.textContent = meses.length === 0
+            ? 'Sem dados com data de saída para os filtros selecionados.'
+            : (semData > 0 ? `${semData} ficha(s) sem data de saída não entram no gráfico.` : '');
+    }
+
+    // ---------------- 6. Composição das despesas ----------------
+    const composicao = [
+        { nome: 'Diesel', valor: total.diesel, cor: '#f97316' },
+        { nome: 'Pedágio', valor: total.pedagio, cor: '#eab308' },
+        { nome: 'Imposto federal', valor: total.imposto, cor: '#3d3d90' },
+        { nome: 'Outras despesas', valor: total.outras, cor: '#94a3b8' }
+    ];
+    renderizarGraficoAnalise('despesas', 'chart-analises-despesas', 'analises-box-chart-despesas', {
+        type: 'doughnut',
+        data: {
+            labels: composicao.map(c => c.nome),
+            datasets: [{ data: composicao.map(c => c.valor), backgroundColor: composicao.map(c => c.cor), borderWidth: 3, borderColor: '#ffffff', hoverOffset: 6 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11, weight: '500' } } },
+                tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${formatarMoeda(ctx.parsed)}` } }
+            }
+        }
+    }, total.despesas > 0);
+    const elTabDesp = document.getElementById('analises-tabela-despesas');
+    if (elTabDesp) {
+        elTabDesp.innerHTML = total.despesas > 0
+            ? montarTabelaAnalise([{ texto: 'Despesa' }, { texto: 'Valor', num: true }, { texto: '% do total', num: true }],
+                composicao.map(c => `
+                    <tr>
+                        <td><strong>${c.nome}</strong></td>
+                        <td class="td-num">${moeda(c.valor)}</td>
+                        <td class="td-num">${formatarNumeroBR((c.valor / total.despesas) * 100, 1)}%</td>
+                    </tr>
+                `))
+            : '<div class="analises-vazio">Nenhuma despesa lançada nas fichas filtradas.</div>';
+    }
+
+    // ---------------- 7. Ranking de rotas ----------------
+    const porRota = {};
+    const registrarRota = (origem, destino, valor) => {
+        const o = String(origem || '').trim();
+        const d = String(destino || '').trim();
+        if (!o && !d) return;
+        const chave = `${normalizarNomePessoa(o)}→${normalizarNomePessoa(d)}`;
+        const r = porRota[chave] = porRota[chave] || { origem: o || '—', destino: d || '—', vezes: 0, valor: 0 };
+        r.vezes += 1;
+        r.valor += valor;
+    };
+    lista.forEach(({ ficha, v }) => {
+        const fretes = Array.isArray(ficha.fretes) ? ficha.fretes.filter(Boolean) : [];
+        if (fretes.length > 0) {
+            fretes.forEach(fr => registrarRota(fr.origem, fr.destino, parseValorMoeda(fr.valor)));
+        } else {
+            // Ficha sem Relação de Fretes: usa o trajeto da própria ficha
+            registrarRota(ficha.destinoInicial, ficha.destinoFinal, v.frete);
+        }
+    });
+    const rotas = Object.values(porRota).sort((a, b) => (b.vezes - a.vezes) || (b.valor - a.valor)).slice(0, 10);
+    const elTabRotas = document.getElementById('analises-tabela-rotas');
+    if (elTabRotas) {
+        elTabRotas.innerHTML = montarTabelaAnalise([
+            { texto: '#', num: true }, { texto: 'Origem → Destino' }, { texto: 'Viagens', num: true }, { texto: 'Frete', num: true }
+        ], rotas.map((r, i) => `
+            <tr>
+                <td class="td-num">${i + 1}</td>
+                <td><strong>${escaparHtml(r.origem)}</strong> → <strong>${escaparHtml(r.destino)}</strong></td>
+                <td class="td-num">${r.vezes}</td>
+                <td class="td-num">${moeda(r.valor)}</td>
+            </tr>
+        `), 'Nenhuma rota informada nas fichas filtradas.');
+    }
+
+    // ---------------- 8. Abastecimentos por posto ----------------
+    const porPosto = {};
+    lista.forEach(({ ficha }) => {
+        (Array.isArray(ficha.abastecimentos) ? ficha.abastecimentos : []).forEach(ab => {
+            if (!ab) return;
+            const nome = String(ab.posto || '').trim() || 'Posto não informado';
+            const chave = normalizarNomePessoa(nome);
+            const p = porPosto[chave] = porPosto[chave] || { nome, abastecimentos: 0, litros: 0, valor: 0 };
+            p.abastecimentos += 1;
+            p.litros += parseValorMoeda(ab.litros);
+            p.valor += parseValorMoeda(ab.valor || ab.total);
+        });
+    });
+    const postos = Object.values(porPosto).sort((a, b) => b.valor - a.valor);
+    const elTabPostos = document.getElementById('analises-tabela-postos');
+    if (elTabPostos) {
+        elTabPostos.innerHTML = montarTabelaAnalise([
+            { texto: 'Posto' }, { texto: 'Abast.', num: true }, { texto: 'Litros', num: true },
+            { texto: 'Valor', num: true }, { texto: 'Preço médio/L', num: true }
+        ], postos.map(p => `
+            <tr>
+                <td><strong>${escaparHtml(p.nome)}</strong></td>
+                <td class="td-num">${p.abastecimentos}</td>
+                <td class="td-num">${p.litros > 0 ? `${formatarNumeroBR(p.litros, 2)} L` : '—'}</td>
+                <td class="td-num">${moeda(p.valor)}</td>
+                <td class="td-num">${textoOuTraco(dividirOuNulo(p.valor, p.litros), n => `R$ ${formatarNumeroBR(n, 3)}`)}</td>
+            </tr>
+        `), 'Nenhum abastecimento nas fichas filtradas.');
+    }
+}
+
+// Só recalcula quando a aba está aberta (evita desenhar gráficos em área oculta)
+function renderizarAnalisesSeVisivel() {
+    const secao = document.getElementById('view-analises');
+    if (secao && secao.classList.contains('active')) renderizarAnalises();
+}
+
+// ==========================================================================
 // 8. CONTROLE DE NAVEGAÇÃO DE SEÇÕES (SIDEBAR TABS)
 // ==========================================================================
 
@@ -2147,6 +2631,9 @@ function alternarSecao(viewId) {
         const id = sec.id.replace('view-', '');
         sec.classList.toggle('active', id === viewId);
     });
+
+    // Gráficos da aba Análises são desenhados quando a aba fica visível
+    if (viewId === 'analises') renderizarAnalises();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2451,6 +2938,13 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
     // 6.2 Filtro de motorista cadastrado na aba Gestão de Frota
     const selectFrotaMotorista = document.getElementById('filtro-frota-motorista');
     if (selectFrotaMotorista) selectFrotaMotorista.addEventListener('change', renderizarTabelaFrota);
+
+    // 6.3 Filtros da aba Análises
+    ['analises-data-de', 'analises-data-ate', 'analises-filtro-motorista', 'analises-filtro-placa', 'analises-filtro-status']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', renderizarAnalises);
+        });
 
     // 7. Busca global em tempo real
     const inputBusca = document.getElementById('global-search-input');

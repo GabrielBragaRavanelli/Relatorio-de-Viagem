@@ -81,6 +81,23 @@
                         </a>
                     </li>
 
+                    <!-- 1.1 Análises (Tabelas, Comparações e Gráficos) -->
+                    <li class="nav-item">
+                        <a href="#analises" class="nav-link" data-view="analises" id="nav-link-analises">
+                            <span class="nav-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                    <line x1="3" y1="20" x2="21" y2="20"></line>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Análises</span>
+                        </a>
+                    </li>
+
                     <!-- 2. Viagens -->
                     <li class="nav-item">
                         <a href="#viagens" class="nav-link" data-view="viagens" id="nav-link-viagens">
@@ -743,6 +760,143 @@
                 <!-- ================================================================
                      SEÇÕES SECUNDÁRIAS (INTEGRALMENTE NAVEGÁVEIS PELO MENU LATERAL)
                      ================================================================ -->
+
+                <!-- SEÇÃO 1.1: ANÁLISES (TABELAS, COMPARAÇÕES E GRÁFICOS DAS FICHAS) -->
+                <section class="admin-section" id="view-analises">
+                    <div class="section-page-header">
+                        <h2>📊 Análises da Operação</h2>
+                        <p>Comparações por motorista, veículo, operação, mês, rota e posto, calculadas a partir das fichas de viagem.</p>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="tabela-toolbar" style="margin-bottom: 20px;">
+                        <div class="toolbar-left toolbar-filtros-linha">
+                            <div class="filtro-cliente-wrapper">
+                                <label for="analises-data-de">Saída de:</label>
+                                <input type="date" id="analises-data-de" class="input-filtro-custom">
+                            </div>
+                            <div class="filtro-cliente-wrapper">
+                                <label for="analises-data-ate">até:</label>
+                                <input type="date" id="analises-data-ate" class="input-filtro-custom">
+                            </div>
+                            <div class="filtro-cliente-wrapper">
+                                <label for="analises-filtro-motorista">Motorista:</label>
+                                <select id="analises-filtro-motorista" class="select-filtro-custom">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="filtro-cliente-wrapper">
+                                <label for="analises-filtro-placa">Placa:</label>
+                                <select id="analises-filtro-placa" class="select-filtro-custom">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div class="filtro-cliente-wrapper">
+                                <label for="analises-filtro-status">Status:</label>
+                                <select id="analises-filtro-status" class="select-filtro-custom">
+                                    <option value="aprovado" selected>Só aprovadas</option>
+                                    <option value="todas">Todas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="tabela-info-registros" id="analises-info-registros">0 ficha(s) analisada(s)</span>
+                        </div>
+                    </div>
+
+                    <!-- Cards de resumo -->
+                    <div class="kpi-grid analises-kpi-grid" id="analises-resumo"></div>
+
+                    <!-- Por motorista -->
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-card-header">
+                            <div>
+                                <h3 class="chart-card-title">Desempenho por Motorista</h3>
+                                <p class="chart-card-subtitle">Frete, comissão e despesas de cada motorista no período filtrado</p>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container" id="analises-box-chart-motoristas">
+                            <canvas id="chart-analises-motoristas"></canvas>
+                        </div>
+                        <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-motoristas"></div>
+                    </div>
+
+                    <!-- Evolução mensal -->
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-card-header">
+                            <div>
+                                <h3 class="chart-card-title">Evolução Mensal</h3>
+                                <p class="chart-card-subtitle">Frete, despesas e resultado por mês de saída da viagem</p>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container" id="analises-box-chart-mensal">
+                            <canvas id="chart-analises-mensal"></canvas>
+                        </div>
+                        <p class="analises-nota" id="analises-nota-mensal"></p>
+                    </div>
+
+                    <!-- Por placa / veículo -->
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-card-header">
+                            <div>
+                                <h3 class="chart-card-title">Por Placa / Veículo</h3>
+                                <p class="chart-card-subtitle">Consumo comparado com a meta de diesel configurada (<strong id="analises-meta-diesel">2,40</strong> km/l)</p>
+                            </div>
+                        </div>
+                        <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-placas"></div>
+                    </div>
+
+                    <div class="analises-grid-2">
+                        <!-- Por operação -->
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Por Operação</h3>
+                                    <p class="chart-card-subtitle">A partir da Relação de Fretes de cada ficha</p>
+                                </div>
+                            </div>
+                            <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-operacoes"></div>
+                        </div>
+
+                        <!-- Composição das despesas -->
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Composição das Despesas</h3>
+                                    <p class="chart-card-subtitle">Diesel, pedágio, imposto federal e outras despesas</p>
+                                </div>
+                            </div>
+                            <div class="chart-canvas-container donut-container" id="analises-box-chart-despesas">
+                                <canvas id="chart-analises-despesas"></canvas>
+                            </div>
+                            <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-despesas"></div>
+                        </div>
+                    </div>
+
+                    <div class="analises-grid-2">
+                        <!-- Ranking de rotas -->
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Rotas Mais Frequentes</h3>
+                                    <p class="chart-card-subtitle">Origem → destino (10 mais frequentes)</p>
+                                </div>
+                            </div>
+                            <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-rotas"></div>
+                        </div>
+
+                        <!-- Abastecimentos por posto -->
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Abastecimentos por Posto</h3>
+                                    <p class="chart-card-subtitle">Litros, valor e preço médio por litro</p>
+                                </div>
+                            </div>
+                            <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-postos"></div>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- SEÇÃO 2: VIAGENS -->
                 <section class="admin-section" id="view-viagens">
