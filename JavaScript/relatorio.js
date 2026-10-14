@@ -3921,12 +3921,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             });
         }
 
-        // Modal Com Login - Novo Envio
+        // Modal Com Login - Voltar à página principal
         const btnNovoEnvioComLogin = document.getElementById('btn-novo-envio-com-login');
         if (btnNovoEnvioComLogin) {
             btnNovoEnvioComLogin.addEventListener('click', () => {
                 localStorage.removeItem(STORAGE_ML_KEY);
-                window.location.href = 'relatorio-viagem.html?novo=true';
+                window.location.href = 'index.html';
             });
         }
 
@@ -3935,9 +3935,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // =========================================================================
         const btnFinalizarRelatorioMl = document.getElementById('btn-finalizar-relatorio-ml');
         if (btnFinalizarRelatorioMl) {
-            btnFinalizarRelatorioMl.addEventListener('click', async (e) => {
-                e.preventDefault();
-
+            const processarEnvioRelatorioMl = async () => {
                 // Recupera usuário ativo e modo
                 const usuarioAtivoStr = localStorage.getItem(STORAGE_USER_ACTIVE);
                 let usuarioAtivo = null;
@@ -4181,12 +4179,95 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                     exibirToast(`Ficha ${novoIdFicha} vinculada ao seu cadastro e enviada com sucesso!`, 'sucesso');
                 }
+            };
+
+            // Mesmo critério de modo admin usado em processarEnvioRelatorioMl
+            const ehModoAdminFichaMl = () => {
+                let usuarioAtivo = null;
+                try { usuarioAtivo = JSON.parse(localStorage.getItem(STORAGE_USER_ACTIVE) || 'null'); } catch (e) { }
+                const modeUrl = new URLSearchParams(window.location.search).get('mode');
+                return (modeUrl === 'admin') || !!(usuarioAtivo && (usuarioAtivo.role === 'admin' || usuarioAtivo.role === 'diretoria') && modeUrl !== 'motorista');
+            };
+
+            // Modal de revisão antes do envio (somente modo motorista)
+            const modalRevisarEnvio = document.getElementById('modal-revisar-envio');
+            const btnRevisarVoltar = document.getElementById('btn-revisar-voltar');
+            const btnRevisarConfirmar = document.getElementById('btn-revisar-confirmar');
+
+            const modalRevisarAberto = () => !!(modalRevisarEnvio && modalRevisarEnvio.classList.contains('ativo'));
+
+            const abrirModalRevisarEnvio = () => {
+                const qtdOutrasDespesas = inputsOutrasDespesasValorMl
+                    .filter(input => input && parseMoeda(input.value || '') > 0).length;
+                const definirTexto = (id, valor) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = String(valor);
+                };
+                definirTexto('revisar-qtd-abastecimentos', coletarAbastecimentosAtuais().length);
+                definirTexto('revisar-qtd-fretes', coletarFretesAtuais().length);
+                definirTexto('revisar-qtd-outras-despesas', qtdOutrasDespesas);
+                definirTexto('revisar-qtd-comprovantes', (arquivosComprovantesMl || []).length);
+
+                modalRevisarEnvio.classList.add('ativo');
+                modalRevisarEnvio.setAttribute('aria-hidden', 'false');
+                if (btnRevisarVoltar) btnRevisarVoltar.focus();
+            };
+
+            const fecharModalRevisarEnvio = () => {
+                modalRevisarEnvio.classList.remove('ativo');
+                modalRevisarEnvio.setAttribute('aria-hidden', 'true');
+                btnFinalizarRelatorioMl.focus();
+            };
+
+            btnFinalizarRelatorioMl.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (btnFinalizarRelatorioMl.disabled) return;
+
+                if (ehModoAdminFichaMl() || !modalRevisarEnvio) {
+                    processarEnvioRelatorioMl();
+                    return;
+                }
+                abrirModalRevisarEnvio();
             });
+
+            if (modalRevisarEnvio) {
+                if (btnRevisarVoltar) btnRevisarVoltar.addEventListener('click', fecharModalRevisarEnvio);
+
+                if (btnRevisarConfirmar) {
+                    btnRevisarConfirmar.addEventListener('click', () => {
+                        modalRevisarEnvio.classList.remove('ativo');
+                        modalRevisarEnvio.setAttribute('aria-hidden', 'true');
+                        processarEnvioRelatorioMl();
+                    });
+                }
+
+                // Clique fora do card = voltar para a ficha
+                modalRevisarEnvio.addEventListener('click', (e) => {
+                    if (e.target === modalRevisarEnvio) fecharModalRevisarEnvio();
+                });
+
+                // Esc = voltar para a ficha
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && modalRevisarAberto()) {
+                        e.preventDefault();
+                        fecharModalRevisarEnvio();
+                    }
+                });
+            }
         }
 
         // Salvar progresso ao digitar nos campos e prevenir submit padrão
         if (form) {
             form.addEventListener('submit', (e) => {
+                e.preventDefault();
+            });
+
+            // Enter nunca envia a ficha (em <textarea> continua quebrando linha;
+            // em botões continua acionando o próprio botão)
+            form.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' || e.isComposing) return;
+                const alvo = e.target;
+                if (!alvo || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'BUTTON' || alvo.tagName === 'A') return;
                 e.preventDefault();
             });
             form.addEventListener('input', () => {

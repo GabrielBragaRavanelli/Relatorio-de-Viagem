@@ -2480,7 +2480,7 @@
 
                                 <!-- 6. BLOCO: AÇÕES DO FORMULÁRIO -->
                                 <div class="bloco-acoes-relatorio">
-                                    <button type="submit" id="btn-finalizar-relatorio-ml" class="btn-acao-primario">
+                                    <button type="button" id="btn-finalizar-relatorio-ml" class="btn-acao-primario">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                             stroke-linejoin="round">
@@ -2503,6 +2503,53 @@
             <span class="toast-mensagem"></span>
         </div>
     </main>
+
+    <!-- ====================================================================
+         MODAL 0: REVISÃO ANTES DO ENVIO - MOTORISTA
+         ==================================================================== -->
+    <div class="modal-overlay-custom" id="modal-revisar-envio" aria-hidden="true" role="dialog"
+        aria-modal="true" aria-labelledby="modal-revisar-envio-titulo">
+        <div class="modal-card-custom">
+            <div style="font-size: 3rem; margin-bottom: 12px;">📝</div>
+            <h2 id="modal-revisar-envio-titulo"
+                style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: #1e293b; margin-bottom: 6px;">
+                Revise antes de enviar
+            </h2>
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 16px;">
+                Confira se todos os dados da ficha estão corretos antes de enviá-la para a
+                <strong>Gestão AJBorges</strong>.
+            </p>
+
+            <div
+                style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: left; font-size: 0.85rem; color: #334155;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Abastecimentos:</span>
+                    <strong id="revisar-qtd-abastecimentos">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Fretes:</span>
+                    <strong id="revisar-qtd-fretes">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span>Outras despesas:</span>
+                    <strong id="revisar-qtd-outras-despesas">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Comprovantes anexados:</span>
+                    <strong id="revisar-qtd-comprovantes">0</strong>
+                </div>
+            </div>
+
+            <div class="modal-acoes-row">
+                <button type="button" class="modal-btn-acao-secundario" id="btn-revisar-voltar">
+                    Voltar para a ficha
+                </button>
+                <button type="button" class="modal-btn-acao-primario" id="btn-revisar-confirmar">
+                    Confirmar e enviar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- ====================================================================
          MODAL 1: CONFIRMAÇÃO DE ENVIO - MOTORISTA SEM LOGIN
@@ -2578,7 +2625,7 @@
 
             <div class="modal-acoes-row" style="width: 100%; display: flex; justify-content: center;">
                 <button type="button" class="modal-btn-acao-primario" id="btn-novo-envio-com-login" style="width: 100%; justify-content: center; text-align: center;">
-                    Preencher Novo Relatório
+                    Voltar à página principal
                 </button>
             </div>
         </div>
