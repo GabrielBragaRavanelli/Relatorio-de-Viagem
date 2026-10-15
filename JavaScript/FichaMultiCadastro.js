@@ -137,12 +137,26 @@ document.addEventListener('DOMContentLoaded', () => {
     applyMask(document.getElementById('pj-telefone-empresa'), maskPhone);
     bloquearNumeros(document.getElementById('pj-responsavel'));
 
+    // Mesma checagem para "Choose Files" e para arrastar e soltar
+    function conferirArquivos(files) {
+        const lista = Array.from(files || []);
+        if (lista.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} arquivos por documento.`;
+        for (const f of lista) {
+            if (!TIPOS_ARQUIVO.includes(f.type)) return `O arquivo "${f.name}" não é PDF, JPG ou PNG.`;
+            if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
+        }
+        return null;
+    }
+
+    // Busca o input e a prévia dentro da própria zona: funciona também com
+    // cartões criados pelo JS que ainda não entraram na página (CRLVs).
     function ligarDropzone(zone) {
-        const inputId = zone.getAttribute('data-target');
-        const input = document.getElementById(inputId);
-        const previewList = document.getElementById(`preview-${inputId}`);
+        if (!zone || zone.dataset.ligada === '1') return;
+        const input = zone.querySelector('input[type="file"]');
+        const previewList = zone.querySelector('.file-preview-list');
 
         if (!input) return;
+        zone.dataset.ligada = '1';
 
         zone.addEventListener('click', (e) => {
             if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
@@ -162,28 +176,51 @@ document.addEventListener('DOMContentLoaded', () => {
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
             zone.classList.remove('dragover');
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                input.files = e.dataTransfer.files;
-                renderFileList(input.files, previewList);
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            const arquivos = e.dataTransfer && e.dataTransfer.files;
+            if (!arquivos || arquivos.length === 0) return;
+            const problema = conferirArquivos(arquivos);
+            if (problema) return alert(problema);
+            input.files = arquivos;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
         input.addEventListener('change', () => {
-            renderFileList(input.files, previewList);
+            const problema = conferirArquivos(input.files);
+            if (problema) {
+                alert(problema);
+                input.value = '';
+            }
+            renderFileList(input, previewList);
         });
     }
 
-    document.querySelectorAll('.upload-dropzone').forEach(ligarDropzone);
+    document.querySelectorAll('.upload-dropzone').forEach((zone) => ligarDropzone(zone));
 
-    function renderFileList(files, container) {
+    // Arquivo solto fora de uma zona não abre no navegador
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => e.preventDefault());
+
+    function renderFileList(input, container) {
         if (!container) return;
         container.innerHTML = '';
-        Array.from(files).forEach(file => {
+        Array.from(input.files || []).forEach((file, i) => {
             const item = document.createElement('span');
             item.className = 'file-preview-item';
             const sizeKb = (file.size / 1024).toFixed(0);
             item.textContent = `${file.name} (${sizeKb} KB)`;
+            const remover = document.createElement('button');
+            remover.type = 'button';
+            remover.className = 'file-preview-remover';
+            remover.setAttribute('aria-label', `Remover ${file.name}`);
+            remover.textContent = '×';
+            remover.addEventListener('click', (e) => {
+                e.stopPropagation(); // não abre o seletor de arquivos da zona
+                const restantes = new DataTransfer();
+                Array.from(input.files).forEach((f, j) => { if (j !== i) restantes.items.add(f); });
+                input.files = restantes.files;
+                renderFileList(input, container);
+            });
+            item.appendChild(remover);
             container.appendChild(item);
         });
     }

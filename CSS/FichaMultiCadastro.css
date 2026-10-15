@@ -773,6 +773,20 @@ select {
     gap: 6px;
 }
 
+.file-preview-remover {
+    background: none;
+    border: none;
+    padding: 0 2px;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--azul-ajborges-escuro);
+    cursor: pointer;
+}
+
+.file-preview-remover:hover {
+    color: #b91c1c;
+}
+
 .form-submit-row {
     margin: 32px 0 44px 0;
     display: flex;
