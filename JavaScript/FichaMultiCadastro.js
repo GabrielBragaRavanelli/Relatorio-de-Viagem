@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyMask(document.getElementById(`${p}-cpf`), maskCPF);
         applyMask(document.getElementById(`${p}-celular`), maskPhone);
         applyMask(document.getElementById(`${p}-mot-cep`), maskCEP);
+        applyMask(document.getElementById(`${p}-rntrc`), soDigitos(12));
         ['motorista-nome', 'motorista-sobrenome', 'mae'].forEach((s) => bloquearNumeros(document.getElementById(`${p}-${s}`)));
     });
     applyMask(document.getElementById('pj-cnpj'), maskCNPJ);
@@ -190,8 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     // CADASTRO NO SUPABASE (edge function "solicitar-cadastro")
     //
-    // Para cada documento (CNH, um CRLV por veículo da tipologia e comprovante
-    // de residência) o motorista ANEXA o arquivo ou marca "Não tenho o PDF" e
+    // Para cada documento (CNH, um CRLV por veículo da tipologia, RNTRC e
+    // comprovante de residência) o motorista ANEXA o arquivo ou marca "Não tenho o PDF" e
     // PREENCHE o formulário daquele documento. A conta nasce PENDENTE: o login
     // só funciona depois que a gestão aprovar.
     // =========================================================================
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const CAMPOS_EMPRESA = ['nome-empresa', 'cnpj', 'telefone-empresa', 'responsavel'];
     const CAMPOS_CNH = ['nascimento', 'rg', 'rg-uf', 'cidade-nasc', 'mae', 'cnh-registro', 'cnh-emissao',
         'cnh-primeira', 'cnh-uf', 'cnh-validade', 'cnh-categoria', 'cnh-seguranca'];
+    const CAMPOS_RNTRC = ['rntrc', 'val-rntrc'];
     const CAMPOS_RESIDENCIA = ['mot-endereco', 'mot-cidade', 'mot-estado', 'mot-cep'];
     const UFS = ['Acre (AC)', 'Alagoas (AL)', 'Amapá (AP)', 'Amazonas (AM)', 'Bahia (BA)', 'Ceará (CE)',
         'Distrito Federal (DF)', 'Espírito Santo (ES)', 'Goiás (GO)', 'Maranhão (MA)', 'Mato Grosso (MT)',
@@ -253,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ...papeisDe(prefixo).map((papel, i) => ({
                 doc: `crlv_${i + 1}`, titulo: nomeCrlv(papel), obrigatorio: true, campos: camposCrlv(i + 1)
             })),
+            { doc: 'rntrc', titulo: 'RNTRC', obrigatorio: true, campos: CAMPOS_RNTRC },
             { doc: 'residencia', titulo: 'Comprovante de residência', obrigatorio: false, campos: CAMPOS_RESIDENCIA }
         ];
     }

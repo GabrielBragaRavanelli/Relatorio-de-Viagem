@@ -367,6 +367,49 @@
 
                     <div class="lista-crlv" id="pj-crlvs"></div>
 
+                    <div class="cartao-doc" data-doc="rntrc">
+                        <div class="cartao-doc-topo">
+                            <h4 class="cartao-doc-titulo">RNTRC (ANTT)</h4>
+                            <span class="etiqueta-doc etiqueta-obrigatorio">Obrigatório</span>
+                        </div>
+                        <div class="cartao-doc-anexo">
+                            <div class="upload-dropzone" data-target="pj-anexo-rntrc">
+                                <div class="upload-inner-card">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                        stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-rntrc"
+                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <input type="file" id="pj-anexo-rntrc" class="file-input-hidden" multiple
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="file-preview-list" id="preview-pj-anexo-rntrc"></div>
+                            </div>
+                        </div>
+                        <label class="caixa-sem-pdf">
+                            <input type="checkbox" id="pj-sem-pdf-rntrc" data-doc="rntrc">
+                            <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do RNTRC</span>
+                        </label>
+                        <div class="cartao-doc-form" hidden>
+                            <div class="form-row col-2">
+                                <div class="form-group">
+                                    <label for="pj-rntrc">Nº do RNTRC: <span class="required-asterisk">*</span></label>
+                                    <input type="text" id="pj-rntrc" inputmode="numeric" pattern="[0-9]{8,12}"
+                                        title="Somente números, de 8 a 12 dígitos">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pj-val-rntrc">Validade (RNTRC): <span class="required-asterisk">*</span></label>
+                                    <input type="date" id="pj-val-rntrc">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="cartao-doc" data-doc="residencia">
                         <div class="cartao-doc-topo">
                             <h4 class="cartao-doc-titulo">Comprovante de Residência</h4>
@@ -726,6 +769,49 @@
                     </div>
 
                     <div class="lista-crlv" id="pf-crlvs"></div>
+
+                    <div class="cartao-doc" data-doc="rntrc">
+                        <div class="cartao-doc-topo">
+                            <h4 class="cartao-doc-titulo">RNTRC (ANTT)</h4>
+                            <span class="etiqueta-doc etiqueta-obrigatorio">Obrigatório</span>
+                        </div>
+                        <div class="cartao-doc-anexo">
+                            <div class="upload-dropzone" data-target="pf-anexo-rntrc">
+                                <div class="upload-inner-card">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                                        stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-rntrc"
+                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <input type="file" id="pf-anexo-rntrc" class="file-input-hidden" multiple
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="file-preview-list" id="preview-pf-anexo-rntrc"></div>
+                            </div>
+                        </div>
+                        <label class="caixa-sem-pdf">
+                            <input type="checkbox" id="pf-sem-pdf-rntrc" data-doc="rntrc">
+                            <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do RNTRC</span>
+                        </label>
+                        <div class="cartao-doc-form" hidden>
+                            <div class="form-row col-2">
+                                <div class="form-group">
+                                    <label for="pf-rntrc">Nº do RNTRC: <span class="required-asterisk">*</span></label>
+                                    <input type="text" id="pf-rntrc" inputmode="numeric" pattern="[0-9]{8,12}"
+                                        title="Somente números, de 8 a 12 dígitos">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pf-val-rntrc">Validade (RNTRC): <span class="required-asterisk">*</span></label>
+                                    <input type="date" id="pf-val-rntrc">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="cartao-doc" data-doc="residencia">
                         <div class="cartao-doc-topo">

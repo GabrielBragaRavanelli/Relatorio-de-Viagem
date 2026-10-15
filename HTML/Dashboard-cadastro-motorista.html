@@ -659,6 +659,7 @@
         const camposCrlvNovos = (n) => [['placa', 'Placa'], ['renavam', 'RENAVAM'], ['chassi', 'Chassi'], ['marca', 'Marca'],
             ['modelo', 'Modelo'], ['ano', 'Ano'], ['cor', 'Cor'], ['cidade-emp', 'Cidade de emplacamento'], ['uf', 'UF'],
             ['prop-nome', 'Proprietário'], ['prop-doc', 'CPF/CNPJ do proprietário']].map(([s, r]) => [`crlv${n}-${s}`, r]);
+        const CAMPOS_RNTRC_NOVOS = [['rntrc', 'RNTRC'], ['val-rntrc', 'Validade do RNTRC']];
         const CAMPOS_RESIDENCIA_NOVOS = SECOES[3][1];
 
         // [{ doc, titulo, campos, opcional }] na ordem do formulário
@@ -666,6 +667,7 @@
             return [
                 { doc: 'cnh', titulo: 'CNH', campos: CAMPOS_CNH_NOVOS },
                 ...(TIPOLOGIAS[d._tipologia] || []).map((papel, i) => ({ doc: `crlv_${i + 1}`, titulo: nomeCrlv(papel), campos: camposCrlvNovos(i + 1) })),
+                { doc: 'rntrc', titulo: 'RNTRC', campos: CAMPOS_RNTRC_NOVOS },
                 { doc: 'residencia', titulo: 'Comprovante de residência', campos: CAMPOS_RESIDENCIA_NOVOS, opcional: true }
             ];
         }
@@ -877,10 +879,15 @@
                         const temAnexo = docs.some((x) => x.campo === doc);
                         const preenchido = semPdf[doc] === true;
                         const vazio = opcional && !temAnexo && !(preenchido && campos.some(([k]) => d[k]));
+                        // Documento que não existia no formulário quando o cadastro foi feito (ex.: RNTRC)
+                        const naoEnviado = !opcional && !temAnexo && !Object.hasOwn(semPdf, doc);
                         const etiqueta = vazio ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado (opcional)</span>'
+                            : naoEnviado ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado</span>'
                             : preenchido ? '<span class="cad-etiqueta cad-etiqueta-preenchido">Preenchido pelo motorista</span>'
                             : '<span class="cad-etiqueta cad-etiqueta-anexo">Anexo</span>';
-                        const conteudo = preenchido
+                        const conteudo = naoEnviado
+                            ? `<div class="cad-vazio">Não enviado.</div>${grade(campos)}`
+                            : preenchido
                             ? grade(campos)
                             : (temAnexo ? `<div class="cad-docs" data-docs-de="${esc(doc)}">Carregando documentos...</div>`
                                 : `<div class="${vazio ? 'cad-vazio' : 'cad-doc cad-doc-faltando'}">${vazio ? 'Não enviado (opcional).' : 'Nenhum anexo recebido.'}</div>`);

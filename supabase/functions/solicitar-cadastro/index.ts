@@ -13,6 +13,7 @@
 // Regra "anexo OU formulário", por documento (caixa "Não tenho o PDF"):
 //   - CNH e cada CRLV (um por veículo da tipologia): sem_pdf false -> anexo
 //     obrigatório e sem campos; sem_pdf true -> campos obrigatórios e sem anexo
+//   - RNTRC (um por cadastro, do transportador): mesma regra da CNH
 //   - Comprovante de residência: sempre opcional (anexo OU campos)
 // =============================================================================
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -110,6 +111,7 @@ const CAMPOS_CRLV_SUFIXOS = [
   "placa", "renavam", "chassi", "marca", "modelo", "ano", "cor", "cidade-emp", "uf", "prop-nome", "prop-doc",
 ];
 const camposCrlv = (n: number) => CAMPOS_CRLV_SUFIXOS.map((s) => `crlv${n}-${s}`);
+const CAMPOS_RNTRC = ["rntrc", "val-rntrc"];
 const CAMPOS_RESIDENCIA = ["mot-endereco", "mot-cidade", "mot-estado", "mot-cep"];
 
 // Tipo de veículo -> veículos (um CRLV por veículo, na ordem)
@@ -142,6 +144,7 @@ const ROTULOS: Record<string, string> = {
   "mae": "Nome da mãe", "cnh-registro": "Registro da CNH", "cnh-emissao": "Emissão da CNH",
   "cnh-primeira": "Data da 1ª CNH", "cnh-uf": "UF da CNH", "cnh-validade": "Validade da CNH",
   "cnh-categoria": "Categoria da CNH", "cnh-seguranca": "Código de segurança da CNH",
+  "rntrc": "RNTRC: Número", "val-rntrc": "RNTRC: Validade",
 };
 const ROTULOS_CRLV: Record<string, string> = {
   "placa": "Placa", "renavam": "RENAVAM", "chassi": "Chassi", "marca": "Marca", "modelo": "Modelo",
@@ -200,6 +203,7 @@ Deno.serve(async (req: Request) => {
     // Documentos deste envio: nome no servidor -> descrição (com artigo) para as mensagens
     const documentosDoEnvio: Record<string, string> = { cnh: "a CNH" };
     papeis.forEach((papel, i) => { documentosDoEnvio[`crlv_${i + 1}`] = `o ${nomeCrlv(papel)}`; });
+    documentosDoEnvio.rntrc = "o RNTRC";
     documentosDoEnvio.residencia = "o comprovante de residência";
 
     const semPdfBruto = (corpo.sem_pdf && typeof corpo.sem_pdf === "object") ? corpo.sem_pdf as Record<string, unknown> : {};
@@ -207,7 +211,7 @@ Deno.serve(async (req: Request) => {
     for (const campo of Object.keys(documentosDoEnvio)) semPdf[campo] = semPdfBruto[campo] === true;
 
     // Campos permitidos: acesso, empresa (PJ) e os formulários abertos (caixa marcada)
-    const camposDoc: Record<string, string[]> = { cnh: CAMPOS_CNH, residencia: CAMPOS_RESIDENCIA };
+    const camposDoc: Record<string, string[]> = { cnh: CAMPOS_CNH, rntrc: CAMPOS_RNTRC, residencia: CAMPOS_RESIDENCIA };
     for (let i = 1; i <= n; i++) camposDoc[`crlv_${i}`] = camposCrlv(i);
     const permitidos = new Set([...CAMPOS_ACESSO, ...(tipo === "pj" ? CAMPOS_EMPRESA : [])]);
     for (const [campo, lista] of Object.entries(camposDoc)) if (semPdf[campo]) lista.forEach((c) => permitidos.add(c));
@@ -247,8 +251,8 @@ Deno.serve(async (req: Request) => {
     }
     const temDoc = (c: string) => (contagem[c] ?? 0) > 0;
 
-    // CNH e CRLVs: anexo obrigatório, ou formulário completo se marcou "não tenho o PDF"
-    for (const campo of ["cnh", ...papeis.map((_, i) => `crlv_${i + 1}`)]) {
+    // CNH, CRLVs e RNTRC: anexo obrigatório, ou formulário completo se marcou "não tenho o PDF"
+    for (const campo of ["cnh", ...papeis.map((_, i) => `crlv_${i + 1}`), "rntrc"]) {
       if (!semPdf[campo] && !temDoc(campo)) {
         return resp(req, 400, { erro: `Anexe ${documentosDoEnvio[campo]} ou marque que não tem o PDF.` });
       }
@@ -264,12 +268,15 @@ Deno.serve(async (req: Request) => {
         exigir(camposCrlv(i + 1), (c) => `${nomeCrlv(papel)}: ${ROTULOS_CRLV[c.replace(/^crlv\d-/, "")]}`);
       }
     });
+    if (semPdf.rntrc) exigir(CAMPOS_RNTRC, (c) => ROTULOS[c] ?? c);
     if (faltando.length > 0) {
       return resp(req, 400, {
         erro: "Preencha os campos obrigatórios dos documentos que você marcou como \"não tenho o PDF\".",
         faltando,
       });
     }
+
+    if (semPdf.rntrc && !/^\d{8,12}$/.test(dados["rntrc"])) return resp(req, 400, { erro: "RNTRC inválido." });
 
     const cpf = dados["cpf"].replace(/\D/g, "");
     if (!cpfValido(cpf)) return resp(req, 400, { erro: "CPF inválido." });
