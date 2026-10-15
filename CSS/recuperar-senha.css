@@ -74,7 +74,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 112px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -94,7 +94,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 100px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -116,17 +116,17 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
+    font-size: 18.5px;
     font-weight: 600;
     letter-spacing: 0.2px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -152,10 +152,10 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
+    font-size: 18.5px;
     font-weight: 600;
     letter-spacing: 0.2px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -310,9 +310,9 @@ header {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 130px 20px 60px 20px;
+    padding: 142px 20px 60px 20px;
     background: linear-gradient(135deg, #f0f4ff 0%, #f8faff 50%, #edf2fc 100%);
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 112px);
 }
 
 /* Formas decorativas com blur para profundidade visual moderna */
@@ -1459,7 +1459,7 @@ input::-ms-clear {
 
 .recuperar-toast {
     position: fixed;
-    top: 90px;
+    top: 102px;
     right: 24px;
     z-index: 2000;
     transform: translateY(-20px);
@@ -1709,12 +1709,29 @@ footer {
     }
 }
 
+/* Tablet: menu com os tamanhos de antes para caber ao lado do logo */
+@media (max-width: 900px) {
+    .lista-links {
+        gap: 12px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 16.5px;
+        padding: 7px 14px;
+    }
+}
+
 @media (max-width: 640px) {
     .header-AJBorges {
         height: auto;
         padding: 12px 20px;
         flex-direction: column;
         gap: 12px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 70px;
     }
 
     .lista-links {
@@ -1750,7 +1767,7 @@ footer {
     }
 
     .recuperar-main {
-        padding: 85px 12px 40px 12px;
+        padding: 198px 12px 40px 12px;
     }
 
     .recuperar-card {

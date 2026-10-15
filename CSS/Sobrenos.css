@@ -92,7 +92,7 @@ header {
 .header-AJBorges {
     width: 100%;
     max-width: 1200px;
-    height: 100px;
+    height: 112px;
     margin: 0 auto;
     padding: 0 32px;
     display: flex;
@@ -112,7 +112,7 @@ header {
 }
 
 .logotipo-AJBorges img {
-    height: 90px;
+    height: 100px;
     width: auto;
     object-fit: contain;
     background-color: transparent;
@@ -134,17 +134,17 @@ header {
 .lista-links {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     list-style: none;
 }
 
 .lista-links li a {
     text-decoration: none;
     color: var(--branco);
-    font-size: 16.5px;
+    font-size: 18.5px;
     font-weight: 600;
     letter-spacing: 0.2px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.25s ease;
     display: inline-block;
@@ -172,10 +172,10 @@ header {
     border: none;
     color: var(--branco);
     font-family: inherit;
-    font-size: 16.5px;
+    font-size: 18.5px;
     font-weight: 600;
     letter-spacing: 0.2px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -323,7 +323,7 @@ header {
 /* --- CONTEÚDO PRINCIPAL (SOBRE NÓS) --- */
 
 main {
-    margin-top: 100px;
+    margin-top: 112px;
     width: 100%;
     background-color: var(--fundo-principal);
     display: flex;
@@ -1703,12 +1703,33 @@ footer {
     }
 }
 
+/* Tablet: menu com os tamanhos de antes para caber ao lado do logo */
+@media (max-width: 900px) {
+    .lista-links {
+        gap: 12px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 16.5px;
+        padding: 7px 14px;
+    }
+}
+
 @media (max-width: 640px) {
     .header-AJBorges {
         height: auto;
         padding: 12px 20px;
         flex-direction: column;
         gap: 12px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 70px;
+    }
+
+    main {
+        margin-top: 178px;
     }
 
     .lista-links {
