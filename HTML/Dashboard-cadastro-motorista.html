@@ -292,6 +292,11 @@
         .cad-docs { display: grid; gap: 8px; font-size: 0.88rem; }
         .cad-doc { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
         .cad-doc-faltando { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        .cad-etiqueta { display: inline-block; margin-left: 6px; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; vertical-align: middle; }
+        .cad-etiqueta-anexo { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+        .cad-etiqueta-preenchido { background: #eef2ff; border: 1px solid #c7d2fe; color: #3d3d90; }
+        .cad-etiqueta-vazio { background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; }
+        .cad-vazio { color: #64748b; font-size: 0.88rem; }
         #modal-footer-actions { flex-wrap: wrap; }
     </style>
 </head>
@@ -628,6 +633,51 @@
                 ['prop-carreta-cidade', 'Cidade'], ['prop-carreta-estado', 'Estado'], ['prop-carreta-cep', 'CEP']]]
         ];
 
+        // ---------- Cadastros novos (com dados._tipologia): uma seção por documento ----------
+        const TIPOLOGIAS = {
+            'VUC/¾': ['Caminhão'],
+            'Toco (4×2)': ['Caminhão'],
+            'Truck (6×2)': ['Caminhão'],
+            'Bitruck (8×2)': ['Caminhão'],
+            'Cavalo 4×2': ['Cavalo'],
+            'Cavalo 6×2': ['Cavalo'],
+            'Cavalo 6×4': ['Cavalo'],
+            'Carreta simples (2e)': ['Cavalo', 'Carreta'],
+            'Carreta LS 3e': ['Cavalo', 'Carreta'],
+            'Romeu e Julieta': ['Caminhão', 'Reboque'],
+            'Bitrem': ['Cavalo', '1ª carreta', '2ª carreta'],
+            'Rodotrem': ['Cavalo', '1ª carreta', '2ª carreta'],
+            'Treminhão/Tritrem': ['Caminhão', '1º reboque', '2º reboque', '3º reboque']
+        };
+        const nomeCrlv = (papel) => `CRLV ${/carreta$/i.test(papel) ? 'da' : 'do'} ${papel}`;
+        const SECOES_FIXAS_NOVAS = [
+            ['Empresa (PJ)', SECOES[0][1]],
+            ['Motorista', [['motorista-nome', 'Nome'], ['motorista-sobrenome', 'Sobrenome'], ['cpf', 'CPF'], ['celular', 'Celular']]]
+        ];
+        const CAMPOS_CNH_NOVOS = [['nascimento', 'Nascimento'], ['rg', 'RG'], ['rg-uf', 'UF do RG'], ['cidade-nasc', 'Cidade de nascimento'],
+            ['mae', 'Nome da mãe'], ...SECOES[2][1]];
+        const camposCrlvNovos = (n) => [['placa', 'Placa'], ['renavam', 'RENAVAM'], ['chassi', 'Chassi'], ['marca', 'Marca'],
+            ['modelo', 'Modelo'], ['ano', 'Ano'], ['cor', 'Cor'], ['cidade-emp', 'Cidade de emplacamento'], ['uf', 'UF'],
+            ['prop-nome', 'Proprietário'], ['prop-doc', 'CPF/CNPJ do proprietário']].map(([s, r]) => [`crlv${n}-${s}`, r]);
+        const CAMPOS_RESIDENCIA_NOVOS = SECOES[3][1];
+
+        // [{ doc, titulo, campos, opcional }] na ordem do formulário
+        function documentosNovos(d) {
+            return [
+                { doc: 'cnh', titulo: 'CNH', campos: CAMPOS_CNH_NOVOS },
+                ...(TIPOLOGIAS[d._tipologia] || []).map((papel, i) => ({ doc: `crlv_${i + 1}`, titulo: nomeCrlv(papel), campos: camposCrlvNovos(i + 1) })),
+                { doc: 'residencia', titulo: 'Comprovante de residência', campos: CAMPOS_RESIDENCIA_NOVOS, opcional: true }
+            ];
+        }
+
+        function nomeDocumento(campo, d) {
+            if (d._tipologia) {
+                const doc = documentosNovos(d).find((x) => x.doc === campo);
+                if (doc) return doc.titulo;
+            }
+            return NOMES_DOCUMENTOS[campo] || campo;
+        }
+
         const NOMES_DOCUMENTOS = {
             cnh: 'CNH', residencia: 'Comprovante de residência', crlv_cavalo: 'CRLV do cavalo',
             crlv_carreta: 'CRLV da carreta', rntrc: 'RNTRC/ANTT', complementares: 'Complementar'
@@ -706,7 +756,8 @@
                 if (filtroAtual !== 'todos' && c.status !== filtroAtual) return false;
                 if (!termoBusca) return true;
                 const d = c.dados || {};
-                const alvo = [c.nome, c.cpf, formatarCpf(c.cpf), c.email, d['veic-placa'], d['carreta-placa'], d['nome-empresa'], d.cnpj]
+                const alvo = [c.nome, c.cpf, formatarCpf(c.cpf), c.email, d['veic-placa'], d['carreta-placa'], d['nome-empresa'], d.cnpj,
+                    d._tipologia, d['crlv1-placa'], d['crlv2-placa'], d['crlv3-placa'], d['crlv4-placa']]
                     .filter(Boolean).join(' ').toLowerCase();
                 return alvo.includes(termoBusca);
             });
@@ -723,7 +774,11 @@
                 const iniciais = (c.nome || 'M').split(' ').filter(Boolean).map((n) => n[0]).slice(0, 2).join('').toUpperCase();
                 const docs = Array.isArray(c.documentos) ? c.documentos : [];
                 const temDoc = (campo) => docs.some((x) => x.campo === campo);
-                const placa = d['veic-placa'] || (temDoc('crlv_cavalo') ? 'no CRLV anexado' : '—');
+                const novo = !!d._tipologia;
+                const placa = novo
+                    ? (d['crlv1-placa'] || (temDoc('crlv_1') ? 'no CRLV anexado' : '—'))
+                    : (d['veic-placa'] || (temDoc('crlv_cavalo') ? 'no CRLV anexado' : '—'));
+                const veiculo = novo ? d._tipologia : (d['veic-modelo'] || 'Cavalo mecânico');
                 const cnh = d['cnh-registro'] ? `${esc(d['cnh-registro'])} (Cat. ${esc(d['cnh-categoria'] || '—')})` : (temDoc('cnh') ? 'CNH anexada' : '—');
                 return `
                     <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -739,8 +794,8 @@
                         </td>
                         <td style="padding: 16px;"><span style="font-weight: 500; color: #334155;">${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</span>
                             <div style="font-size: 0.75rem; color: #64748b;">${docs.length} documento(s)</div></td>
-                        <td style="padding: 16px;"><div style="font-weight: 500; color: #0f172a;">${esc(d['veic-modelo'] || 'Cavalo mecânico')}</div>
-                            <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${esc(placa)}</strong>${c.sem_carreta ? ' &bull; sem carreta' : ''}</div></td>
+                        <td style="padding: 16px;"><div style="font-weight: 500; color: #0f172a;">${esc(veiculo)}</div>
+                            <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${esc(placa)}</strong>${c.sem_carreta && !novo ? ' &bull; sem carreta' : ''}</div></td>
                         <td style="padding: 16px;"><span style="font-size: 0.82rem; color: #334155;">${cnh}</span></td>
                         <td style="padding: 16px; color: #64748b; font-size: 0.82rem;">${formatarData(c.criado_em)}</td>
                         <td style="padding: 16px;">${ROTULOS_STATUS[c.status] || esc(c.status)}</td>
@@ -799,33 +854,61 @@
             document.getElementById('modal-title').textContent = `Cadastro • ${c.nome || ''}`;
             const corpo = document.getElementById('modal-body-content');
 
-            const secoes = SECOES.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)')
-                .filter(([titulo]) => !c.sem_carreta || !titulo.includes('arreta'))
-                .map(([titulo, campos]) => `
-                    <fieldset class="cad-secao">
-                        <legend>${esc(titulo)}</legend>
+            const grade = (campos) => `
                         <div class="cad-grid">
                             ${campos.map(([k, rotulo]) => `
                                 <label class="cad-campo">
                                     <span>${esc(rotulo)}</span>
                                     <input type="text" data-campo="${esc(k)}" value="${esc(d[k] || '')}" readonly placeholder="—">
                                 </label>`).join('')}
-                        </div>
-                    </fieldset>`).join('');
+                        </div>`;
+            const secaoFixa = ([titulo, campos]) => `
+                    <fieldset class="cad-secao">
+                        <legend>${esc(titulo)}</legend>${grade(campos)}
+                    </fieldset>`;
+
+            // Cadastro novo (tem _tipologia): uma seção por documento. Antigo: exibição de antes.
+            const novo = !!d._tipologia;
+            let secoes;
+            if (novo) {
+                const semPdf = d._sem_pdf || {};
+                secoes = SECOES_FIXAS_NOVAS.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)').map(secaoFixa).join('') +
+                    documentosNovos(d).map(({ doc, titulo, campos, opcional }) => {
+                        const temAnexo = docs.some((x) => x.campo === doc);
+                        const preenchido = semPdf[doc] === true;
+                        const vazio = opcional && !temAnexo && !(preenchido && campos.some(([k]) => d[k]));
+                        const etiqueta = vazio ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado (opcional)</span>'
+                            : preenchido ? '<span class="cad-etiqueta cad-etiqueta-preenchido">Preenchido pelo motorista</span>'
+                            : '<span class="cad-etiqueta cad-etiqueta-anexo">Anexo</span>';
+                        const conteudo = preenchido
+                            ? grade(campos)
+                            : (temAnexo ? `<div class="cad-docs" data-docs-de="${esc(doc)}">Carregando documentos...</div>`
+                                : `<div class="${vazio ? 'cad-vazio' : 'cad-doc cad-doc-faltando'}">${vazio ? 'Não enviado (opcional).' : 'Nenhum anexo recebido.'}</div>`);
+                        return `
+                    <fieldset class="cad-secao">
+                        <legend>${esc(titulo)} ${etiqueta}</legend>${conteudo}
+                    </fieldset>`;
+                    }).join('');
+            } else {
+                secoes = SECOES.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)')
+                    .filter(([titulo]) => !c.sem_carreta || !titulo.includes('arreta'))
+                    .map(secaoFixa).join('');
+            }
 
             corpo.innerHTML = `
                 <div class="cad-topo">
-                    <div>${ROTULOS_STATUS[c.status] || ''} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${c.sem_carreta ? ' · sem carreta' : ''}</div>
+                    <div>${ROTULOS_STATUS[c.status] || ''} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${novo ? '' : (c.sem_carreta ? ' · sem carreta' : '')}</div>
+                    ${novo ? `<div>Tipo de veículo: <b>${esc(d._tipologia)}</b></div>` : ''}
                     <div>Enviado em <b>${formatarData(c.criado_em)}</b></div>
                     <div>E-mail de acesso: <b>${esc(c.email || '—')}</b></div>
                     <div>Senha: <b>definida pelo motorista</b> (nunca é exibida)${perfil.senha_alterada_em ? ` · alterada em <b>${formatarData(perfil.senha_alterada_em)}</b>` : ''}</div>
                     ${c.analisado_por ? `<div>Última análise: <b>${esc(c.analisado_por)}</b> em ${formatarData(c.analisado_em)}</div>` : ''}
                     ${c.status === 'recusado' && c.motivo_recusa ? `<div style="color:#b91c1c;">Motivo da recusa: <b>${esc(c.motivo_recusa)}</b></div>` : ''}
                 </div>
-                <fieldset class="cad-secao">
+                ${novo ? '' : `<fieldset class="cad-secao">
                     <legend>Documentos</legend>
                     <div id="cad-lista-docs" class="cad-docs">Carregando documentos...</div>
-                </fieldset>
+                </fieldset>`}
                 ${secoes}`;
 
             document.getElementById('modal-footer-actions').innerHTML = `
@@ -839,15 +922,23 @@
             document.getElementById('driver-modal').classList.add('active');
 
             const enviados = await listarArquivosEnviados(c);
-            const lista = document.getElementById('cad-lista-docs');
-            if (!lista || cadastroAberto !== id) return;
-            lista.innerHTML = docs.length === 0 ? 'Nenhum documento anexado.' : docs.map((doc) => {
+            if (cadastroAberto !== id) return;
+            const itemDoc = (doc) => {
                 const ok = enviados.has(doc.path);
                 return `<div class="cad-doc ${ok ? '' : 'cad-doc-faltando'}">
-                    <span>📎 <b>${esc(NOMES_DOCUMENTOS[doc.campo] || doc.campo)}</b> · ${esc(doc.nome)}</span>
+                    <span>📎 <b>${esc(nomeDocumento(doc.campo, d))}</b> · ${esc(doc.nome)}</span>
                     ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não chegou a ser enviado</em>'}
                 </div>`;
-            }).join('');
+            };
+            if (novo) {
+                document.querySelectorAll('#modal-body-content [data-docs-de]').forEach((el) => {
+                    el.innerHTML = docs.filter((x) => x.campo === el.getAttribute('data-docs-de')).map(itemDoc).join('');
+                });
+                return;
+            }
+            const lista = document.getElementById('cad-lista-docs');
+            if (!lista) return;
+            lista.innerHTML = docs.length === 0 ? 'Nenhum documento anexado.' : docs.map(itemDoc).join('');
         }
 
         function fecharModal() {
