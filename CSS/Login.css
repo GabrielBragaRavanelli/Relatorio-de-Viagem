@@ -652,67 +652,13 @@ input::-ms-clear {
     display: none !important;
 }
 
-/* Opções de Formulário (Lembrar / Esqueci senha) */
+/* Opções de Formulário (Esqueci a senha) */
 .form-options {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-bottom: 22px;
     font-size: 13px;
-    gap: 8px;
-}
-
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    color: var(--cinza-texto);
-    position: relative;
-}
-
-.checkbox-container input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-checkbox {
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--cinza-borda-hover);
-    border-radius: 5px;
-    background-color: var(--branco);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.checkbox-container:hover .custom-checkbox {
-    border-color: var(--azul-ajborges-claro);
-}
-
-.checkbox-container input[type="checkbox"]:checked ~ .custom-checkbox {
-    background-color: var(--azul-ajborges);
-    border-color: var(--azul-ajborges);
-}
-
-.checkbox-container input[type="checkbox"]:checked ~ .custom-checkbox::after {
-    content: '';
-    width: 4px;
-    height: 8px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg) translate(-1px, -1px);
-}
-
-.checkbox-label {
-    font-size: 13px;
-    font-weight: 500;
 }
 
 .link-recuperar {
@@ -899,11 +845,8 @@ input::-ms-clear {
     }
 
     .form-options {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
+        justify-content: flex-end;
+        margin-bottom: 18px;
     }
 
     .login-toast {
