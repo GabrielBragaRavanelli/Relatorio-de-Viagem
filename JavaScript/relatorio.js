@@ -1610,7 +1610,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const inputTotalValorCombustivelMl = document.getElementById('ml-total-valor-combustivel');
     const inputTotalLitrosCombustivelMl = document.getElementById('ml-total-litros-combustivel');
 
-    // Lista Oficial dos 37 Postos de Combustíveis Conveniados da AJBorges
+    // Lista Oficial dos 38 Postos de Combustíveis Conveniados da AJBorges
     const POSTOS_COMBUSTIVEL_CONVENIADOS = [
         "Açailândia - Posto Magnólia 06",
         "Anaurilândia - Posto Lala (93)",
@@ -1648,7 +1648,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         "Posto Marajó Araporã",
         "Posto Marajo Anapolis 1",
         "Posto Marajó Cariri 1",
-        "Posto Marajó Grande Belém"
+        "Posto Marajó Grande Belém",
+        "Posto Monte Carlo Nova Alexandria - Rod. Raposo Tavares"
     ];
 
     function popularSelectsPostosConvenidos() {
