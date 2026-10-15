@@ -97,155 +97,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return maskCNPJ(clean);
     }
 
+
     function maskPlaca(value) {
         return value
             .toUpperCase()
             .replace(/[^A-Z0-9]/g, '')
             .slice(0, 7)
-            .replace(/^([A-Z]{3})([0-9A-Z]{4})$/, '$1-$2');
+            .replace(/^([A-Z]{3})([0-9]{4})$/, '$1-$2');
     }
 
+    function soDigitos(max) {
+        return (value) => value.replace(/\D/g, '').slice(0, max);
+    }
+
+    function maskChassi(value) {
+        return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
+    }
+
+    function bloquearNumeros(input) {
+        if (!input) return;
+        input.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+            }
+        });
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[0-9]/g, '');
+        });
+    }
+
+    ['pj', 'pf'].forEach((p) => {
+        applyMask(document.getElementById(`${p}-cpf`), maskCPF);
+        applyMask(document.getElementById(`${p}-celular`), maskPhone);
+        applyMask(document.getElementById(`${p}-mot-cep`), maskCEP);
+        ['motorista-nome', 'motorista-sobrenome', 'mae'].forEach((s) => bloquearNumeros(document.getElementById(`${p}-${s}`)));
+    });
     applyMask(document.getElementById('pj-cnpj'), maskCNPJ);
-    applyMask(document.getElementById('pj-cpf'), maskCPF);
     applyMask(document.getElementById('pj-telefone-empresa'), maskPhone);
-    applyMask(document.getElementById('pj-celular'), maskPhone);
-    applyMask(document.getElementById('pj-mot-cep'), maskCEP);
-    applyMask(document.getElementById('pj-prop-cep'), maskCEP);
-    applyMask(document.getElementById('pj-prop-doc'), maskCpfCnpj);
+    bloquearNumeros(document.getElementById('pj-responsavel'));
 
-    const placaInput = document.getElementById('pj-veic-placa');
-    if (placaInput) {
-        placaInput.addEventListener('input', () => {
-            placaInput.value = placaInput.value.toUpperCase();
-        });
-    }
-
-    const renavamInput = document.getElementById('pj-veic-renavam');
-    if (renavamInput) {
-        renavamInput.addEventListener('input', () => {
-            renavamInput.value = renavamInput.value.replace(/\D/g, '').slice(0, 11);
-        });
-    }
-
-    const anoInput = document.getElementById('pj-veic-ano');
-    if (anoInput) {
-        anoInput.addEventListener('input', () => {
-            anoInput.value = anoInput.value.replace(/\D/g, '').slice(0, 4);
-        });
-    }
-
-    const chassiInput = document.getElementById('pj-veic-chassi');
-    if (chassiInput) {
-        chassiInput.addEventListener('input', () => {
-            chassiInput.value = chassiInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
-        });
-    }
-
-    applyMask(document.getElementById('pj-prop-carreta-doc'), maskCpfCnpj);
-    applyMask(document.getElementById('pj-prop-carreta-cep'), maskCEP);
-
-    const carretaPlacaInput = document.getElementById('pj-carreta-placa');
-    if (carretaPlacaInput) {
-        carretaPlacaInput.addEventListener('input', () => {
-            carretaPlacaInput.value = carretaPlacaInput.value.toUpperCase();
-        });
-    }
-
-    const carretaChassiInput = document.getElementById('pj-carreta-chassi');
-    if (carretaChassiInput) {
-        carretaChassiInput.addEventListener('input', () => {
-            carretaChassiInput.value = carretaChassiInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
-        });
-    }
-
-    const carretaRenavamInput = document.getElementById('pj-carreta-renavam');
-    if (carretaRenavamInput) {
-        carretaRenavamInput.addEventListener('input', () => {
-            if (carretaRenavamInput.value !== 'NA') {
-                carretaRenavamInput.value = carretaRenavamInput.value.replace(/\D/g, '').slice(0, 11);
-            }
-        });
-    }
-
-    const carretaAnoInput = document.getElementById('pj-carreta-ano');
-    if (carretaAnoInput) {
-        carretaAnoInput.addEventListener('input', () => {
-            if (carretaAnoInput.value !== 'NA') {
-                carretaAnoInput.value = carretaAnoInput.value.replace(/\D/g, '').slice(0, 4);
-            }
-        });
-    }
-
-    applyMask(document.getElementById('pf-cpf'), maskCPF);
-    applyMask(document.getElementById('pf-celular'), maskPhone);
-    applyMask(document.getElementById('pf-mot-cep'), maskCEP);
-    applyMask(document.getElementById('pf-prop-cep'), maskCEP);
-    applyMask(document.getElementById('pf-prop-doc'), maskCpfCnpj);
-    applyMask(document.getElementById('pf-prop-carreta-doc'), maskCpfCnpj);
-    applyMask(document.getElementById('pf-prop-carreta-cep'), maskCEP);
-
-    const pfPlacaInput = document.getElementById('pf-veic-placa');
-    if (pfPlacaInput) {
-        pfPlacaInput.addEventListener('input', () => {
-            pfPlacaInput.value = pfPlacaInput.value.toUpperCase();
-        });
-    }
-
-    const pfRenavamInput = document.getElementById('pf-veic-renavam');
-    if (pfRenavamInput) {
-        pfRenavamInput.addEventListener('input', () => {
-            pfRenavamInput.value = pfRenavamInput.value.replace(/\D/g, '').slice(0, 11);
-        });
-    }
-
-    const pfAnoInput = document.getElementById('pf-veic-ano');
-    if (pfAnoInput) {
-        pfAnoInput.addEventListener('input', () => {
-            pfAnoInput.value = pfAnoInput.value.replace(/\D/g, '').slice(0, 4);
-        });
-    }
-
-    const pfChassiInput = document.getElementById('pf-veic-chassi');
-    if (pfChassiInput) {
-        pfChassiInput.addEventListener('input', () => {
-            pfChassiInput.value = pfChassiInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
-        });
-    }
-
-    const pfCarretaPlacaInput = document.getElementById('pf-carreta-placa');
-    if (pfCarretaPlacaInput) {
-        pfCarretaPlacaInput.addEventListener('input', () => {
-            pfCarretaPlacaInput.value = pfCarretaPlacaInput.value.toUpperCase();
-        });
-    }
-
-    const pfCarretaChassiInput = document.getElementById('pf-carreta-chassi');
-    if (pfCarretaChassiInput) {
-        pfCarretaChassiInput.addEventListener('input', () => {
-            pfCarretaChassiInput.value = pfCarretaChassiInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 17);
-        });
-    }
-
-    const pfCarretaRenavamInput = document.getElementById('pf-carreta-renavam');
-    if (pfCarretaRenavamInput) {
-        pfCarretaRenavamInput.addEventListener('input', () => {
-            if (pfCarretaRenavamInput.value !== 'NA') {
-                pfCarretaRenavamInput.value = pfCarretaRenavamInput.value.replace(/\D/g, '').slice(0, 11);
-            }
-        });
-    }
-
-    const pfCarretaAnoInput = document.getElementById('pf-carreta-ano');
-    if (pfCarretaAnoInput) {
-        pfCarretaAnoInput.addEventListener('input', () => {
-            if (pfCarretaAnoInput.value !== 'NA') {
-                pfCarretaAnoInput.value = pfCarretaAnoInput.value.replace(/\D/g, '').slice(0, 4);
-            }
-        });
-    }
-
-    const dropzones = document.querySelectorAll('.upload-dropzone');
-    dropzones.forEach(zone => {
+    function ligarDropzone(zone) {
         const inputId = zone.getAttribute('data-target');
         const input = document.getElementById(inputId);
         const previewList = document.getElementById(`preview-${inputId}`);
@@ -280,7 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('change', () => {
             renderFileList(input.files, previewList);
         });
-    });
+    }
+
+    document.querySelectorAll('.upload-dropzone').forEach(ligarDropzone);
 
     function renderFileList(files, container) {
         if (!container) return;
@@ -294,71 +187,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const noNumberFields = [
-        'pj-responsavel',
-        'pj-motorista-nome',
-        'pj-motorista-sobrenome',
-        'pj-mae',
-        'pj-prop-mae',
-        'pj-prop-carreta-mae',
-        'pf-motorista-nome',
-        'pf-motorista-sobrenome',
-        'pf-mae',
-        'pf-prop-mae',
-        'pf-prop-carreta-mae'
-    ];
-
-    noNumberFields.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('keydown', (e) => {
-                if (e.key >= '0' && e.key <= '9') {
-                    e.preventDefault();
-                }
-            });
-            input.addEventListener('input', () => {
-                input.value = input.value.replace(/[0-9]/g, '');
-            });
-        }
-    });
-
     // =========================================================================
     // CADASTRO NO SUPABASE (edge function "solicitar-cadastro")
     //
-    // Regra combinada com a Atlas: para cada documento, o motorista ANEXA o
-    // arquivo OU PREENCHE os campos. Documento anexado -> campos opcionais.
-    // A conta nasce PENDENTE: o login só funciona depois que a gestão aprovar.
+    // Para cada documento (CNH, um CRLV por veículo da tipologia e comprovante
+    // de residência) o motorista ANEXA o arquivo ou marca "Não tenho o PDF" e
+    // PREENCHE o formulário daquele documento. A conta nasce PENDENTE: o login
+    // só funciona depois que a gestão aprovar.
     // =========================================================================
 
-    const BLOCOS = {
-        cnh: ['nascimento', 'rg', 'rg-uf', 'cidade-nasc', 'mae', 'cnh-registro', 'cnh-emissao',
-            'cnh-primeira', 'cnh-uf', 'cnh-validade', 'cnh-categoria', 'cnh-seguranca'],
-        cavalo: ['veic-placa', 'veic-marca', 'veic-modelo', 'veic-cor', 'veic-ano', 'veic-cidade-emp',
-            'veic-uf', 'veic-tipologia', 'veic-carroceria', 'veic-renavam', 'veic-chassi'],
-        carreta: ['carreta-placa', 'carreta-marca', 'carreta-modelo', 'carreta-cor', 'carreta-ano',
-            'carreta-chassi', 'carreta-renavam', 'carreta-cidade-emp', 'carreta-uf']
+    // Tipo de veículo -> veículos (um CRLV por veículo, na ordem; o mesmo da edge function)
+    const TIPOLOGIAS = {
+        'VUC/¾': ['Caminhão'],
+        'Toco (4×2)': ['Caminhão'],
+        'Truck (6×2)': ['Caminhão'],
+        'Bitruck (8×2)': ['Caminhão'],
+        'Cavalo 4×2': ['Cavalo'],
+        'Cavalo 6×2': ['Cavalo'],
+        'Cavalo 6×4': ['Cavalo'],
+        'Carreta simples (2e)': ['Cavalo', 'Carreta'],
+        'Carreta LS 3e': ['Cavalo', 'Carreta'],
+        'Romeu e Julieta': ['Caminhão', 'Reboque'],
+        'Bitrem': ['Cavalo', '1ª carreta', '2ª carreta'],
+        'Rodotrem': ['Cavalo', '1ª carreta', '2ª carreta'],
+        'Treminhão/Tritrem': ['Caminhão', '1º reboque', '2º reboque', '3º reboque']
     };
-    const CARRETA_SEMPRE = ['carreta-rntrc', 'prop-carreta-doc', 'prop-carreta-mae', 'prop-carreta-endereco',
-        'prop-carreta-cidade', 'prop-carreta-estado', 'prop-carreta-cep'];
-    const CAMPOS_ENVIO = [
-        'nome-empresa', 'cnpj', 'telefone-empresa', 'responsavel',
-        'motorista-nome', 'motorista-sobrenome', 'cpf', 'celular',
-        'mot-endereco', 'mot-cidade', 'mot-estado', 'mot-cep',
-        'rastreador-pri', 'id-rastreador-pri', 'rastreador-sec', 'id-rastreador-sec', 'rntrc', 'val-rntrc',
-        'prop-doc', 'prop-mae', 'prop-endereco', 'prop-cidade', 'prop-estado', 'prop-cep',
-        ...BLOCOS.cnh, ...BLOCOS.cavalo, ...BLOCOS.carreta, ...CARRETA_SEMPRE
-    ];
-    // id do input de arquivo (sem o sufixo -pf) -> nome do documento no servidor
-    const ARQUIVOS = {
-        'file-doc-cnh': 'cnh',
-        'file-doc-residencia': 'residencia',
-        'file-doc-crlv-cavalo': 'crlv_cavalo',
-        'file-doc-crlv-carreta': 'crlv_carreta',
-        'file-doc-rntrc': 'rntrc',
-        'file-doc-complementares': 'complementares'
-    };
+    const CAMPOS_ACESSO = ['motorista-nome', 'motorista-sobrenome', 'cpf', 'celular'];
+    const CAMPOS_EMPRESA = ['nome-empresa', 'cnpj', 'telefone-empresa', 'responsavel'];
+    const CAMPOS_CNH = ['nascimento', 'rg', 'rg-uf', 'cidade-nasc', 'mae', 'cnh-registro', 'cnh-emissao',
+        'cnh-primeira', 'cnh-uf', 'cnh-validade', 'cnh-categoria', 'cnh-seguranca'];
+    const CAMPOS_RESIDENCIA = ['mot-endereco', 'mot-cidade', 'mot-estado', 'mot-cep'];
+    const UFS = ['Acre (AC)', 'Alagoas (AL)', 'Amapá (AP)', 'Amazonas (AM)', 'Bahia (BA)', 'Ceará (CE)',
+        'Distrito Federal (DF)', 'Espírito Santo (ES)', 'Goiás (GO)', 'Maranhão (MA)', 'Mato Grosso (MT)',
+        'Mato Grosso do Sul (MS)', 'Minas Gerais (MG)', 'Pará (PA)', 'Paraíba (PB)', 'Paraná (PR)',
+        'Pernambuco (PE)', 'Piauí (PI)', 'Rio de Janeiro (RJ)', 'Rio Grande do Norte (RN)',
+        'Rio Grande do Sul (RS)', 'Rondônia (RO)', 'Roraima (RR)', 'Santa Catarina (SC)', 'São Paulo (SP)',
+        'Sergipe (SE)', 'Tocantins (TO)'];
+    const MAX_ARQUIVOS = 3;
     const TIPOS_ARQUIVO = ['application/pdf', 'image/png', 'image/jpeg'];
     const TAMANHO_MAX = 10 * 1024 * 1024;
+
+    // "CRLV do Cavalo", "CRLV da 1ª carreta"
+    const nomeCrlv = (papel) => `CRLV ${/carreta$/i.test(papel) ? 'da' : 'do'} ${papel}`;
+    const camposCrlv = (n) => ['placa', 'renavam', 'chassi', 'marca', 'modelo', 'ano', 'cor', 'cidade-emp', 'uf',
+        'prop-nome', 'prop-doc'].map((s) => `crlv${n}-${s}`);
 
     function esc(v) {
         return String(v ?? '').replace(/[&<>"'`]/g, (c) => ({
@@ -370,113 +242,178 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.getElementById(`${prefixo}-${sufixo}`);
     }
 
-    function inputArquivo(prefixo, idBase) {
-        return document.getElementById(prefixo === 'pf' ? `${idBase}-pf` : idBase);
+    function papeisDe(prefixo) {
+        return TIPOLOGIAS[campo(prefixo, 'tipologia')?.value] || [];
     }
 
-    function arquivosDe(prefixo, idBase) {
-        const el = inputArquivo(prefixo, idBase);
+    // Documentos do envio, na ordem da tela: [{ doc, titulo, obrigatorio, campos }]
+    function documentosDe(prefixo) {
+        return [
+            { doc: 'cnh', titulo: 'CNH', obrigatorio: true, campos: CAMPOS_CNH },
+            ...papeisDe(prefixo).map((papel, i) => ({
+                doc: `crlv_${i + 1}`, titulo: nomeCrlv(papel), obrigatorio: true, campos: camposCrlv(i + 1)
+            })),
+            { doc: 'residencia', titulo: 'Comprovante de residência', obrigatorio: false, campos: CAMPOS_RESIDENCIA }
+        ];
+    }
+
+    const cartaoDe = (prefixo, doc) => campo(prefixo, 'docs')?.querySelector(`.cartao-doc[data-doc="${doc}"]`);
+    const semPdf = (prefixo, doc) => !!campo(prefixo, `sem-pdf-${doc}`)?.checked;
+    const anexoDe = (prefixo, doc) => campo(prefixo, `anexo-${doc.replace('_', '-')}`);
+    const arquivosDe = (prefixo, doc) => {
+        const el = anexoDe(prefixo, doc);
         return el && el.files ? Array.from(el.files) : [];
-    }
+    };
 
-    function marcarObrigatorio(el, obrigatorio) {
-        if (!el) return;
-        el.required = !!obrigatorio;
-        const grupo = el.closest('.form-group');
-        const label = grupo ? grupo.querySelector('label') : null;
-        const asterisco = label ? label.querySelector('.required-asterisk') : null;
-        if (asterisco && label.getAttribute('for') === el.id) {
-            asterisco.style.visibility = obrigatorio ? '' : 'hidden';
-        }
-    }
-
-    // ---------- Montagem das partes novas do formulário ----------
-    function montarAviso(form) {
-        const aviso = document.createElement('div');
-        aviso.className = 'aviso-regra-docs';
-        aviso.innerHTML = `
-            <strong>Como preencher mais rápido:</strong>
-            anexe a <b>CNH</b> e o <b>CRLV</b> do cavalo (e da carreta, se tiver) na etapa
-            <b>08 - Envio de Documentos</b>. Com o documento anexado, os campos dele ficam
-            <b>opcionais</b>. Se não tiver o documento em mãos, preencha os campos normalmente.
-            Use arquivos <b>legíveis</b> em PDF, JPG ou PNG (até 10 MB cada).`;
-        form.insertBefore(aviso, form.firstElementChild);
-    }
-
-    function montarSemCarreta(form, prefixo) {
-        const placa = campo(prefixo, 'carreta-placa');
-        const etapa = placa ? placa.closest('.form-step') : null;
-        if (!etapa) return null;
-        const corpo = etapa.querySelector('.step-body');
-        const caixa = document.createElement('label');
-        caixa.className = 'opcao-sem-carreta';
-        caixa.innerHTML = `<input type="checkbox" id="${prefixo}-sem-carreta"> Não possuo carreta`;
-        corpo.insertBefore(caixa, corpo.firstChild);
-
-        // Os campos da carreta vinham com "NA" preenchido; agora existe a caixa acima
-        [...BLOCOS.carreta, ...CARRETA_SEMPRE].forEach((s) => {
-            const el = campo(prefixo, s);
-            if (el && el.value === 'NA') el.value = '';
-        });
-        return caixa.querySelector('input');
-    }
-
-    function montarAcesso(form, prefixo) {
-        const etapa = document.createElement('div');
-        etapa.className = 'form-step';
-        etapa.innerHTML = `
-            <div class="step-header">
-                <div class="step-title-row">
-                    <span class="step-bar"></span>
-                    <h3 class="step-title">09 - Acesso ao Portal da Frota</h3>
-                </div>
-                <p class="step-subtitle">Depois que a gestão <strong>aprovar</strong> o seu cadastro, você entra no
-                    Portal da Frota com o seu <strong>CPF</strong> e esta <strong>senha</strong>. O e-mail é usado
-                    para recuperar a senha.</p>
+    // ---------- Cartões de CRLV (um por veículo da tipologia) ----------
+    function criarCartaoCrlv(prefixo, n, papel) {
+        const id = (s) => `${prefixo}-crlv${n}-${s}`;
+        const anexo = `${prefixo}-anexo-crlv-${n}`;
+        const ast = '<span class="required-asterisk">*</span>';
+        const texto = (s, rotulo, extra = '') => `
+            <div class="form-group">
+                <label for="${id(s)}">${rotulo}: ${ast}</label>
+                <input type="text" id="${id(s)}" ${extra}>
+            </div>`;
+        const cartao = document.createElement('div');
+        cartao.className = 'cartao-doc';
+        cartao.dataset.doc = `crlv_${n}`;
+        cartao.dataset.papel = papel;
+        cartao.innerHTML = `
+            <div class="cartao-doc-topo">
+                <h4 class="cartao-doc-titulo">${esc(nomeCrlv(papel))}</h4>
+                <span class="etiqueta-doc etiqueta-obrigatorio">Obrigatório</span>
             </div>
-            <div class="step-body">
-                <div class="form-group mb-2">
-                    <label for="${prefixo}-email">E-mail: <span class="required-asterisk">*</span></label>
-                    <input type="email" id="${prefixo}-email" autocomplete="email" placeholder="seuemail@exemplo.com" required>
+            <div class="cartao-doc-anexo">
+                <div class="upload-dropzone" data-target="${anexo}">
+                    <div class="upload-inner-card">
+                        <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
+                            stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span class="upload-text">Drag & Drop Files, <label for="${anexo}"
+                                class="upload-action-link">Choose Files to Upload</label></span>
+                        <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                        <input type="file" id="${anexo}" class="file-input-hidden" multiple accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                    <div class="file-preview-list" id="preview-${anexo}"></div>
                 </div>
-                <div class="dica-senha">
-                    <strong>Dica para facilitar sua senha:</strong>
-                    use os <b>6 primeiros dígitos do seu CPF</b> com um <b>caractere especial</b>
-                    (como @, #, $ ou !) e uma <b>palavra de pelo menos 4 letras</b>. O caractere pode ficar no
-                    início, no meio ou no final. Mínimo de 11 caracteres.
-                    <div class="exemplos-senha">
-                        <div><span>Exemplo 1:</span> <code data-exemplo="0"></code> <em>caractere no início + CPF + palavra</em></div>
-                        <div><span>Exemplo 2:</span> <code data-exemplo="1"></code> <em>palavra + caractere no meio + CPF</em></div>
-                        <div><span>Exemplo 3:</span> <code data-exemplo="2"></code> <em>palavra + CPF + caractere no final</em></div>
+            </div>
+            <label class="caixa-sem-pdf">
+                <input type="checkbox" id="${prefixo}-sem-pdf-crlv_${n}" data-doc="crlv_${n}">
+                <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
+                <span class="caixa-sem-pdf-texto">Não tenho o PDF do ${esc(nomeCrlv(papel))}</span>
+            </label>
+            <div class="cartao-doc-form" hidden>
+                <div class="form-row col-3">
+                    ${texto('placa', 'Placa', 'placeholder="ABC-1234 ou ABC1D23"')}
+                    ${texto('renavam', 'RENAVAM')}
+                    ${texto('chassi', 'Chassi')}
+                </div>
+                <div class="form-row col-4">
+                    ${texto('marca', 'Marca')}
+                    ${texto('modelo', 'Modelo')}
+                    ${texto('ano', 'Ano', 'placeholder="AAAA"')}
+                    ${texto('cor', 'Cor')}
+                </div>
+                <div class="form-row col-2">
+                    ${texto('cidade-emp', 'Cidade de Emplacamento')}
+                    <div class="form-group">
+                        <label for="${id('uf')}">Estado: ${ast}</label>
+                        <select id="${id('uf')}">
+                            <option value="">--- Selecione a escolha ---</option>
+                            ${UFS.map((uf) => `<option value="${esc(uf)}">${esc(uf)}</option>`).join('')}
+                        </select>
                     </div>
                 </div>
                 <div class="form-row col-2">
-                    <div class="form-group">
-                        <label for="${prefixo}-senha">Criar senha: <span class="required-asterisk">*</span></label>
-                        <div class="campo-senha">
-                            <input type="password" id="${prefixo}-senha" autocomplete="new-password" required minlength="11" maxlength="72">
-                            <button type="button" class="btn-ver-senha" aria-label="Mostrar senha">👁</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="${prefixo}-senha2">Confirmar senha: <span class="required-asterisk">*</span></label>
-                        <div class="campo-senha">
-                            <input type="password" id="${prefixo}-senha2" autocomplete="new-password" required maxlength="72">
-                            <button type="button" class="btn-ver-senha" aria-label="Mostrar senha">👁</button>
-                        </div>
-                    </div>
+                    ${texto('prop-nome', 'Nome do Proprietário (como no CRLV)')}
+                    ${texto('prop-doc', 'CPF/CNPJ do Proprietário')}
                 </div>
-                <ul class="checklist-senha" id="${prefixo}-checklist-senha">
-                    <li data-regra="tamanho">Pelo menos 11 caracteres</li>
-                    <li data-regra="cpf">Os 6 primeiros dígitos do seu CPF</li>
-                    <li data-regra="especial">Um caractere especial (@, #, $, !...)</li>
-                    <li data-regra="palavra">Uma palavra com 4 letras ou mais</li>
-                    <li data-regra="iguais">As duas senhas iguais</li>
-                </ul>
             </div>`;
-        const linhaEnviar = form.querySelector('.form-submit-row');
-        form.insertBefore(etapa, linhaEnviar);
+        const el = (s) => cartao.querySelector(`#${id(s)}`);
+        applyMask(el('placa'), maskPlaca);
+        applyMask(el('renavam'), soDigitos(11));
+        applyMask(el('ano'), soDigitos(4));
+        applyMask(el('chassi'), maskChassi);
+        applyMask(el('prop-doc'), maskCpfCnpj);
+        ligarDropzone(cartao.querySelector('.upload-dropzone'));
+        return cartao;
+    }
 
+    function cartaoPreenchido(cartao) {
+        if (!cartao) return false;
+        const arquivo = cartao.querySelector('input[type="file"]');
+        if (arquivo && arquivo.files && arquivo.files.length > 0) return true;
+        return Array.from(cartao.querySelectorAll('.cartao-doc-form input, .cartao-doc-form select'))
+            .some((el) => el.value.trim() !== '');
+    }
+
+    // Recria os cartões de CRLV para a tipologia escolhida. Os cartões que
+    // continuam iguais (mesma posição e mesmo veículo) são mantidos.
+    // Devolve false se o motorista desistir da troca.
+    function montarCrlvs(prefixo) {
+        const lista = campo(prefixo, 'crlvs');
+        if (!lista) return true;
+        const papeis = papeisDe(prefixo);
+        const atuais = Array.from(lista.querySelectorAll('.cartao-doc'));
+        const sairao = atuais.filter((c, i) => c.dataset.papel !== papeis[i]);
+        if (sairao.some(cartaoPreenchido)) {
+            const nomes = sairao.filter(cartaoPreenchido).map((c) => nomeCrlv(c.dataset.papel)).join(', ');
+            if (!confirm(`Trocar o tipo de veículo apaga o que você já informou em: ${nomes}. Deseja continuar?`)) return false;
+        }
+        sairao.forEach((c) => c.remove());
+        papeis.forEach((papel, i) => {
+            const existente = lista.querySelector(`.cartao-doc[data-doc="crlv_${i + 1}"]`);
+            if (existente) return;
+            const novo = criarCartaoCrlv(prefixo, i + 1, papel);
+            const proximo = Array.from(lista.children).find((c) => Number(c.dataset.doc.slice(5)) > i + 1);
+            lista.insertBefore(novo, proximo || null);
+        });
+        return true;
+    }
+
+    // ---------- Caixinhas "Não tenho o PDF" ----------
+    function aplicarCaixas(prefixo) {
+        const temTipologia = papeisDe(prefixo).length > 0;
+        const aviso = campo(prefixo, 'aviso-tipologia');
+        const listaDocs = campo(prefixo, 'docs');
+        if (aviso) aviso.hidden = temTipologia;
+        if (listaDocs) listaDocs.hidden = !temTipologia;
+
+        documentosDe(prefixo).forEach(({ doc, obrigatorio }) => {
+            const cartao = cartaoDe(prefixo, doc);
+            if (!cartao) return;
+            const marcado = semPdf(prefixo, doc);
+            const ativo = temTipologia;
+            cartao.classList.toggle('sem-pdf', marcado);
+
+            // Anexo: some e é limpo quando a caixa é marcada
+            const anexo = cartao.querySelector('.cartao-doc-anexo');
+            const arquivo = anexoDe(prefixo, doc);
+            anexo.hidden = marcado;
+            if (marcado && arquivo && arquivo.value) {
+                arquivo.value = '';
+                const previa = document.getElementById(`preview-${arquivo.id}`);
+                if (previa) previa.innerHTML = '';
+            }
+
+            // Formulário do documento: só com a caixa marcada; escondido fica limpo e desativado
+            const form = cartao.querySelector('.cartao-doc-form');
+            form.hidden = !marcado;
+            form.querySelectorAll('input, select').forEach((el) => {
+                if (!marcado) el.value = '';
+                el.disabled = !marcado || !ativo;
+                el.required = marcado && ativo && obrigatorio;
+            });
+        });
+    }
+
+    function ligarSenha(prefixo) {
+        const etapa = campo(prefixo, 'senha')?.closest('.form-step');
+        if (!etapa) return;
         etapa.querySelectorAll('.btn-ver-senha').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const inp = btn.parentElement.querySelector('input');
@@ -486,8 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const atualizar = () => {
             const cpf = campo(prefixo, 'cpf')?.value || '';
-            const senha = document.getElementById(`${prefixo}-senha`).value;
-            const senha2 = document.getElementById(`${prefixo}-senha2`).value;
+            const senha = campo(prefixo, 'senha').value;
+            const senha2 = campo(prefixo, 'senha2').value;
             const exemplos = window.ajbSenha.exemplos(cpf);
             etapa.querySelectorAll('[data-exemplo]').forEach((el) => {
                 el.textContent = exemplos[Number(el.getAttribute('data-exemplo'))];
@@ -499,7 +436,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.classList.toggle('ok', ok === true);
             });
         };
-        ['cpf'].forEach((s) => campo(prefixo, s)?.addEventListener('input', atualizar));
         etapa.querySelectorAll('input').forEach((el) => el.addEventListener('input', atualizar));
         atualizar();
     }
@@ -539,82 +475,50 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fechar(); });
     }
 
-    // ---------- Regra "anexo OU campos" ----------
-    function aplicarRegra(prefixo) {
-        const temCnh = arquivosDe(prefixo, 'file-doc-cnh').length > 0;
-        const temCavalo = arquivosDe(prefixo, 'file-doc-crlv-cavalo').length > 0;
-        const temCarreta = arquivosDe(prefixo, 'file-doc-crlv-carreta').length > 0;
-        const semCarreta = !!document.getElementById(`${prefixo}-sem-carreta`)?.checked;
-
-        BLOCOS.cnh.forEach((s) => marcarObrigatorio(campo(prefixo, s), !temCnh));
-        BLOCOS.cavalo.forEach((s) => marcarObrigatorio(campo(prefixo, s), !temCavalo));
-        BLOCOS.carreta.forEach((s) => marcarObrigatorio(campo(prefixo, s), !semCarreta && !temCarreta));
-        CARRETA_SEMPRE.forEach((s) => marcarObrigatorio(campo(prefixo, s), !semCarreta));
-
-        // Etapas da carreta (06 e 07) ficam esmaecidas e desativadas sem carreta
-        const etapaCarreta = campo(prefixo, 'carreta-placa')?.closest('.form-step');
-        const etapaPropCarreta = campo(prefixo, 'prop-carreta-doc')?.closest('.form-step');
-        [etapaCarreta, etapaPropCarreta].forEach((etapa) => {
-            if (!etapa) return;
-            etapa.classList.toggle('etapa-desativada', semCarreta);
-            etapa.querySelectorAll('input:not([type="checkbox"]), select, textarea').forEach((el) => {
-                el.disabled = semCarreta;
-            });
-        });
-        const crlvCarreta = inputArquivo(prefixo, 'file-doc-crlv-carreta');
-        if (crlvCarreta) crlvCarreta.closest('.form-group')?.classList.toggle('etapa-desativada', semCarreta);
-
-        // Selos "documento anexado" nas etapas
-        const selo = (el, ativo, texto) => {
-            const etapa = el?.closest('.form-step');
-            if (!etapa) return;
-            let badge = etapa.querySelector('.selo-doc-anexado');
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'selo-doc-anexado';
-                etapa.querySelector('.step-title-row')?.appendChild(badge);
-            }
-            badge.textContent = texto;
-            badge.style.display = ativo ? '' : 'none';
-        };
-        selo(campo(prefixo, 'cnh-registro'), temCnh, 'CNH anexada · campos da CNH opcionais');
-        selo(campo(prefixo, 'veic-placa'), temCavalo, 'CRLV anexado · campos opcionais');
-        selo(campo(prefixo, 'carreta-placa'), temCarreta && !semCarreta, 'CRLV anexado · campos opcionais');
-    }
-
     function validarArquivos(prefixo) {
-        for (const idBase of Object.keys(ARQUIVOS)) {
-            for (const f of arquivosDe(prefixo, idBase)) {
+        for (const { doc, titulo, obrigatorio } of documentosDe(prefixo)) {
+            if (semPdf(prefixo, doc)) continue;
+            const arquivos = arquivosDe(prefixo, doc);
+            const artigo = doc === 'cnh' ? 'a' : 'o';
+            if (obrigatorio && arquivos.length === 0) return `Anexe ${artigo} ${titulo} ou marque que não tem o PDF.`;
+            if (arquivos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${artigo} ${titulo}.`;
+            for (const f of arquivos) {
                 if (!TIPOS_ARQUIVO.includes(f.type)) return `O arquivo "${f.name}" não é PDF, JPG ou PNG.`;
                 if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
             }
-        }
-        if (arquivosDe(prefixo, 'file-doc-residencia').length === 0) {
-            return 'Anexe o comprovante de residência na etapa 08.';
         }
         return null;
     }
 
     function montarEnvio(prefixo) {
+        const docs = documentosDe(prefixo);
+        const chaves = [...CAMPOS_ACESSO, ...(prefixo === 'pj' ? CAMPOS_EMPRESA : [])];
+        const sem_pdf = {};
+        docs.forEach(({ doc, campos }) => {
+            sem_pdf[doc] = semPdf(prefixo, doc);
+            if (sem_pdf[doc]) chaves.push(...campos);
+        });
         const dados = {};
-        CAMPOS_ENVIO.forEach((s) => {
+        chaves.forEach((s) => {
             const el = campo(prefixo, s);
             if (el && !el.disabled && el.value.trim()) dados[s] = el.value.trim();
         });
-        const documentos = [];
+        const documentos = {};
         const arquivos = [];
-        Object.entries(ARQUIVOS).forEach(([idBase, nomeDoc]) => {
-            arquivosDe(prefixo, idBase).forEach((f) => {
-                documentos.push({ campo: nomeDoc, nome: f.name, tipo: f.type, tamanho: f.size });
-                arquivos.push(f);
-            });
+        docs.forEach(({ doc }) => {
+            if (sem_pdf[doc]) return;
+            const lista = arquivosDe(prefixo, doc);
+            if (lista.length === 0) return;
+            documentos[doc] = lista.map((f) => ({ nome: f.name, tipo: f.type, tamanho: f.size }));
+            arquivos.push(...lista); // mesma ordem que o servidor usa em "indice"
         });
         return {
             corpo: {
                 tipo: prefixo,
-                email: (document.getElementById(`${prefixo}-email`)?.value || '').trim().toLowerCase(),
-                senha: document.getElementById(`${prefixo}-senha`)?.value || '',
-                sem_carreta: !!document.getElementById(`${prefixo}-sem-carreta`)?.checked,
+                tipologia: campo(prefixo, 'tipologia')?.value || '',
+                email: (campo(prefixo, 'email')?.value || '').trim().toLowerCase(),
+                senha: campo(prefixo, 'senha')?.value || '',
+                sem_pdf,
                 dados,
                 documentos
             },
@@ -642,15 +546,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function prepararFormulario(form, prefixo) {
         if (!form) return;
-        montarAviso(form);
-        const caixaSemCarreta = montarSemCarreta(form, prefixo);
-        montarAcesso(form, prefixo);
+        ligarSenha(prefixo);
 
-        Object.keys(ARQUIVOS).forEach((idBase) => {
-            inputArquivo(prefixo, idBase)?.addEventListener('change', () => aplicarRegra(prefixo));
+        const select = campo(prefixo, 'tipologia');
+        let tipologiaAnterior = select ? select.value : '';
+        select?.addEventListener('change', () => {
+            if (!montarCrlvs(prefixo)) {
+                select.value = tipologiaAnterior;
+                return;
+            }
+            tipologiaAnterior = select.value;
+            aplicarCaixas(prefixo);
         });
-        caixaSemCarreta?.addEventListener('change', () => aplicarRegra(prefixo));
-        aplicarRegra(prefixo);
+        // Caixinhas (inclusive as dos CRLVs criados depois)
+        campo(prefixo, 'docs')?.addEventListener('change', (e) => {
+            if (e.target.matches('.caixa-sem-pdf input')) aplicarCaixas(prefixo);
+        });
+        montarCrlvs(prefixo);
+        aplicarCaixas(prefixo);
 
         // Enter num campo não envia o cadastro
         form.addEventListener('keydown', (e) => {
@@ -661,12 +574,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            aplicarRegra(prefixo);
+            aplicarCaixas(prefixo);
             if (!form.reportValidity()) return;
 
             const cpf = campo(prefixo, 'cpf')?.value || '';
-            const senha = document.getElementById(`${prefixo}-senha`).value;
-            const senha2 = document.getElementById(`${prefixo}-senha2`).value;
+            const senha = campo(prefixo, 'senha').value;
+            const senha2 = campo(prefixo, 'senha2').value;
             const problemaSenha = window.ajbSenha.erro(senha, cpf);
             if (problemaSenha) return mostrarErro(problemaSenha);
             if (senha !== senha2) return mostrarErro('As duas senhas não são iguais.');
@@ -674,17 +587,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (problemaArquivo) return mostrarErro(problemaArquivo);
 
             const { corpo } = montarEnvio(prefixo);
-            const conta = (c) => corpo.documentos.filter((d) => d.campo === c).length;
-            const via = (c, rotulo) => conta(c) > 0 ? `${rotulo}: <b>documento anexado</b>` : `${rotulo}: <b>preenchido no formulário</b>`;
+            const situacao = ({ doc, campos, obrigatorio }) => {
+                const anexos = corpo.documentos[doc] || [];
+                if (anexos.length) return `Anexado (${esc(anexos.map((a) => a.nome).join(', '))})`;
+                if (corpo.sem_pdf[doc] && (obrigatorio || campos.some((c) => corpo.dados[c]))) return 'Preenchido no formulário';
+                return 'Não enviado (opcional)';
+            };
             const nome = `${corpo.dados['motorista-nome'] || ''} ${corpo.dados['motorista-sobrenome'] || ''}`.trim();
             document.getElementById('resumo-cadastro').innerHTML = `
-                <div>Tipo: <b>${prefixo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</b></div>
+                <div>Tipo: <b>${prefixo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</b> · Veículo: <b>${esc(corpo.tipologia)}</b></div>
                 <div>Motorista: <b>${esc(nome)}</b> · CPF <b>${esc(corpo.dados.cpf || '')}</b></div>
                 <div>E-mail: <b>${esc(corpo.email)}</b></div>
-                <div>${via('cnh', 'CNH')}</div>
-                <div>${via('crlv_cavalo', 'Cavalo')}</div>
-                <div>${corpo.sem_carreta ? 'Carreta: <b>não possui</b>' : via('crlv_carreta', 'Carreta')}</div>
-                <div>Arquivos anexados: <b>${corpo.documentos.length}</b></div>`;
+                ${documentosDe(prefixo).map((d) => `<div>${esc(d.titulo)}: <b>${situacao(d)}</b></div>`).join('')}`;
             envioEmAndamento = { form, prefixo };
             document.getElementById('modal-revisar-cadastro').classList.add('ativo');
         });
@@ -722,7 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Entre em contato com a gestão da AJBorges para completar o envio.';
             }
             form.reset();
-            aplicarRegra(prefixo);
+            form.querySelectorAll('.file-preview-list').forEach((c) => { c.innerHTML = ''; });
+            campo(prefixo, 'crlvs').innerHTML = '';
+            aplicarCaixas(prefixo);
             document.getElementById('modal-sucesso-cadastro').classList.add('ativo');
         } catch (err) {
             console.error('Erro ao enviar cadastro:', err);
