@@ -866,6 +866,8 @@ footer {
     padding: 70px 24px;
     border-top: 1px solid var(--cinza-borda);
     border-bottom: 1px solid var(--cinza-borda);
+    /* recorta o deslocamento inicial do .reveal-right (evita rolagem lateral) */
+    overflow-x: clip;
 }
 
 .sobre-nos-container {
@@ -1781,6 +1783,8 @@ footer {
     background-color: var(--fundo-principal);
     padding: 85px 24px;
     border-bottom: 1px solid var(--cinza-borda);
+    /* recorta o deslocamento inicial do .reveal-right (evita rolagem lateral) */
+    overflow-x: clip;
 }
 
 .solucoes-cta-container {
@@ -2151,6 +2155,8 @@ footer {
     position: relative;
     border-top: 1px solid var(--cinza-borda);
     border-bottom: 1px solid var(--cinza-borda);
+    /* recorta o deslocamento inicial do .reveal-right (evita rolagem lateral) */
+    overflow-x: clip;
 }
 
 .especialidades-container {
@@ -2976,5 +2982,23 @@ footer {
     .aj-feature-pill {
         font-size: 11.5px;
         padding: 6px 12px;
+    }
+}
+
+/* Celular pequeno (<=360px): menu menor para caber em no máximo 2 linhas */
+@media (max-width: 360px) {
+    .header-AJBorges {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .lista-links {
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 12px;
+        padding: 7.5px 9px;
     }
 }

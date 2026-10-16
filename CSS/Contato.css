@@ -520,6 +520,8 @@ main {
 /* SEÇÃO PRINCIPAL (FORMULÁRIO + DETALHES) */
 .contato-principal-section {
   padding: 60px 24px;
+  /* recorta o deslocamento inicial do .reveal-right (evita rolagem lateral) */
+  overflow-x: clip;
 }
 
 .contato-principal-container {
@@ -1388,6 +1390,12 @@ main {
     align-items: flex-start !important;
   }
 
+  /* botão do operacional pode quebrar linha (o min-width de 250px passava da tela) */
+  .torre-destaque-horizontal .btn-operacional-marilia {
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+
   .mapa-section {
     padding: 0 16px 50px;
   }
@@ -1750,5 +1758,23 @@ footer {
 
   .footer-container {
     padding: 0 20px 30px;
+  }
+}
+
+/* Celular pequeno (<=360px): menu menor para caber em no máximo 2 linhas */
+@media (max-width: 360px) {
+  .header-AJBorges {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .lista-links {
+    gap: 6px;
+  }
+
+  .lista-links li a,
+  .dropdown-toggle {
+    font-size: 12px;
+    padding: 7.5px 9px;
   }
 }

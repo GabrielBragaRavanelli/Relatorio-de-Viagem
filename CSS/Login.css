@@ -1046,6 +1046,14 @@ footer {
 }
 
 /* --- RESPONSIVIDADE MOBILE --- */
+/* Rodapé em 2 colunas no tablet e 1 no celular, como nas outras páginas */
+@media (max-width: 900px) {
+    .bloco-footer {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+}
+
 /* Tablet: menu com os tamanhos de antes para caber ao lado do logo */
 @media (max-width: 900px) {
     .lista-links {
@@ -1105,5 +1113,32 @@ footer {
     .dropdown-item:hover .dropdown-menu,
     .dropdown-item.active .dropdown-menu {
         transform: translateX(-50%) translateY(0);
+    }
+
+    .bloco-footer {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .footer-container {
+        padding: 0 20px 30px;
+    }
+}
+
+/* Celular pequeno (<=360px): menu menor para caber em no máximo 2 linhas */
+@media (max-width: 360px) {
+    .header-AJBorges {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .lista-links {
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 12px;
+        padding: 7.5px 9px;
     }
 }

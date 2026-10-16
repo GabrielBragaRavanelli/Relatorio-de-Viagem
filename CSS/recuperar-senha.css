@@ -400,6 +400,8 @@ header {
     border: 1px solid rgba(255, 255, 255, 0.8);
     padding: 38px 40px;
     backdrop-filter: blur(10px);
+    /* o JS rola até o card ao trocar de etapa (<=768px): para abaixo do header de 112px */
+    scroll-margin-top: 124px;
 }
 
 /* Cabeçalho do Card */
@@ -1773,6 +1775,8 @@ footer {
     .recuperar-card {
         padding: 26px 20px;
         border-radius: 16px;
+        /* header de até 178px nesta faixa (logo + menu em 2 linhas) */
+        scroll-margin-top: 190px;
     }
 
     .card-title {
@@ -1827,5 +1831,23 @@ footer {
         top: 80px;
         right: 12px;
         left: 12px;
+    }
+}
+
+/* Celular pequeno (<=360px): menu menor para caber em no máximo 2 linhas */
+@media (max-width: 360px) {
+    .header-AJBorges {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .lista-links {
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 12px;
+        padding: 7.5px 9px;
     }
 }

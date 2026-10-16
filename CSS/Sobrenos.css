@@ -1827,3 +1827,21 @@ footer {
 .stagger-delay:nth-child(9) { transition-delay: 0.70s; }
 .stagger-delay:nth-child(10) { transition-delay: 0.78s; }
 
+
+/* Celular pequeno (<=360px): menu menor para caber em no máximo 2 linhas */
+@media (max-width: 360px) {
+    .header-AJBorges {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .lista-links {
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        font-size: 12px;
+        padding: 7.5px 9px;
+    }
+}
