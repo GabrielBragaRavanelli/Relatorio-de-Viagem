@@ -113,6 +113,12 @@ Deno.serve(async (req: Request) => {
       return resp(req, 429, { erro: "Você já pediu vários códigos. Aguarde e confira sua caixa de entrada e o spam." });
     }
 
+    // E-mail provisório da frota (passo 9): não recebe nada, então é tratado
+    // como não cadastrado. Quem esqueceu a senha sem e-mail fala com a gestão.
+    if (email.endsWith("@sem-email.ajborges.com.br")) {
+      return resp(req, 404, { erro: "E-mail não encontrado. Confira o e-mail ou fale com a gestão." });
+    }
+
     // O e-mail está cadastrado?
     const { data: perfil, error: erroPerfil } = await admin.from("perfis")
       .select("id, status").eq("email", email).maybeSingle();

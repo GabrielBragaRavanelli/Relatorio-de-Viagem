@@ -14,6 +14,11 @@
 // NOVO (passo 5): o motorista só entra se o cadastro estiver APROVADO pela gestão
 // (perfis.status = 'aprovado'). A verificação acontece DEPOIS da senha conferida,
 // para não revelar a terceiros a situação de um CPF.
+//
+// NOVO (passo 9): a ficha de viagem é só para motoristas de FROTA
+// (perfis.vinculo = 'frota'). Outro vínculo recebe a mesma falha de "CPF ou
+// senha incorretos". Status 'inativo' (saiu da empresa) recebe 403. A resposta
+// de sucesso traz usuario.trocar_senha = perfis.senha_provisoria.
 // =============================================================================
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -187,13 +192,15 @@ Deno.serve(async (req: Request) => {
     if (tipo === "motorista") {
       const { data: perfil, error: perfilErr } = await admin
         .from("perfis")
-        .select("id, nome, email, role, status")
+        .select("id, nome, email, role, status, vinculo, senha_provisoria")
         .eq("cpf", identificador)
         .eq("role", "motorista")
         .maybeSingle();
 
       if (perfilErr) console.error("login: erro ao consultar perfis:", perfilErr.message);
       if (perfilErr || !perfil?.email) return falha();
+      // Só frota entra na ficha; a mesma falha genérica não revela que o CPF existe
+      if (perfil.vinculo !== "frota") return falha();
 
       const { data, error } = await authClient.auth.signInWithPassword({
         email: String(perfil.email).trim().toLowerCase(),
@@ -211,7 +218,9 @@ Deno.serve(async (req: Request) => {
       if (perfil.status !== "aprovado") {
         await admin.auth.admin.signOut(data.session.access_token).catch(() => {});
         await admin.rpc("limpar_tentativas", { p_chave: chaveConta });
-        const mensagem = perfil.status === "recusado"
+        const mensagem = perfil.status === "inativo"
+          ? "Seu acesso está desativado. Fale com a gestão da AJBorges."
+          : perfil.status === "recusado"
           ? "Seu cadastro não foi aprovado. Entre em contato com a gestão da AJBorges."
           : "Seu cadastro está em análise pela gestão. Você poderá entrar assim que ele for aprovado.";
         return resp(req, 403, { erro: mensagem, status_cadastro: perfil.status });
@@ -235,7 +244,12 @@ Deno.serve(async (req: Request) => {
           expires_at: data.session.expires_at,
           token_type: data.session.token_type,
         },
-        usuario: { id: data.user.id, nome: perfil.nome ?? "Motorista", role: "motorista" },
+        usuario: {
+          id: data.user.id,
+          nome: perfil.nome ?? "Motorista",
+          role: "motorista",
+          trocar_senha: perfil.senha_provisoria === true,
+        },
       });
     }
 
