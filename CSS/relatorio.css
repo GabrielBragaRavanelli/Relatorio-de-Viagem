@@ -3883,3 +3883,334 @@ input.campo-bloqueado-gestao {
     text-align: center;
 }
 
+
+/* ==========================================================================
+   MODAL: SENHA PROVISÓRIA DA FROTA (JavaScript/trocar-senha-frota.js)
+   ========================================================================== */
+body.msf-aberto {
+    overflow: hidden;
+}
+
+/* hidden precisa vencer o display dos blocos abaixo */
+#modal-senha-frota [hidden] {
+    display: none !important;
+}
+
+#modal-senha-frota {
+    overflow-y: auto;
+    align-items: flex-start;
+}
+
+.msf-card {
+    max-width: 560px;
+    text-align: left;
+    margin: auto;
+}
+
+.msf-topo {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.msf-icone {
+    font-size: 2.6rem;
+    margin-bottom: 8px;
+}
+
+.msf-titulo {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.45rem;
+    color: var(--cinza-escuro);
+    margin-bottom: 6px;
+}
+
+.msf-intro {
+    font-size: 0.92rem;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+}
+
+.msf-passos {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 18px;
+    padding: 0;
+}
+
+.msf-passos li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--cinza-medio);
+    font-weight: 600;
+}
+
+.msf-passos li + li::before {
+    content: '';
+    width: 22px;
+    height: 2px;
+    background: var(--cinza-borda);
+    margin-right: 2px;
+}
+
+.msf-passo-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cinza-hover);
+    border: 1px solid var(--cinza-borda-hover);
+    font-size: 0.78rem;
+}
+
+.msf-passos li.atual {
+    color: var(--azul-ajborges);
+}
+
+.msf-passos li.atual .msf-passo-num {
+    background: var(--azul-ajborges);
+    border-color: var(--azul-ajborges);
+    color: var(--branco);
+}
+
+.msf-passos li.feito .msf-passo-num {
+    background: var(--verde-sucesso-fundo);
+    border-color: var(--verde-sucesso-borda);
+    color: var(--verde-sucesso-escuro);
+}
+
+.msf-alerta {
+    background: var(--vermelho-perigo-fundo);
+    border: 1px solid var(--vermelho-perigo-borda);
+    color: var(--vermelho-perigo-escuro);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 14px;
+}
+
+.msf-alerta.msf-alerta-ok {
+    background: var(--verde-sucesso-fundo);
+    border-color: var(--verde-sucesso-borda);
+    color: var(--verde-sucesso-escuro);
+}
+
+.msf-desc {
+    font-size: 0.9rem;
+    color: var(--cinza-texto);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.msf-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.msf-campo > span:first-child {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cinza-escuro);
+}
+
+.msf-campo input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--cinza-borda);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--cinza-escuro);
+    background: var(--branco);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.msf-campo input:focus {
+    outline: none;
+    border-color: var(--azul-ajborges);
+    box-shadow: 0 0 0 3px var(--azul-ajborges-alpha);
+}
+
+.msf-senha-wrapper {
+    position: relative;
+    display: block;
+}
+
+.msf-senha-wrapper input {
+    padding-right: 84px;
+}
+
+/* o botão Mostrar/Ocultar já faz isso (o Edge mostraria um segundo olho) */
+.msf-senha-wrapper input::-ms-reveal {
+    display: none;
+}
+
+.msf-olho {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--cinza-hover);
+    border: 1px solid var(--cinza-borda);
+    color: var(--azul-ajborges);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.msf-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: -4px 0 6px;
+}
+
+.msf-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--azul-ajborges);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.msf-link:disabled {
+    color: var(--cinza-medio);
+    text-decoration: none;
+    cursor: default;
+}
+
+.msf-dica {
+    background: var(--azul-ajborges-suave);
+    border: 1px solid var(--azul-info-borda);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 0.86rem;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+}
+
+.msf-dica > strong {
+    color: var(--azul-ajborges-escuro);
+}
+
+.msf-dica p {
+    margin: 6px 0 10px;
+}
+
+.msf-dica code,
+.msf-exemplos code {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 5px;
+    padding: 1px 6px;
+    font-size: 0.85rem;
+    color: var(--azul-ajborges);
+}
+
+.msf-exemplos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    font-weight: 600;
+}
+
+.msf-requisitos {
+    list-style: none;
+    padding: 0;
+    margin: -4px 0 14px;
+    display: grid;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: var(--vermelho-perigo-escuro);
+}
+
+.msf-requisitos li.valido {
+    color: var(--verde-sucesso-escuro);
+}
+
+.msf-req-icone {
+    display: inline-block;
+    width: 16px;
+    font-weight: 700;
+}
+
+.msf-conferencia {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: -6px 0 6px;
+    min-height: 1em;
+}
+
+.msf-conferencia.ok {
+    color: var(--verde-sucesso-escuro);
+}
+
+.msf-conferencia.erro {
+    color: var(--vermelho-perigo-escuro);
+}
+
+.msf-botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.msf-sucesso {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--cinza-escuro);
+    line-height: 1.55;
+}
+
+@media (max-width: 560px) {
+    #modal-senha-frota {
+        padding: 12px;
+    }
+
+    .msf-card {
+        padding: 22px 18px;
+        border-radius: 16px;
+    }
+
+    .msf-titulo {
+        font-size: 1.25rem;
+    }
+
+    .msf-passo-nome {
+        display: none;
+    }
+
+    .msf-passos li.atual .msf-passo-nome {
+        display: inline;
+    }
+
+    .msf-botoes {
+        flex-direction: column-reverse;
+    }
+
+    .msf-botoes button {
+        width: 100%;
+    }
+
+    .msf-campo input {
+        font-size: 16px; /* evita o zoom automático do iPhone */
+    }
+}

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.4">
+    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.5">
     <link rel="icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="shortcut icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="apple-touch-icon" href="../Imagens/logo-header-1x.png">
@@ -2504,6 +2504,130 @@
     </main>
 
     <!-- ====================================================================
+         MODAL: SENHA PROVISÓRIA DA FROTA (JavaScript/trocar-senha-frota.js)
+         Aparece a cada acesso enquanto perfis.senha_provisoria = true.
+         ==================================================================== -->
+    <div class="modal-overlay-custom" id="modal-senha-frota" aria-hidden="true" role="dialog"
+        aria-modal="true" aria-labelledby="msf-titulo">
+        <div class="modal-card-custom msf-card">
+            <div class="msf-topo">
+                <div class="msf-icone" aria-hidden="true">🔐</div>
+                <h2 id="msf-titulo" class="msf-titulo">Crie uma senha só sua</h2>
+                <p class="msf-intro">Sua senha ainda é a senha provisória enviada pela AJBorges. Para proteger sua
+                    conta, cadastre seu e-mail e crie uma senha só sua.</p>
+            </div>
+
+            <ol class="msf-passos" id="msf-passos" aria-label="Etapas"></ol>
+
+            <div class="msf-alerta" id="msf-alerta" role="alert" hidden></div>
+
+            <!-- Passo 1: confirmar identidade -->
+            <section class="msf-etapa" data-etapa="identidade">
+                <p class="msf-desc">Primeiro, confirme que é você.</p>
+                <label class="msf-campo">
+                    <span>Nome completo</span>
+                    <input type="text" id="msf-nome" autocomplete="name" maxlength="120" placeholder="Como está no seu cadastro">
+                </label>
+                <label class="msf-campo">
+                    <span>CPF</span>
+                    <input type="text" id="msf-cpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
+                </label>
+                <div class="msf-botoes">
+                    <button type="button" class="modal-btn-acao-secundario" data-msf="agora-nao">Agora não</button>
+                    <button type="button" class="modal-btn-acao-primario" id="msf-btn-identidade">Continuar</button>
+                </div>
+            </section>
+
+            <!-- Passo 2: e-mail -->
+            <section class="msf-etapa" data-etapa="email" hidden>
+                <p class="msf-desc">Digite um e-mail que você usa. Vamos mandar um código para ele. É esse e-mail que
+                    recupera a sua senha se você esquecer.</p>
+                <label class="msf-campo">
+                    <span>Seu e-mail</span>
+                    <input type="email" id="msf-email" autocomplete="email" inputmode="email" maxlength="254" placeholder="seuemail@exemplo.com">
+                </label>
+                <div class="msf-botoes">
+                    <button type="button" class="modal-btn-acao-secundario" data-msf="agora-nao">Agora não</button>
+                    <button type="button" class="modal-btn-acao-primario" id="msf-btn-enviar-codigo">Enviar código</button>
+                </div>
+            </section>
+
+            <!-- Passo 3: código -->
+            <section class="msf-etapa" data-etapa="codigo" hidden>
+                <p class="msf-desc">Enviamos um código para <strong id="msf-email-destino"></strong>. Ele pode levar
+                    alguns minutos para chegar (confira também o spam).</p>
+                <label class="msf-campo">
+                    <span>Código</span>
+                    <input type="text" id="msf-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000">
+                </label>
+                <div class="msf-links">
+                    <button type="button" class="msf-link" id="msf-btn-reenviar">Reenviar código</button>
+                    <button type="button" class="msf-link" id="msf-btn-trocar-email">Usar outro e-mail</button>
+                </div>
+                <div class="msf-botoes">
+                    <button type="button" class="modal-btn-acao-secundario" data-msf="agora-nao">Agora não</button>
+                    <button type="button" class="modal-btn-acao-primario" id="msf-btn-confirmar-codigo">Confirmar código</button>
+                </div>
+            </section>
+
+            <!-- Passo 4: senha nova (mesma regra, dica e checklist da recuperação de senha) -->
+            <section class="msf-etapa" data-etapa="senha" hidden>
+                <div class="msf-dica">
+                    <strong>Dica para facilitar sua senha:</strong>
+                    <p>Use os <strong>6 primeiros dígitos do seu CPF</strong> com um <strong>caractere especial</strong>
+                        (como <code>@</code>, <code>#</code>, <code>$</code> ou <code>!</code>) e uma <strong>palavra de
+                            pelo menos 4 letras</strong>. O caractere pode ficar no <strong>início</strong>, no
+                        <strong>meio</strong> ou no <strong>final</strong>. Mínimo de <strong>11 caracteres</strong>.</p>
+                    <div class="msf-exemplos">
+                        <span>Exemplos:</span>
+                        <code id="msf-exemplo-1">@123456Rota</code>
+                        <code id="msf-exemplo-2">Frota#123456</code>
+                        <code id="msf-exemplo-3">Viagem123456!</code>
+                    </div>
+                </div>
+                <label class="msf-campo">
+                    <span>Senha nova</span>
+                    <span class="msf-senha-wrapper">
+                        <input type="password" id="msf-senha" autocomplete="new-password" maxlength="72" placeholder="Mínimo de 11 caracteres">
+                        <button type="button" class="msf-olho" data-msf="olho" aria-label="Mostrar ou ocultar senha">Mostrar</button>
+                    </span>
+                </label>
+                <ul class="msf-requisitos">
+                    <li data-req="tamanho"><span class="msf-req-icone">✕</span> Mínimo de 11 caracteres</li>
+                    <li data-req="cpf"><span class="msf-req-icone">✕</span> Os 6 primeiros dígitos do seu CPF</li>
+                    <li data-req="especial"><span class="msf-req-icone">✕</span> Pelo menos um caractere especial (ex: @, #, $, !)</li>
+                    <li data-req="palavra"><span class="msf-req-icone">✕</span> Uma palavra com pelo menos 4 letras</li>
+                    <li data-req="provisoria"><span class="msf-req-icone">✕</span> Diferente da senha provisória</li>
+                </ul>
+                <label class="msf-campo">
+                    <span>Confirmar senha nova</span>
+                    <span class="msf-senha-wrapper">
+                        <input type="password" id="msf-senha-confirmar" autocomplete="new-password" maxlength="72" placeholder="Digite de novo">
+                        <button type="button" class="msf-olho" data-msf="olho" aria-label="Mostrar ou ocultar senha">Mostrar</button>
+                    </span>
+                </label>
+                <p class="msf-conferencia" id="msf-conferencia"></p>
+                <div class="msf-botoes">
+                    <button type="button" class="modal-btn-acao-secundario" data-msf="agora-nao">Agora não</button>
+                    <button type="button" class="modal-btn-acao-primario" id="msf-btn-salvar-senha">Salvar senha nova</button>
+                </div>
+            </section>
+
+            <!-- Sucesso -->
+            <section class="msf-etapa" data-etapa="sucesso" hidden>
+                <div class="msf-sucesso">
+                    <div class="msf-icone" aria-hidden="true">✅</div>
+                    <p>Pronto! A partir de agora, entre com seu CPF e a senha nova. Se esquecer, use
+                        'Esqueceu a senha?' com este e-mail.</p>
+                </div>
+                <div class="msf-botoes">
+                    <button type="button" class="modal-btn-acao-primario" data-msf="fechar">Continuar para a ficha</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ====================================================================
          MODAL 0: REVISÃO ANTES DO ENVIO - MOTORISTA
          ==================================================================== -->
     <div class="modal-overlay-custom" id="modal-revisar-envio" aria-hidden="true" role="dialog"
@@ -2756,7 +2880,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
-    <script src="../JavaScript/relatorio.js?v=2.4"></script>
+    <script src="../JavaScript/senha.js"></script>
+    <script src="../JavaScript/trocar-senha-frota.js?v=1"></script>
+    <script src="../JavaScript/relatorio.js?v=2.5"></script>
     <script>
         // Mede a altura real do header fixo e grava em --altura-header,
         // usada pela .barra-admin-operacional para grudar logo abaixo dele.
