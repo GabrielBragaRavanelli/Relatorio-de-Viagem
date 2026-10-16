@@ -702,6 +702,17 @@
             return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // LGPD: recusado é apagado 90 dias após a recusa (edge function limpar-recusados).
+        // Só vale enquanto o status for "recusado"; outra decisão muda analisado_em.
+        const DIAS_RETENCAO_LGPD = 90;
+        function prazoExclusao(c) {
+            if (c.status !== 'recusado' || !c.analisado_em) return '';
+            const prazo = new Date(new Date(c.analisado_em).getTime() + DIAS_RETENCAO_LGPD * 86400000);
+            if (isNaN(prazo)) return '';
+            const urgente = prazo.getTime() - Date.now() <= 7 * 86400000;
+            return `<div style="font-size: 0.75rem; color: ${urgente ? '#b91c1c' : '#64748b'};${urgente ? ' font-weight: 600;' : ''}">Será apagado em ${prazo.toLocaleDateString('pt-BR')}</div>`;
+        }
+
         function aviso(msg) {
             alert(msg);
         }
@@ -800,7 +811,7 @@
                             <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${esc(placa)}</strong>${c.sem_carreta && !novo ? ' &bull; sem carreta' : ''}</div></td>
                         <td style="padding: 16px;"><span style="font-size: 0.82rem; color: #334155;">${cnh}</span></td>
                         <td style="padding: 16px; color: #64748b; font-size: 0.82rem;">${formatarData(c.criado_em)}</td>
-                        <td style="padding: 16px;">${ROTULOS_STATUS[c.status] || esc(c.status)}</td>
+                        <td style="padding: 16px;">${ROTULOS_STATUS[c.status] || esc(c.status)}${prazoExclusao(c)}</td>
                         <td style="padding: 16px 20px; text-align: right;">
                             <div class="table-action-btns" style="justify-content: flex-end;">
                                 <button type="button" class="btn-action-small" data-acao="abrir" data-id="${esc(c.id)}">Ver detalhes</button>
@@ -817,7 +828,8 @@
             let motivo = null;
             if (decisao === 'aprovado' && !confirm(`Aprovar o cadastro de ${c.nome}? O motorista passa a conseguir entrar no Portal da Frota.`)) return;
             if (decisao === 'recusado') {
-                motivo = prompt(`Motivo da recusa do cadastro de ${c.nome} (opcional):`, '');
+                motivo = prompt(`Motivo da recusa do cadastro de ${c.nome} (opcional):\n\n` +
+                    'Pela LGPD, os dados e documentos deste cadastro serão apagados automaticamente 90 dias após a recusa.', '');
                 if (motivo === null) return;
             }
             const { error } = await window.supabaseClient.rpc('analisar_cadastro', {
@@ -911,6 +923,7 @@
                     <div>Senha: <b>definida pelo motorista</b> (nunca é exibida)${perfil.senha_alterada_em ? ` · alterada em <b>${formatarData(perfil.senha_alterada_em)}</b>` : ''}</div>
                     ${c.analisado_por ? `<div>Última análise: <b>${esc(c.analisado_por)}</b> em ${formatarData(c.analisado_em)}</div>` : ''}
                     ${c.status === 'recusado' && c.motivo_recusa ? `<div style="color:#b91c1c;">Motivo da recusa: <b>${esc(c.motivo_recusa)}</b></div>` : ''}
+                    ${prazoExclusao(c)}
                 </div>
                 ${novo ? '' : `<fieldset class="cad-secao">
                     <legend>Documentos</legend>
