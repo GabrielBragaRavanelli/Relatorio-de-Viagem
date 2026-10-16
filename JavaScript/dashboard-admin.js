@@ -10,7 +10,6 @@
 
 const STORAGE_FICHAS_KEY = 'ajborges_fichas_viagem';
 const STORAGE_USER_KEY = 'ajborges_usuario_ativo';
-const STORAGE_CADASTROS_AGREGADOS_KEY = 'ajborges_cadastros_agregados';
 const STORAGE_CONFIG_META_DIESEL = 'ajborges_config_meta_diesel';
 const STORAGE_CONFIG_TAXA_BORGES = 'ajborges_config_taxa_borges';
 
@@ -1721,35 +1720,7 @@ function preencherSecoesSecundarias() {
         `;
     }
 
-    // 7. Seção Cadastros
-    const containerCadastros = document.getElementById('container-cadastros-resumo');
-    if (containerCadastros) {
-        let totalAgregados = 0;
-        try {
-            const cadSalvos = JSON.parse(localStorage.getItem(STORAGE_CADASTROS_AGREGADOS_KEY) || '[]');
-            if (Array.isArray(cadSalvos)) totalAgregados = cadSalvos.length;
-        } catch (e) {}
-
-        containerCadastros.innerHTML = `
-            <div class="config-grid">
-                <div class="config-card">
-                    <h4>Clientes da Operação</h4>
-                    <p>Shopee Brasil, Mercado Livre Logística e Cargas Alimentícias.</p>
-                    <span class="status-pill status-concluido">Contratos Ativos</span>
-                </div>
-                <div class="config-card">
-                    <h4>Cadastros de Agregados (${totalAgregados})</h4>
-                    <p>Fichas recebidas pelo formulário Seja um Agregado Conosco.</p>
-                    <a href="Dashboard-cadastro-motorista.html" style="font-size: 0.85rem; color: #4f46e5; text-decoration: none; font-weight: 600;">Ver Painel de Cadastros (${totalAgregados}) ➔</a>
-                </div>
-                <div class="config-card">
-                    <h4>Rotas Homologadas</h4>
-                    <p>Rotas definidas conforme demandas de fretes registradas.</p>
-                    <span class="status-pill status-concluido">Rotas em Operação</span>
-                </div>
-            </div>
-        `;
-    }
+    // 7. Seção Motoristas: carregada do banco ao abrir (carregarAbaMotoristas)
 
     // 8. Seção Planejamento
     const containerPlanejamento = document.getElementById('container-planejamento-resumo');
@@ -2197,7 +2168,13 @@ function classeConsumoDiesel(media) {
 
 function montarTabelaAnalise(cabecalhos, linhas, msgVazio = 'Sem dados para os filtros selecionados.') {
     if (linhas.length === 0) return `<div class="analises-vazio">${msgVazio}</div>`;
-    const ths = cabecalhos.map(c => `<th${c.num ? ' class="td-num"' : ''}${c.title ? ` title="${escaparHtml(c.title)}"` : ''}>${c.texto}</th>`).join('');
+    const ths = cabecalhos.map(c => {
+        const classes = [c.num ? 'td-num' : '', c.ordem ? 'th-ordenavel' : '', c.ordemAtiva ? `th-ordem-${c.ordemAtiva}` : ''].filter(Boolean);
+        const attrs = (classes.length ? ` class="${classes.join(' ')}"` : '') +
+            (c.title ? ` title="${escaparHtml(c.title)}"` : '') +
+            (c.ordem ? ` data-ordem="${c.ordem}" tabindex="0" aria-sort="${c.ordemAtiva === 'desc' ? 'descending' : c.ordemAtiva === 'asc' ? 'ascending' : 'none'}"` : '');
+        return `<th${attrs}>${c.texto}</th>`;
+    }).join('');
     return `
         <table class="tabela-fichas">
             <thead><tr>${ths}</tr></thead>
@@ -2263,6 +2240,97 @@ function obterFichasFiltradasAnalise() {
         });
 }
 
+// Tabela "Por placa": linhas calculadas em renderizarAnalises e ordem escolhida
+// no cabeçalho (padrão: Resultado, do maior para o menor)
+let linhasTabelaPlacas = [];
+const ordemTabelaPlacas = { chave: 'resultado', desc: true };
+
+const VALOR_ORDEM_PLACA = {
+    placa: (l) => l.placa,
+    fichas: (l) => l.t.fichas,
+    km: (l) => l.t.km,
+    receita: (l) => l.t.frete,
+    custos: (l) => l.custos,
+    resultado: (l) => l.t.resultado,
+    margem: (l) => l.margem,
+    custoKm: (l) => l.custoKm,
+    resultadoKm: (l) => l.resultadoKm,
+    litros: (l) => l.t.litros,
+    media: (l) => l.media,
+    diesel: (l) => l.t.diesel,
+    dieselKm: (l) => l.dieselKm
+};
+
+function ordenarTabelaPlacas(chave) {
+    if (!VALOR_ORDEM_PLACA[chave]) return;
+    if (ordemTabelaPlacas.chave === chave) ordemTabelaPlacas.desc = !ordemTabelaPlacas.desc;
+    else {
+        ordemTabelaPlacas.chave = chave;
+        ordemTabelaPlacas.desc = chave !== 'placa'; // texto começa de A a Z; números do maior para o menor
+    }
+    renderizarTabelaPlacasAnalise();
+}
+
+function renderizarTabelaPlacasAnalise() {
+    const elTabPlaca = document.getElementById('analises-tabela-placas');
+    if (!elTabPlaca) return;
+    const meta = (appState.config && typeof appState.config.metaDiesel === 'number') ? appState.config.metaDiesel : 2.40;
+    const moeda = (n) => formatarMoeda(n);
+    const reaisKm = (n) => formatarMoeda(n);
+    const { chave, desc } = ordemTabelaPlacas;
+    const valor = VALOR_ORDEM_PLACA[chave];
+
+    // Valores ausentes (divisão por zero) ficam sempre no fim
+    const linhas = [...linhasTabelaPlacas].sort((a, b) => {
+        const va = valor(a), vb = valor(b);
+        const na = va === null || va === undefined, nb = vb === null || vb === undefined;
+        if (na || nb) return na === nb ? 0 : na ? 1 : -1;
+        const cmp = typeof va === 'string' ? va.localeCompare(vb, 'pt-BR') : va - vb;
+        return desc ? -cmp : cmp;
+    });
+
+    const col = (texto, ordem, extra = {}) => ({ texto, ordem, num: ordem !== 'placa', ordemAtiva: chave === ordem ? (desc ? 'desc' : 'asc') : '', ...extra });
+    const classeResultado = (n) => n > 0 ? 'analises-positivo' : n < 0 ? 'analises-negativo' : '';
+
+    elTabPlaca.innerHTML = montarTabelaAnalise([
+        col('Placa', 'placa'), col('Fichas', 'fichas'), col('KM', 'km'),
+        col('Receita', 'receita', { title: 'Frete das fichas' }),
+        col('Custos', 'custos', { title: 'Diesel + pedágio + imposto + outras + comissão (só o que está na ficha)' }),
+        col('Resultado', 'resultado', { title: 'Receita − custos' }),
+        col('Margem %', 'margem', { title: 'Resultado ÷ receita' }),
+        col('Custo/km', 'custoKm', { title: 'Custos ÷ KM rodados' }),
+        col('Resultado/km', 'resultadoKm', { title: 'Resultado ÷ KM rodados' }),
+        col('Litros', 'litros'), col('Média km/l', 'media'),
+        { texto: 'vs. Meta', num: true },
+        col('Diesel', 'diesel'), col('Diesel/km', 'dieselKm')
+    ], linhas.map(({ placa, t, custos, margem, custoKm, resultadoKm, media, dieselKm }) => {
+        let vsMeta = '—';
+        if (media !== null && meta > 0) {
+            const dif = media - meta;
+            const pct = (dif / meta) * 100;
+            vsMeta = `<span class="diesel-badge ${classeConsumoDiesel(media)}">${dif >= 0 ? '+' : ''}${formatarNumeroBR(pct, 1)}%</span>`;
+        }
+        return `
+            <tr>
+                <td><span class="placa-box">${escaparHtml(placa)}</span></td>
+                <td class="td-num">${t.fichas}</td>
+                <td class="td-num">${t.km > 0 ? `${formatarNumeroBR(t.km, 0)} km` : '—'}</td>
+                <td class="td-num">${moeda(t.frete)}</td>
+                <td class="td-num">${moeda(custos)}</td>
+                <td class="td-num"><strong class="${classeResultado(t.resultado)}">${moeda(t.resultado)}</strong></td>
+                <td class="td-num"><span class="${classeResultado(t.resultado)}">${textoOuTraco(margem, n => `${formatarNumeroBR(n * 100, 1)}%`)}</span></td>
+                <td class="td-num">${textoOuTraco(custoKm, reaisKm)}</td>
+                <td class="td-num"><span class="${classeResultado(t.resultado)}">${textoOuTraco(resultadoKm, reaisKm)}</span></td>
+                <td class="td-num">${t.litros > 0 ? `${formatarNumeroBR(t.litros, 2)} L` : '—'}</td>
+                <td class="td-num">${textoOuTraco(media, n => `${formatarNumeroBR(n, 2)} km/l`)}</td>
+                <td class="td-num">${vsMeta}</td>
+                <td class="td-num">${moeda(t.diesel)}</td>
+                <td class="td-num">${textoOuTraco(dieselKm, reaisKm)}</td>
+            </tr>
+        `;
+    }));
+}
+
 function renderizarAnalises() {
     const secao = document.getElementById('view-analises');
     if (!secao) return;
@@ -2303,13 +2371,17 @@ function renderizarAnalises() {
             { classe: 'card-entrada', rotulo: 'Frete total', valor: moeda(total.frete) },
             { classe: 'card-saida', rotulo: 'Comissão total', valor: moeda(total.comissao) },
             { classe: 'card-saida', rotulo: 'Despesas totais', valor: moeda(total.despesas), nota: 'Diesel + pedágio + imposto + outras' },
-            { classe: 'card-resultado', rotulo: 'Resultado', valor: moeda(total.resultado), nota: 'Frete − despesas − comissão' },
+            {
+                classe: 'card-resultado', rotulo: 'Resultado do período', valor: moeda(total.resultado),
+                classeValor: total.resultado > 0 ? 'analises-positivo' : total.resultado < 0 ? 'analises-negativo' : '',
+                nota: `Margem ${textoOuTraco(dividirOuNulo(total.resultado, total.frete), n => `${formatarNumeroBR(n * 100, 1)}%`)} · frete − despesas − comissão`
+            },
             { classe: 'card-frota-kpi', rotulo: 'Média km/l', valor: textoOuTraco(mediaGeral, kmlTxt), nota: `Meta: ${formatarNumeroBR(meta, 2)} km/l` }
         ];
         elResumo.innerHTML = cards.map(c => `
             <div class="kpi-card ${c.classe}">
                 <span class="kpi-label">${c.rotulo}</span>
-                <h3 class="kpi-value">${c.valor}</h3>
+                <h3 class="kpi-value${c.classeValor ? ` ${c.classeValor}` : ''}">${c.valor}</h3>
                 ${c.nota ? `<span class="kpi-meta-text">${c.nota}</span>` : ''}
             </div>
         `).join('');
@@ -2378,45 +2450,26 @@ function renderizarAnalises() {
         }
     }, motoristas.length > 0);
 
-    // ---------------- 3. Por placa / veículo ----------------
+    // ---------------- 3. Por placa / veículo (lucratividade + consumo) ----------------
     const porPlaca = {};
     lista.forEach(item => {
         const placa = (item.ficha.placas || '').trim() || 'Placa não informada';
         (porPlaca[placa] = porPlaca[placa] || []).push(item);
     });
-    const placas = Object.keys(porPlaca)
-        .map(placa => ({ placa, t: somarValoresAnalise(porPlaca[placa]) }))
-        .sort((a, b) => b.t.km - a.t.km);
-
-    const elTabPlaca = document.getElementById('analises-tabela-placas');
-    if (elTabPlaca) {
-        elTabPlaca.innerHTML = montarTabelaAnalise([
-            { texto: 'Placa' }, { texto: 'Fichas', num: true }, { texto: 'KM', num: true }, { texto: 'Litros', num: true },
-            { texto: 'Média km/l', num: true }, { texto: 'vs. Meta', num: true }, { texto: 'Diesel', num: true },
-            { texto: 'Diesel/km', num: true }
-        ], placas.map(({ placa, t }) => {
-            const media = dividirOuNulo(t.km, t.litros);
-            const dieselKm = dividirOuNulo(t.diesel, t.km);
-            let vsMeta = '—';
-            if (media !== null && meta > 0) {
-                const dif = media - meta;
-                const pct = (dif / meta) * 100;
-                vsMeta = `<span class="diesel-badge ${classeConsumoDiesel(media)}">${dif >= 0 ? '+' : ''}${formatarNumeroBR(pct, 1)}%</span>`;
-            }
-            return `
-                <tr>
-                    <td><span class="placa-box">${escaparHtml(placa)}</span></td>
-                    <td class="td-num">${t.fichas}</td>
-                    <td class="td-num">${t.km > 0 ? kmTxt(t.km) : '—'}</td>
-                    <td class="td-num">${t.litros > 0 ? `${formatarNumeroBR(t.litros, 2)} L` : '—'}</td>
-                    <td class="td-num">${textoOuTraco(media, kmlTxt)}</td>
-                    <td class="td-num">${vsMeta}</td>
-                    <td class="td-num">${moeda(t.diesel)}</td>
-                    <td class="td-num">${textoOuTraco(dieselKm, n => `R$ ${formatarNumeroBR(n, 2)}`)}</td>
-                </tr>
-            `;
-        }));
-    }
+    linhasTabelaPlacas = Object.keys(porPlaca).map(placa => {
+        const t = somarValoresAnalise(porPlaca[placa]);
+        // Custos = só o que está na ficha: diesel + pedágio + imposto + outras + comissão
+        const custos = t.despesas + t.comissao;
+        return {
+            placa, t, custos,
+            margem: dividirOuNulo(t.resultado, t.frete),
+            custoKm: dividirOuNulo(custos, t.km),
+            resultadoKm: dividirOuNulo(t.resultado, t.km),
+            media: dividirOuNulo(t.km, t.litros),
+            dieselKm: dividirOuNulo(t.diesel, t.km)
+        };
+    });
+    renderizarTabelaPlacasAnalise();
 
     // ---------------- 4. Por operação (Relação de Fretes) ----------------
     const porOperacao = {};
@@ -2634,6 +2687,8 @@ function alternarSecao(viewId) {
 
     // Gráficos da aba Análises são desenhados quando a aba fica visível
     if (viewId === 'analises') renderizarAnalises();
+    // Aba Motoristas (frota e terceiros) é lida do banco ao abrir
+    if (viewId === 'cadastros') carregarAbaMotoristas();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2868,6 +2923,7 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
     preencherSecoesSecundarias();
     carregarFiltroMotoristas();
     carregarMotoristasCadastrados();
+    inicializarAbaMotoristas();
 
     // Sincroniza com o Supabase e ativa o Realtime
     sincronizarFichasComSupabase();
@@ -2945,6 +3001,23 @@ ajbAoAutenticar(['admin', 'diretoria'], 'Login.html#admin', () => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', renderizarAnalises);
         });
+
+    // 6.4 Ordenação da tabela "Por placa" pelo cabeçalho
+    const tabelaPlacas = document.getElementById('analises-tabela-placas');
+    if (tabelaPlacas) {
+        tabelaPlacas.addEventListener('click', (e) => {
+            const th = e.target.closest('th[data-ordem]');
+            if (th) ordenarTabelaPlacas(th.getAttribute('data-ordem'));
+        });
+        tabelaPlacas.addEventListener('keydown', (e) => {
+            const th = e.target.closest('th[data-ordem]');
+            if (th && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                ordenarTabelaPlacas(th.getAttribute('data-ordem'));
+                tabelaPlacas.querySelector(`th[data-ordem="${th.getAttribute('data-ordem')}"]`)?.focus();
+            }
+        });
+    }
 
     // 7. Busca global em tempo real
     const inputBusca = document.getElementById('global-search-input');
@@ -3111,3 +3184,750 @@ function fazerLogoutAdmin() {
     }
 }
 window.fazerLogoutAdmin = fazerLogoutAdmin;
+
+
+// ==========================================================================
+// 13. ABA MOTORISTAS: FROTA (gerenciar-frota) × TERCEIROS E AGREGADOS
+//     Frota = perfis com vinculo 'frota' (RPC listar_motoristas_frota).
+//     Terceiros = cadastros_agregados, só consulta.
+//     Senhas nunca aparecem na tela, no console ou na lista.
+// ==========================================================================
+
+const DOMINIO_SEM_EMAIL = '@sem-email.ajborges.com.br';
+const TAMANHO_LOTE_IMPORTACAO = 50;
+
+const estadoMotoristas = {
+    iniciado: false,
+    frota: [],
+    terceiros: [],
+    cpfsFrota: new Set(),
+    cpfsTerceiros: new Set(),
+    importacao: [] // linhas da prévia
+};
+
+function cpfValidoBR(cpf) {
+    const d = somenteDigitos(cpf);
+    if (!/^\d{11}$/.test(d) || /^(\d)\1{10}$/.test(d)) return false;
+    const digito = (base, peso) => {
+        let soma = 0;
+        for (let i = 0; i < base.length; i++) soma += Number(base[i]) * (peso - i);
+        const resto = (soma * 10) % 11;
+        return resto === 10 ? 0 : resto;
+    };
+    return digito(d.slice(0, 9), 10) === Number(d[9]) && digito(d.slice(0, 10), 11) === Number(d[10]);
+}
+
+function formatarCpfCompleto(cpf) {
+    const d = somenteDigitos(cpf);
+    return d.length === 11 ? d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : d;
+}
+
+// 10 ou 11 dígitos; aceita com 55 (DDI) na frente. Devolve só os dígitos ou ''
+function limparCelularBR(valor) {
+    let d = somenteDigitos(valor);
+    if ((d.length === 12 || d.length === 13) && d.startsWith('55')) d = d.slice(2);
+    return d.length === 10 || d.length === 11 ? d : '';
+}
+
+function formatarCelularBR(valor) {
+    const d = somenteDigitos(valor);
+    if (d.length === 11) return d.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    if (d.length === 10) return d.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    return d;
+}
+
+function mascaraCpfDigitando(valor) {
+    const d = somenteDigitos(valor).slice(0, 11);
+    return d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+function mascaraCelularDigitando(valor) {
+    const d = somenteDigitos(valor).slice(0, 11);
+    if (d.length <= 2) return d.length ? `(${d}` : '';
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+// Mesma regra da edge function gerenciar-frota (senhaPadrao)
+function senhaPadraoFrota(cpf) {
+    return `${somenteDigitos(cpf).slice(0, 6)}@frota`;
+}
+
+function dataHoraBR(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+// Chama a edge function gerenciar-frota com o token da sessão (Verify JWT ligado)
+async function chamarGerenciarFrota(corpo) {
+    const c = window.supabaseClient;
+    if (!c) return { ok: false, status: 0, dados: { erro: 'Serviço indisponível no momento.' } };
+    const { data } = await c.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if (!token) return { ok: false, status: 401, dados: { erro: 'Sessão expirada. Entre novamente.' } };
+    try {
+        const resp = await fetch(`${SUPABASE_CONFIG.url}/functions/v1/gerenciar-frota`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(corpo)
+        });
+        let dados = {};
+        try { dados = await resp.json(); } catch (e) { /* resposta sem JSON */ }
+        return { ok: resp.ok, status: resp.status, dados };
+    } catch (e) {
+        return { ok: false, status: 0, dados: { erro: 'Falha de conexão. Tente novamente.' } };
+    }
+}
+
+// ---------------- Carregamento ----------------
+
+async function carregarAbaMotoristas() {
+    const c = window.supabaseClient;
+    if (!c) return;
+    const [frota, terceiros] = await Promise.all([
+        c.rpc('listar_motoristas_frota'),
+        c.from('cadastros_agregados')
+            .select('id, nome, cpf, celular, status, criado_em, tipologia:dados->>_tipologia')
+            .order('criado_em', { ascending: false })
+    ]);
+
+    if (frota.error) {
+        console.warn('Erro ao carregar a frota:', frota.error.message);
+        estadoMotoristas.frota = [];
+        const tbody = document.getElementById('mot-tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="tabela-empty-state">Não foi possível carregar a frota. Confira se o passo 9 do banco foi aplicado e atualize a página.</td></tr>';
+    } else {
+        estadoMotoristas.frota = Array.isArray(frota.data) ? frota.data : [];
+    }
+    if (terceiros.error) {
+        console.warn('Erro ao carregar terceiros:', terceiros.error.message);
+        estadoMotoristas.terceiros = [];
+    } else {
+        estadoMotoristas.terceiros = Array.isArray(terceiros.data) ? terceiros.data : [];
+    }
+
+    estadoMotoristas.cpfsFrota = new Set(estadoMotoristas.frota.map(m => somenteDigitos(m.cpf)).filter(Boolean));
+    estadoMotoristas.cpfsTerceiros = new Set(estadoMotoristas.terceiros.map(t => somenteDigitos(t.cpf)).filter(Boolean));
+
+    if (!frota.error) renderizarFrota();
+    renderizarTerceiros();
+}
+
+// ---------------- Aba Frota ----------------
+
+function situacaoMotorista(m) {
+    if (m.status === 'inativo') return 'inativo';
+    if (m.senha_provisoria) return 'provisoria';
+    return 'trocou';
+}
+
+function seloSituacaoMotorista(m) {
+    if (m.status === 'inativo') return '<span class="status-pill mot-selo-inativo">Inativo</span>';
+    if (m.status !== 'aprovado') return `<span class="status-pill mot-selo-inativo">${escaparHtml(m.status)}</span>`;
+    if (m.senha_provisoria) return '<span class="status-pill mot-selo-provisoria">Senha provisória</span>';
+    return '<span class="status-pill status-concluido">Ativo</span>';
+}
+
+function renderizarFrota() {
+    const lista = estadoMotoristas.frota;
+    const ativos = lista.filter(m => m.status === 'aprovado');
+    const naoTrocaram = ativos.filter(m => m.senha_provisoria);
+    const semEmail = lista.filter(m => !m.tem_email);
+    const inativos = lista.filter(m => m.status === 'inativo');
+
+    const qtdAba = document.getElementById('mot-aba-frota-qtd');
+    if (qtdAba) qtdAba.textContent = lista.length;
+
+    const elKpis = document.getElementById('mot-kpis');
+    if (elKpis) {
+        const cards = [
+            { classe: 'card-frota-kpi', rotulo: 'Motoristas da frota', valor: lista.length },
+            { classe: 'card-entrada', rotulo: 'Ativos', valor: ativos.length },
+            { classe: 'card-saida mot-kpi-alerta', rotulo: 'Ainda não trocaram a senha', valor: naoTrocaram.length,
+                nota: 'Clique para filtrar', filtro: 'provisoria' },
+            { classe: 'card-frota-kpi', rotulo: 'Sem e-mail', valor: semEmail.length },
+            { classe: 'card-resultado', rotulo: 'Inativos', valor: inativos.length, filtro: 'inativo' }
+        ];
+        elKpis.innerHTML = cards.map(c => `
+            <div class="kpi-card ${c.classe}${c.filtro ? ' mot-kpi-clicavel' : ''}"${c.filtro ? ` data-mot-filtro="${c.filtro}" role="button" tabindex="0"` : ''}>
+                <span class="kpi-label">${c.rotulo}</span>
+                <h3 class="kpi-value">${c.valor}</h3>
+                ${c.nota ? `<span class="kpi-meta-text">${c.nota}</span>` : ''}
+            </div>
+        `).join('');
+    }
+
+    const termo = normalizarNomePessoa(document.getElementById('mot-busca')?.value || '');
+    const termoDigitos = somenteDigitos(termo);
+    const situacao = document.getElementById('mot-filtro-situacao')?.value || '';
+
+    const filtrados = lista.filter(m => {
+        if (situacao) {
+            if (situacao === 'provisoria' && !(m.status === 'aprovado' && m.senha_provisoria)) return false;
+            if (situacao !== 'provisoria' && situacaoMotorista(m) !== situacao) return false;
+        }
+        if (!termo) return true;
+        if (normalizarNomePessoa(m.nome).includes(termo)) return true;
+        return termoDigitos.length >= 3 &&
+            (somenteDigitos(m.cpf).includes(termoDigitos) || somenteDigitos(m.telefone).includes(termoDigitos));
+    });
+
+    const info = document.getElementById('mot-info-registros');
+    if (info) info.textContent = `${filtrados.length} de ${lista.length} motorista(s)`;
+
+    const tbody = document.getElementById('mot-tbody');
+    if (!tbody) return;
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="tabela-empty-state">${lista.length === 0
+            ? 'Nenhum motorista da frota cadastrado. Use <strong>Adicionar motorista da frota</strong> ou <strong>Importar planilha</strong>.'
+            : 'Nenhum motorista encontrado para a busca ou o filtro.'}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtrados.map(m => {
+        const id = escaparHtml(m.id);
+        const tambemTerceiro = estadoMotoristas.cpfsTerceiros.has(somenteDigitos(m.cpf));
+        const inativo = m.status === 'inativo';
+        return `
+            <tr>
+                <td><strong>${escaparHtml(m.nome || 'Sem nome')}</strong>
+                    ${tambemTerceiro ? '<span class="mot-selo-duplo" title="Este CPF também tem cadastro de terceiro/agregado">também é terceiro</span>' : ''}</td>
+                <td class="mot-nowrap">${escaparHtml(formatarCpfCompleto(m.cpf))}</td>
+                <td class="mot-nowrap">${escaparHtml(formatarCelularBR(m.telefone)) || '—'}</td>
+                <td>${m.tem_email ? escaparHtml(m.email) : '<span class="mot-texto-cinza">sem e-mail</span>'}</td>
+                <td>${seloSituacaoMotorista(m)}</td>
+                <td class="mot-nowrap">${m.ultimo_acesso ? escaparHtml(dataHoraBR(m.ultimo_acesso)) : '<span class="mot-texto-cinza">nunca entrou</span>'}</td>
+                <td>
+                    <div class="table-actions-cell">
+                        <button type="button" class="btn-acao-resumo" data-mot-acao="redefinir_senha" data-id="${id}">Redefinir para senha provisória</button>
+                        ${inativo
+                            ? `<button type="button" class="btn-acao-aprovar-rapido" data-mot-acao="reativar" data-id="${id}">Reativar</button>`
+                            : `<button type="button" class="btn-acao-excluir" data-mot-acao="desativar" data-id="${id}">Desativar</button>`}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function executarAcaoMotorista(acao, id) {
+    const m = estadoMotoristas.frota.find(x => x.id === id);
+    if (!m) return;
+    const nome = m.nome || 'este motorista';
+    const perguntas = {
+        redefinir_senha: `Redefinir a senha de ${nome}?\n\nA senha volta a ser a provisória: os 6 primeiros dígitos do CPF + @frota. As sessões abertas dele serão encerradas e, no próximo acesso, o site pede para ele criar uma senha própria.`,
+        desativar: `Desativar ${nome}?\n\nEle deixa de conseguir entrar na ficha de viagem e as sessões abertas são encerradas. Dá para reativar depois.`,
+        reativar: `Reativar ${nome}?\n\nEle volta a conseguir entrar na ficha de viagem com a senha atual.`
+    };
+    if (!perguntas[acao] || !confirm(perguntas[acao])) return;
+
+    const r = await chamarGerenciarFrota({ acao, id });
+    if (!r.ok) {
+        exibirToast((r.dados && r.dados.erro) || 'Não foi possível concluir a ação.', 'erro');
+        return;
+    }
+    const mensagens = {
+        redefinir_senha: 'Senha redefinida para a provisória (6 primeiros dígitos do CPF + @frota).',
+        desativar: 'Motorista desativado.',
+        reativar: 'Motorista reativado.'
+    };
+    exibirToast(mensagens[acao], 'sucesso');
+    await carregarAbaMotoristas();
+}
+
+// CSV com nome e celular de quem ainda não trocou a senha (para a gestão cobrar)
+function exportarQuemNaoTrocou() {
+    const lista = estadoMotoristas.frota.filter(m => m.status === 'aprovado' && m.senha_provisoria);
+    if (lista.length === 0) {
+        exibirToast('Todos os motoristas ativos já trocaram a senha.', 'info');
+        return;
+    }
+    // Aspas duplas e proteção contra fórmula (= + - @ no início vira texto)
+    const celula = (v) => {
+        let s = String(v ?? '');
+        if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+        return `"${s.replace(/"/g, '""')}"`;
+    };
+    const linhas = [['Nome', 'Celular'], ...lista.map(m => [m.nome || '', formatarCelularBR(m.telefone)])];
+    const csv = '﻿' + linhas.map(l => l.map(celula).join(';')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `frota-nao-trocou-senha-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---------------- Aba Terceiros e agregados ----------------
+
+const ROTULOS_STATUS_TERCEIRO = {
+    pendente: '<span class="status-pill status-pendente">Pendente</span>',
+    analise: '<span class="status-pill status-aguardando-confirmacao">Em análise</span>',
+    aprovado: '<span class="status-pill status-concluido">Aprovado</span>',
+    recusado: '<span class="status-pill mot-selo-recusado">Recusado</span>'
+};
+
+function renderizarTerceiros() {
+    const lista = estadoMotoristas.terceiros;
+    const qtdAba = document.getElementById('mot-aba-terceiros-qtd');
+    if (qtdAba) qtdAba.textContent = lista.length;
+
+    const termo = normalizarNomePessoa(document.getElementById('ter-busca')?.value || '');
+    const termoDigitos = somenteDigitos(termo);
+    const filtrados = lista.filter(t => {
+        if (!termo) return true;
+        if (normalizarNomePessoa(t.nome).includes(termo)) return true;
+        return termoDigitos.length >= 3 && somenteDigitos(t.cpf).includes(termoDigitos);
+    });
+
+    const info = document.getElementById('ter-info-registros');
+    if (info) info.textContent = `${filtrados.length} de ${lista.length} cadastro(s)`;
+
+    const tbody = document.getElementById('ter-tbody');
+    if (!tbody) return;
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="tabela-empty-state">${lista.length === 0
+            ? 'Nenhum cadastro de terceiro ou agregado recebido.'
+            : 'Nenhum cadastro encontrado para a busca.'}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtrados.map(t => {
+        const tambemFrota = estadoMotoristas.cpfsFrota.has(somenteDigitos(t.cpf));
+        return `
+            <tr>
+                <td><strong>${escaparHtml(t.nome || 'Sem nome')}</strong>
+                    ${tambemFrota ? '<span class="mot-selo-duplo" title="Este CPF também é de um motorista da frota">também é frota</span>' : ''}</td>
+                <td class="mot-nowrap">${escaparHtml(formatarCpfCompleto(t.cpf))}</td>
+                <td class="mot-nowrap">${escaparHtml(formatarCelularBR(t.celular)) || '—'}</td>
+                <td>${escaparHtml(t.tipologia || '—')}</td>
+                <td>${ROTULOS_STATUS_TERCEIRO[t.status] || escaparHtml(t.status)}</td>
+                <td class="mot-nowrap">${escaparHtml(dataHoraBR(t.criado_em)) || '—'}</td>
+                <td>
+                    <div class="table-actions-cell">
+                        <a class="btn-acao-conferir" href="Dashboard-cadastro-motorista.html?id=${encodeURIComponent(t.id)}">Abrir no Dashboard de Cadastros</a>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ---------------- Modais (abrir/fechar) ----------------
+
+function abrirModalMotoristas(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function fecharModalMotoristas(modal) {
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    if (modal.id === 'modal-mot-adicionar') limparFormularioMotorista();
+}
+
+// ---------------- Adicionar motorista ----------------
+
+let senhaInicialEditada = false;
+
+function mostrarAlertaMot(id, texto) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = texto || '';
+    el.hidden = !texto;
+}
+
+function limparFormularioMotorista() {
+    const form = document.getElementById('mot-add-form');
+    if (!form) return;
+    form.reset();
+    form.hidden = false;
+    senhaInicialEditada = false;
+    const senha = document.getElementById('mot-add-senha');
+    senha.type = 'password';
+    document.getElementById('mot-add-olho').textContent = 'Mostrar';
+    mostrarAlertaMot('mot-add-alerta', '');
+    document.getElementById('mot-add-sucesso').hidden = true;
+    document.getElementById('mot-add-salvar').hidden = false;
+    document.getElementById('mot-add-outro').hidden = true;
+    avaliarSenhaInicial();
+}
+
+// Checklist do senha.js só quando a senha não é a padrão
+function avaliarSenhaInicial() {
+    const cpf = document.getElementById('mot-add-cpf')?.value || '';
+    const senha = document.getElementById('mot-add-senha')?.value || '';
+    const lista = document.getElementById('mot-add-requisitos');
+    if (!lista || !window.ajbSenha) return;
+    const ehPadrao = senha !== '' && senha === senhaPadraoFrota(cpf);
+    lista.hidden = senha === '' || ehPadrao;
+    const r = window.ajbSenha.regras(senha, cpf);
+    lista.querySelectorAll('[data-req]').forEach(li => {
+        const ok = r[li.getAttribute('data-req')] === true;
+        li.classList.toggle('valido', ok);
+        li.querySelector('span').textContent = ok ? '✓' : '✕';
+    });
+}
+
+function preencherSenhaPadrao(forcar) {
+    const cpf = document.getElementById('mot-add-cpf')?.value || '';
+    const senha = document.getElementById('mot-add-senha');
+    if (!senha) return;
+    if (forcar) senhaInicialEditada = false;
+    if (!senhaInicialEditada) senha.value = somenteDigitos(cpf).length === 11 ? senhaPadraoFrota(cpf) : '';
+    avaliarSenhaInicial();
+}
+
+async function salvarMotoristaFrota() {
+    const nome = document.getElementById('mot-add-nome').value.replace(/\s+/g, ' ').trim();
+    const cpf = somenteDigitos(document.getElementById('mot-add-cpf').value);
+    const celular = limparCelularBR(document.getElementById('mot-add-celular').value);
+    const email = document.getElementById('mot-add-email').value.trim().toLowerCase();
+    const senha = document.getElementById('mot-add-senha').value;
+
+    if (!nome) return mostrarAlertaMot('mot-add-alerta', 'Informe o nome completo.');
+    if (!cpfValidoBR(cpf)) return mostrarAlertaMot('mot-add-alerta', 'CPF inválido. Confira os números.');
+    if (!celular) return mostrarAlertaMot('mot-add-alerta', 'Celular inválido. Use DDD + número.');
+    if (email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith(DOMINIO_SEM_EMAIL))) {
+        return mostrarAlertaMot('mot-add-alerta', 'E-mail inválido. Corrija ou deixe em branco.');
+    }
+    if (!senha) return mostrarAlertaMot('mot-add-alerta', 'Informe a senha inicial ou use a senha padrão.');
+    const ehPadrao = senha === senhaPadraoFrota(cpf);
+    if (!ehPadrao && window.ajbSenha) {
+        const problema = window.ajbSenha.erro(senha, cpf);
+        if (problema) return mostrarAlertaMot('mot-add-alerta', `Senha fora da regra: ${problema}`);
+    }
+    mostrarAlertaMot('mot-add-alerta', '');
+
+    const botao = document.getElementById('mot-add-salvar');
+    botao.disabled = true;
+    botao.textContent = 'Cadastrando...';
+    try {
+        const corpo = { acao: 'criar', nome, cpf, celular };
+        if (email) corpo.email = email;
+        if (!ehPadrao) corpo.senha = senha; // a padrão o servidor monta sozinho
+        const r = await chamarGerenciarFrota(corpo);
+        if (!r.ok) {
+            let msg = (r.dados && r.dados.erro) || 'Não foi possível cadastrar o motorista.';
+            if (r.status === 409 && /cpf/i.test(msg)) msg = 'CPF já cadastrado.';
+            else if (r.status === 409 && /e-mail/i.test(msg)) msg = 'Este e-mail já está em uso.';
+            else if (r.status === 400 && /senha/i.test(msg)) msg = `Senha fora da regra: ${msg}`;
+            mostrarAlertaMot('mot-add-alerta', msg);
+            return;
+        }
+        // A senha não fica em lugar nenhum da tela
+        const form = document.getElementById('mot-add-form');
+        form.reset();
+        form.hidden = true;
+        senhaInicialEditada = false;
+        document.getElementById('mot-add-sucesso').hidden = false;
+        botao.hidden = true;
+        document.getElementById('mot-add-outro').hidden = false;
+        await carregarAbaMotoristas();
+    } finally {
+        botao.disabled = false;
+        botao.textContent = 'Cadastrar motorista';
+    }
+}
+
+// ---------------- Importar planilha (CSV lido só no navegador) ----------------
+
+function normalizarCabecalho(texto) {
+    return String(texto || '').replace(/^﻿/, '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .trim().toLowerCase();
+}
+
+// Lê CSV com aspas ("a;b" e "" dentro de aspas). Separador: ; ou ,
+function lerCsv(texto) {
+    const conteudo = texto.replace(/^﻿/, '');
+    const primeira = conteudo.split(/\r?\n/, 1)[0] || '';
+    const separador = (primeira.split(';').length >= primeira.split(',').length) ? ';' : ',';
+    const linhas = [];
+    let linha = [], campo = '', aspas = false;
+    for (let i = 0; i < conteudo.length; i++) {
+        const ch = conteudo[i];
+        if (aspas) {
+            if (ch === '"' && conteudo[i + 1] === '"') { campo += '"'; i++; }
+            else if (ch === '"') aspas = false;
+            else campo += ch;
+        } else if (ch === '"') aspas = true;
+        else if (ch === separador) { linha.push(campo); campo = ''; }
+        else if (ch === '\n' || ch === '\r') {
+            if (ch === '\r' && conteudo[i + 1] === '\n') i++;
+            linha.push(campo); linhas.push(linha); linha = []; campo = '';
+        } else campo += ch;
+    }
+    if (campo !== '' || linha.length) { linha.push(campo); linhas.push(linha); }
+    return linhas;
+}
+
+function montarPreviaImportacao(texto) {
+    const linhas = lerCsv(texto);
+    if (linhas.length < 2) return { erro: 'A planilha está vazia ou só tem o cabeçalho.' };
+
+    const cab = linhas[0].map(normalizarCabecalho);
+    const achar = (...nomes) => cab.findIndex(c => nomes.includes(c));
+    const iNome = achar('motorista', 'nome');
+    const iCpf = achar('cpf');
+    const iContato = achar('contato', 'celular', 'telefone');
+    const iTipo = achar('tipo');
+    if (iNome < 0 || iCpf < 0 || iContato < 0) {
+        return { erro: 'Não achei as colunas necessárias. A primeira linha precisa ter: Motorista (ou Nome), CPF e Contato (ou Celular/Telefone).' };
+    }
+
+    const vistos = new Set();
+    const itens = [];
+    let ignoradas = 0;
+    linhas.slice(1).forEach((cols, idx) => {
+        const numeroLinha = idx + 2; // linha 1 é o cabeçalho
+        if (cols.every(c => !String(c || '').trim())) return; // linha em branco
+        if (iTipo >= 0 && normalizarCabecalho(cols[iTipo]) !== 'frota') { ignoradas++; return; }
+
+        const nome = String(cols[iNome] || '').replace(/\s+/g, ' ').trim();
+        const cpf = somenteDigitos(cols[iCpf]);
+        const celular = limparCelularBR(cols[iContato]);
+        let situacao = 'OK';
+        if (!cpfValidoBR(cpf)) situacao = 'CPF inválido';
+        else if (!nome) situacao = 'Sem nome';
+        else if (!celular) situacao = 'Sem celular';
+        else if (vistos.has(cpf)) situacao = 'CPF repetido na planilha';
+        else if (estadoMotoristas.cpfsFrota.has(cpf)) situacao = 'Já cadastrado';
+        if (cpfValidoBR(cpf)) vistos.add(cpf);
+        itens.push({ linha: numeroLinha, nome, cpf, celular, celularOriginal: String(cols[iContato] || '').trim(), situacao });
+    });
+    return { itens, ignoradas, temTipo: iTipo >= 0 };
+}
+
+function renderizarPreviaImportacao(previa) {
+    const resumo = document.getElementById('mot-imp-resumo');
+    const box = document.getElementById('mot-imp-previa');
+    const confirmar = document.getElementById('mot-imp-confirmar');
+    document.getElementById('mot-imp-resultado').innerHTML = '';
+    document.getElementById('mot-imp-progresso').hidden = true;
+
+    if (previa.erro) {
+        mostrarAlertaMot('mot-imp-alerta', previa.erro);
+        resumo.innerHTML = '';
+        box.innerHTML = '';
+        confirmar.disabled = true;
+        estadoMotoristas.importacao = [];
+        return;
+    }
+    mostrarAlertaMot('mot-imp-alerta', '');
+    estadoMotoristas.importacao = previa.itens;
+
+    const conta = {};
+    previa.itens.forEach(i => { conta[i.situacao] = (conta[i.situacao] || 0) + 1; });
+    const ok = conta.OK || 0;
+    const partes = Object.entries(conta).filter(([s]) => s !== 'OK').map(([s, n]) => `${n} ${escaparHtml(s.toLowerCase())}`);
+    if (previa.temTipo) partes.push(`${previa.ignoradas} ignorada(s) (não é frota)`);
+    resumo.innerHTML = `<strong>${ok}</strong> linha(s) prontas para importar${partes.length ? ` · ${partes.join(' · ')}` : ''}`;
+
+    box.innerHTML = previa.itens.length === 0 ? '<div class="analises-vazio">Nenhuma linha de frota na planilha.</div>' : `
+        <table class="tabela-fichas">
+            <thead><tr><th>Linha</th><th>Motorista</th><th>CPF</th><th>Celular</th><th>Situação</th></tr></thead>
+            <tbody>${previa.itens.map(i => `
+                <tr>
+                    <td>${i.linha}</td>
+                    <td>${escaparHtml(i.nome) || '—'}</td>
+                    <td class="mot-nowrap">${escaparHtml(formatarCpfCompleto(i.cpf)) || '—'}</td>
+                    <td class="mot-nowrap">${escaparHtml(i.celular ? formatarCelularBR(i.celular) : i.celularOriginal) || '—'}</td>
+                    <td><span class="status-pill ${i.situacao === 'OK' ? 'status-concluido' : i.situacao === 'Já cadastrado' ? 'mot-selo-inativo' : 'mot-selo-recusado'}">${escaparHtml(i.situacao)}</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>`;
+    confirmar.disabled = ok === 0;
+}
+
+function atualizarProgressoImportacao(feitos, total) {
+    const pct = total ? Math.round((feitos / total) * 100) : 0;
+    document.getElementById('mot-imp-progresso').hidden = false;
+    document.getElementById('mot-imp-progresso-preenchido').style.width = `${pct}%`;
+    document.getElementById('mot-imp-progresso-texto').textContent = `${feitos} de ${total} (${pct}%)`;
+}
+
+async function confirmarImportacao() {
+    const linhasOk = estadoMotoristas.importacao.filter(i => i.situacao === 'OK');
+    if (linhasOk.length === 0) return;
+    if (!confirm(`Importar ${linhasOk.length} motorista(s) da frota com a senha padrão (6 primeiros dígitos do CPF + @frota)?`)) return;
+
+    const botao = document.getElementById('mot-imp-confirmar');
+    const arquivo = document.getElementById('mot-imp-arquivo');
+    botao.disabled = true;
+    arquivo.disabled = true;
+    const total = { criados: 0, pulados: [], erros: [] };
+    atualizarProgressoImportacao(0, linhasOk.length);
+
+    for (let i = 0; i < linhasOk.length; i += TAMANHO_LOTE_IMPORTACAO) {
+        const lote = linhasOk.slice(i, i + TAMANHO_LOTE_IMPORTACAO);
+        const r = await chamarGerenciarFrota({
+            acao: 'importar',
+            motoristas: lote.map(l => ({ linha: l.linha, nome: l.nome, cpf: l.cpf, celular: l.celular }))
+        });
+        if (r.ok) {
+            total.criados += r.dados.criados || 0;
+            total.pulados.push(...(r.dados.pulados || []));
+            total.erros.push(...(r.dados.erros || []));
+        } else {
+            const motivo = (r.dados && r.dados.erro) || 'Falha ao enviar este lote.';
+            lote.forEach(l => total.erros.push({ linha: l.linha, cpf_final4: l.cpf.slice(-4), motivo }));
+        }
+        atualizarProgressoImportacao(Math.min(i + lote.length, linhasOk.length), linhasOk.length);
+    }
+
+    const item = (x) => `<li>Linha ${escaparHtml(x.linha)} · CPF final ${escaparHtml(x.cpf_final4)}: ${escaparHtml(x.motivo)}</li>`;
+    document.getElementById('mot-imp-resultado').innerHTML = `
+        <div class="mot-imp-resultado-box">
+            <p><strong>${total.criados}</strong> criado(s) · <strong>${total.pulados.length}</strong> pulado(s) · <strong>${total.erros.length}</strong> com erro</p>
+            ${total.pulados.length ? `<h4>Pulados</h4><ul>${total.pulados.map(item).join('')}</ul>` : ''}
+            ${total.erros.length ? `<h4>Com erro</h4><ul>${total.erros.map(item).join('')}</ul>` : ''}
+        </div>`;
+    estadoMotoristas.importacao = [];
+    document.getElementById('mot-imp-previa').innerHTML = '';
+    document.getElementById('mot-imp-resumo').innerHTML = '';
+    arquivo.disabled = false;
+    arquivo.value = '';
+    document.getElementById('mot-imp-nome-arquivo').textContent = 'Nenhum arquivo escolhido';
+    exibirToast(`Importação concluída: ${total.criados} motorista(s) criado(s).`, total.erros.length ? 'info' : 'sucesso');
+    await carregarAbaMotoristas();
+}
+
+function limparImportacao() {
+    estadoMotoristas.importacao = [];
+    const arquivo = document.getElementById('mot-imp-arquivo');
+    if (arquivo) { arquivo.value = ''; arquivo.disabled = false; }
+    document.getElementById('mot-imp-nome-arquivo').textContent = 'Nenhum arquivo escolhido';
+    document.getElementById('mot-imp-resumo').innerHTML = '';
+    document.getElementById('mot-imp-previa').innerHTML = '';
+    document.getElementById('mot-imp-resultado').innerHTML = '';
+    document.getElementById('mot-imp-progresso').hidden = true;
+    document.getElementById('mot-imp-confirmar').disabled = true;
+    mostrarAlertaMot('mot-imp-alerta', '');
+}
+
+// ---------------- Ligações ----------------
+
+function inicializarAbaMotoristas() {
+    if (estadoMotoristas.iniciado || !document.getElementById('view-cadastros')) return;
+    estadoMotoristas.iniciado = true;
+
+    // Abas internas Frota / Terceiros
+    document.querySelectorAll('[data-mot-aba]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const aba = btn.getAttribute('data-mot-aba');
+            document.querySelectorAll('[data-mot-aba]').forEach(b => {
+                const ativa = b === btn;
+                b.classList.toggle('active', ativa);
+                b.setAttribute('aria-selected', ativa ? 'true' : 'false');
+            });
+            document.getElementById('mot-painel-frota').hidden = aba !== 'frota';
+            document.getElementById('mot-painel-terceiros').hidden = aba !== 'terceiros';
+        });
+    });
+
+    document.getElementById('mot-busca')?.addEventListener('input', renderizarFrota);
+    document.getElementById('mot-filtro-situacao')?.addEventListener('change', renderizarFrota);
+    document.getElementById('ter-busca')?.addEventListener('input', renderizarTerceiros);
+
+    // Cards clicáveis aplicam o filtro de situação (clicar de novo limpa)
+    const aplicarFiltroCard = (card) => {
+        const select = document.getElementById('mot-filtro-situacao');
+        if (!select) return;
+        const filtro = card.getAttribute('data-mot-filtro');
+        select.value = select.value === filtro ? '' : filtro;
+        renderizarFrota();
+    };
+    const kpis = document.getElementById('mot-kpis');
+    kpis?.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-mot-filtro]');
+        if (card) aplicarFiltroCard(card);
+    });
+    kpis?.addEventListener('keydown', (e) => {
+        const card = e.target.closest('[data-mot-filtro]');
+        if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); aplicarFiltroCard(card); }
+    });
+
+    document.getElementById('mot-tbody')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-mot-acao]');
+        if (btn) executarAcaoMotorista(btn.getAttribute('data-mot-acao'), btn.getAttribute('data-id'));
+    });
+
+    document.getElementById('mot-btn-exportar')?.addEventListener('click', exportarQuemNaoTrocou);
+    document.getElementById('mot-btn-adicionar')?.addEventListener('click', () => {
+        limparFormularioMotorista();
+        abrirModalMotoristas('modal-mot-adicionar');
+        setTimeout(() => document.getElementById('mot-add-nome')?.focus(), 100);
+    });
+    document.getElementById('mot-btn-importar')?.addEventListener('click', () => {
+        limparImportacao();
+        abrirModalMotoristas('modal-mot-importar');
+    });
+
+    // Fechar modais (botões, clique fora e Esc)
+    ['modal-mot-adicionar', 'modal-mot-importar'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal || e.target.closest('[data-mot-fechar]')) fecharModalMotoristas(modal);
+        });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        document.querySelectorAll('#modal-mot-adicionar.active, #modal-mot-importar.active').forEach(fecharModalMotoristas);
+    });
+
+    // Formulário de adicionar
+    const cpf = document.getElementById('mot-add-cpf');
+    const senha = document.getElementById('mot-add-senha');
+    cpf?.addEventListener('input', () => {
+        cpf.value = mascaraCpfDigitando(cpf.value);
+        preencherSenhaPadrao(false);
+    });
+    const celular = document.getElementById('mot-add-celular');
+    celular?.addEventListener('input', () => { celular.value = mascaraCelularDigitando(celular.value); });
+    senha?.addEventListener('input', () => {
+        senhaInicialEditada = senha.value !== senhaPadraoFrota(cpf.value);
+        avaliarSenhaInicial();
+    });
+    document.getElementById('mot-add-padrao')?.addEventListener('click', () => preencherSenhaPadrao(true));
+    document.getElementById('mot-add-olho')?.addEventListener('click', (e) => {
+        const mostrar = senha.type === 'password';
+        senha.type = mostrar ? 'text' : 'password';
+        e.currentTarget.textContent = mostrar ? 'Ocultar' : 'Mostrar';
+    });
+    document.getElementById('mot-add-salvar')?.addEventListener('click', salvarMotoristaFrota);
+    document.getElementById('mot-add-form')?.addEventListener('submit', (e) => { e.preventDefault(); salvarMotoristaFrota(); });
+    document.getElementById('mot-add-outro')?.addEventListener('click', () => {
+        limparFormularioMotorista();
+        document.getElementById('mot-add-nome')?.focus();
+    });
+
+    // Importação
+    document.getElementById('mot-imp-arquivo')?.addEventListener('change', (e) => {
+        const arquivo = e.target.files && e.target.files[0];
+        document.getElementById('mot-imp-nome-arquivo').textContent = arquivo ? arquivo.name : 'Nenhum arquivo escolhido';
+        if (!arquivo) return;
+        if (arquivo.size > 2 * 1024 * 1024) {
+            renderizarPreviaImportacao({ erro: 'Arquivo muito grande (máximo 2 MB).' });
+            return;
+        }
+        const leitor = new FileReader();
+        leitor.onload = () => renderizarPreviaImportacao(montarPreviaImportacao(String(leitor.result || '')));
+        leitor.onerror = () => renderizarPreviaImportacao({ erro: 'Não foi possível ler o arquivo.' });
+        leitor.readAsText(arquivo, 'utf-8');
+    });
+    document.getElementById('mot-imp-confirmar')?.addEventListener('click', confirmarImportacao);
+}

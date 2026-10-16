@@ -1001,9 +1001,21 @@
             } catch (e) { /* ignora */ }
         }
 
+        // ?id=<cadastro> (vindo da aba Motoristas do dashboard admin): abre o modal desse cadastro
+        function abrirCadastroDaUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id') || '';
+            if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+            params.delete('id');
+            const qs = params.toString();
+            history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
+            if (cadastros.some((x) => x.id === id)) abrirModal(id);
+            else aviso('Cadastro não encontrado. Ele pode ter sido apagado.');
+        }
+
         function iniciarPainel() {
             atualizarUsuarioLateral();
-            carregarCadastros();
+            carregarCadastros().then(abrirCadastroDaUrl);
 
             document.getElementById('driver-search-input')?.addEventListener('input', (e) => {
                 termoBusca = e.target.value.toLowerCase().trim();

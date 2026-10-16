@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <!-- Folha de Estilos do Dashboard -->
-    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.1">
+    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.2">
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
@@ -212,7 +212,7 @@
                         </a>
                     </li>
 
-                    <!-- 9. Cadastros -->
+                    <!-- 9. Motoristas (frota e terceiros) -->
                     <li class="nav-item">
                         <a href="#cadastros" class="nav-link" data-view="cadastros" id="nav-link-cadastros">
                             <span class="nav-icon">
@@ -225,7 +225,7 @@
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                 </svg>
                             </span>
-                            <span class="nav-text">Cadastros</span>
+                            <span class="nav-text">Motoristas</span>
                         </a>
                     </li>
 
@@ -840,7 +840,7 @@
                         <div class="chart-card-header">
                             <div>
                                 <h3 class="chart-card-title">Por Placa / Veículo</h3>
-                                <p class="chart-card-subtitle">Consumo comparado com a meta de diesel configurada (<strong id="analises-meta-diesel">2,40</strong> km/l)</p>
+                                <p class="chart-card-subtitle">Lucratividade com os custos lançados na ficha (sem custo fixo da placa) e consumo comparado com a meta de diesel configurada (<strong id="analises-meta-diesel">2,40</strong> km/l). Clique no cabeçalho para ordenar.</p>
                             </div>
                         </div>
                         <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-placas"></div>
@@ -1125,13 +1125,101 @@
                     </div>
                 </section>
 
-                <!-- SEÇÃO 9: CADASTROS -->
+                <!-- SEÇÃO 9: MOTORISTAS (FROTA × TERCEIROS E AGREGADOS) -->
                 <section class="admin-section" id="view-cadastros">
                     <div class="section-page-header">
-                        <h2>📝 Cadastros Operacionais (Clientes, Motoristas, Rotas)</h2>
-                        <p>Gerenciamento da base de dados e parceiros da AJBorges Transportes.</p>
+                        <h2>🧑‍✈️ Motoristas</h2>
+                        <p>Frota: motoristas contratados que usam a ficha de viagem. Terceiros e agregados: cadastros
+                            recebidos pelo formulário Seja um Agregado (só consulta).</p>
                     </div>
-                    <div class="placeholder-section-card" id="container-cadastros-resumo"></div>
+
+                    <div class="tabs-fichas-filtro mot-abas" role="tablist">
+                        <button type="button" class="mot-aba-btn active" data-mot-aba="frota" role="tab" aria-selected="true">
+                            Frota <span class="tab-counter-badge" id="mot-aba-frota-qtd">0</span>
+                        </button>
+                        <button type="button" class="mot-aba-btn" data-mot-aba="terceiros" role="tab" aria-selected="false">
+                            Terceiros e agregados <span class="tab-counter-badge" id="mot-aba-terceiros-qtd">0</span>
+                        </button>
+                    </div>
+
+                    <!-- ===== Aba Frota ===== -->
+                    <div id="mot-painel-frota">
+                        <div class="kpi-grid mot-kpi-grid" id="mot-kpis"></div>
+
+                        <div class="tabela-toolbar mot-toolbar">
+                            <div class="toolbar-left toolbar-filtros-linha">
+                                <div class="filtro-cliente-wrapper">
+                                    <label for="mot-busca">Buscar:</label>
+                                    <input type="search" id="mot-busca" class="input-filtro-custom" placeholder="Nome, CPF ou celular" autocomplete="off">
+                                </div>
+                                <div class="filtro-cliente-wrapper">
+                                    <label for="mot-filtro-situacao">Situação:</label>
+                                    <select id="mot-filtro-situacao" class="select-filtro-custom">
+                                        <option value="">Todos</option>
+                                        <option value="provisoria">Não trocou a senha</option>
+                                        <option value="trocou">Trocou</option>
+                                        <option value="inativo">Inativos</option>
+                                    </select>
+                                </div>
+                                <span class="tabela-info-registros" id="mot-info-registros">0 motorista(s)</span>
+                            </div>
+                            <div class="toolbar-right mot-botoes">
+                                <button type="button" class="btn-acao-resumo" id="mot-btn-exportar">Exportar lista de quem não trocou</button>
+                                <button type="button" class="btn-acao-resumo" id="mot-btn-importar">Importar planilha</button>
+                                <button type="button" class="btn-modal-sucesso" id="mot-btn-adicionar">+ Adicionar motorista da frota</button>
+                            </div>
+                        </div>
+
+                        <div class="placeholder-section-card tabela-fichas-responsive mot-card-tabela">
+                            <table class="tabela-fichas">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>CPF</th>
+                                        <th>Celular</th>
+                                        <th>E-mail</th>
+                                        <th>Situação</th>
+                                        <th>Último acesso</th>
+                                        <th class="text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mot-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== Aba Terceiros e agregados (só consulta) ===== -->
+                    <div id="mot-painel-terceiros" hidden>
+                        <div class="tabela-toolbar mot-toolbar">
+                            <div class="toolbar-left toolbar-filtros-linha">
+                                <div class="filtro-cliente-wrapper">
+                                    <label for="ter-busca">Buscar:</label>
+                                    <input type="search" id="ter-busca" class="input-filtro-custom" placeholder="Nome ou CPF" autocomplete="off">
+                                </div>
+                                <span class="tabela-info-registros" id="ter-info-registros">0 cadastro(s)</span>
+                            </div>
+                            <div class="toolbar-right mot-botoes">
+                                <a href="Dashboard-cadastro-motorista.html" class="btn-acao-resumo mot-link-botao">Abrir Dashboard de Cadastros</a>
+                            </div>
+                        </div>
+
+                        <div class="placeholder-section-card tabela-fichas-responsive mot-card-tabela">
+                            <table class="tabela-fichas">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>CPF</th>
+                                        <th>Celular</th>
+                                        <th>Tipo de veículo</th>
+                                        <th>Status</th>
+                                        <th>Enviado em</th>
+                                        <th class="text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ter-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- SEÇÃO 10: PORTAL DO MOTORISTA (DIRETO) -->
@@ -1277,6 +1365,121 @@
     </div>
 
     <!-- ====================================================================
+         MODAL: ADICIONAR MOTORISTA DA FROTA (edge function gerenciar-frota)
+         ==================================================================== -->
+    <div class="modal-overlay" id="modal-mot-adicionar" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="mot-add-titulo">
+        <div class="modal-container mot-modal">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="badge-modal">Frota</span>
+                    <h3 class="modal-title" id="mot-add-titulo">Adicionar motorista da frota</h3>
+                </div>
+                <button type="button" class="modal-close-btn" data-mot-fechar aria-label="Fechar">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mot-alerta" id="mot-add-alerta" role="alert" hidden></div>
+
+                <form id="mot-add-form" class="mot-form" novalidate>
+                    <label class="mot-campo mot-campo-largo">
+                        <span>Nome completo <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-add-nome" maxlength="120" autocomplete="off" required>
+                    </label>
+                    <label class="mot-campo">
+                        <span>CPF <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-add-cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required>
+                    </label>
+                    <label class="mot-campo">
+                        <span>Celular <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-add-celular" inputmode="tel" maxlength="15" placeholder="(00) 00000-0000" autocomplete="off" required>
+                    </label>
+                    <label class="mot-campo mot-campo-largo">
+                        <span>E-mail <em>(opcional)</em></span>
+                        <input type="email" id="mot-add-email" maxlength="254" autocomplete="off" placeholder="motorista@exemplo.com">
+                        <small>Se ficar em branco, o motorista cadastra o e-mail dele no primeiro acesso.</small>
+                    </label>
+                    <div class="mot-campo mot-campo-largo">
+                        <label for="mot-add-senha">Senha inicial <b class="mot-obrigatorio">*</b></label>
+                        <div class="mot-senha-linha">
+                            <input type="password" id="mot-add-senha" maxlength="72" autocomplete="new-password" required>
+                            <button type="button" class="btn-acao-resumo" id="mot-add-olho">Mostrar</button>
+                            <button type="button" class="btn-acao-resumo" id="mot-add-padrao">Usar senha padrão</button>
+                        </div>
+                        <small id="mot-add-senha-dica">Senha padrão: os 6 primeiros dígitos do CPF + @frota. O motorista é
+                            incentivado a trocar no primeiro acesso.</small>
+                        <ul class="mot-requisitos" id="mot-add-requisitos" hidden>
+                            <li data-req="tamanho"><span>✕</span> Mínimo de 11 caracteres</li>
+                            <li data-req="cpf"><span>✕</span> Os 6 primeiros dígitos do CPF</li>
+                            <li data-req="especial"><span>✕</span> Pelo menos um caractere especial (ex: @, #, $, !)</li>
+                            <li data-req="palavra"><span>✕</span> Uma palavra com pelo menos 4 letras</li>
+                        </ul>
+                    </div>
+                </form>
+
+                <div class="mot-sucesso" id="mot-add-sucesso" hidden>
+                    <strong>✓ Motorista cadastrado na frota.</strong>
+                    <p>Ele já pode entrar com o CPF e a senha inicial; no primeiro acesso, o site pede para ele
+                        cadastrar o e-mail e criar uma senha própria.</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-secundario" data-mot-fechar>Fechar</button>
+                <button type="button" class="btn-modal-secundario" id="mot-add-outro" hidden>Cadastrar outro</button>
+                <button type="button" class="btn-modal-sucesso" id="mot-add-salvar">Cadastrar motorista</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL: IMPORTAR PLANILHA DA FROTA (CSV lido só no navegador)
+         ==================================================================== -->
+    <div class="modal-overlay" id="modal-mot-importar" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="mot-imp-titulo">
+        <div class="modal-container mot-modal mot-modal-largo">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="badge-modal">Frota</span>
+                    <h3 class="modal-title" id="mot-imp-titulo">Importar planilha da frota</h3>
+                </div>
+                <button type="button" class="modal-close-btn" data-mot-fechar aria-label="Fechar">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info-box mot-imp-explicacao">
+                    <p>Salve a planilha como CSV UTF-8 (no Excel: Arquivo → Salvar como → CSV UTF-8). Colunas
+                        necessárias: Motorista, CPF, Contato.</p>
+                    <p>Se tiver a coluna <strong>Tipo</strong>, só as linhas <strong>FROTA</strong> são importadas.
+                        O arquivo é lido aqui no navegador; só as linhas OK são enviadas.</p>
+                    <p>Cada motorista entra com a senha padrão (6 primeiros dígitos do CPF + @frota).</p>
+                </div>
+
+                <label class="mot-arquivo">
+                    <input type="file" id="mot-imp-arquivo" accept=".csv,text/csv">
+                    <span>Escolher arquivo CSV</span>
+                    <em id="mot-imp-nome-arquivo">Nenhum arquivo escolhido</em>
+                </label>
+
+                <div class="mot-alerta" id="mot-imp-alerta" role="alert" hidden></div>
+                <div class="mot-imp-resumo" id="mot-imp-resumo"></div>
+                <div class="tabela-fichas-responsive mot-imp-previa" id="mot-imp-previa"></div>
+
+                <div class="mot-progresso" id="mot-imp-progresso" hidden>
+                    <div class="mot-progresso-barra"><div id="mot-imp-progresso-preenchido"></div></div>
+                    <span id="mot-imp-progresso-texto">0%</span>
+                </div>
+                <div id="mot-imp-resultado"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-secundario" data-mot-fechar>Fechar</button>
+                <button type="button" class="btn-modal-sucesso" id="mot-imp-confirmar" disabled>Confirmar importação</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
          TOAST DE NOTIFICAÇÃO
          ==================================================================== -->
     <div class="admin-toast" id="admin-toast" role="alert" aria-live="assertive" aria-hidden="true">
@@ -1289,7 +1492,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
-    <script src="../JavaScript/dashboard-admin.js?v=2.1"></script>
+    <script src="../JavaScript/senha.js"></script>
+    <script src="../JavaScript/dashboard-admin.js?v=2.2"></script>
 </body>
 
 </html>
