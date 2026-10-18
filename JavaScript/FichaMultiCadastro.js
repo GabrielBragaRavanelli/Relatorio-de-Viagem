@@ -451,35 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function ligarSenha(prefixo) {
-        const etapa = campo(prefixo, 'senha')?.closest('.form-step');
-        if (!etapa) return;
-        etapa.querySelectorAll('.btn-ver-senha').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const inp = btn.parentElement.querySelector('input');
-                inp.type = inp.type === 'password' ? 'text' : 'password';
-            });
-        });
-
-        const atualizar = () => {
-            const cpf = campo(prefixo, 'cpf')?.value || '';
-            const senha = campo(prefixo, 'senha').value;
-            const senha2 = campo(prefixo, 'senha2').value;
-            const exemplos = window.ajbSenha.exemplos(cpf);
-            etapa.querySelectorAll('[data-exemplo]').forEach((el) => {
-                el.textContent = exemplos[Number(el.getAttribute('data-exemplo'))];
-            });
-            const r = window.ajbSenha.regras(senha, cpf);
-            r.iguais = senha.length > 0 && senha === senha2;
-            etapa.querySelectorAll('.checklist-senha li').forEach((li) => {
-                const ok = r[li.getAttribute('data-regra')];
-                li.classList.toggle('ok', ok === true);
-            });
-        };
-        etapa.querySelectorAll('input').forEach((el) => el.addEventListener('input', atualizar));
-        atualizar();
-    }
-
     function montarModais() {
         const wrap = document.createElement('div');
         wrap.innerHTML = `
@@ -499,11 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="modal-cadastro-caixa">
                     <div class="icone-sucesso">✓</div>
                     <h3 id="titulo-sucesso">Cadastro enviado!</h3>
-                    <p id="texto-sucesso-cadastro">Recebemos seus dados e documentos. Assim que a gestão da AJBorges
-                        aprovar o cadastro, você poderá entrar no Portal da Frota com o seu CPF e a senha que criou.</p>
+                    <p id="texto-sucesso-cadastro">Cadastro enviado! O time de Cadastros da AJBorges vai conferir seus documentos e entrar em contato pelo celular informado.</p>
                     <div class="modal-cadastro-botoes">
-                        <a class="btn-modal-sec" href="index.html">Página principal</a>
-                        <a class="btn-modal-pri" href="Login.html#motorista">Ir para o login</a>
+                        <a class="btn-modal-pri" href="index.html">Página principal</a>
                     </div>
                 </div>
             </div>`;
@@ -556,8 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
             corpo: {
                 tipo: prefixo,
                 tipologia: campo(prefixo, 'tipologia')?.value || '',
-                email: (campo(prefixo, 'email')?.value || '').trim().toLowerCase(),
-                senha: campo(prefixo, 'senha')?.value || '',
+                email: (campo(prefixo, 'email')?.value || '').trim().toLowerCase() || null,
                 sem_pdf,
                 dados,
                 documentos
@@ -586,7 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function prepararFormulario(form, prefixo) {
         if (!form) return;
-        ligarSenha(prefixo);
 
         const select = campo(prefixo, 'tipologia');
         let tipologiaAnterior = select ? select.value : '';
@@ -617,12 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
             aplicarCaixas(prefixo);
             if (!form.reportValidity()) return;
 
-            const cpf = campo(prefixo, 'cpf')?.value || '';
-            const senha = campo(prefixo, 'senha').value;
-            const senha2 = campo(prefixo, 'senha2').value;
-            const problemaSenha = window.ajbSenha.erro(senha, cpf);
-            if (problemaSenha) return mostrarErro(problemaSenha);
-            if (senha !== senha2) return mostrarErro('As duas senhas não são iguais.');
             const problemaArquivo = validarArquivos(prefixo);
             if (problemaArquivo) return mostrarErro(problemaArquivo);
 
@@ -637,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('resumo-cadastro').innerHTML = `
                 <div>Tipo: <b>${prefixo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</b> · Veículo: <b>${esc(corpo.tipologia)}</b></div>
                 <div>Motorista: <b>${esc(nome)}</b> · CPF <b>${esc(corpo.dados.cpf || '')}</b></div>
-                <div>E-mail: <b>${esc(corpo.email)}</b></div>
+                <div>E-mail: <b>${esc(corpo.email || 'Não informado')}</b></div>
                 ${documentosDe(prefixo).map((d) => `<div>${esc(d.titulo)}: <b>${situacao(d)}</b></div>`).join('')}`;
             envioEmAndamento = { form, prefixo };
             document.getElementById('modal-revisar-cadastro').classList.add('ativo');

@@ -2,13 +2,20 @@
 // EDGE FUNCTION: solicitar-cadastro
 // AJBorges Transporte & Logística - "Seja um Agregado Conosco"
 //
-// Recebe a ficha de cadastro (PF ou PJ), cria a conta do motorista com status
-// PENDENTE (o login só funciona depois que a gestão aprovar), grava a ficha em
-// cadastros_agregados e devolve URLs assinadas para o navegador enviar os
-// documentos ao bucket privado "documentos-cadastro".
+// Recebe a ficha de cadastro de TERCEIROS e AGREGADOS (PF ou PJ).
+//
+// Terceiros NÃO possuem conta de login nem acessam fichas de viagem.
+// Esta função:
+//   1. Valida dados de identificação e veículos;
+//   2. Não cria usuário em auth.users (user_id vai null);
+//   3. Valida e-mail como opcional (apenas para contato);
+//   4. Bloqueia CPF duplicado com cadastro pendente, em análise ou aprovado (409);
+//   5. Grava a ficha na tabela cadastros_agregados;
+//   6. Gera URLs assinadas para envio direto ao bucket "documentos-cadastro"
+//      no caminho padronizado: terceiros/{cadastro_id}/{campo}_{i}_{nome}.
 //
 // Configuração no painel: Verify JWT DESLIGADO (quem chama ainda não tem conta).
-// Secrets: LOGIN_PEPPER (o mesmo do login), ALLOWED_ORIGINS.
+// Secrets: LOGIN_PEPPER, ALLOWED_ORIGINS.
 //
 // Regra "anexo OU formulário", por documento (caixa "Não tenho o PDF"):
 //   - CNH e cada CRLV (um por veículo da tipologia): sem_pdf false -> anexo
@@ -71,17 +78,6 @@ function cpfValido(cpf: string): boolean {
 
 function emailValido(email: string): boolean {
   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-// Mesma regra do formulário: 6 primeiros dígitos do CPF + caractere especial
-// + palavra de 4 letras ou mais, no mínimo 11 caracteres.
-function erroSenha(senha: string, cpf: string): string | null {
-  if (senha.length < 11) return "A senha precisa ter pelo menos 11 caracteres.";
-  if (senha.length > 72) return "A senha pode ter no máximo 72 caracteres.";
-  if (!senha.includes(cpf.slice(0, 6))) return "A senha precisa conter os 6 primeiros dígitos do seu CPF.";
-  if (!/[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]]/.test(senha)) return "A senha precisa de um caractere especial (como @, #, $, !).";
-  if (!/[A-Za-zÀ-ÿ]{4,}/.test(senha)) return "A senha precisa de uma palavra com pelo menos 4 letras.";
-  return null;
 }
 
 function ipDe(req: Request): string {
@@ -183,13 +179,13 @@ Deno.serve(async (req: Request) => {
 
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
-    // Limite: 5 envios por hora por IP (evita robôs criando contas)
+    // Limite: 5 envios por hora por IP (evita robôs enviando spam)
     const chaveIp = await hmac(pepper, `cadastro-ip:${ipDe(req)}`);
     if ((await contarTentativa(admin, chaveIp, 5, "1 hour", "1 hour")).bloqueado) {
       return resp(req, 429, { erro: "Muitos envios em pouco tempo. Tente novamente mais tarde." });
     }
 
-    // ---------- Validação ----------
+    // ---------- Validação de Tipologia e Tipo ----------
     const tipo = corpo.tipo === "pj" ? "pj" : corpo.tipo === "pf" ? "pf" : "";
     if (!tipo) return resp(req, 400, { erro: "Tipo de cadastro inválido." });
 
@@ -197,8 +193,16 @@ Deno.serve(async (req: Request) => {
     if (!Object.hasOwn(TIPOLOGIAS, tipologia)) return resp(req, 400, { erro: "Tipo de veículo inválido." });
     const papeis = TIPOLOGIAS[tipologia];
     const n = papeis.length;
-    const email = String(corpo.email ?? "").trim().toLowerCase();
-    const senha = typeof corpo.senha === "string" ? corpo.senha : "";
+
+    // E-mail é opcional (para contato). Se informado, valida o formato.
+    const emailBruto = typeof corpo.email === "string" ? corpo.email.trim().toLowerCase() : "";
+    let email: string | null = null;
+    if (emailBruto) {
+      if (!emailValido(emailBruto)) {
+        return resp(req, 400, { erro: "Informe um e-mail válido para contato ou deixe o campo em branco." });
+      }
+      email = emailBruto;
+    }
 
     // Documentos deste envio: nome no servidor -> descrição (com artigo) para as mensagens
     const documentosDoEnvio: Record<string, string> = { cnh: "a CNH" };
@@ -280,74 +284,62 @@ Deno.serve(async (req: Request) => {
 
     const cpf = dados["cpf"].replace(/\D/g, "");
     if (!cpfValido(cpf)) return resp(req, 400, { erro: "CPF inválido." });
-    if (!emailValido(email)) return resp(req, 400, { erro: "Informe um e-mail válido." });
     const celular = dados["celular"].replace(/\D/g, "");
     if (celular.length < 10 || celular.length > 11) return resp(req, 400, { erro: "Celular inválido." });
-    const problemaSenha = erroSenha(senha, cpf);
-    if (problemaSenha) return resp(req, 400, { erro: problemaSenha });
     dados["cpf"] = cpf;
 
     const nome = `${dados["motorista-nome"]} ${dados["motorista-sobrenome"]}`.trim().slice(0, 120);
 
-    // ---------- CPF já existe? ----------
-    const { data: existente } = await admin.from("perfis")
-      .select("id, status, role").eq("cpf", cpf).maybeSingle();
-    if (existente) {
-      if (existente.role !== "motorista") return resp(req, 409, { erro: "Este CPF já está cadastrado." });
-      if (existente.status === "aprovado") {
-        return resp(req, 409, { erro: "Este CPF já tem cadastro aprovado. Entre pela tela de login." });
-      }
-      if (existente.status === "pendente") {
-        return resp(req, 409, { erro: "Já existe um cadastro em análise para este CPF. Aguarde a gestão." });
-      }
-      // Recusado: apaga a conta antiga para permitir um novo envio
-      await admin.from("perfis").delete().eq("id", existente.id);
-      await admin.auth.admin.deleteUser(existente.id).catch(() => {});
+    // ---------- CPF já existe em cadastros_agregados? ----------
+    // Bloqueia se já tiver cadastro pendente, em análise ou aprovado (409)
+    // Se só tiver cadastros recusados, permite novo envio (o recusado fica até os 90 dias da LGPD)
+    const { data: cadastrosCpf, error: erroConsulta } = await admin
+      .from("cadastros_agregados")
+      .select("id, status")
+      .eq("cpf", cpf);
+
+    if (erroConsulta) {
+      console.error("solicitar-cadastro: falha ao consultar CPF:", erroConsulta.message);
+      return resp(req, 503, { erro: "Não foi possível verificar cadastros anteriores. Tente novamente." });
     }
 
-    // ---------- Cria a conta (pendente) ----------
-    const { data: criado, error: erroCriar } = await admin.auth.admin.createUser({
-      email,
-      password: senha,
-      email_confirm: true,
-      user_metadata: { nome, cpf, telefone: celular },
-      app_metadata: { role: "motorista" },
-    });
-    if (erroCriar || !criado?.user) {
-      const msg = String(erroCriar?.message ?? "");
-      if ((erroCriar as { code?: string })?.code === "email_exists" || /already|exists|registered/i.test(msg)) {
-        return resp(req, 409, { erro: "Este e-mail já está cadastrado. Use outro e-mail ou recupere a senha." });
-      }
-      if (/database error|cpf/i.test(msg)) return resp(req, 409, { erro: "Este CPF já está cadastrado." });
-      console.error("solicitar-cadastro: falha ao criar usuário:", msg);
-      return resp(req, 503, { erro: "Não foi possível concluir o cadastro. Tente novamente." });
+    const temAtivo = (cadastrosCpf ?? []).some((c) => ["pendente", "analise", "aprovado"].includes(c.status));
+    if (temAtivo) {
+      return resp(req, 409, {
+        erro: "Já existe um cadastro para este CPF. Se precisar atualizar algum documento, fale com o time de Cadastros da AJBorges.",
+      });
     }
-    const uid = criado.user.id;
 
-    // ---------- Grava a ficha ----------
+    // ---------- Grava a ficha (SEM criar conta de usuário: user_id = null) ----------
     const { data: cad, error: erroCad } = await admin.from("cadastros_agregados").insert({
-      user_id: uid, tipo, status: "pendente", nome, cpf, email, celular,
-      sem_carreta: n === 1, dados: { ...dados, _tipologia: tipologia, _sem_pdf: semPdf },
+      user_id: null,
+      tipo,
+      status: "pendente",
+      nome,
+      cpf,
+      email,
+      celular,
+      sem_carreta: n === 1,
+      dados: { ...dados, _tipologia: tipologia, _sem_pdf: semPdf },
     }).select("id").single();
+
     if (erroCad || !cad) {
       console.error("solicitar-cadastro: falha ao gravar ficha:", erroCad?.message);
-      await admin.auth.admin.deleteUser(uid).catch(() => {});
       return resp(req, 503, { erro: "Não foi possível concluir o cadastro. Tente novamente." });
     }
 
-    // ---------- URLs assinadas para os documentos ----------
-    // "indice" segue a ordem dos documentos recebidos (campo a campo, arquivo a arquivo)
+    // ---------- URLs assinadas para os documentos (pasta: terceiros/{cad.id}/...) ----------
     const uploads: { indice: number; campo: string; path: string; token: string }[] = [];
     const documentos: Record<string, unknown>[] = [];
     for (let i = 0; i < docs.length; i++) {
       const d = docs[i];
-      const path = `${uid}/${cad.id}/${d.campo}_${i + 1}_${nomeArquivoSeguro(d.nome)}`;
+      const path = `terceiros/${cad.id}/${d.campo}_${i + 1}_${nomeArquivoSeguro(d.nome)}`;
       const { data: assinado, error: erroUrl } = await admin.storage
         .from("documentos-cadastro").createSignedUploadUrl(path);
       if (erroUrl || !assinado) {
         console.error("solicitar-cadastro: falha na URL de upload:", erroUrl?.message);
+        // Rollback: apaga apenas a linha recém-criada em cadastros_agregados
         await admin.from("cadastros_agregados").delete().eq("id", cad.id);
-        await admin.auth.admin.deleteUser(uid).catch(() => {});
         return resp(req, 503, { erro: "Não foi possível preparar o envio dos documentos. Tente novamente." });
       }
       uploads.push({ indice: i, campo: d.campo, path: assinado.path ?? path, token: assinado.token });

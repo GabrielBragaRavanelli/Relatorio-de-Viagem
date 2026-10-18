@@ -298,6 +298,36 @@
         .cad-etiqueta-vazio { background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; }
         .cad-vazio { color: #64748b; font-size: 0.88rem; }
         #modal-footer-actions { flex-wrap: wrap; }
+
+        /* Projeto 2: status "Cadastro concluído" */
+        .status-concluido-cad { background-color: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+
+        /* Projeto 2: selos GR / Shopee / Base na tabela */
+        .etapas-selos { display: flex; gap: 4px; flex-wrap: wrap; }
+        .selo-etapa { padding: 3px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; border: 1px solid #cbd5e1; background: #f1f5f9; color: #64748b; white-space: nowrap; }
+        .selo-etapa.feito { background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+
+        /* Projeto 2: caixinhas de etapas (mesmo checkbox personalizado do formulário) */
+        .etapas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+        .etapa-item { padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+        .caixa-etapa { display: inline-flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; color: #0f172a; cursor: pointer; user-select: none; position: relative; }
+        .caixa-etapa input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+        .caixa-etapa-quadrado { flex-shrink: 0; width: 18px; height: 18px; border: 1.5px solid #94a3b8; border-radius: 5px; background: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; color: #fff; font-size: 12px; font-weight: 800; }
+        .caixa-etapa:hover .caixa-etapa-quadrado { border-color: #10b981; }
+        .caixa-etapa input:focus-visible ~ .caixa-etapa-quadrado { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+        .caixa-etapa input:checked ~ .caixa-etapa-quadrado { background: #059669; border-color: #059669; }
+        .caixa-etapa input:checked ~ .caixa-etapa-quadrado::after { content: '✓'; }
+        .caixa-etapa input:disabled ~ .caixa-etapa-quadrado { opacity: 0.5; }
+        .caixa-etapa.desabilitada { cursor: not-allowed; color: #94a3b8; }
+        .etapa-quem { margin-top: 6px; font-size: 0.75rem; color: #64748b; }
+        .etapas-aviso { font-size: 0.8rem; color: #b45309; margin-bottom: 10px; }
+
+        /* Projeto 2: documentos extras */
+        .extra-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 12px; }
+        .extra-form label { display: grid; gap: 4px; font-size: 0.75rem; color: #64748b; font-weight: 600; }
+        .extra-form input[type="text"], .extra-form input[type="file"] { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #fff; }
+        .extra-meta { display: block; font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        @media (max-width: 700px) { .extra-form { grid-template-columns: 1fr; } }
     </style>
 </head>
 
@@ -379,7 +409,7 @@
                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                 </svg>
                             </span>
-                            <span class="nav-text">Homologados</span>
+                            <span class="nav-text">Documentos ok</span>
                         </a>
                     </li>
                 </ul>
@@ -510,11 +540,11 @@
                     <div class="card-bg"
                         style="background: #ffffff; padding: 20px; border-radius: 14px; border: 1px solid #a7f3d0; box-shadow: var(--card-shadow); border-left: 4px solid #10b981;">
                         <span
-                            style="font-size: 0.8rem; font-weight: 600; color: #047857; text-transform: uppercase;">Homologados
-                            &amp; Aprovados</span>
+                            style="font-size: 0.8rem; font-weight: 600; color: #047857; text-transform: uppercase;">Documentos
+                            Ok</span>
                         <div style="font-size: 2.2rem; font-weight: 800; color: #047857; margin-top: 6px;"
                             id="kpi-aprovados">0</div>
-                        <span style="font-size: 0.75rem; color: #047857;">Prontos para operar</span>
+                        <span style="font-size: 0.75rem; color: #047857;" id="kpi-concluidos-texto">0 com cadastro concluído (GR, Shopee e Base)</span>
                     </div>
                 </div>
 
@@ -537,7 +567,11 @@
                             <button type="button" class="btn-action-small" data-tab="analise" id="btn-tab-analise">Em
                                 Análise (0)</button>
                             <button type="button" class="btn-action-small" data-tab="aprovado"
-                                id="btn-tab-aprovados">Aprovados (0)</button>
+                                id="btn-tab-aprovados">Documentos ok (0)</button>
+                            <button type="button" class="btn-action-small" data-tab="concluido"
+                                id="btn-tab-concluidos">Cadastro concluído (0)</button>
+                            <button type="button" class="btn-action-small" data-tab="recusado"
+                                id="btn-tab-recusados">Recusados (0)</button>
                         </div>
                     </div>
 
@@ -553,6 +587,7 @@
                                     <th style="padding: 14px 16px;">CNH</th>
                                     <th style="padding: 14px 16px;">Data de Envio</th>
                                     <th style="padding: 14px 16px;">Status</th>
+                                    <th style="padding: 14px 16px;">Etapas</th>
                                     <th style="padding: 14px 20px; text-align: right;">Ações</th>
                                 </tr>
                             </thead>
@@ -598,20 +633,36 @@
         // Fichas de cadastro lidas do Supabase (tabela cadastros_agregados).
         // Só admin/diretoria enxerga (RLS). Documentos no bucket privado
         // "documentos-cadastro", abertos com link temporário.
-        // Aprovar libera o login do motorista; recusar mantém bloqueado.
+        // Terceiros NÃO têm login: "aprovado" significa só "documentos conferidos".
+        // Depois o time de Cadastros marca as etapas GR / Shopee / Base.
         // =====================================================================
         let cadastros = [];
-        let perfisPorUsuario = {};
         let filtroAtual = 'todos';
         let termoBusca = '';
         let cadastroAberto = null;
 
+        const ETAPAS = [
+            ['gr', 'GR', 'Cadastrado no GR'],
+            ['shopee', 'Shopee', 'Cadastrado na Shopee'],
+            ['base', 'Base', 'Cadastrado na Base']
+        ];
+        const TIPOS_EXTRA = ['application/pdf', 'image/png', 'image/jpeg'];
+        const TAMANHO_MAX_EXTRA = 10 * 1024 * 1024;
+
         const ROTULOS_STATUS = {
             pendente: '<span class="motorista-badge-status status-pendente">⏳ Pendente</span>',
             analise: '<span class="motorista-badge-status status-analise">🔍 Em Análise</span>',
-            aprovado: '<span class="motorista-badge-status status-aprovado">✓ Aprovado</span>',
+            aprovado: '<span class="motorista-badge-status status-aprovado">✓ Documentos ok</span>',
+            concluido: '<span class="motorista-badge-status status-concluido-cad">🏁 Cadastro concluído</span>',
             recusado: '<span class="motorista-badge-status status-reprovado">✕ Recusado</span>'
         };
+
+        const etapaFeita = (c, chave) => !!(c.etapas && c.etapas[chave] && c.etapas[chave].feito === true);
+        // Status exibido: "aprovado" com as três etapas feitas vira "concluido"
+        function statusExibido(c) {
+            if (c.status === 'aprovado' && ETAPAS.every(([k]) => etapaFeita(c, k))) return 'concluido';
+            return c.status;
+        }
 
         const SECOES = [
             ['Empresa (PJ)', [['nome-empresa', 'Nome da empresa'], ['cnpj', 'CNPJ'], ['telefone-empresa', 'Telefone da empresa'], ['responsavel', 'Responsável']]],
@@ -726,28 +777,23 @@
             if (error) {
                 console.error('Erro ao carregar cadastros:', error);
                 document.getElementById('driver-table-body').innerHTML =
-                    '<tr><td colspan="7" style="padding: 36px; text-align: center; color: #b91c1c;">Não foi possível carregar os cadastros. Atualize a página.</td></tr>';
+                    '<tr><td colspan="8" style="padding: 36px; text-align: center; color: #b91c1c;">Não foi possível carregar os cadastros. Atualize a página.</td></tr>';
                 return;
             }
             cadastros = data || [];
-
-            const ids = cadastros.map((x) => x.user_id).filter(Boolean);
-            perfisPorUsuario = {};
-            if (ids.length) {
-                const { data: perfis } = await c.from('perfis')
-                    .select('id, status, senha_alterada_em').in('id', ids);
-                (perfis || []).forEach((p) => { perfisPorUsuario[p.id] = p; });
-            }
             renderTabela();
         }
 
         function atualizarMetricas() {
             const total = cadastros.length;
-            const n = (s) => cadastros.filter((c) => c.status === s).length;
+            const n = (s) => cadastros.filter((c) => statusExibido(c) === s).length;
+            const docsOk = n('aprovado') + n('concluido');
             document.getElementById('kpi-total-cadastros').textContent = total;
             document.getElementById('kpi-pendentes-analise').textContent = n('pendente');
             document.getElementById('kpi-em-analise').textContent = n('analise');
-            document.getElementById('kpi-aprovados').textContent = n('aprovado');
+            document.getElementById('kpi-aprovados').textContent = docsOk;
+            const txtConc = document.getElementById('kpi-concluidos-texto');
+            if (txtConc) txtConc.textContent = `${n('concluido')} com cadastro concluído (GR, Shopee e Base)`;
             const badgeTotal = document.getElementById('badge-total-count');
             if (badgeTotal) badgeTotal.textContent = total;
             const badgePend = document.getElementById('badge-pendente-count');
@@ -755,9 +801,29 @@
             document.getElementById('btn-tab-todos').textContent = `Todos (${total})`;
             document.getElementById('btn-tab-pendentes').textContent = `Pendentes (${n('pendente')})`;
             document.getElementById('btn-tab-analise').textContent = `Em Análise (${n('analise')})`;
-            document.getElementById('btn-tab-aprovados').textContent = `Aprovados (${n('aprovado')})`;
-            const btnRec = document.getElementById('btn-tab-recusados');
-            if (btnRec) btnRec.textContent = `Recusados (${n('recusado')})`;
+            document.getElementById('btn-tab-aprovados').textContent = `Documentos ok (${n('aprovado')})`;
+            document.getElementById('btn-tab-concluidos').textContent = `Cadastro concluído (${n('concluido')})`;
+            document.getElementById('btn-tab-recusados').textContent = `Recusados (${n('recusado')})`;
+        }
+
+        // Busca por nome, CPF (com ou sem pontos) ou placa de qualquer CRLV
+        function bateBusca(c) {
+            if (!termoBusca) return true;
+            const d = c.dados || {};
+            const placas = Object.keys(d).filter((k) => /^crlv\d+-placa$/.test(k)).map((k) => d[k]);
+            const texto = [c.nome, c.email, d['nome-empresa'], d.cnpj, d._tipologia, d['veic-placa'], d['carreta-placa'], ...placas]
+                .filter(Boolean).join(' ').toLowerCase();
+            if (texto.includes(termoBusca)) return true;
+            const semPontuacao = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const termoLimpo = semPontuacao(termoBusca);
+            if (!termoLimpo) return false;
+            if (semPontuacao(c.cpf).includes(termoLimpo)) return true;
+            return [d['veic-placa'], d['carreta-placa'], ...placas].some((p) => semPontuacao(p).includes(termoLimpo));
+        }
+
+        function selosEtapas(c) {
+            return `<div class="etapas-selos">${ETAPAS.map(([k, curto]) =>
+                `<span class="selo-etapa ${etapaFeita(c, k) ? 'feito' : ''}" title="${etapaFeita(c, k) ? 'Feito' : 'Pendente'}">${esc(curto)}</span>`).join('')}</div>`;
         }
 
         function renderTabela() {
@@ -766,18 +832,13 @@
             if (!tbody) return;
 
             const filtrados = cadastros.filter((c) => {
-                if (filtroAtual !== 'todos' && c.status !== filtroAtual) return false;
-                if (!termoBusca) return true;
-                const d = c.dados || {};
-                const alvo = [c.nome, c.cpf, formatarCpf(c.cpf), c.email, d['veic-placa'], d['carreta-placa'], d['nome-empresa'], d.cnpj,
-                    d._tipologia, d['crlv1-placa'], d['crlv2-placa'], d['crlv3-placa'], d['crlv4-placa']]
-                    .filter(Boolean).join(' ').toLowerCase();
-                return alvo.includes(termoBusca);
+                if (filtroAtual !== 'todos' && statusExibido(c) !== filtroAtual) return false;
+                return bateBusca(c);
             });
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="padding: 36px; text-align: center; color: #64748b;">
-                    ${cadastros.length === 0 ? 'Nenhum cadastro recebido até o momento. Quando um motorista enviar o formulário <strong>Seja um Agregado Conosco</strong>, ele aparece aqui.' : 'Nenhum cadastro encontrado para o filtro ou a busca.'}
+                tbody.innerHTML = `<tr><td colspan="8" style="padding: 36px; text-align: center; color: #64748b;">
+                    ${cadastros.length === 0 ? 'Nenhum cadastro recebido até o momento. Quando um terceiro ou agregado enviar o formulário <strong>Cadastro de Terceiros e Agregados</strong>, ele aparece aqui.' : 'Nenhum cadastro encontrado para o filtro ou a busca.'}
                 </td></tr>`;
                 return;
             }
@@ -811,11 +872,12 @@
                             <div style="font-size: 0.78rem; color: #64748b;">Placa: <strong>${esc(placa)}</strong>${c.sem_carreta && !novo ? ' &bull; sem carreta' : ''}</div></td>
                         <td style="padding: 16px;"><span style="font-size: 0.82rem; color: #334155;">${cnh}</span></td>
                         <td style="padding: 16px; color: #64748b; font-size: 0.82rem;">${formatarData(c.criado_em)}</td>
-                        <td style="padding: 16px;">${ROTULOS_STATUS[c.status] || esc(c.status)}${prazoExclusao(c)}</td>
+                        <td style="padding: 16px;">${ROTULOS_STATUS[statusExibido(c)] || esc(c.status)}${prazoExclusao(c)}</td>
+                        <td style="padding: 16px;">${selosEtapas(c)}</td>
                         <td style="padding: 16px 20px; text-align: right;">
                             <div class="table-action-btns" style="justify-content: flex-end;">
                                 <button type="button" class="btn-action-small" data-acao="abrir" data-id="${esc(c.id)}">Ver detalhes</button>
-                                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Aprovar</button>` : ''}
+                                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Documentos ok</button>` : ''}
                             </div>
                         </td>
                     </tr>`;
@@ -826,7 +888,7 @@
             const c = cadastros.find((x) => x.id === id);
             if (!c) return;
             let motivo = null;
-            if (decisao === 'aprovado' && !confirm(`Aprovar o cadastro de ${c.nome}? O motorista passa a conseguir entrar no Portal da Frota.`)) return;
+            if (decisao === 'aprovado' && !confirm(`Marcar os documentos deste cadastro como conferidos?\n\n${c.nome}`)) return;
             if (decisao === 'recusado') {
                 motivo = prompt(`Motivo da recusa do cadastro de ${c.nome} (opcional):\n\n` +
                     'Pela LGPD, os dados e documentos deste cadastro serão apagados automaticamente 90 dias após a recusa.', '');
@@ -850,11 +912,110 @@
             window.open(data.signedUrl, '_blank', 'noopener');
         }
 
+        // Pastas onde os arquivos do cadastro estão: antigas ({user_id}/{id}) e novas (terceiros/{id})
         async function listarArquivosEnviados(c) {
-            if (!c.user_id) return new Set();
-            const pasta = `${c.user_id}/${c.id}`;
-            const { data } = await window.supabaseClient.storage.from('documentos-cadastro').list(pasta, { limit: 100 });
-            return new Set((data || []).map((f) => `${pasta}/${f.name}`));
+            const docs = Array.isArray(c.documentos) ? c.documentos : [];
+            const pastas = new Set();
+            if (c.user_id) pastas.add(`${c.user_id}/${c.id}`);
+            pastas.add(`terceiros/${c.id}`);
+            docs.forEach((x) => {
+                const p = String(x.path || '');
+                const i = p.lastIndexOf('/');
+                if (i > 0) pastas.add(p.slice(0, i));
+            });
+            const enviados = new Set();
+            for (const pasta of pastas) {
+                const { data } = await window.supabaseClient.storage.from('documentos-cadastro').list(pasta, { limit: 200 });
+                (data || []).forEach((f) => enviados.add(`${pasta}/${f.name}`));
+            }
+            return enviados;
+        }
+
+        // Substitui o cadastro na lista local pela linha devolvida pela RPC
+        function atualizarLocal(linha) {
+            if (!linha || !linha.id) return;
+            const i = cadastros.findIndex((x) => x.id === linha.id);
+            if (i >= 0) cadastros[i] = linha;
+        }
+
+        async function marcarEtapa(id, etapa, feito, caixa) {
+            caixa.disabled = true;
+            const { data, error } = await window.supabaseClient.rpc('marcar_etapa_cadastro', {
+                p_id: id, p_etapa: etapa, p_feito: feito
+            });
+            if (error) {
+                console.error('Erro ao marcar etapa:', error);
+                caixa.checked = !feito;
+                caixa.disabled = false;
+                return aviso('Não foi possível salvar a etapa. Tente novamente.');
+            }
+            atualizarLocal(Array.isArray(data) ? data[0] : data);
+            renderTabela();
+            if (cadastroAberto === id) abrirModal(id);
+        }
+
+        function nomeArquivoSeguro(nome) {
+            return String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80) || 'arquivo';
+        }
+
+        async function anexarExtra(id) {
+            const inpArq = document.getElementById('extra-arquivo');
+            const inpDesc = document.getElementById('extra-descricao');
+            const botao = document.getElementById('btn-anexar-extra');
+            const arquivo = inpArq?.files?.[0];
+            const descricao = (inpDesc?.value || '').replace(/[<>"'`\\]/g, '').trim().slice(0, 200);
+            if (!arquivo) return aviso('Escolha o arquivo do documento extra.');
+            if (!descricao) return aviso('Informe a descrição do documento (ex.: Consulta GR, CNH atualizada).');
+            if (!TIPOS_EXTRA.includes(arquivo.type)) return aviso('Envie apenas PDF, PNG ou JPG.');
+            if (arquivo.size <= 0 || arquivo.size > TAMANHO_MAX_EXTRA) return aviso('O arquivo pode ter no máximo 10 MB.');
+
+            const caminho = `terceiros/${id}/extra_${Date.now()}_${nomeArquivoSeguro(arquivo.name)}`;
+            botao.disabled = true;
+            botao.textContent = 'Enviando...';
+            const restaurar = () => { botao.disabled = false; botao.textContent = 'Anexar documento'; };
+
+            const { error: erroUp } = await window.supabaseClient.storage.from('documentos-cadastro')
+                .upload(caminho, arquivo, { contentType: arquivo.type, upsert: false });
+            if (erroUp) {
+                console.error('Erro no upload do documento extra:', erroUp);
+                restaurar();
+                return aviso('Não foi possível enviar o arquivo. Tente novamente.');
+            }
+            const { data, error } = await window.supabaseClient.rpc('adicionar_documento_extra', {
+                p_id: id, p_path: caminho, p_nome: arquivo.name, p_tipo: arquivo.type,
+                p_tamanho: arquivo.size, p_descricao: descricao
+            });
+            if (error) {
+                console.error('Erro ao registrar documento extra:', error);
+                // Não deixa arquivo órfão no Storage
+                await window.supabaseClient.storage.from('documentos-cadastro').remove([caminho]);
+                restaurar();
+                return aviso('Não foi possível registrar o documento. Tente novamente.');
+            }
+            atualizarLocal(Array.isArray(data) ? data[0] : data);
+            renderTabela();
+            if (cadastroAberto === id) abrirModal(id);
+        }
+
+        async function removerExtra(id, caminho) {
+            const c = cadastros.find((x) => x.id === id);
+            const doc = (c?.documentos || []).find((x) => x.campo === 'extra' && x.path === caminho);
+            if (!doc) return;
+            if (!confirm(`Remover o documento extra "${doc.descricao || doc.nome}"? O arquivo será apagado.`)) return;
+            const { error: erroSt } = await window.supabaseClient.storage.from('documentos-cadastro').remove([caminho]);
+            if (erroSt) {
+                console.error('Erro ao apagar arquivo extra:', erroSt);
+                return aviso('Não foi possível apagar o arquivo. Tente novamente.');
+            }
+            const { data, error } = await window.supabaseClient.rpc('remover_documento_extra', { p_id: id, p_path: caminho });
+            if (error) {
+                console.error('Erro ao remover documento extra:', error);
+                return aviso('O arquivo foi apagado, mas não foi possível atualizar a lista. Atualize a página.');
+            }
+            atualizarLocal(Array.isArray(data) ? data[0] : data);
+            renderTabela();
+            if (cadastroAberto === id) abrirModal(id);
         }
 
         async function abrirModal(id) {
@@ -862,7 +1023,6 @@
             if (!c) return;
             cadastroAberto = id;
             const d = c.dados || {};
-            const perfil = perfisPorUsuario[c.user_id] || {};
             const docs = Array.isArray(c.documentos) ? c.documentos : [];
 
             document.getElementById('modal-title').textContent = `Cadastro • ${c.nome || ''}`;
@@ -914,22 +1074,65 @@
                     .map(secaoFixa).join('');
             }
 
+            const habilitarEtapas = c.status === 'aprovado';
+            const secaoEtapas = `
+                <fieldset class="cad-secao">
+                    <legend>Etapas de Homologação</legend>
+                    ${habilitarEtapas ? '' : '<div class="etapas-aviso">Marque os documentos como conferidos ("Documentos ok") para liberar as etapas.</div>'}
+                    <div class="etapas-grid">
+                        ${ETAPAS.map(([k, curto, rotulo]) => {
+                            const info = (c.etapas && c.etapas[k]) || {};
+                            const feito = !!info.feito;
+                            const quem = feito && info.por ? `por <b>${esc(info.por)}</b> em ${formatarData(info.em)}` : '';
+                            return `
+                                <div class="etapa-item">
+                                    <label class="caixa-etapa ${habilitarEtapas ? '' : 'desabilitada'}">
+                                        <input type="checkbox" data-etapa="${esc(k)}" data-id="${esc(c.id)}" ${feito ? 'checked' : ''} ${habilitarEtapas ? '' : 'disabled'}>
+                                        <span class="caixa-etapa-quadrado"></span>
+                                        <span>${esc(rotulo)}</span>
+                                    </label>
+                                    ${quem ? `<div class="etapa-quem">${quem}</div>` : ''}
+                                </div>`;
+                        }).join('')}
+                    </div>
+                </fieldset>`;
+
+            const secaoExtras = `
+                <fieldset class="cad-secao">
+                    <legend>Documentos Extras</legend>
+                    <div id="cad-lista-extras" class="cad-docs">Carregando documentos extras...</div>
+                    <div class="extra-form">
+                        <label>
+                            <span>Arquivo (PDF, PNG ou JPG até 10 MB)</span>
+                            <input type="file" id="extra-arquivo" accept=".pdf,image/png,image/jpeg">
+                        </label>
+                        <label>
+                            <span>Descrição (obrigatória)</span>
+                            <input type="text" id="extra-descricao" placeholder="Ex.: Consulta GR, CNH atualizada" maxlength="200">
+                        </label>
+                        <div>
+                            <button type="button" class="btn-action-small" id="btn-anexar-extra" data-acao="anexar-extra" data-id="${esc(c.id)}" style="background:#059669; color:#fff; border-color:#059669; height:36px;">Anexar documento</button>
+                        </div>
+                    </div>
+                </fieldset>`;
+
             corpo.innerHTML = `
                 <div class="cad-topo">
-                    <div>${ROTULOS_STATUS[c.status] || ''} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${novo ? '' : (c.sem_carreta ? ' · sem carreta' : '')}</div>
+                    <div>${ROTULOS_STATUS[statusExibido(c)] || esc(c.status)} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${novo ? '' : (c.sem_carreta ? ' · sem carreta' : '')}</div>
                     ${novo ? `<div>Tipo de veículo: <b>${esc(d._tipologia)}</b></div>` : ''}
                     <div>Enviado em <b>${formatarData(c.criado_em)}</b></div>
-                    <div>E-mail de acesso: <b>${esc(c.email || '—')}</b></div>
-                    <div>Senha: <b>definida pelo motorista</b> (nunca é exibida)${perfil.senha_alterada_em ? ` · alterada em <b>${formatarData(perfil.senha_alterada_em)}</b>` : ''}</div>
+                    <div>E-mail de contato: <b>${esc(c.email || '—')}</b></div>
                     ${c.analisado_por ? `<div>Última análise: <b>${esc(c.analisado_por)}</b> em ${formatarData(c.analisado_em)}</div>` : ''}
                     ${c.status === 'recusado' && c.motivo_recusa ? `<div style="color:#b91c1c;">Motivo da recusa: <b>${esc(c.motivo_recusa)}</b></div>` : ''}
                     ${prazoExclusao(c)}
                 </div>
+                ${secaoEtapas}
                 ${novo ? '' : `<fieldset class="cad-secao">
                     <legend>Documentos</legend>
                     <div id="cad-lista-docs" class="cad-docs">Carregando documentos...</div>
                 </fieldset>`}
-                ${secoes}`;
+                ${secoes}
+                ${secaoExtras}`;
 
             document.getElementById('modal-footer-actions').innerHTML = `
                 <button type="button" class="btn-action-small" data-acao="fechar">Fechar</button>
@@ -937,7 +1140,7 @@
                 <button type="button" class="btn-action-small" data-acao="salvar-dados" id="btn-salvar-dados" style="display:none;">Salvar dados</button>
                 ${c.status !== 'analise' && c.status !== 'aprovado' ? `<button type="button" class="btn-action-small" data-acao="analise" data-id="${esc(c.id)}">Colocar em análise</button>` : ''}
                 ${c.status !== 'recusado' ? `<button type="button" class="btn-action-small btn-action-delete" data-acao="recusar" data-id="${esc(c.id)}">Recusar</button>` : ''}
-                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Aprovar cadastro</button>` : ''}`;
+                ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Documentos ok</button>` : ''}`;
 
             document.getElementById('driver-modal').classList.add('active');
 
@@ -950,15 +1153,37 @@
                     ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não chegou a ser enviado</em>'}
                 </div>`;
             };
+            const itemExtra = (doc) => {
+                const ok = enviados.has(doc.path);
+                const infoEnvio = doc.enviado_por ? `Enviado por <b>${esc(doc.enviado_por)}</b> em ${formatarData(doc.enviado_em)}` : '';
+                return `<div class="cad-doc ${ok ? '' : 'cad-doc-faltando'}">
+                    <div>
+                        <div>📎 <b>${esc(doc.descricao || doc.nome)}</b> · <span style="color:#64748b; font-size:0.8rem;">${esc(doc.nome)}</span></div>
+                        ${infoEnvio ? `<span class="extra-meta">${infoEnvio}</span>` : ''}
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não encontrado</em>'}
+                        <button type="button" class="btn-action-small btn-action-delete" data-acao="remover-extra" data-id="${esc(c.id)}" data-caminho="${esc(doc.path)}">Remover</button>
+                    </div>
+                </div>`;
+            };
+
             if (novo) {
                 document.querySelectorAll('#modal-body-content [data-docs-de]').forEach((el) => {
                     el.innerHTML = docs.filter((x) => x.campo === el.getAttribute('data-docs-de')).map(itemDoc).join('');
                 });
-                return;
+            } else {
+                const lista = document.getElementById('cad-lista-docs');
+                if (lista) {
+                    lista.innerHTML = docs.filter((x) => x.campo !== 'extra').length === 0 ? 'Nenhum documento anexado.' : docs.filter((x) => x.campo !== 'extra').map(itemDoc).join('');
+                }
             }
-            const lista = document.getElementById('cad-lista-docs');
-            if (!lista) return;
-            lista.innerHTML = docs.length === 0 ? 'Nenhum documento anexado.' : docs.map(itemDoc).join('');
+
+            const listaExtras = document.getElementById('cad-lista-extras');
+            if (listaExtras) {
+                const extras = docs.filter((x) => x.campo === 'extra');
+                listaExtras.innerHTML = extras.length === 0 ? '<div class="cad-vazio">Nenhum documento extra anexado.</div>' : extras.map(itemExtra).join('');
+            }
         }
 
         function fecharModal() {
@@ -1042,6 +1267,17 @@
                 });
             });
 
+            // Ouvinte de etapas (checkboxes no modal)
+            document.addEventListener('change', (e) => {
+                const inp = e.target.closest('input[data-etapa]');
+                if (!inp) return;
+                const etapa = inp.getAttribute('data-etapa');
+                const id = inp.getAttribute('data-id') || cadastroAberto;
+                if (id && etapa) {
+                    marcarEtapa(id, etapa, inp.checked, inp);
+                }
+            });
+
             // Um único ouvinte para todos os botões da tabela e do modal
             document.addEventListener('click', (e) => {
                 const alvo = e.target.closest('[data-acao]');
@@ -1054,6 +1290,8 @@
                     case 'analise': decidir(id, 'analise'); break;
                     case 'fechar': fecharModal(); break;
                     case 'abrir-doc': abrirDocumento(alvo.getAttribute('data-caminho')); break;
+                    case 'anexar-extra': anexarExtra(id || cadastroAberto); break;
+                    case 'remover-extra': removerExtra(id || cadastroAberto, alvo.getAttribute('data-caminho')); break;
                     case 'editar':
                         document.querySelectorAll('#modal-body-content input[data-campo]').forEach((inp) => { inp.readOnly = false; });
                         alvo.style.display = 'none';
@@ -1067,7 +1305,13 @@
             document.getElementById('btn-close-modal')?.addEventListener('click', fecharModal);
             const modal = document.getElementById('driver-modal');
             modal?.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') fecharModal();
+                if (e.key === 'Enter' && e.target && e.target.id === 'extra-descricao') {
+                    e.preventDefault();
+                    if (cadastroAberto) anexarExtra(cadastroAberto);
+                }
+            });
 
             // Mantém a lista atualizada
             setInterval(() => { if (!cadastroAberto) carregarCadastros(); }, 60000);
