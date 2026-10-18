@@ -38,7 +38,7 @@ function lerChave(legado: string, novo: string): string | undefined {
   return undefined;
 }
 
-const ORIGENS = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+const ORIGENS = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s: string) => s.trim()).filter(Boolean);
 
 function cors(req: Request): Record<string, string> {
   const origem = req.headers.get("origin") ?? "";
@@ -303,7 +303,7 @@ Deno.serve(async (req: Request) => {
       return resp(req, 503, { erro: "Não foi possível verificar cadastros anteriores. Tente novamente." });
     }
 
-    const temAtivo = (cadastrosCpf ?? []).some((c) => ["pendente", "analise", "aprovado"].includes(c.status));
+    const temAtivo = (cadastrosCpf ?? []).some((c: { status?: string }) => ["pendente", "analise", "aprovado"].includes(c.status ?? ""));
     if (temAtivo) {
       return resp(req, 409, {
         erro: "Já existe um cadastro para este CPF. Se precisar atualizar algum documento, fale com o time de Cadastros da AJBorges.",
