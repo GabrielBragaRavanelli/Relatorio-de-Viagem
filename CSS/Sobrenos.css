@@ -1694,6 +1694,16 @@ footer {
     letter-spacing: 0.2px;
 }
 
+.footer-bottom a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.footer-bottom a:hover {
+    color: #ffffff;
+}
+
 /* --- RESPONSIVIDADE (Header e Footer) --- */
 
 @media (max-width: 900px) {

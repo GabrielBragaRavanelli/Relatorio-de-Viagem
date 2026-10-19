@@ -1,0 +1,86 @@
+/* Página Política de Privacidade (header, rodapé e base vêm de Nossofretes.css) */
+
+.politica-section {
+    width: 100%;
+    padding: 48px 24px 64px;
+}
+
+.politica-card {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    background-color: var(--card-background);
+    border: 1px solid var(--cinza-borda);
+    border-radius: 16px;
+    box-shadow: var(--sombra-card);
+    padding: 40px 44px;
+    color: var(--cinza-texto);
+}
+
+.politica-cabecalho {
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+}
+
+.politica-titulo {
+    font-size: 26px;
+    line-height: 1.3;
+    color: var(--azul-ajborges);
+    font-weight: 700;
+}
+
+.politica-atualizacao {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--cinza-medio);
+}
+
+.politica-bloco {
+    margin-top: 24px;
+}
+
+.politica-bloco h2 {
+    font-size: 18px;
+    color: var(--cinza-escuro);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.politica-bloco p,
+.politica-bloco li {
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.politica-bloco ul {
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+@media (max-width: 640px) {
+    .politica-section {
+        padding: 24px 16px 40px;
+    }
+
+    .politica-card {
+        padding: 24px 18px;
+        border-radius: 12px;
+    }
+
+    .politica-titulo {
+        font-size: 21px;
+    }
+
+    .politica-bloco h2 {
+        font-size: 16.5px;
+    }
+
+    .politica-bloco p,
+    .politica-bloco li {
+        font-size: 14.5px;
+        overflow-wrap: break-word;
+    }
+}

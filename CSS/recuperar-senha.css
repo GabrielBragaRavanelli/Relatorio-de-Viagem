@@ -1700,6 +1700,16 @@ footer {
     color: #94a3b8;
 }
 
+.footer-bottom a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.footer-bottom a:hover {
+    color: #ffffff;
+}
+
 /* =========================================================================
    15. RESPONSIVIDADE
    ========================================================================= */

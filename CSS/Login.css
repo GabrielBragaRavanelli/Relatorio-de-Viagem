@@ -1045,6 +1045,16 @@ footer {
     letter-spacing: 0.2px;
 }
 
+.footer-bottom a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.footer-bottom a:hover {
+    color: #ffffff;
+}
+
 /* --- RESPONSIVIDADE MOBILE --- */
 /* Rodapé em 2 colunas no tablet e 1 no celular, como nas outras páginas */
 @media (max-width: 900px) {
