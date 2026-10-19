@@ -753,6 +753,13 @@
             return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // LGPD: aceite da Política de Privacidade gravado pela edge function solicitar-cadastro
+        function aceitePolitica(d) {
+            const a = d && d._aceite_lgpd;
+            if (!a || !a.em) return 'Política de Privacidade: <b>não registrado</b>';
+            return `Política aceita em <b>${formatarData(a.em)}</b> (versão ${esc(a.versao || '—')})`;
+        }
+
         // LGPD: recusado é apagado 90 dias após a recusa (edge function limpar-recusados).
         // Só vale enquanto o status for "recusado"; outra decisão muda analisado_em.
         const DIAS_RETENCAO_LGPD = 90;
@@ -1121,6 +1128,7 @@
                     <div>${ROTULOS_STATUS[statusExibido(c)] || esc(c.status)} ${c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}${novo ? '' : (c.sem_carreta ? ' · sem carreta' : '')}</div>
                     ${novo ? `<div>Tipo de veículo: <b>${esc(d._tipologia)}</b></div>` : ''}
                     <div>Enviado em <b>${formatarData(c.criado_em)}</b></div>
+                    <div>${aceitePolitica(d)}</div>
                     <div>E-mail de contato: <b>${esc(c.email || '—')}</b></div>
                     ${c.analisado_por ? `<div>Última análise: <b>${esc(c.analisado_por)}</b> em ${formatarData(c.analisado_em)}</div>` : ''}
                     ${c.status === 'recusado' && c.motivo_recusa ? `<div style="color:#b91c1c;">Motivo da recusa: <b>${esc(c.motivo_recusa)}</b></div>` : ''}

@@ -416,6 +416,16 @@ Deno.serve(async (req: Request) => {
 
     const corpo = recebido;
 
+    // ---------- Aceite da Política de Privacidade (LGPD) ----------
+
+    if (corpo.aceite_lgpd !== true) {
+      return resp(req, 400, {
+        erro: "É preciso aceitar a Política de Privacidade para enviar o cadastro.",
+      });
+    }
+
+    const versaoPolitica = limparTexto(corpo.versao_politica).slice(0, 20);
+
     admin = createClient(url, serviceKey, {
       auth: {
         persistSession: false,
@@ -805,6 +815,10 @@ Deno.serve(async (req: Request) => {
           ...dados,
           _tipologia: tipologia,
           _sem_pdf: semPdf,
+          _aceite_lgpd: {
+            em: new Date().toISOString(),
+            versao: versaoPolitica,
+          },
         },
       })
       .select("id")
