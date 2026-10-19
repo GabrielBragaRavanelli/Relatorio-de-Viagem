@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UFS.map((uf) => `<option value="${esc(uf)}">${esc(uf)}</option>`).join('');
     const siglaDe = (uf) => (/\(([A-Z]{2})\)$/.exec(uf || '') || [])[1] || '';
     const semAcento = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
-        .replace(/\s+/g, ' ').trim().toLowerCase();
+        .replace(/’/g, "'").replace(/\s+/g, ' ').trim().toLowerCase();
     // Funciona também nos cartões de CRLV que ainda não entraram na página
     const cidadeDe = (select) => select.closest('.cartao-doc-form').querySelector(`#${select.dataset.cidade}`);
 

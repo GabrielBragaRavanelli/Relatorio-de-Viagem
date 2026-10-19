@@ -365,8 +365,10 @@ function limparTexto(v: unknown): string {
     return "";
   }
 
+  // Apóstrofo comum vira tipográfico: preserva "Santa Bárbara d’Oeste".
   return String(v)
-    .replace(/[<>"'`]/g, "")
+    .replace(/'/g, "’")
+    .replace(/[<>"`]/g, "")
     .trim()
     .slice(0, 200);
 }
