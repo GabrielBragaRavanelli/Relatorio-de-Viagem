@@ -215,6 +215,7 @@ const CAMPOS_CNH = [
   "nascimento",
   "rg",
   "rg-uf",
+  "uf-nasc",
   "cidade-nasc",
   "mae",
   "cnh-registro",
@@ -276,6 +277,37 @@ const TIPOLOGIAS: Record<string, string[]> = {
   ],
 };
 
+// As 27 UFs, no formato do select do formulário ("São Paulo (SP)").
+const UFS = [
+  "Acre (AC)",
+  "Alagoas (AL)",
+  "Amapá (AP)",
+  "Amazonas (AM)",
+  "Bahia (BA)",
+  "Ceará (CE)",
+  "Distrito Federal (DF)",
+  "Espírito Santo (ES)",
+  "Goiás (GO)",
+  "Maranhão (MA)",
+  "Mato Grosso (MT)",
+  "Mato Grosso do Sul (MS)",
+  "Minas Gerais (MG)",
+  "Pará (PA)",
+  "Paraíba (PB)",
+  "Paraná (PR)",
+  "Pernambuco (PE)",
+  "Piauí (PI)",
+  "Rio de Janeiro (RJ)",
+  "Rio Grande do Norte (RN)",
+  "Rio Grande do Sul (RS)",
+  "Rondônia (RO)",
+  "Roraima (RR)",
+  "Santa Catarina (SC)",
+  "São Paulo (SP)",
+  "Sergipe (SE)",
+  "Tocantins (TO)",
+];
+
 const nomeCrlv = (papel: string) =>
   `CRLV ${/carreta$/i.test(papel) ? "da" : "do"} ${papel}`;
 
@@ -300,6 +332,7 @@ const ROTULOS: Record<string, string> = {
   "nascimento": "Data de nascimento",
   "rg": "RG",
   "rg-uf": "UF do RG",
+  "uf-nasc": "Estado de nascimento",
   "cidade-nasc": "Cidade de nascimento",
   "mae": "Nome da mãe",
   "cnh-registro": "Registro da CNH",
@@ -572,6 +605,20 @@ Deno.serve(async (req: Request) => {
       }
 
       dados[k] = valor;
+    }
+
+    // ---------- Estados (mesmos valores do select do formulário) ----------
+
+    for (const [k, v] of Object.entries(dados)) {
+      const ehEstado = k === "uf-nasc" ||
+        k === "mot-estado" ||
+        /^crlv\d+-uf$/.test(k);
+
+      if (ehEstado && !UFS.includes(v)) {
+        return resp(req, 400, {
+          erro: "Estado inválido.",
+        });
+      }
     }
 
     // ---------- Validação dos anexos ----------

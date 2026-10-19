@@ -234,13 +234,17 @@
                             <span class="caixa-sem-pdf-texto">Não tenho o PDF da CNH</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
-                            <div class="form-row col-2">
+                            <div class="form-row col-3">
                                 <div class="form-group">
                                     <label for="pj-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
                                     <input type="date" id="pj-nascimento" >
                                 </div>
                                 <div class="form-group">
-                                    <label for="pj-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                                    <label for="pj-uf-nasc">Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                                    <select id="pj-uf-nasc" data-cidade="pj-cidade-nasc"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pj-cidade-nasc">Cidade de Nascimento: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pj-cidade-nasc" >
                                 </div>
                             </div>
@@ -446,12 +450,12 @@
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
-                                    <label for="pj-mot-cidade">Cidade:</label>
-                                    <input type="text" id="pj-mot-cidade">
+                                    <label for="pj-mot-estado">Estado:</label>
+                                    <select id="pj-mot-estado" data-cidade="pj-mot-cidade"></select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pj-mot-estado">Estado:</label>
-                                    <input type="text" id="pj-mot-estado">
+                                    <label for="pj-mot-cidade">Cidade:</label>
+                                    <input type="text" id="pj-mot-cidade">
                                 </div>
                                 <div class="form-group">
                                     <label for="pj-mot-cep">CEP:</label>
@@ -609,13 +613,17 @@
                             <span class="caixa-sem-pdf-texto">Não tenho o PDF da CNH</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
-                            <div class="form-row col-2">
+                            <div class="form-row col-3">
                                 <div class="form-group">
                                     <label for="pf-nascimento">Data de Nascimento: <span class="required-asterisk">*</span></label>
                                     <input type="date" id="pf-nascimento" >
                                 </div>
                                 <div class="form-group">
-                                    <label for="pf-cidade-nasc">Cidade/Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                                    <label for="pf-uf-nasc">Estado de Nascimento: <span class="required-asterisk">*</span></label>
+                                    <select id="pf-uf-nasc" data-cidade="pf-cidade-nasc"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pf-cidade-nasc">Cidade de Nascimento: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pf-cidade-nasc" >
                                 </div>
                             </div>
@@ -821,12 +829,12 @@
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
-                                    <label for="pf-mot-cidade">Cidade:</label>
-                                    <input type="text" id="pf-mot-cidade">
+                                    <label for="pf-mot-estado">Estado:</label>
+                                    <select id="pf-mot-estado" data-cidade="pf-mot-cidade"></select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pf-mot-estado">Estado:</label>
-                                    <input type="text" id="pf-mot-estado">
+                                    <label for="pf-mot-cidade">Cidade:</label>
+                                    <input type="text" id="pf-mot-cidade">
                                 </div>
                                 <div class="form-group">
                                     <label for="pf-mot-cep">CEP:</label>

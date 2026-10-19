@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const CAMPOS_ACESSO = ['motorista-nome', 'motorista-sobrenome', 'cpf', 'celular'];
     const CAMPOS_EMPRESA = ['nome-empresa', 'cnpj', 'telefone-empresa', 'responsavel'];
-    const CAMPOS_CNH = ['nascimento', 'rg', 'rg-uf', 'cidade-nasc', 'mae', 'cnh-registro', 'cnh-emissao',
+    const CAMPOS_CNH = ['nascimento', 'rg', 'rg-uf', 'uf-nasc', 'cidade-nasc', 'mae', 'cnh-registro', 'cnh-emissao',
         'cnh-primeira', 'cnh-uf', 'cnh-validade', 'cnh-categoria', 'cnh-seguranca'];
     const CAMPOS_RNTRC = ['rntrc', 'val-rntrc'];
     const CAMPOS_RESIDENCIA = ['mot-endereco', 'mot-cidade', 'mot-estado', 'mot-cep'];
@@ -306,6 +306,133 @@ document.addEventListener('DOMContentLoaded', () => {
         const el = anexoDe(prefixo, doc);
         return el && el.files ? Array.from(el.files) : [];
     };
+
+    // ---------- Estado -> Cidade (municípios da API do IBGE) ----------
+    // A cidade é um campo de texto com <datalist> dos municípios do estado.
+    // Se a API falhar, vira texto livre: o cadastro nunca trava por causa dela.
+    const URL_MUNICIPIOS = (sigla) =>
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${sigla}/municipios?orderBy=nome`;
+    const municipiosPorUf = {}; // cache em memória: sigla -> nomes oficiais
+    const buscasMunicipios = {}; // sigla -> busca em andamento
+    const AVISO_SEM_LISTA = 'Não foi possível carregar a lista de cidades; digite o nome da cidade.';
+
+    const opcoesUf = () => '<option value="">--- Selecione a escolha ---</option>' +
+        UFS.map((uf) => `<option value="${esc(uf)}">${esc(uf)}</option>`).join('');
+    const siglaDe = (uf) => (/\(([A-Z]{2})\)$/.exec(uf || '') || [])[1] || '';
+    const semAcento = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/\s+/g, ' ').trim().toLowerCase();
+    // Funciona também nos cartões de CRLV que ainda não entraram na página
+    const cidadeDe = (select) => select.closest('.cartao-doc-form').querySelector(`#${select.dataset.cidade}`);
+
+    function buscarMunicipios(sigla) {
+        if (!buscasMunicipios[sigla]) {
+            const controle = new AbortController();
+            const prazo = setTimeout(() => controle.abort(), 10000);
+            buscasMunicipios[sigla] = fetch(URL_MUNICIPIOS(sigla), { signal: controle.signal })
+                .then((r) => {
+                    if (!r.ok) throw new Error(`IBGE respondeu ${r.status}`);
+                    return r.json();
+                })
+                .then((lista) => {
+                    const nomes = Array.isArray(lista) ? lista.map((m) => m && m.nome).filter(Boolean) : [];
+                    if (nomes.length === 0) throw new Error('IBGE devolveu lista vazia');
+                    return nomes;
+                })
+                .finally(() => {
+                    clearTimeout(prazo);
+                    delete buscasMunicipios[sigla];
+                });
+        }
+        return buscasMunicipios[sigla];
+    }
+
+    // Habilita a cidade só com estado escolhido (e lista já buscada)
+    function sincronizarCidade(select) {
+        const cidade = cidadeDe(select);
+        if (!cidade) return;
+        if (!select.value) {
+            cidade.value = '';
+            cidade.dataset.lista = '';
+            cidade.parentElement.querySelector('datalist').innerHTML = '';
+            cidade.parentElement.querySelector('.aviso-cidade').hidden = true;
+        }
+        const carregando = cidade.dataset.lista === 'carregando';
+        cidade.disabled = select.disabled || !select.value || carregando;
+        cidade.placeholder = !select.value ? 'Escolha o estado primeiro'
+            : carregando ? 'Carregando cidades…'
+            : cidade.dataset.lista === 'ok' ? 'Digite e escolha da lista' : 'Digite o nome da cidade';
+    }
+
+    async function carregarCidades(select) {
+        const cidade = cidadeDe(select);
+        const lista = cidade.parentElement.querySelector('datalist');
+        const aviso = cidade.parentElement.querySelector('.aviso-cidade');
+        const sigla = siglaDe(select.value);
+        cidade.value = '';
+        cidade.setCustomValidity('');
+        lista.innerHTML = '';
+        aviso.hidden = true;
+        cidade.dataset.lista = '';
+        if (sigla && !municipiosPorUf[sigla]) {
+            cidade.dataset.lista = 'carregando';
+            sincronizarCidade(select);
+            try {
+                municipiosPorUf[sigla] = await buscarMunicipios(sigla);
+            } catch (err) {
+                console.warn(`Municípios de ${sigla} indisponíveis:`, err);
+            }
+            if (siglaDe(select.value) !== sigla) return; // estado trocado durante a busca
+        }
+        const nomes = municipiosPorUf[sigla];
+        if (sigla && nomes) {
+            lista.innerHTML = nomes.map((n) => `<option value="${esc(n)}"></option>`).join('');
+            cidade.dataset.lista = 'ok';
+        } else if (sigla) {
+            cidade.dataset.lista = 'falhou';
+            aviso.textContent = AVISO_SEM_LISTA;
+            aviso.hidden = false;
+        }
+        sincronizarCidade(select);
+    }
+
+    function ligarEstadoCidade(select) {
+        if (!select || select.dataset.ligado === '1') return;
+        select.dataset.ligado = '1';
+        if (select.options.length === 0) select.innerHTML = opcoesUf();
+        const cidade = cidadeDe(select);
+        const lista = document.createElement('datalist');
+        lista.id = `${cidade.id}-lista`;
+        const aviso = document.createElement('small');
+        aviso.className = 'aviso-cidade';
+        aviso.hidden = true;
+        cidade.setAttribute('list', lista.id);
+        cidade.autocomplete = 'off';
+        cidade.after(lista, aviso);
+        cidade.addEventListener('input', () => cidade.setCustomValidity(''));
+        cidade.addEventListener('change', () => conferirCidade(select));
+        select.addEventListener('change', () => carregarCidades(select));
+        sincronizarCidade(select);
+    }
+
+    // Com a lista carregada, a cidade tem que ser um município do estado
+    // (sem diferenciar acentos/maiúsculas) e fica com o nome oficial do IBGE.
+    function conferirCidade(select) {
+        const cidade = cidadeDe(select);
+        if (!cidade) return;
+        cidade.setCustomValidity('');
+        if (cidade.disabled || cidade.dataset.lista !== 'ok' || !cidade.value.trim()) return;
+        const alvo = semAcento(cidade.value);
+        const oficial = (municipiosPorUf[siglaDe(select.value)] || []).find((n) => semAcento(n) === alvo);
+        if (oficial) cidade.value = oficial;
+        else cidade.setCustomValidity('Escolha uma cidade da lista.');
+    }
+
+    function validarCidades(form) {
+        const selects = Array.from(form.querySelectorAll('select[data-cidade]'));
+        selects.forEach(conferirCidade);
+        const carregando = selects.some((s) => !s.disabled && cidadeDe(s)?.dataset.lista === 'carregando');
+        return carregando ? 'Aguarde: a lista de cidades ainda está carregando.' : null;
+    }
 
     // ---------- Cartões de CRLV (um por veículo da tipologia) ----------
     function criarCartaoCrlv(prefixo, n, papel) {
@@ -361,14 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${texto('cor', 'Cor')}
                 </div>
                 <div class="form-row col-2">
-                    ${texto('cidade-emp', 'Cidade de Emplacamento')}
                     <div class="form-group">
                         <label for="${id('uf')}">Estado: ${ast}</label>
-                        <select id="${id('uf')}">
-                            <option value="">--- Selecione a escolha ---</option>
-                            ${UFS.map((uf) => `<option value="${esc(uf)}">${esc(uf)}</option>`).join('')}
-                        </select>
+                        <select id="${id('uf')}" data-cidade="${id('cidade-emp')}">${opcoesUf()}</select>
                     </div>
+                    ${texto('cidade-emp', 'Cidade de Emplacamento')}
                 </div>
                 <div class="form-row col-2">
                     ${texto('prop-nome', 'Nome do Proprietário (como no CRLV)')}
@@ -381,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyMask(el('ano'), soDigitos(4));
         applyMask(el('chassi'), maskChassi);
         applyMask(el('prop-doc'), maskCpfCnpj);
+        ligarEstadoCidade(el('uf'));
         ligarDropzone(cartao.querySelector('.upload-dropzone'));
         return cartao;
     }
@@ -450,6 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.disabled = !marcado || !ativo;
                 el.required = marcado && ativo && obrigatorio;
             });
+            form.querySelectorAll('select[data-cidade]').forEach(sincronizarCidade);
         });
     }
 
@@ -573,6 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
         campo(prefixo, 'docs')?.addEventListener('change', (e) => {
             if (e.target.matches('.caixa-sem-pdf input')) aplicarCaixas(prefixo);
         });
+        form.querySelectorAll('select[data-cidade]').forEach(ligarEstadoCidade);
         montarCrlvs(prefixo);
         aplicarCaixas(prefixo);
 
@@ -586,7 +713,9 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             aplicarCaixas(prefixo);
+            const cidadesCarregando = validarCidades(form);
             if (!form.reportValidity()) return;
+            if (cidadesCarregando) return mostrarErro(cidadesCarregando);
 
             const problemaArquivo = validarArquivos(prefixo);
             if (problemaArquivo) return mostrarErro(problemaArquivo);

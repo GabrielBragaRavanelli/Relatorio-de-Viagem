@@ -705,8 +705,8 @@
             ['Empresa (PJ)', SECOES[0][1]],
             ['Motorista', [['motorista-nome', 'Nome'], ['motorista-sobrenome', 'Sobrenome'], ['cpf', 'CPF'], ['celular', 'Celular']]]
         ];
-        const CAMPOS_CNH_NOVOS = [['nascimento', 'Nascimento'], ['rg', 'RG'], ['rg-uf', 'UF do RG'], ['cidade-nasc', 'Cidade de nascimento'],
-            ['mae', 'Nome da mãe'], ...SECOES[2][1]];
+        const CAMPOS_CNH_NOVOS = [['nascimento', 'Nascimento'], ['rg', 'RG'], ['rg-uf', 'UF do RG'], ['uf-nasc', 'Estado de nascimento'],
+            ['cidade-nasc', 'Cidade de nascimento'], ['mae', 'Nome da mãe'], ...SECOES[2][1]];
         const camposCrlvNovos = (n) => [['placa', 'Placa'], ['renavam', 'RENAVAM'], ['chassi', 'Chassi'], ['marca', 'Marca'],
             ['modelo', 'Modelo'], ['ano', 'Ano'], ['cor', 'Cor'], ['cidade-emp', 'Cidade de emplacamento'], ['uf', 'UF'],
             ['prop-nome', 'Proprietário'], ['prop-doc', 'CPF/CNPJ do proprietário']].map(([s, r]) => [`crlv${n}-${s}`, r]);

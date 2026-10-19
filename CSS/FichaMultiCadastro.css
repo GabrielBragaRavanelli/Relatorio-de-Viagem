@@ -1231,6 +1231,23 @@ footer {
     font-size: 0.85rem;
 }
 
+/* Cidade: desabilitada até escolher o estado; aviso quando a lista do IBGE falha */
+.cartao-doc-form input[list]:disabled {
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+}
+
+.aviso-cidade {
+    display: block;
+    margin-top: 4px;
+    color: #b45309;
+    font-size: 0.78rem;
+}
+
+.aviso-cidade[hidden] {
+    display: none;
+}
+
 /* Caixinha "Não tenho o PDF": input nativo escondido + quadrado personalizado */
 .caixa-sem-pdf {
     display: inline-flex;
