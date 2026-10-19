@@ -1290,6 +1290,29 @@ footer {
     transform: rotate(45deg) translate(-1px, -1px);
 }
 
+/* Caixa de aceite da Política de Privacidade (mesmo checkbox do "Não tenho o PDF") */
+.aceite-lgpd-row {
+    margin-top: 28px;
+}
+
+.caixa-sem-pdf.caixa-aceite-lgpd {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.caixa-aceite-lgpd .caixa-sem-pdf-quadrado {
+    margin-top: 2px;
+}
+
+.caixa-aceite-lgpd a {
+    color: var(--azul-ajborges);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 .dica-senha {
     margin: 0 0 18px;
     padding: 16px 20px;

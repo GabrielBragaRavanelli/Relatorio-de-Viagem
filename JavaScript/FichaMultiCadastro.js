@@ -265,6 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_ARQUIVOS = 3;
     const TIPOS_ARQUIVO = ['application/pdf', 'image/png', 'image/jpeg'];
     const TAMANHO_MAX = 10 * 1024 * 1024;
+    // Data da "Última atualização" da Política de Privacidade (HTML/politica-privacidade.html)
+    const VERSAO_POLITICA = '2026-10-19';
 
     // "CRLV do Cavalo", "CRLV da 1ª carreta"
     const nomeCrlv = (papel) => `CRLV ${/carreta$/i.test(papel) ? 'da' : 'do'} ${papel}`;
@@ -528,7 +530,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 email: (campo(prefixo, 'email')?.value || '').trim().toLowerCase() || null,
                 sem_pdf,
                 dados,
-                documentos
+                documentos,
+                aceite_lgpd: campo(prefixo, 'aceite-lgpd')?.checked === true,
+                versao_politica: VERSAO_POLITICA
             },
             arquivos
         };
@@ -587,6 +591,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const problemaArquivo = validarArquivos(prefixo);
             if (problemaArquivo) return mostrarErro(problemaArquivo);
 
+            const aceite = campo(prefixo, 'aceite-lgpd');
+            if (!aceite?.checked) {
+                mostrarErro('Para enviar, marque que leu e concorda com a Política de Privacidade.');
+                aceite?.focus();
+                return;
+            }
+
             const { corpo } = montarEnvio(prefixo);
             const situacao = ({ doc, campos, obrigatorio }) => {
                 const anexos = corpo.documentos[doc] || [];
@@ -599,7 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>Tipo: <b>${prefixo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'}</b> · Veículo: <b>${esc(corpo.tipologia)}</b></div>
                 <div>Motorista: <b>${esc(nome)}</b> · CPF <b>${esc(corpo.dados.cpf || '')}</b></div>
                 <div>E-mail: <b>${esc(corpo.email || 'Não informado')}</b></div>
-                ${documentosDe(prefixo).map((d) => `<div>${esc(d.titulo)}: <b>${situacao(d)}</b></div>`).join('')}`;
+                ${documentosDe(prefixo).map((d) => `<div>${esc(d.titulo)}: <b>${situacao(d)}</b></div>`).join('')}
+                <div>Política de Privacidade: <b>aceita</b></div>`;
             envioEmAndamento = { form, prefixo };
             document.getElementById('modal-revisar-cadastro').classList.add('ativo');
         });
