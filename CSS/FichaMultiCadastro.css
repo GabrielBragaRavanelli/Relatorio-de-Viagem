@@ -1695,3 +1695,235 @@ footer {
         padding: 7.5px 9px;
     }
 }
+
+/* ==========================================================================
+   CELULAR: campos com 16px (o iPhone não dá zoom), alvos de toque de 44px,
+   header que não cobre o conteúdo e modais em tela inteira
+   ========================================================================== */
+
+/* Zona de anexo: "Toque para escolher" no celular, arrastar e soltar no computador */
+.upload-texto-toque {
+    display: none;
+    color: var(--azul-ajborges);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+@media (hover: none), (max-width: 640px) {
+    .upload-texto-mouse {
+        display: none;
+    }
+
+    .upload-texto-toque {
+        display: inline;
+    }
+}
+
+/* Aviso dentro do cartão do documento ou da caixa de aceite */
+.aviso-bloco {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+@media (max-width: 1024px), (pointer: coarse), (max-height: 500px) {
+    input[type="text"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    select {
+        font-size: 16px; /* abaixo de 16px o iPhone dá zoom ao tocar */
+        height: 48px;
+    }
+
+    .phone-input-wrapper input {
+        height: 46px;
+    }
+
+    .phone-prefix {
+        height: 46px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .caixa-sem-pdf {
+        min-height: 44px;
+    }
+
+    .caixa-sem-pdf-quadrado {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Botão × da prévia do anexo */
+    .file-preview-item {
+        padding: 2px 2px 2px 10px;
+        font-size: 0.85rem;
+    }
+
+    .file-preview-remover {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 1.4rem;
+    }
+
+    .links-redessociais a {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .contato-info a,
+    .footer-bottom a {
+        display: inline-block;
+        padding: 12px 0;
+    }
+
+    .btn-modal-pri,
+    .btn-modal-sec {
+        min-height: 48px;
+    }
+}
+
+/* Header rola com a página (estreito ou deitado): nunca cobre o conteúdo */
+@media (max-width: 640px), (max-height: 500px) {
+    header {
+        position: relative;
+    }
+
+    .main-container,
+    .main-container[class] {
+        margin-top: 20px;
+    }
+}
+
+@media (max-height: 500px) {
+    .header-AJBorges {
+        height: 64px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Header compacto: logo + menu em grade 2x2 com botões de 44px */
+    .header-AJBorges {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+
+    .header-links,
+    .lista-links {
+        width: 100%;
+    }
+
+    .lista-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        font-size: 14px;
+        padding: 8px 10px;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        left: 0;
+        transform: translateY(10px);
+        min-width: 0;
+        width: calc(100vw - 24px);
+        max-width: 380px;
+    }
+
+    .dropdown-menu::before {
+        left: 28px;
+        margin-left: 0;
+    }
+
+    .dropdown-item:hover .dropdown-menu,
+    .dropdown-item.active .dropdown-menu {
+        transform: translateY(0);
+    }
+
+    .main-container {
+        padding: 0 12px;
+    }
+
+    /* Anexo: a zona inteira é o alvo de toque */
+    .upload-dropzone {
+        padding: 14px;
+        min-height: 120px;
+    }
+
+    .upload-inner-card {
+        padding: 14px 12px;
+        max-width: none;
+    }
+
+    /* Enviar: grande e com a largura toda */
+    .btn-submit {
+        min-height: 56px;
+    }
+
+    .btn-submit:disabled,
+    .btn-modal-pri:disabled {
+        opacity: 0.7;
+        cursor: wait;
+    }
+}
+
+/* Modais (revisão e sucesso) em tela inteira, rolagem interna e botões sempre visíveis */
+@media (max-width: 640px), (max-height: 500px) {
+    .modal-cadastro {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modal-cadastro-caixa {
+        max-width: none;
+        border-radius: 0;
+        padding: 22px 16px 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        max-height: 100%;
+    }
+
+    .modal-cadastro-botoes {
+        position: sticky;
+        bottom: 0;
+        margin-top: auto;
+        padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+        background: var(--branco);
+        flex-direction: column-reverse;
+    }
+
+    .btn-modal-pri,
+    .btn-modal-sec {
+        width: 100%;
+        text-align: center;
+    }
+}

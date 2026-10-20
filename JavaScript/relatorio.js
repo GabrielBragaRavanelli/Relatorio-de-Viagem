@@ -2594,6 +2594,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // Zerar todos os campos de cabeçalho
         if (inputPlacas) inputPlacas.value = '';
         if (inputPlacaSecundaria) inputPlacaSecundaria.value = '';
+        // Listas do celular voltam a mostrar só a primeira linha
+        document.querySelectorAll('table.tabela-abastecimento').forEach(t => { delete t.dataset.mostrar; });
+        setTimeout(atualizarListasCelular, 0);
         if (inputDataSaida) inputDataSaida.value = '';
         if (inputDataChegada) inputDataChegada.value = '';
         if (inputKmSaida) inputKmSaida.value = '';
@@ -3142,6 +3145,77 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         calcularTotaisAbastecimentoMl();
         calcularTotaisDespesasMl();
         calcularIndicadoresViagemMl();
+        atualizarListasCelular();
+    }
+
+    // ------------------------------------------
+    // Listas no celular (fretes e abastecimentos)
+    // Até 640px cada linha vira um cartão (CSS) com o rótulo de cada campo.
+    // Aparecem as linhas preenchidas (ou a primeira); as outras ficam guardadas
+    // até o motorista tocar em "Adicionar". No computador nada muda.
+    // ------------------------------------------
+    const TABELAS_CELULAR = [
+        { seletor: 'table.tabela-fretes-ml', item: 'Frete', botao: 'Adicionar frete' },
+        { seletor: 'table.tabela-abastecimento:not(.tabela-fretes-ml)', item: 'Abastecimento', botao: 'Adicionar abastecimento' }
+    ];
+
+    function linhaPreenchida(tr) {
+        return Array.from(tr.querySelectorAll('input:not([type="date"]), select'))
+            .some(el => { const v = (el.value || '').trim(); return v !== '' && v !== '0,00' && v !== '0'; });
+    }
+
+    const linhasDaLista = (tabela) => Array.from(tabela.tBodies[0].rows).filter(tr => !tr.classList.contains('linha-adicionar-celular'));
+
+    function atualizarListasCelular() {
+        TABELAS_CELULAR.forEach(({ seletor }) => {
+            const tabela = document.querySelector(seletor);
+            if (!tabela || !tabela.tBodies[0]) return;
+            const linhas = linhasDaLista(tabela);
+            const ultimaPreenchida = linhas.reduce((u, tr, i) => (linhaPreenchida(tr) ? i + 1 : u), 0);
+            const mostrar = Math.min(linhas.length, Math.max(1, ultimaPreenchida, Number(tabela.dataset.mostrar || 0)));
+            tabela.dataset.mostrar = String(mostrar);
+            linhas.forEach((tr, i) => tr.classList.toggle('linha-oculta-celular', i >= mostrar));
+            tabela.querySelector('.linha-adicionar-celular')?.classList.toggle('linha-oculta-celular', mostrar >= linhas.length);
+        });
+    }
+
+    function prepararListasCelular() {
+        TABELAS_CELULAR.forEach(({ seletor, item, botao }) => {
+            const tabela = document.querySelector(seletor);
+            if (!tabela || !tabela.tBodies[0] || tabela.querySelector('.linha-adicionar-celular')) return;
+
+            // Rótulo de cada célula = texto do cabeçalho da coluna (sem o selo "Gestão")
+            const rotulos = Array.from(tabela.tHead.rows[0].cells).map(th => (th.childNodes[0]?.textContent || '').trim());
+            linhasDaLista(tabela).forEach(tr => {
+                Array.from(tr.cells).forEach((td, i) => {
+                    td.dataset.rotulo = td.classList.contains('td-num') ? item : rotulos[i] || '';
+                });
+            });
+            tabela.querySelector('tfoot .td-total-valor')?.setAttribute('data-rotulo', 'Total em R$');
+            tabela.querySelector('tfoot .td-total-litros')?.setAttribute('data-rotulo', 'Total de litros');
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-adicionar-linha-celular';
+            btn.innerHTML = `<span aria-hidden="true">+</span> ${botao}`;
+            btn.addEventListener('click', () => {
+                tabela.dataset.mostrar = String(Number(tabela.dataset.mostrar || 1) + 1);
+                atualizarListasCelular();
+                const nova = linhasDaLista(tabela).filter(tr => !tr.classList.contains('linha-oculta-celular')).pop();
+                const campo = nova?.querySelector('input:not([readonly]):not([type="date"]), select:not([disabled])');
+                if (campo) campo.focus();
+                else nova?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            });
+            // Última linha da lista (antes dos totais); no computador fica escondida
+            const linhaBotao = document.createElement('tr');
+            linhaBotao.className = 'linha-adicionar-celular';
+            const celula = document.createElement('td');
+            celula.colSpan = rotulos.length;
+            celula.appendChild(btn);
+            linhaBotao.appendChild(celula);
+            tabela.tBodies[0].appendChild(linhaBotao);
+        });
+        atualizarListasCelular();
     }
 
     function obterListaFichasCentral() {
@@ -4307,6 +4381,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
         window.carregarProgressoMl = carregarProgressoMl;
         carregarProgressoMl();
+        prepararListasCelular();
 
         // Dispara a configuração completa do ciclo de vida
         configurarCicloDeVidaViagem();

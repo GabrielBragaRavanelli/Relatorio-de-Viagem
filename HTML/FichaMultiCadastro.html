@@ -134,11 +134,11 @@
                         <div class="form-group">
                             <label for="pj-nome-empresa">Nome da Empresa: <span
                                     class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-nome-empresa" name="nome_empresa" required>
+                            <input type="text" id="pj-nome-empresa" autocomplete="organization" name="nome_empresa" required>
                         </div>
                         <div class="form-group">
                             <label for="pj-cnpj">CNPJ: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-cnpj" name="cnpj" placeholder="00.000.000/0000-00" required>
+                            <input type="text" id="pj-cnpj" inputmode="numeric" autocomplete="off" name="cnpj" placeholder="00.000.000/0000-00" required>
                             <span class="field-subtext">Dica: use o CNPJ principal da transportadora.</span>
                         </div>
                     </div>
@@ -157,14 +157,14 @@
                                     </svg>
                                     <span class="prefix-arrow">▾</span>
                                 </div>
-                                <input type="tel" id="pj-telefone-empresa" name="telefone_empresa"
+                                <input type="tel" id="pj-telefone-empresa" inputmode="tel" autocomplete="tel-national" name="telefone_empresa"
                                     placeholder="(11) 96123-4567" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="pj-responsavel">Responsável pelo Contato: <span
                                     class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-responsavel" name="responsavel_contato" required>
+                            <input type="text" id="pj-responsavel" autocomplete="name" name="responsavel_contato" required>
                         </div>
                     </div>
 
@@ -219,8 +219,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-cnh"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-cnh"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-cnh" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -294,7 +294,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pj-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pj-cnh-registro" >
+                                    <input type="text" id="pj-cnh-registro" inputmode="numeric" >
                                 </div>
                             </div>
                             <div class="form-row col-2">
@@ -363,7 +363,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pj-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pj-cnh-seguranca" >
+                                    <input type="text" id="pj-cnh-seguranca" inputmode="numeric" >
                                 </div>
                             </div>
                         </div>
@@ -385,8 +385,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-rntrc"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-rntrc"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-rntrc" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -443,8 +443,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-residencia"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-residencia"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-residencia" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -460,7 +460,7 @@
                         <div class="cartao-doc-form" hidden>
                             <div class="form-group mb-2">
                                 <label for="pj-mot-endereco">Endereço: <span class="required-asterisk">*</span></label>
-                                <input type="text" id="pj-mot-endereco">
+                                <input type="text" id="pj-mot-endereco" autocomplete="street-address">
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
@@ -473,7 +473,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pj-mot-cep">CEP: <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pj-mot-cep" placeholder="00000-000">
+                                    <input type="text" id="pj-mot-cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000">
                                 </div>
                             </div>
                         </div>
@@ -496,11 +496,11 @@
                         <label>Nome do Motorista: <span class="required-asterisk">*</span></label>
                         <div class="form-row col-2">
                             <div class="subfield-group">
-                                <input type="text" id="pj-motorista-nome" name="motorista_nome" required>
+                                <input type="text" id="pj-motorista-nome" autocomplete="given-name" name="motorista_nome" required>
                                 <span class="field-sublabel">Nome</span>
                             </div>
                             <div class="subfield-group">
-                                <input type="text" id="pj-motorista-sobrenome" name="motorista_sobrenome" required>
+                                <input type="text" id="pj-motorista-sobrenome" autocomplete="family-name" name="motorista_sobrenome" required>
                                 <span class="field-sublabel">Sobrenome</span>
                             </div>
                         </div>
@@ -509,7 +509,7 @@
                     <div class="form-row col-2">
                         <div class="form-group">
                             <label for="pj-cpf">CPF: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pj-cpf" name="cpf" placeholder="000.000.000-00" required>
+                            <input type="text" id="pj-cpf" inputmode="numeric" autocomplete="off" name="cpf" placeholder="000.000.000-00" required>
                         </div>
                         <div class="form-group">
                             <label for="pj-celular">Celular: <span class="required-asterisk">*</span></label>
@@ -523,7 +523,7 @@
                                     </svg>
                                     <span class="prefix-arrow">▾</span>
                                 </div>
-                                <input type="tel" id="pj-celular" name="celular" placeholder="(11) 96123-4567" required>
+                                <input type="tel" id="pj-celular" inputmode="tel" autocomplete="tel-national" name="celular" placeholder="(11) 96123-4567" required>
                             </div>
                         </div>
                     </div>
@@ -612,8 +612,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-cnh"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-cnh"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-cnh" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -687,7 +687,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pf-cnh-registro">Nº Registro da CNH: <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pf-cnh-registro" >
+                                    <input type="text" id="pf-cnh-registro" inputmode="numeric" >
                                 </div>
                             </div>
                             <div class="form-row col-2">
@@ -756,7 +756,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pf-cnh-seguranca">Código de Segurança (CNH): <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pf-cnh-seguranca" >
+                                    <input type="text" id="pf-cnh-seguranca" inputmode="numeric" >
                                 </div>
                             </div>
                         </div>
@@ -778,8 +778,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-rntrc"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-rntrc"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-rntrc" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -836,8 +836,8 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-residencia"
-                                            class="upload-action-link">Choose Files to Upload</label></span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-residencia"
+                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                                     <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-residencia" class="file-input-hidden" multiple
                                         accept="application/pdf,.pdf">
@@ -853,7 +853,7 @@
                         <div class="cartao-doc-form" hidden>
                             <div class="form-group mb-2">
                                 <label for="pf-mot-endereco">Endereço: <span class="required-asterisk">*</span></label>
-                                <input type="text" id="pf-mot-endereco">
+                                <input type="text" id="pf-mot-endereco" autocomplete="street-address">
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
@@ -866,7 +866,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pf-mot-cep">CEP: <span class="required-asterisk">*</span></label>
-                                    <input type="text" id="pf-mot-cep" placeholder="00000-000">
+                                    <input type="text" id="pf-mot-cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000">
                                 </div>
                             </div>
                         </div>
@@ -889,11 +889,11 @@
                         <label>Nome do Motorista: <span class="required-asterisk">*</span></label>
                         <div class="form-row col-2">
                             <div class="subfield-group">
-                                <input type="text" id="pf-motorista-nome" name="motorista_nome" required>
+                                <input type="text" id="pf-motorista-nome" autocomplete="given-name" name="motorista_nome" required>
                                 <span class="field-sublabel">Nome</span>
                             </div>
                             <div class="subfield-group">
-                                <input type="text" id="pf-motorista-sobrenome" name="motorista_sobrenome" required>
+                                <input type="text" id="pf-motorista-sobrenome" autocomplete="family-name" name="motorista_sobrenome" required>
                                 <span class="field-sublabel">Sobrenome</span>
                             </div>
                         </div>
@@ -902,7 +902,7 @@
                     <div class="form-row col-2">
                         <div class="form-group">
                             <label for="pf-cpf">CPF: <span class="required-asterisk">*</span></label>
-                            <input type="text" id="pf-cpf" name="cpf" placeholder="000.000.000-00" required>
+                            <input type="text" id="pf-cpf" inputmode="numeric" autocomplete="off" name="cpf" placeholder="000.000.000-00" required>
                         </div>
                         <div class="form-group">
                             <label for="pf-celular">Celular: <span class="required-asterisk">*</span></label>
@@ -916,7 +916,7 @@
                                     </svg>
                                     <span class="prefix-arrow">▾</span>
                                 </div>
-                                <input type="tel" id="pf-celular" name="celular" placeholder="(11) 96123-4567" required>
+                                <input type="tel" id="pf-celular" inputmode="tel" autocomplete="tel-national" name="celular" placeholder="(11) 96123-4567" required>
                             </div>
                         </div>
                     </div>
@@ -1066,6 +1066,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
+    <script src="../JavaScript/celular.js"></script>
     <script src="../JavaScript/FichaMultiCadastro.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

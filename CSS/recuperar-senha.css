@@ -1861,3 +1861,130 @@ footer {
         padding: 7.5px 9px;
     }
 }
+
+/* ==========================================================================
+   CELULAR: campos com 16px (o iPhone não dá zoom), alvos de toque de 44px
+   e header que não cobre o conteúdo
+   ========================================================================== */
+@media (max-width: 1024px), (pointer: coarse), (max-height: 500px) {
+    .form-input {
+        font-size: 16px; /* abaixo de 16px o iPhone dá zoom ao tocar */
+        min-height: 48px;
+    }
+
+    .btn-toggle-password {
+        width: 44px;
+        height: 44px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle,
+    .btn-voltar,
+    .tab-btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .link-recuperar,
+    .link-cadastro,
+    .contato-info a,
+    .footer-bottom a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .links-redessociais a {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Header rola com a página (estreito ou deitado): nunca cobre o conteúdo */
+@media (max-width: 640px), (max-height: 500px) {
+    header {
+        position: relative;
+    }
+
+    .recuperar-main {
+        padding-top: 24px;
+    }
+
+    .recuperar-toast {
+        top: calc(12px + env(safe-area-inset-top));
+        left: 12px;
+        right: 12px;
+        max-width: none;
+    }
+
+    .recuperar-card {
+        scroll-margin-top: 12px;
+    }
+
+    /* Formas decorativas do fundo não criam rolagem lateral */
+    .recuperar-main {
+        overflow-x: hidden;
+    }
+}
+
+@media (max-height: 500px) {
+    .header-AJBorges {
+        height: 64px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Header compacto: logo + menu em grade 2x2 com botões de 44px */
+    .header-AJBorges {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+
+    .header-links,
+    .lista-links {
+        width: 100%;
+    }
+
+    .lista-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        display: flex;
+        width: 100%;
+        font-size: 14px;
+        padding: 8px 10px;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        left: 0;
+        transform: translateY(10px);
+        min-width: 0;
+        width: calc(100vw - 24px);
+        max-width: 380px;
+    }
+
+    .dropdown-menu::before {
+        left: 28px;
+        margin-left: 0;
+    }
+
+    .dropdown-item:hover .dropdown-menu,
+    .dropdown-item.active .dropdown-menu {
+        transform: translateY(0);
+    }
+}

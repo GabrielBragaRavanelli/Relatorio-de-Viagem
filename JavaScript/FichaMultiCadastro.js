@@ -472,8 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                             <circle cx="12" cy="13" r="4" />
                         </svg>
-                        <span class="upload-text">Arraste a foto aqui ou <label for="${id}"
-                                class="upload-action-link">escolha a foto</label></span>
+                        <span class="upload-text"><span class="upload-texto-mouse">Arraste a foto aqui ou <label for="${id}"
+                                class="upload-action-link">escolha a foto</label></span><span class="upload-texto-toque">Toque para escolher a foto</span></span>
                         <span class="upload-subtext">JPG ou PNG. Até 3 fotos.</span>
                         <input type="file" id="${id}" class="file-input-hidden" multiple accept="image/png,image/jpeg" data-foto="1">
                     </div>
@@ -645,8 +645,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
-                        <span class="upload-text">Drag & Drop Files, <label for="${anexo}"
-                                class="upload-action-link">Choose Files to Upload</label></span>
+                        <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="${anexo}"
+                                class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
                         <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                         <input type="file" id="${anexo}" class="file-input-hidden" multiple accept="application/pdf,.pdf">
                     </div>
@@ -661,13 +661,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="cartao-doc-form" hidden>
                 <div class="form-row col-3">
                     ${texto('placa', 'Placa', 'placeholder="ABC-1234 ou ABC1D23"')}
-                    ${texto('renavam', 'RENAVAM')}
+                    ${texto('renavam', 'RENAVAM', 'inputmode="numeric"')}
                     ${texto('chassi', 'Chassi')}
                 </div>
                 <div class="form-row col-4">
                     ${texto('marca', 'Marca')}
                     ${texto('modelo', 'Modelo')}
-                    ${texto('ano', 'Ano', 'placeholder="AAAA"')}
+                    ${texto('ano', 'Ano', 'placeholder="AAAA" inputmode="numeric"')}
                     ${texto('cor', 'Cor')}
                 </div>
                 <div class="form-row col-2">
@@ -679,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="form-row col-2">
                     ${texto('prop-nome', 'Nome do Proprietário (como no CRLV)')}
-                    ${texto('prop-doc', 'CPF/CNPJ do Proprietário')}
+                    ${texto('prop-doc', 'CPF/CNPJ do Proprietário', 'inputmode="numeric"')}
                 </div>
             </div>`;
         const el = (s) => cartao.querySelector(`#${id(s)}`);
@@ -798,30 +798,37 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fechar(); });
     }
 
+    // Primeiro problema nos anexos: { msg, doc } (doc = cartão onde mostrar o aviso)
     function validarArquivos(prefixo) {
-        for (const { doc, titulo, obrigatorio } of documentosDe(prefixo)) {
-            const artigo = doc === 'cnh' ? 'a' : 'o';
-            if (semPdf(prefixo, doc)) {
-                if (fotoDe(prefixo, doc)?.closest('.upload-dropzone')?.dataset.processando) {
-                    return 'Aguarde: as fotos ainda estão sendo preparadas.';
-                }
-                const fotos = fotosDe(prefixo, doc);
-                if (fotos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} fotos para ${artigo} ${titulo}.`;
-                for (const f of fotos) {
-                    if (!TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é uma foto JPG ou PNG.`;
-                    if (f.size > TAMANHO_MAX) return `A foto "${f.name}" passa de 10 MB.`;
-                }
-                continue;
+        for (const d of documentosDe(prefixo)) {
+            const msg = problemaArquivosDoc(prefixo, d);
+            if (msg) return { msg, doc: d.doc };
+        }
+        return null;
+    }
+
+    function problemaArquivosDoc(prefixo, { doc, titulo, obrigatorio }) {
+        const artigo = doc === 'cnh' ? 'a' : 'o';
+        if (semPdf(prefixo, doc)) {
+            if (fotoDe(prefixo, doc)?.closest('.upload-dropzone')?.dataset.processando) {
+                return 'Aguarde: as fotos ainda estão sendo preparadas.';
             }
-            const arquivos = arquivosDe(prefixo, doc);
-            if (obrigatorio && arquivos.length === 0) return `Anexe ${artigo} ${titulo} ou marque que não tem o PDF.`;
-            if (arquivos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${artigo} ${titulo}.`;
-            for (const f of arquivos) {
-                if (!TIPOS_PDF.includes(f.type)) {
-                    return `O anexo d${artigo} ${titulo} precisa ser PDF. Se tiver só a foto, marque 'Não tenho o PDF' e envie a foto no formulário.`;
-                }
-                if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
+            const fotos = fotosDe(prefixo, doc);
+            if (fotos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} fotos para ${artigo} ${titulo}.`;
+            for (const f of fotos) {
+                if (!TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é uma foto JPG ou PNG.`;
+                if (f.size > TAMANHO_MAX) return `A foto "${f.name}" passa de 10 MB.`;
             }
+            return null;
+        }
+        const arquivos = arquivosDe(prefixo, doc);
+        if (obrigatorio && arquivos.length === 0) return `Anexe ${artigo} ${titulo} ou marque que não tem o PDF.`;
+        if (arquivos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${artigo} ${titulo}.`;
+        for (const f of arquivos) {
+            if (!TIPOS_PDF.includes(f.type)) {
+                return `O anexo d${artigo} ${titulo} precisa ser PDF. Se tiver só a foto, marque 'Não tenho o PDF' e envie a foto no formulário.`;
+            }
+            if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
         }
         return null;
     }
@@ -862,6 +869,23 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             arquivos
         };
+    }
+
+    // Aviso dentro do cartão do documento (ou da caixa de aceite), com a tela rolando até ele.
+    // Some quando o motorista mexe naquele bloco.
+    function avisarNoBloco(bloco, msg) {
+        if (!bloco) return mostrarErro(msg);
+        let aviso = bloco.querySelector(':scope > .aviso-bloco');
+        if (!aviso) {
+            aviso = document.createElement('p');
+            aviso.className = 'aviso-bloco';
+            aviso.setAttribute('role', 'alert');
+            bloco.prepend(aviso);
+            const limpar = () => { aviso.remove(); bloco.removeEventListener('change', limpar); };
+            bloco.addEventListener('change', limpar);
+        }
+        aviso.textContent = msg;
+        bloco.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
 
     function mostrarErro(msg, lista) {
@@ -920,12 +944,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cidadesCarregando) return mostrarErro(cidadesCarregando);
 
             const problemaArquivo = validarArquivos(prefixo);
-            if (problemaArquivo) return mostrarErro(problemaArquivo);
+            if (problemaArquivo) return avisarNoBloco(cartaoDe(prefixo, problemaArquivo.doc), problemaArquivo.msg);
 
             const aceite = campo(prefixo, 'aceite-lgpd');
             if (!aceite?.checked) {
-                mostrarErro('Para enviar, marque que leu e concorda com a Política de Privacidade.');
-                aceite?.focus();
+                avisarNoBloco(aceite?.closest('.aceite-lgpd-row'), 'Para enviar, marque que leu e concorda com a Política de Privacidade.');
+                aceite?.focus({ preventScroll: true });
                 return;
             }
 

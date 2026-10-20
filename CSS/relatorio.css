@@ -4221,3 +4221,446 @@ body.msf-aberto {
         font-size: 16px; /* evita o zoom automático do iPhone */
     }
 }
+
+/* ==========================================================================
+   CELULAR (os motoristas usam só o celular)
+   Campos com 16px (o iPhone não dá zoom), alvos de toque de 44px,
+   listas viram cartões e o header nunca cobre o conteúdo.
+   ========================================================================== */
+
+/* Telas de toque ou estreitas: campos de 16px e alvos de 44px */
+@media (max-width: 1024px), (pointer: coarse), (max-height: 500px) {
+    .form-relatorio input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    .form-relatorio select,
+    .form-relatorio textarea,
+    .modal-card-custom input,
+    .input-wrapper input,
+    .input-wrapper select,
+    .input-tabela {
+        font-size: 16px !important; /* abaixo de 16px o iPhone dá zoom ao tocar */
+    }
+
+    .input-tabela {
+        height: 44px;
+    }
+
+    .btn-voltar,
+    .lista-links li a,
+    .dropdown-toggle {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Botão do calendário e seta das cidades: área de toque de 44px */
+    .btn-picker-data,
+    .btn-combobox-seta {
+        min-width: 44px;
+        min-height: 44px;
+        right: 0;
+    }
+
+    .input-wrapper-data input {
+        padding-right: 48px;
+    }
+
+    .combobox-cidade-wrap .input-tabela {
+        padding-right: 44px !important;
+    }
+
+    /* Botões das listas (apagar tudo) e copiar protocolo */
+    #btn-lixeira-fretes-ml,
+    #btn-lixeira-abast-ml,
+    #btn-lixeira-despesas-ml,
+    .btn-copiar-protocolo {
+        min-height: 44px;
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .msf-campo input {
+        min-height: 48px;
+    }
+
+    .links-redessociais a {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .contato-info a {
+        display: inline-block;
+        padding: 14px 0;
+    }
+
+    .modal-btn-acao-primario,
+    .modal-btn-acao-secundario {
+        min-height: 48px;
+    }
+}
+
+/* Header rola com a página (estreito ou deitado): não cobre o conteúdo */
+@media (max-width: 640px), (max-height: 500px) {
+    header {
+        position: relative;
+    }
+
+    main {
+        margin-top: 0;
+        min-height: 0;
+    }
+
+    .barra-admin-operacional {
+        top: 0;
+    }
+}
+
+@media (max-height: 500px) {
+    .header-AJBorges {
+        height: 64px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+}
+
+/* Listas (fretes e abastecimentos): um cartão por item, com rótulos visíveis */
+@media (max-width: 900px), (max-height: 500px) {
+    .tabela-abastecimento-wrapper {
+        overflow: visible;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .tabela-abastecimento,
+    .tabela-fretes-ml {
+        display: block;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .tabela-abastecimento thead {
+        display: none;
+    }
+
+    .tabela-abastecimento tbody,
+    .tabela-abastecimento tfoot {
+        display: grid;
+        gap: 12px;
+    }
+
+    .tabela-abastecimento tfoot {
+        margin-top: 12px;
+        border-top: none;
+        background: transparent;
+    }
+
+    .tabela-abastecimento tbody tr,
+    .tabela-abastecimento tfoot tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff !important;
+    }
+
+    .tabela-abastecimento tfoot tr {
+        background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%) !important;
+        border-color: #c7d2fe;
+    }
+
+    .tabela-abastecimento td {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+        padding: 0;
+    }
+
+    .tabela-abastecimento td[data-rotulo]:not(.td-num)::before {
+        content: attr(data-rotulo);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: #475569;
+        text-transform: uppercase;
+    }
+
+    /* Campos largos ocupam a linha toda: posto; origem e destino */
+    .tabela-abastecimento:not(.tabela-fretes-ml) tbody td:nth-child(2),
+    .tabela-fretes-ml tbody td:nth-child(4),
+    .tabela-fretes-ml tbody td:nth-child(5),
+    .tabela-abastecimento tfoot td.td-totais-label {
+        grid-column: 1 / -1;
+    }
+
+    .tabela-abastecimento tfoot td.td-totais-label {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+
+    /* Topo do cartão: "Frete 1" + botão Apagar sempre visível */
+    .tabela-abastecimento td.td-num {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: auto;
+        position: static;
+        text-align: left;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tabela-abastecimento td.td-num::before {
+        content: attr(data-rotulo);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--azul-ajborges);
+    }
+
+    .tabela-abastecimento td.td-num .num-rotulo,
+    .tabela-abastecimento tbody tr:hover .num-rotulo {
+        opacity: 1;
+        font-size: 14px;
+        color: var(--azul-ajborges);
+    }
+
+    .tabela-abastecimento .btn-limpar-linha-inline,
+    .tabela-abastecimento tbody tr:hover .btn-limpar-linha-inline {
+        display: inline-flex;
+        position: static;
+        transform: none;
+        margin-left: auto;
+        width: auto;
+        height: 44px;
+        padding: 0 14px;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+
+    .tabela-abastecimento .btn-limpar-linha-inline::after {
+        content: "Apagar";
+    }
+
+    .tabela-abastecimento .btn-limpar-linha-inline:hover {
+        transform: none;
+    }
+
+    /* Linhas vazias ficam guardadas até o motorista tocar em "Adicionar" */
+    .tabela-abastecimento tr.linha-oculta-celular {
+        display: none !important;
+    }
+
+    .btn-adicionar-linha-celular {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 48px;
+        margin-top: 12px;
+        border: 2px dashed var(--azul-ajborges);
+        border-radius: 12px;
+        background: #eef2ff;
+        color: var(--azul-ajborges);
+        font-family: "Poppins", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .tabela-abastecimento tbody tr.linha-adicionar-celular {
+        display: block;
+        padding: 0;
+        border: none;
+        background: transparent !important;
+    }
+
+    .btn-adicionar-linha-celular {
+        margin-top: 0;
+    }
+}
+
+@media (min-width: 901px) and (min-height: 501px) {
+    .tabela-abastecimento tr.linha-adicionar-celular {
+        display: none;
+    }
+}
+
+/* Celular bem estreito: campos dos cartões em uma coluna */
+@media (max-width: 400px) {
+    .tabela-abastecimento tbody tr,
+    .tabela-abastecimento tfoot tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    /* Header compacto: logo + menu em grade 2x2 com botões de 44px */
+    .header-AJBorges {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .logotipo-AJBorges img {
+        height: 56px;
+    }
+
+    .header-links,
+    .lista-links {
+        width: 100%;
+    }
+
+    .lista-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .lista-links li a,
+    .dropdown-toggle {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        font-size: 14px;
+        padding: 8px 10px;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        left: 0;
+        transform: translateY(10px);
+        min-width: 0;
+        width: calc(100vw - 24px);
+        max-width: 380px;
+    }
+
+    .dropdown-menu::before {
+        left: 28px;
+        margin-left: 0;
+    }
+
+    .dropdown-item:hover .dropdown-menu,
+    .dropdown-item.active .dropdown-menu {
+        transform: translateY(0);
+    }
+
+    main {
+        padding: 20px 12px 48px;
+    }
+
+    .form-relatorio {
+        padding: 20px 14px;
+    }
+
+    /* Uma coluna: nada lado a lado no celular */
+    .tabela-fretes-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Rodapé em uma coluna */
+    .bloco-footer {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    .footer-container {
+        padding: 0 16px 30px;
+    }
+
+    /* Cartão "Iniciar preenchimento": empilhado, sem estourar a largura */
+    .card-iniciar-relatorio {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 18px;
+        gap: 12px;
+    }
+
+    .card-iniciar-status {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Enviar: grande e com a largura toda */
+    .bloco-acoes-relatorio {
+        flex-direction: column;
+    }
+
+    .btn-acao-primario,
+    .btn-acao-secundario {
+        width: 100%;
+        max-width: 100%;
+        flex: 1 1 auto;
+        min-height: 56px;
+        font-size: 16px;
+    }
+
+    .btn-acao-primario:disabled {
+        opacity: 0.7;
+        cursor: wait;
+    }
+
+    /* Aviso (toast) dentro da tela */
+    .toast {
+        left: 12px;
+        right: 12px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        justify-content: center;
+        text-align: center;
+    }
+
+}
+
+/* Modais em tela inteira (em pé ou deitado), rolagem interna e botões sempre visíveis no rodapé */
+@media (max-width: 640px), (max-height: 500px) {
+    .modal-overlay-custom {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modal-card-custom,
+    .msf-card {
+        max-width: none;
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        border-radius: 0;
+        padding: 22px 16px 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-overlay-custom:not(#modal-senha-frota) .modal-card-custom {
+        max-height: 100%;
+    }
+
+    .modal-acoes-row,
+    .msf-botoes {
+        position: sticky;
+        bottom: 0;
+        margin-top: auto;
+        padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+        background: #ffffff;
+        flex-direction: column-reverse;
+        z-index: 2;
+    }
+
+    .modal-acoes-row > *,
+    .msf-botoes > * {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    #modal-senha-frota {
+        padding: 0;
+    }
+}
