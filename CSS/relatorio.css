@@ -4651,6 +4651,12 @@ body.msf-aberto {
         font-size: 16px;
     }
 
+    /* O mínimo de 340px do computador cortava o "Enviar" à direita em telas até 390px */
+    #btn-finalizar-relatorio-ml {
+        min-width: 0;
+        margin-left: 0;
+    }
+
     .btn-acao-primario:disabled {
         opacity: 0.7;
         cursor: wait;
