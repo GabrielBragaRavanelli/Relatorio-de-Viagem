@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.7">
+    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.8">
     <link rel="icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="shortcut icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="apple-touch-icon" href="../Imagens/logo-header-1x.png">
@@ -771,7 +771,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">1</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="1" title="Apagar Linha 1">
+                                                            data-linha="1" title="Remover linha 1" aria-label="Remover linha 1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -868,7 +868,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">2</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="2" title="Apagar Linha 2">
+                                                            data-linha="2" title="Remover linha 2" aria-label="Remover linha 2">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -965,7 +965,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">3</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="3" title="Apagar Linha 3">
+                                                            data-linha="3" title="Remover linha 3" aria-label="Remover linha 3">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1062,7 +1062,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">4</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="4" title="Apagar Linha 4">
+                                                            data-linha="4" title="Remover linha 4" aria-label="Remover linha 4">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1159,7 +1159,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">5</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="5" title="Apagar Linha 5">
+                                                            data-linha="5" title="Remover linha 5" aria-label="Remover linha 5">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1256,7 +1256,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">6</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="6" title="Apagar Linha 6">
+                                                            data-linha="6" title="Remover linha 6" aria-label="Remover linha 6">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1353,7 +1353,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">7</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="7" title="Apagar Linha 7">
+                                                            data-linha="7" title="Remover linha 7" aria-label="Remover linha 7">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1450,7 +1450,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">8</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha="8" title="Apagar Linha 8">
+                                                            data-linha="8" title="Remover linha 8" aria-label="Remover linha 8">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1543,6 +1543,13 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+                                                    <!-- "+ Adicionar": mostra a próxima linha guardada (as linhas acima são fixas) -->
+                                                    <tr class="linha-adicionar-celular">
+                                                        <td colspan="8">
+                                                            <button type="button" class="btn-adicionar-linha-celular" data-adicionar="fretes"><span aria-hidden="true">+</span> Adicionar frete</button>
+                                                            <small class="texto-limite-linhas" hidden>Limite de 8 fretes</small>
+                                                        </td>
+                                                    </tr>
                                             </tbody>
                                             <tfoot>
                                                 <tr class="linha-totais-abast">
@@ -1674,7 +1681,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">1</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="1" title="Apagar Linha 1">
+                                                            data-linha-abast="1" title="Remover linha 1" aria-label="Remover linha 1">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1727,7 +1734,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">2</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="2" title="Apagar Linha 2">
+                                                            data-linha-abast="2" title="Remover linha 2" aria-label="Remover linha 2">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1780,7 +1787,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">3</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="3" title="Apagar Linha 3">
+                                                            data-linha-abast="3" title="Remover linha 3" aria-label="Remover linha 3">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1833,7 +1840,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">4</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="4" title="Apagar Linha 4">
+                                                            data-linha-abast="4" title="Remover linha 4" aria-label="Remover linha 4">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1886,7 +1893,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">5</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="5" title="Apagar Linha 5">
+                                                            data-linha-abast="5" title="Remover linha 5" aria-label="Remover linha 5">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1939,7 +1946,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">6</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="6" title="Apagar Linha 6">
+                                                            data-linha-abast="6" title="Remover linha 6" aria-label="Remover linha 6">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -1992,7 +1999,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">7</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="7" title="Apagar Linha 7">
+                                                            data-linha-abast="7" title="Remover linha 7" aria-label="Remover linha 7">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -2045,7 +2052,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">8</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="8" title="Apagar Linha 8">
+                                                            data-linha-abast="8" title="Remover linha 8" aria-label="Remover linha 8">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -2098,7 +2105,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">9</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="9" title="Apagar Linha 9">
+                                                            data-linha-abast="9" title="Remover linha 9" aria-label="Remover linha 9">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -2151,7 +2158,7 @@
                                                     <td class="td-num">
                                                         <span class="num-rotulo">10</span>
                                                         <button type="button" class="btn-limpar-linha-inline"
-                                                            data-linha-abast="10" title="Apagar Linha 10">
+                                                            data-linha-abast="10" title="Remover linha 10" aria-label="Remover linha 10">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12"
                                                                 height="12" viewBox="0 0 24 24" fill="none"
                                                                 stroke="currentColor" stroke-width="2.5"
@@ -2200,6 +2207,13 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+                                                    <!-- "+ Adicionar": mostra a próxima linha guardada (as linhas acima são fixas) -->
+                                                    <tr class="linha-adicionar-celular">
+                                                        <td colspan="8">
+                                                            <button type="button" class="btn-adicionar-linha-celular" data-adicionar="abastecimentos"><span aria-hidden="true">+</span> Adicionar abastecimento</button>
+                                                            <small class="texto-limite-linhas" hidden>Limite de 10 abastecimentos</small>
+                                                        </td>
+                                                    </tr>
                                             </tbody>
                                             <tfoot>
                                                 <tr class="linha-totais-abast">
@@ -3057,7 +3071,7 @@
     <script src="../JavaScript/senha.js"></script>
     <script src="../JavaScript/trocar-senha-frota.js?v=1"></script>
     <script src="../JavaScript/celular.js"></script>
-    <script src="../JavaScript/relatorio.js?v=2.7"></script>
+    <script src="../JavaScript/relatorio.js?v=2.8"></script>
     <script>
         // Mede a altura real do header fixo e grava em --altura-header,
         // usada pela .barra-admin-operacional para grudar logo abaixo dele.

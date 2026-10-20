@@ -2672,6 +2672,96 @@ footer {
     transform: translate(-50%, -50%) scale(1.1);
 }
 
+/* ==========================================
+   Linhas em uso (fretes e abastecimentos), em todas as larguras:
+   só as linhas usadas aparecem; "+ Adicionar" mostra a próxima e
+   "Remover" (da 2ª linha em diante) tira a linha e sobe as de baixo.
+   ========================================= */
+.tabela-abastecimento tr.linha-oculta-celular {
+    display: none !important;
+}
+
+.tabela-abastecimento th.th-num,
+.tabela-abastecimento td.td-num {
+    width: 84px;
+    white-space: nowrap;
+}
+
+/* Lixeira sempre visível ao lado do número, com área de toque de 44px */
+.tabela-abastecimento .btn-limpar-linha-inline,
+.tabela-abastecimento tbody tr:hover .btn-limpar-linha-inline {
+    display: inline-flex;
+    position: static;
+    transform: none;
+    width: 44px;
+    height: 44px;
+    margin-left: 2px;
+    vertical-align: middle;
+    background: transparent;
+    border-color: transparent;
+    border-radius: 10px;
+}
+
+.tabela-abastecimento .btn-limpar-linha-inline svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tabela-abastecimento .btn-limpar-linha-inline:hover,
+.tabela-abastecimento .btn-limpar-linha-inline:focus-visible {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+    transform: none;
+}
+
+.tabela-abastecimento tbody tr:hover .num-rotulo {
+    opacity: 1;
+}
+
+/* A 1ª linha não tem "Remover" (o "Limpar" do bloco cuida dela); ficha concluída não tem nenhum */
+.tabela-abastecimento tbody tr:first-child .btn-limpar-linha-inline,
+.tabela-abastecimento[data-somente-leitura] .btn-limpar-linha-inline {
+    display: none !important;
+}
+
+.tabela-abastecimento tr.linha-adicionar-celular td {
+    padding: 12px 8px;
+}
+
+.btn-adicionar-linha-celular {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 2px dashed var(--azul-ajborges);
+    border-radius: 12px;
+    background: #eef2ff;
+    color: var(--azul-ajborges);
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-adicionar-linha-celular:hover {
+    background: #e0e7ff;
+}
+
+.texto-limite-linhas {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.texto-limite-linhas[hidden],
+.btn-adicionar-linha-celular[hidden] {
+    display: none;
+}
+
 .popover-secao-apagar-linha {
     padding: 10px 14px;
     border-bottom: 1px solid #e2e8f0;
@@ -4420,35 +4510,13 @@ body.msf-aberto {
         border-radius: 10px;
     }
 
+    /* "Remover" no canto do cartão */
     .tabela-abastecimento .btn-limpar-linha-inline::after {
-        content: "Apagar";
+        content: "Remover";
     }
 
     .tabela-abastecimento .btn-limpar-linha-inline:hover {
         transform: none;
-    }
-
-    /* Linhas vazias ficam guardadas até o motorista tocar em "Adicionar" */
-    .tabela-abastecimento tr.linha-oculta-celular {
-        display: none !important;
-    }
-
-    .btn-adicionar-linha-celular {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        min-height: 48px;
-        margin-top: 12px;
-        border: 2px dashed var(--azul-ajborges);
-        border-radius: 12px;
-        background: #eef2ff;
-        color: var(--azul-ajborges);
-        font-family: "Poppins", sans-serif;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
     }
 
     .tabela-abastecimento tbody tr.linha-adicionar-celular {
@@ -4458,14 +4526,24 @@ body.msf-aberto {
         background: transparent !important;
     }
 
-    .btn-adicionar-linha-celular {
-        margin-top: 0;
+    .tabela-abastecimento tr.linha-adicionar-celular td {
+        padding: 0;
     }
-}
 
-@media (min-width: 901px) and (min-height: 501px) {
-    .tabela-abastecimento tr.linha-adicionar-celular {
-        display: none;
+    /* Botão de adicionar com a largura toda */
+    .btn-adicionar-linha-celular {
+        width: 100%;
+    }
+
+    /* Popover do "Limpar" na largura do cabeçalho do bloco (antes saía da tela pela esquerda) */
+    .subbloco-acoes-limpeza {
+        position: static;
+    }
+
+    .popover-limpeza {
+        left: 0;
+        right: 0;
+        width: auto;
     }
 }
 

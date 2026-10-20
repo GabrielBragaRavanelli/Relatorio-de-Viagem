@@ -1657,15 +1657,13 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             });
         }
 
-        // Botão inline na coluna de numeração para apagar a linha específica
+        // Lixeira na coluna de numeração: "Remover" a linha (da 2ª em diante)
         const btnLimparInline = document.querySelector(`.btn-limpar-linha-inline[data-linha="${i}"]`);
         if (btnLimparInline) {
             btnLimparInline.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (typeof limparLinhaFrete === 'function') {
-                    limparLinhaFrete(i);
-                }
+                removerLinhaLista('fretes', i);
             });
         }
     }
@@ -1854,15 +1852,13 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             });
         }
 
-        // Botão inline na coluna de numeração para apagar a linha específica de abastecimento
+        // Lixeira na coluna de numeração: "Remover" a linha de abastecimento (da 2ª em diante)
         const btnLimparInline = document.querySelector(`.btn-limpar-linha-inline[data-linha-abast="${i}"]`);
         if (btnLimparInline) {
             btnLimparInline.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (typeof limparLinhaAbast === 'function') {
-                    limparLinhaAbast(i);
-                }
+                removerLinhaLista('abastecimentos', i);
             });
         }
     }
@@ -2488,6 +2484,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 if (desc) desc.value = '';
             }
             if (popoverLimparFretesMl) popoverLimparFretesMl.classList.add('oculto');
+            voltarParaPrimeiraLinha('fretes');
             calcularTotaisFreteMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
@@ -2624,6 +2621,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 limparCamposNovosAbast(i);
             }
             if (popoverLimparAbastMl) popoverLimparAbastMl.classList.add('oculto');
+            voltarParaPrimeiraLinha('abastecimentos');
             calcularTotaisAbastecimentoMl();
             calcularIndicadoresViagemMl();
             salvarProgressoMl();
@@ -3135,6 +3133,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     function coletarFretesAtuais() {
         const fretes = [];
         for (let i = 1; i <= 8; i++) {
+            if (!linhaEmUso(document.querySelector(`input[name="data_frete_ml_${i}"]`))) continue;
             const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`)?.value || '';
             const cli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '';
             const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`)?.value || '';
@@ -3153,6 +3152,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     function coletarAbastecimentosAtuais() {
         const abasts = [];
         for (let i = 1; i <= 10; i++) {
+            if (!linhaEmUso(document.querySelector(`[name="posto_ml_${i}"]`))) continue;
             const posto = document.querySelector(`[name="posto_ml_${i}"]`)?.value || '';
             const nf = document.querySelector(`input[name="nf_ml_${i}"]`)?.value || '';
             const km = document.querySelector(`input[name="km_ml_${i}"]`)?.value || '';
@@ -3378,14 +3378,15 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     }
 
     // ------------------------------------------
-    // Listas no celular (fretes e abastecimentos)
-    // Até 640px cada linha vira um cartão (CSS) com o rótulo de cada campo.
-    // Aparecem as linhas preenchidas (ou a primeira); as outras ficam guardadas
-    // até o motorista tocar em "Adicionar". No computador nada muda.
+    // Linhas em uso (fretes e abastecimentos), em todas as larguras
+    // As 8 e 10 linhas do HTML continuam lá (mesmos name/id); só aparecem as
+    // que estão em uso (no mínimo 1). "+ Adicionar" mostra a próxima; "Remover"
+    // (da 2ª em diante) apaga a linha e sobe as de baixo, sem buraco no meio.
+    // Até 900px cada linha vira um cartão (CSS) com o rótulo de cada campo.
     // ------------------------------------------
     const TABELAS_CELULAR = [
-        { seletor: 'table.tabela-fretes-ml', item: 'Frete', botao: 'Adicionar frete' },
-        { seletor: 'table.tabela-abastecimento:not(.tabela-fretes-ml)', item: 'Abastecimento', botao: 'Adicionar abastecimento' }
+        { tipo: 'fretes', seletor: 'table.tabela-fretes-ml', item: 'Frete' },
+        { tipo: 'abastecimentos', seletor: 'table.tabela-abastecimento:not(.tabela-fretes-ml)', item: 'Abastecimento' }
     ];
 
     function linhaPreenchida(tr) {
@@ -3394,6 +3395,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     }
 
     const linhasDaLista = (tabela) => Array.from(tabela.tBodies[0].rows).filter(tr => !tr.classList.contains('linha-adicionar-celular'));
+
+    // Linha escondida não conta na validação nem no envio
+    const linhaEmUso = (campo) => !(campo && campo.closest('tr')?.classList.contains('linha-oculta-celular'));
 
     function atualizarListasCelular() {
         TABELAS_CELULAR.forEach(({ seletor }) => {
@@ -3404,14 +3408,94 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             const mostrar = Math.min(linhas.length, Math.max(1, ultimaPreenchida, Number(tabela.dataset.mostrar || 0)));
             tabela.dataset.mostrar = String(mostrar);
             linhas.forEach((tr, i) => tr.classList.toggle('linha-oculta-celular', i >= mostrar));
-            tabela.querySelector('.linha-adicionar-celular')?.classList.toggle('linha-oculta-celular', mostrar >= linhas.length);
+            // No limite o botão some e aparece "Limite de 8 fretes" / "Limite de 10 abastecimentos"
+            const linhaBotao = tabela.querySelector('.linha-adicionar-celular');
+            if (!linhaBotao) return;
+            const noLimite = mostrar >= linhas.length;
+            const btn = linhaBotao.querySelector('.btn-adicionar-linha-celular');
+            const limite = linhaBotao.querySelector('.texto-limite-linhas');
+            if (btn) btn.hidden = noLimite;
+            if (limite) limite.hidden = !noLimite;
+            // Ficha só para leitura (concluída): nada de adicionar/remover
+            linhaBotao.classList.toggle('linha-oculta-celular', tabela.hasAttribute('data-somente-leitura'));
         });
     }
 
+    const camposDaLinha = (tr) => Array.from(tr.querySelectorAll('input, select'));
+
+    // Copia os valores de uma linha para outra (mesma estrutura de campos)
+    function copiarCamposLinha(origem, destino) {
+        const de = camposDaLinha(origem);
+        camposDaLinha(destino).forEach((el, k) => {
+            const fonte = de[k];
+            if (!fonte) return;
+            // Posto antigo fora da lista: a opção vai junto
+            if (el.tagName === 'SELECT' && fonte.value && !Array.from(el.options).some(o => o.value === fonte.value)) {
+                const opt = document.createElement('option');
+                opt.value = fonte.value;
+                opt.textContent = fonte.selectedOptions[0]?.textContent || fonte.value;
+                el.appendChild(opt);
+            }
+            el.value = fonte.value;
+            if ('editadoManual' in fonte.dataset || 'editadoManual' in el.dataset) {
+                el.dataset.editadoManual = fonte.dataset.editadoManual || '';
+            }
+        });
+    }
+
+    function limparCamposLinha(tr) {
+        camposDaLinha(tr).forEach(el => {
+            if (el.tagName === 'SELECT') el.selectedIndex = 0; // placa volta para "principal"
+            else el.value = '';
+            if ('editadoManual' in el.dataset) el.dataset.editadoManual = '';
+        });
+    }
+
+    function recalcularDepoisDeMexerNasLinhas(tipo) {
+        if (tipo === 'fretes') {
+            for (let i = 1; i <= 8; i++) atualizarLinhaFreteMl(i, false);
+        }
+        calcularTotaisFreteMl();
+        calcularTotaisAbastecimentoMl();
+        calcularIndicadoresViagemMl();
+        salvarProgressoMl();
+        atualizarListaLinhasPreenchidasPopover();
+        atualizarListaLinhasAbastPreenchidasPopover();
+    }
+
+    // "Remover" da linha N (2 em diante): confirma se tiver dados, sobe as de baixo
+    function removerLinhaLista(tipo, numero) {
+        const cfg = TABELAS_CELULAR.find(t => t.tipo === tipo);
+        const tabela = cfg && document.querySelector(cfg.seletor);
+        if (!tabela || numero < 2) return;
+        const linhas = linhasDaLista(tabela);
+        const mostrar = Number(tabela.dataset.mostrar || 1);
+        if (numero > mostrar) return;
+        if (linhaPreenchida(linhas[numero - 1]) &&
+            !confirm(`Remover ${cfg.item.toLowerCase()} ${numero}? Os dados desta linha serão apagados.`)) return;
+
+        for (let i = numero - 1; i < mostrar - 1; i++) copiarCamposLinha(linhas[i + 1], linhas[i]);
+        limparCamposLinha(linhas[mostrar - 1]);
+        tabela.dataset.mostrar = String(Math.max(1, mostrar - 1));
+        atualizarListasCelular();
+        recalcularDepoisDeMexerNasLinhas(tipo);
+        exibirToast(`${cfg.item} ${numero} removido.`, 'info');
+    }
+
+    // "Limpar" do bloco: volta a ficar só a linha 1, vazia
+    function voltarParaPrimeiraLinha(tipo) {
+        const cfg = TABELAS_CELULAR.find(t => t.tipo === tipo);
+        const tabela = cfg && document.querySelector(cfg.seletor);
+        if (!tabela) return;
+        delete tabela.dataset.mostrar;
+        atualizarListasCelular();
+    }
+
     function prepararListasCelular() {
-        TABELAS_CELULAR.forEach(({ seletor, item, botao }) => {
+        TABELAS_CELULAR.forEach(({ seletor, item }) => {
             const tabela = document.querySelector(seletor);
-            if (!tabela || !tabela.tBodies[0] || tabela.querySelector('.linha-adicionar-celular')) return;
+            if (!tabela || !tabela.tBodies[0] || tabela.dataset.listaPronta) return;
+            tabela.dataset.listaPronta = '1';
 
             // Rótulo de cada célula = texto do cabeçalho da coluna (sem o selo "Gestão")
             const rotulos = Array.from(tabela.tHead.rows[0].cells).map(th => (th.childNodes[0]?.textContent || '').trim());
@@ -3423,11 +3507,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             tabela.querySelector('tfoot .td-total-valor')?.setAttribute('data-rotulo', 'Total em R$');
             tabela.querySelector('tfoot .td-total-litros')?.setAttribute('data-rotulo', 'Total de litros');
 
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn-adicionar-linha-celular';
-            btn.innerHTML = `<span aria-hidden="true">+</span> ${botao}`;
-            btn.addEventListener('click', () => {
+            // "+ Adicionar": mostra a próxima linha guardada e já põe o foco nela
+            tabela.querySelector('.btn-adicionar-linha-celular')?.addEventListener('click', () => {
                 tabela.dataset.mostrar = String(Number(tabela.dataset.mostrar || 1) + 1);
                 atualizarListasCelular();
                 const nova = linhasDaLista(tabela).filter(tr => !tr.classList.contains('linha-oculta-celular')).pop();
@@ -3435,14 +3516,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 if (campo) campo.focus();
                 else nova?.scrollIntoView({ block: 'center', behavior: 'smooth' });
             });
-            // Última linha da lista (antes dos totais); no computador fica escondida
-            const linhaBotao = document.createElement('tr');
-            linhaBotao.className = 'linha-adicionar-celular';
-            const celula = document.createElement('td');
-            celula.colSpan = rotulos.length;
-            celula.appendChild(btn);
-            linhaBotao.appendChild(celula);
-            tabela.tBodies[0].appendChild(linhaBotao);
         });
         atualizarListasCelular();
     }
@@ -3952,6 +4025,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     el.setAttribute('readonly', 'true');
                     el.setAttribute('disabled', 'true');
                 });
+                document.querySelectorAll('table.tabela-abastecimento').forEach(t => t.setAttribute('data-somente-leitura', ''));
+                atualizarListasCelular();
 
                 if (barraMotorista) {
                     barraMotorista.innerHTML = `
@@ -4209,7 +4284,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
                 const litros = document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '';
-                if (comb && !comb.value && (parseMoeda(valor) > 0 || parseLitros(litros) > 0)) {
+                if (comb && linhaEmUso(comb) && !comb.value && (parseMoeda(valor) > 0 || parseLitros(litros) > 0)) {
                     return falharValidacao(comb, 'Escolha o combustível');
                 }
             }
