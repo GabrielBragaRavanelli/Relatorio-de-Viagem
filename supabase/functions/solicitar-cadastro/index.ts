@@ -116,6 +116,30 @@ function cpfValido(cpf: string): boolean {
     digito(cpf.slice(0, 10), 11) === Number(cpf[10]);
 }
 
+function cnpjValido(cnpj: string): boolean {
+  if (!/^\d{14}$/.test(cnpj) || /^(\d)\1{13}$/.test(cnpj)) {
+    return false;
+  }
+
+  const digito = (base: string) => {
+    const pesos = base.length === 12
+      ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+      : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    let soma = 0;
+
+    for (let i = 0; i < base.length; i++) {
+      soma += Number(base[i]) * pesos[i];
+    }
+
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
+  };
+
+  return digito(cnpj.slice(0, 12)) === Number(cnpj[12]) &&
+    digito(cnpj.slice(0, 13)) === Number(cnpj[13]);
+}
+
 function emailValido(email: string): boolean {
   return email.length <= 254 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -247,7 +271,11 @@ const camposCrlv = (n: number) =>
 const CAMPOS_RNTRC = [
   "rntrc",
   "val-rntrc",
+  "rntrc-doc",
+  "rntrc-categoria",
 ];
+
+const CATEGORIAS_RNTRC = ["TAC", "ETC", "CTC"];
 
 const CAMPOS_RESIDENCIA = [
   "mot-endereco",
@@ -312,11 +340,10 @@ const nomeCrlv = (papel: string) =>
   `CRLV ${/carreta$/i.test(papel) ? "da" : "do"} ${papel}`;
 
 const MAX_ARQUIVOS = 3;
-const TIPOS_ACEITOS = [
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-];
+
+// O anexo principal é só PDF; a foto vai junto do formulário ("não tenho o PDF").
+const TIPOS_PDF = ["application/pdf"];
+const TIPOS_FOTO = ["image/png", "image/jpeg"];
 
 const TAMANHO_MAX = 10 * 1024 * 1024;
 
@@ -344,6 +371,12 @@ const ROTULOS: Record<string, string> = {
   "cnh-seguranca": "Código de segurança da CNH",
   "rntrc": "RNTRC: Número",
   "val-rntrc": "RNTRC: Validade",
+  "rntrc-doc": "RNTRC: CPF/CNPJ do titular",
+  "rntrc-categoria": "RNTRC: Categoria",
+  "mot-endereco": "Comprovante de residência: Endereço",
+  "mot-cidade": "Comprovante de residência: Cidade",
+  "mot-estado": "Comprovante de residência: Estado",
+  "mot-cep": "Comprovante de residência: CEP",
 };
 
 const ROTULOS_CRLV: Record<string, string> = {
@@ -359,6 +392,10 @@ const ROTULOS_CRLV: Record<string, string> = {
   "prop-nome": "Nome do proprietário",
   "prop-doc": "CPF/CNPJ do proprietário",
 };
+
+// "a CNH" → "da CNH"; "o RNTRC" → "do RNTRC".
+const comDe = (documento: string) =>
+  documento.replace(/^(a|o) /, (_, artigo) => `d${artigo} `);
 
 function limparTexto(v: unknown): string {
   if (typeof v !== "string" && typeof v !== "number") {
@@ -566,6 +603,13 @@ Deno.serve(async (req: Request) => {
       semPdf[campo] = semPdfBruto[campo] === true;
     }
 
+    // Fotos opcionais: "{campo}_foto" → documento principal.
+    const fotosDoEnvio: Record<string, string> = {};
+
+    for (const campo of Object.keys(documentosDoEnvio)) {
+      fotosDoEnvio[`${campo}_foto`] = campo;
+    }
+
     // ---------- Campos permitidos ----------
 
     const camposDoc: Record<string, string[]> = {
@@ -639,8 +683,10 @@ Deno.serve(async (req: Request) => {
     }[] = [];
 
     for (const [campo, lista] of Object.entries(docsBrutos)) {
+      const ehFoto = Object.hasOwn(fotosDoEnvio, campo);
+
       if (
-        !Object.hasOwn(documentosDoEnvio, campo) ||
+        (!Object.hasOwn(documentosDoEnvio, campo) && !ehFoto) ||
         !Array.isArray(lista)
       ) {
         return resp(req, 400, {
@@ -650,19 +696,28 @@ Deno.serve(async (req: Request) => {
 
       if (lista.length === 0) continue;
 
-      if (semPdf[campo]) {
+      const principal = ehFoto ? fotosDoEnvio[campo] : campo;
+      const nomeDoc = documentosDoEnvio[principal];
+
+      if (ehFoto && !semPdf[principal]) {
         return resp(req, 400, {
-          erro: `Você marcou "não tenho o PDF" para ${
-            documentosDoEnvio[campo]
-          }, mas anexou um arquivo. Desmarque a caixa ou remova o anexo.`,
+          erro: `A foto ${
+            comDe(nomeDoc)
+          } só pode ser enviada quando você marca "não tenho o PDF".`,
+        });
+      }
+
+      if (!ehFoto && semPdf[campo]) {
+        return resp(req, 400, {
+          erro: `Você marcou "não tenho o PDF" para ${nomeDoc}, mas anexou um arquivo. Desmarque a caixa ou remova o anexo.`,
         });
       }
 
       if (lista.length > MAX_ARQUIVOS) {
         return resp(req, 400, {
-          erro: `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${
-            documentosDoEnvio[campo]
-          }.`,
+          erro: `Envie no máximo ${MAX_ARQUIVOS} ${
+            ehFoto ? "fotos" : "arquivos"
+          } para ${nomeDoc}.`,
         });
       }
 
@@ -676,9 +731,17 @@ Deno.serve(async (req: Request) => {
         const tipoArq = String(documento.tipo ?? "");
         const tamanho = Number(documento.tamanho ?? 0);
 
-        if (!TIPOS_ACEITOS.includes(tipoArq)) {
+        if (ehFoto && !TIPOS_FOTO.includes(tipoArq)) {
           return resp(req, 400, {
-            erro: "Envie apenas PDF, PNG ou JPG.",
+            erro: `A foto ${comDe(nomeDoc)} precisa ser PNG ou JPG.`,
+          });
+        }
+
+        if (!ehFoto && !TIPOS_PDF.includes(tipoArq)) {
+          return resp(req, 400, {
+            erro: `O anexo ${
+              comDe(nomeDoc)
+            } precisa ser PDF. Se tiver só a foto, marque 'Não tenho o PDF' e envie a foto no formulário.`,
           });
         }
 
@@ -714,6 +777,7 @@ Deno.serve(async (req: Request) => {
         "cnh",
         ...papeis.map((_, i) => `crlv_${i + 1}`),
         "rntrc",
+        "residencia",
       ]
     ) {
       if (!semPdf[campo] && !temDoc(campo)) {
@@ -776,6 +840,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    if (semPdf.residencia) {
+      exigir(
+        CAMPOS_RESIDENCIA,
+        (campo) => ROTULOS[campo] ?? campo,
+      );
+    }
+
     if (faltando.length > 0) {
       return resp(req, 400, {
         erro: 'Preencha os campos obrigatórios dos documentos que você marcou como "não tenho o PDF".',
@@ -790,6 +861,24 @@ Deno.serve(async (req: Request) => {
       return resp(req, 400, {
         erro: "RNTRC inválido.",
       });
+    }
+
+    if (semPdf.rntrc) {
+      const docRntrc = dados["rntrc-doc"].replace(/\D/g, "");
+
+      if (!cpfValido(docRntrc) && !cnpjValido(docRntrc)) {
+        return resp(req, 400, {
+          erro: "CPF/CNPJ do titular do RNTRC inválido.",
+        });
+      }
+
+      if (!CATEGORIAS_RNTRC.includes(dados["rntrc-categoria"])) {
+        return resp(req, 400, {
+          erro: "Categoria do RNTRC inválida.",
+        });
+      }
+
+      dados["rntrc-doc"] = docRntrc;
     }
 
     // ---------- CPF e celular ----------
