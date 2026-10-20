@@ -21,53 +21,8 @@
             </div>
             <nav class="header-links" aria-label="Navegação principal">
                 <ul class="lista-links">
-                    <li class="dropdown-item" id="dropdown-portais">
-                        <button type="button" class="dropdown-toggle" id="dropdown-menu-btn" aria-expanded="false"
-                            aria-haspopup="true">
-                            <span>Portais &amp; Cadastros</span>
-                            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round" aria-hidden="true">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </button>
-                        <div class="dropdown-menu" id="dropdown-menu-list" role="menu"
-                            aria-labelledby="dropdown-menu-btn">
-                            <a href="Login.html" class="dropdown-link" role="menuitem">
-                                <div class="dropdown-icon-box">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <rect x="1" y="3" width="15" height="13"></rect>
-                                        <polygon points="16 8 20 8 23 11 23 16 16 8"></polygon>
-                                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                                    </svg>
-                                </div>
-                                <div class="dropdown-text">
-                                    <strong>Portal da Frota</strong>
-                                    <span>Acesso com login para motoristas e gestores</span>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="FichaMultiCadastro.html" class="dropdown-link" role="menuitem">
-                                <div class="dropdown-icon-box">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="9" cy="7" r="4"></circle>
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                    </svg>
-                                </div>
-                                <div class="dropdown-text">
-                                    <strong>Seja um Agregado Conosco</strong>
-                                    <span>Pessoa Jurídica (CNPJ) e Física (PF)</span>
-                                </div>
-                            </a>
-                        </div>
-                    </li>
+                    <li><a href="Login.html#motorista">Portal da Frota</a></li>
+                    <li><a href="FichaMultiCadastro.html">Agregue-se Conosco</a></li>
                     <li><a href="Nossosfretes.html">Nossos Fretes</a></li>
                     <li><a href="Sobrenos.html" class="link-ativo">Sobre Nós</a></li>
                     <li><a href="Contato.html">Contato</a></li>
@@ -589,31 +544,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const dropdownItem = document.getElementById('dropdown-portais');
-            const dropdownBtn = document.getElementById('dropdown-menu-btn');
-
-            if (dropdownItem && dropdownBtn) {
-                dropdownBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    const isOpen = dropdownItem.classList.toggle('active');
-                    dropdownBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!dropdownItem.contains(e.target)) {
-                        dropdownItem.classList.remove('active');
-                        dropdownBtn.setAttribute('aria-expanded', 'false');
-                    }
-                });
-
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') {
-                        dropdownItem.classList.remove('active');
-                        dropdownBtn.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            }
-
             // CÁPSULAS CILÍNDRICAS HORIZONTAIS EXPANSÍVEIS (Toque / Clique Mobile & Desktop)
             const capsulas = document.querySelectorAll('.capsula-card');
             capsulas.forEach(capsula => {
