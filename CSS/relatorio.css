@@ -558,6 +558,13 @@ main {
     gap: 8px;
 }
 
+/* Dica curta abaixo do campo (ex.: placa secundária) */
+.dica-campo {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
 .campo-grupo label {
     font-size: 12.5px;
     font-weight: 600;

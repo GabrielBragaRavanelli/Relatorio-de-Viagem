@@ -223,6 +223,15 @@ function escaparHtml(valor) {
     }[c]));
 }
 
+// Placas da ficha para exibição: "ABC-1D23 / XYZ-9A87" quando houve troca de cavalo
+// (placa secundária em dados_completos.placaSecundaria). Análises seguem só pela principal.
+function placasDaFicha(f, vazio = '') {
+    const principal = String(f.placas || '').trim();
+    const secundaria = String(f.placaSecundaria || '').trim();
+    if (!principal && !secundaria) return vazio;
+    return secundaria ? `${principal || '—'} / ${secundaria}` : principal;
+}
+
 // Usuário logado (cache gravado pelo auth.js depois de validar a sessão no servidor)
 function obterUsuarioLogado() {
     try {
@@ -703,7 +712,7 @@ function renderizarTabelaFichas() {
         listaFiltrada = listaFiltrada.filter(f => {
             const id = (f.id || '').toLowerCase();
             const mot = (f.motorista || '').toLowerCase();
-            const pla = (f.placas || '').toLowerCase();
+            const pla = `${f.placas || ''} ${f.placaSecundaria || ''}`.toLowerCase();
             const rota = `${f.destinoInicial || ''} ${f.destinoFinal || ''}`.toLowerCase();
             return id.includes(t) || mot.includes(t) || pla.includes(t) || rota.includes(t);
         });
@@ -782,7 +791,7 @@ function renderizarTabelaFichas() {
                 </div>
             </td>
             <td>
-                <span class="placa-box">${ficha.placas || 'Não informada'}</span>
+                <span class="placa-box">${escaparHtml(placasDaFicha(ficha, 'Não informada'))}</span>
             </td>
             <td>
                 <span class="frete-val-destaque">R$ ${ficha.totalFrete || '0,00'}</span>
@@ -952,7 +961,7 @@ function abrirModalResumoFicha(fichaId) {
     const btnExcluirDireto = document.getElementById('btn-modal-excluir-direto');
 
     if (elId) elId.textContent = ficha.id;
-    if (elMot) elMot.textContent = `${ficha.motorista || 'Motorista'} • ${ficha.placas || 'Placas'}`;
+    if (elMot) elMot.textContent = `${ficha.motorista || 'Motorista'} • ${placasDaFicha(ficha, 'Placas')}`;
     if (btnLinkCompleto) btnLinkCompleto.href = `relatorio-viagem.html?ficha=${ficha.id}&mode=admin`;
 
     if (btnAprovarDireto) {
@@ -1627,7 +1636,7 @@ function preencherSecoesSecundarias() {
                                 <td><strong>${f.id}</strong></td>
                                 <td>${f.dataSaida || f.dataEnvio || '-'}</td>
                                 <td>${f.motorista || 'Motorista'}</td>
-                                <td><span class="placa-box">${f.placas || 'Não informada'}</span></td>
+                                <td><span class="placa-box">${escaparHtml(placasDaFicha(f, 'Não informada'))}</span></td>
                                 <td><span class="status-pill ${f.status === 'pendente' ? 'status-pendente' : 'status-concluido'}">${f.status === 'pendente' ? 'Em Conferência' : 'Concluído'}</span></td>
                             </tr>
                         `).join('')}
@@ -1748,7 +1757,7 @@ function preencherSecoesSecundarias() {
                                 <td>${f.motorista}</td>
                                 <td>${f.destinoInicial || '-'}</td>
                                 <td>${f.destinoFinal || '-'}</td>
-                                <td>${f.placas || '-'}</td>
+                                <td>${escaparHtml(placasDaFicha(f, '-'))}</td>
                                 <td><span class="status-pill status-pendente">Aguardando Conferência</span></td>
                             </tr>
                         `).join('')}

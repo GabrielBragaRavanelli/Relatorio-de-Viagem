@@ -44,6 +44,17 @@ if (window.supabase) {
 // ==========================================================================
 
 /**
+ * Placa secundária (troca de cavalo na viagem): sem coluna própria, vai em
+ * dados_completos.placaSecundaria. Só entra quando a ficha traz a chave
+ * (o envio do motorista não traz; quem grava é a gestão).
+ */
+function comPlacaSecundaria(dadosCompletos, ficha) {
+    const valor = ficha.placaSecundaria ?? ficha.placa_secundaria;
+    if (valor === undefined) return dadosCompletos;
+    return { ...dadosCompletos, placaSecundaria: String(valor || '').trim().toUpperCase() };
+}
+
+/**
  * Converte o objeto da ficha do frontend para as colunas do PostgreSQL
  */
 function mapearFichaParaSupabase(ficha) {
@@ -80,7 +91,7 @@ function mapearFichaParaSupabase(ficha) {
         abastecimentos: ficha.abastecimentos || [],
         comprovantes: ficha.comprovantes || ficha.anexos || [],
         despesas_extras: ficha.despesas_extras || ficha.outrasDespesas || [],
-        dados_completos: ficha.dados_completos || ficha,
+        dados_completos: comPlacaSecundaria(ficha.dados_completos || ficha, ficha),
         status: ficha.status || 'pendente',
         origem_envio: ficha.origem_envio || ficha.origemEnvio || 'motorista_com_login',
         aprovado_em: ficha.aprovado_em || (ficha.dataAprovacao ? new Date().toISOString() : null),
@@ -123,6 +134,7 @@ function mapearFichaDoSupabase(registro) {
         motorista: registro.motorista,
         motoristaCpf: registro.motorista_cpf,
         placas: registro.placas,
+        placaSecundaria: String(completo.placaSecundaria || '').trim(),
         dataSaida: registro.data_saida || completo.dataSaida,
         dataChegada: registro.data_chegada || completo.dataChegada,
         kmSaida: registro.km_saida?.toString() || completo.kmSaida,

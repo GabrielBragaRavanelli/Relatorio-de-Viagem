@@ -28,6 +28,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const form = document.getElementById('form-relatorio');
     const inputMotorista = document.getElementById('motorista');
     const inputPlacas = document.getElementById('placas');
+    const inputPlacaSecundaria = document.getElementById('placa-secundaria');
     const inputDataSaida = document.getElementById('data-saida');
     const inputDataChegada = document.getElementById('data-chegada');
     const inputKmSaida = document.getElementById('km-saida');
@@ -170,30 +171,32 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
     // ------------------------------------------
     // 1. Formatação e Máscara Estrita de Placas (7 caracteres alfanuméricos)
+    //    Vale para "Placas" e "Placa secundária" (troca de cavalo na viagem)
     // ------------------------------------------
-    if (inputPlacas) {
+    function aplicarMascaraPlaca(inputPlaca) {
+        if (!inputPlaca) return;
         let apagandoPlaca = false;
 
-        inputPlacas.addEventListener('keydown', (e) => {
-            if (inputPlacas.readOnly || inputPlacas.disabled) {
+        inputPlaca.addEventListener('keydown', (e) => {
+            if (inputPlaca.readOnly || inputPlaca.disabled) {
                 e.preventDefault();
                 return;
             }
             if (e.key === 'Backspace') {
                 apagandoPlaca = true;
                 // Se terminar com '-', remove o hífen e a letra anterior para não travar o cursor
-                if (inputPlacas.value.endsWith('-')) {
+                if (inputPlaca.value.endsWith('-')) {
                     e.preventDefault();
-                    const limpo = inputPlacas.value.replace(/[^A-Z0-9]/g, '');
-                    inputPlacas.value = limpo.slice(0, -1);
+                    const limpo = inputPlaca.value.replace(/[^A-Z0-9]/g, '');
+                    inputPlaca.value = limpo.slice(0, -1);
                 }
             } else {
                 apagandoPlaca = false;
             }
         });
 
-        inputPlacas.addEventListener('input', (e) => {
-            if (inputPlacas.readOnly || inputPlacas.disabled) {
+        inputPlaca.addEventListener('input', (e) => {
+            if (inputPlaca.readOnly || inputPlaca.disabled) {
                 e.preventDefault();
                 return;
             }
@@ -213,22 +216,24 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             }
         });
 
-        inputPlacas.addEventListener('focus', () => {
-            if (inputPlacas.readOnly || inputPlacas.disabled) {
-                inputPlacas.blur();
+        inputPlaca.addEventListener('focus', () => {
+            if (inputPlaca.readOnly || inputPlaca.disabled) {
+                inputPlaca.blur();
             }
         });
 
         // Validação ao sair do campo (blur)
-        inputPlacas.addEventListener('blur', () => {
-            if (inputPlacas.readOnly || inputPlacas.disabled) return;
-            const limpo = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        inputPlaca.addEventListener('blur', () => {
+            if (inputPlaca.readOnly || inputPlaca.disabled) return;
+            const limpo = (inputPlaca.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (limpo.length > 0 && limpo.length < 7) {
                 exibirToast('A placa deve conter obrigatoriamente exatamente 7 caracteres alfanuméricos (Ex: GAB-1234 ou GAB-1C34).', 'erro');
-                inputPlacas.focus();
+                inputPlaca.focus();
             }
         });
     }
+    aplicarMascaraPlaca(inputPlacas);
+    aplicarMascaraPlaca(inputPlacaSecundaria);
 
     // ------------------------------------------
     // 2. Bloqueio de Hífen / Negativos no KM
@@ -2588,6 +2593,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
         // Zerar todos os campos de cabeçalho
         if (inputPlacas) inputPlacas.value = '';
+        if (inputPlacaSecundaria) inputPlacaSecundaria.value = '';
         if (inputDataSaida) inputDataSaida.value = '';
         if (inputDataChegada) inputDataChegada.value = '';
         if (inputKmSaida) inputKmSaida.value = '';
@@ -2981,6 +2987,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             }
         }
 
+        // Placa secundária (dados_completos.placaSecundaria): troca de cavalo durante a viagem
+        if (inputPlacaSecundaria) {
+            inputPlacaSecundaria.value = String(ficha.placaSecundaria || ficha.dados_completos?.placaSecundaria || '').trim();
+        }
+
         const dataSaidaVal = ficha.dataSaida || ficha.data_saida || ficha.dados_completos?.dataSaida;
         if (inputDataSaida && dataSaidaVal) inputDataSaida.value = normalizarDataExibicao(dataSaidaVal);
 
@@ -3215,7 +3226,17 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // SEPARAÇÃO DOS CAMPOS DE GOVERNANÇA (Tarefas 1, 2, 3 e 4)
         // -------------------------------------------------------------
         // Grupo 1: Motorista e Veículo (Definido pela Gestão no modo motorista)
-        const camposAdminVeiculo = [inputMotorista, inputPlacas].filter(Boolean);
+        const camposAdminVeiculo = [inputMotorista, inputPlacas, inputPlacaSecundaria].filter(Boolean);
+
+        // Placa secundária: só a gestão preenche; para o motorista fica bloqueada como "Placas"
+        function bloquearPlacaSecundariaMotorista() {
+            if (!inputPlacaSecundaria) return;
+            aplicarBloqueioCampo(inputPlacaSecundaria, 'Definido pela Gestão');
+            inputPlacaSecundaria.setAttribute('readonly', 'true');
+            inputPlacaSecundaria.setAttribute('tabindex', '-1');
+            inputPlacaSecundaria.classList.add('campo-bloqueado-gestao');
+            inputPlacaSecundaria.placeholder = 'Definido pela Gestão';
+        }
 
         // Grupo 2: Fretes da Empresa (Definido pela Frota no modo motorista)
         const camposFretesFrota = [
@@ -3371,6 +3392,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 inputPlacas.classList.remove('campo-bloqueado-gestao');
                 inputPlacas.placeholder = 'Ex: GAB-1234';
             }
+            if (inputPlacaSecundaria) {
+                liberarCampoBloqueado(inputPlacaSecundaria);
+                inputPlacaSecundaria.classList.remove('campo-bloqueado-gestao');
+                inputPlacaSecundaria.placeholder = 'Opcional. Ex: XYZ-9A87';
+            }
 
             // 2. Liberação total dos campos de frete com recálculo (Tarefa 3)
             camposFretesFrota.forEach(input => liberarCampoBloqueado(input));
@@ -3508,6 +3534,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                             return;
                         }
                     }
+                    if (!placaSecundariaValida()) return;
 
                     const idSalvar = (fichaCarregada && fichaCarregada.id) ? fichaCarregada.id : (fichaIdUrl || fichaNumeroAtual);
                     const textoOriginal = btnAdminSalvar.innerHTML;
@@ -3541,6 +3568,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                             return;
                         }
                     }
+                    if (!placaSecundariaValida()) return;
 
                     const idAprovar = fichaCarregada ? fichaCarregada.id : fichaNumeroAtual;
                     if (!confirm(`Confirmar a homologação e aprovação definitiva do Relatório de Viagem ${idAprovar}?`)) {
@@ -3665,6 +3693,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             aplicarBloqueioCampo(input, 'Definido pela Administração');
             input.setAttribute('readonly', 'true');
         });
+        bloquearPlacaSecundariaMotorista();
 
         // Campo Placas (Uso Exclusivo da Gestão - Bloqueado para o Motorista)
         if (inputPlacas) {
@@ -3747,6 +3776,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     inputPlacas.value = '';
                 }
             }
+            bloquearPlacaSecundariaMotorista();
 
             if (motoristaSaudacao) {
                 motoristaSaudacao.innerHTML = `Olá, <strong>${nomeMotoristaValido || 'Motorista'}</strong> • Conectado via Portal`;
@@ -3781,6 +3811,16 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         return '0.00';
     }
 
+    // Placa secundária é opcional; se preenchida, precisa ter 7 caracteres como a principal
+    function placaSecundariaValida() {
+        if (!inputPlacaSecundaria || inputPlacaSecundaria.readOnly || inputPlacaSecundaria.disabled) return true;
+        const limpo = (inputPlacaSecundaria.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (limpo.length === 0 || limpo.length === 7) return true;
+        exibirToast('A placa secundária deve ter exatamente 7 caracteres (Ex: XYZ-9A87) ou ficar em branco.', 'erro');
+        inputPlacaSecundaria.focus();
+        return false;
+    }
+
     async function atualizarFichaNaBase(idFicha, marcarComoAprovado = false) {
         await enviarComprovantesPendentesMl(idFicha);
         let todas = obterListaFichasCentral();
@@ -3799,6 +3839,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             motorista_cpf: (index >= 0 ? (todas[index].motorista_cpf || todas[index].motoristaCpf) : '') || usuarioAtivoSessao?.cpf || '',
             motoristaCpf: (index >= 0 ? (todas[index].motoristaCpf || todas[index].motorista_cpf) : '') || usuarioAtivoSessao?.cpf || '',
             placas: (inputPlacas?.value?.trim() && inputPlacas.value.trim() !== 'A definir pela Gestão') ? inputPlacas.value.trim() : ((index >= 0 ? todas[index].placas : '') || ''),
+            // Só a gestão grava (dados_completos.placaSecundaria); vazio apaga
+            placaSecundaria: inputPlacaSecundaria ? inputPlacaSecundaria.value.trim().toUpperCase() : ((index >= 0 ? todas[index].placaSecundaria : '') || ''),
             dataSaida: inputDataSaida?.value || '',
             data_saida: inputDataSaida?.value || '',
             dataChegada: inputDataChegada?.value || '',
