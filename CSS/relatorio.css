@@ -565,6 +565,147 @@ main {
     color: #64748b;
 }
 
+/* Selo dos campos que o motorista preenche (KMs, placa secundária) */
+.tag-motorista {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #047857;
+    background: rgba(16, 185, 129, 0.12);
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.label-com-tag .tag-motorista {
+    margin-left: 0;
+}
+
+/* KM de entrada menor que o de saída */
+.erro-km {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #b91c1c;
+}
+
+/* 2º trecho de KM (placa secundária) */
+.bloco-km-secundaria {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1.5px dashed #a5b4fc;
+    border-radius: 12px;
+    background: #f8faff;
+}
+
+.bloco-km-secundaria[hidden] {
+    display: none;
+}
+
+.bloco-km-secundaria-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-bottom: 14px;
+}
+
+.bloco-km-secundaria-titulo h3 {
+    font-size: 15px;
+    color: var(--azul-ajborges-escuro);
+}
+
+.bloco-km-secundaria .placa-tag {
+    margin-left: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #c7d2fe;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.km-total-viagem-destaque {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 14px;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 1.5px solid #a5b4fc;
+    color: var(--azul-ajborges-escuro);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.km-total-viagem-destaque strong {
+    font-size: 22px;
+    color: var(--azul-ajborges);
+}
+
+.km-total-viagem-destaque small {
+    flex-basis: 100%;
+    font-weight: 500;
+    color: #64748b;
+}
+
+/* Abastecimento: coluna "Placa" só com placa secundária */
+.tabela-abastecimento:not(.com-placa-secundaria) .col-placa-abast {
+    display: none !important;
+}
+
+/* Outras despesas 2 e 3: lista de tipos */
+.input-select-despesa select {
+    padding-left: 14px;
+}
+
+/* Média de cada placa no card de média */
+.indicador-media-por-placa {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.indicador-media-por-placa[hidden] {
+    display: none;
+}
+
+/* Revisão antes de enviar: KMs e abastecimentos */
+.revisar-detalhes {
+    margin-top: 12px;
+    text-align: left;
+    font-size: 0.85rem;
+    color: #334155;
+}
+
+.revisar-detalhes:empty {
+    display: none;
+}
+
+.revisar-detalhes h3 {
+    margin: 10px 0 6px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #475569;
+}
+
+.revisar-linha {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.revisar-linha strong {
+    text-align: right;
+}
+
 .campo-grupo label {
     font-size: 12.5px;
     font-weight: 600;
@@ -1310,7 +1451,7 @@ main {
 .tabela-abastecimento {
     width: 100%;
     border-collapse: collapse;
-    min-width: 760px;
+    min-width: 900px;
     font-size: 13px;
 }
 

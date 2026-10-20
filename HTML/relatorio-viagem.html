@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.5">
+    <link rel="stylesheet" href="../CSS/relatorio.css?v=2.6">
     <link rel="icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="shortcut icon" type="image/png" href="../Imagens/logo-header-1x.png">
     <link rel="apple-touch-icon" href="../Imagens/logo-header-1x.png">
@@ -141,7 +141,7 @@
                     <div class="motorista-texto-aviso">
                         <strong id="motorista-saudacao-texto">Portal da Frota • Modo Motorista</strong><br>
                         <span id="motorista-subtexto-aviso">Dados do veículo, fretes e pedágios são definidos pela
-                            Frota. Preencha seus abastecimentos e comprovantes.</span>
+                            Frota. Preencha os KMs, seus abastecimentos e comprovantes.</span>
                     </div>
                 </div>
             </div>
@@ -250,10 +250,10 @@
                                 </div>
                             </div>
 
-                            <!-- Placa secundária: troca de cavalo durante a viagem (opcional, só a gestão preenche) -->
+                            <!-- Placa secundária: troca de cavalo durante a viagem (opcional; motorista ou gestão preenchem) -->
                             <div class="campo-grupo">
                                 <label for="placa-secundaria">
-                                    PLACA SECUNDÁRIA <span class="tag-bloqueado-frota">Definido pela Gestão</span>
+                                    PLACA SECUNDÁRIA <span class="tag-motorista">Opcional</span>
                                 </label>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -262,11 +262,11 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <input type="text" id="placa-secundaria" name="placa_secundaria" placeholder="Definido pela Gestão"
-                                        maxlength="8" autocomplete="off" readonly="true" tabindex="-1" class="campo-bloqueado-gestao"
+                                    <input type="text" id="placa-secundaria" name="placa_secundaria" placeholder="Opcional. Ex: XYZ-9A87"
+                                        maxlength="8" autocomplete="off" autocapitalize="characters"
                                         aria-describedby="dica-placa-secundaria">
                                 </div>
-                                <small class="dica-campo" id="dica-placa-secundaria">Use quando o motorista trocou de cavalo durante a viagem</small>
+                                <small class="dica-campo" id="dica-placa-secundaria">Use quando trocou de cavalo durante a viagem (ex.: o caminhão quebrou).</small>
                             </div>
                         </div>
 
@@ -339,9 +339,12 @@
                         <div class="grid-campos grid-3-col">
                             <!-- KM Saída -->
                             <div class="campo-grupo">
-                                <label for="km-saida">
-                                    KM SAÍDA <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="km-saida">
+                                        KM SAÍDA <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -358,9 +361,12 @@
 
                             <!-- KM Entrada -->
                             <div class="campo-grupo">
-                                <label for="km-chegada">
-                                    KM ENTRADA <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="km-chegada">
+                                        KM ENTRADA <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -369,10 +375,11 @@
                                         <polyline points="12 6 12 12 8 14"></polyline>
                                     </svg>
                                     <input type="text" inputmode="numeric" id="km-chegada" name="km_chegada" required
-                                        placeholder="Ex: 1573989" autocomplete="off"
+                                        placeholder="Ex: 1573989" autocomplete="off" aria-describedby="erro-km-principal"
                                         onkeydown="if(event.key==='-'||event.key==='Minus'||event.key==='e'||event.key==='E'||event.key==='+'||event.code==='NumpadSubtract') event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
+                                <small class="erro-km" id="erro-km-principal" role="alert" hidden>O KM de entrada não pode ser menor que o de saída.</small>
                             </div>
 
                             <!-- KM Total -->
@@ -391,10 +398,75 @@
                                         <polyline points="4 15 10 9 14 13 20 7"></polyline>
                                     </svg>
                                     <input type="text" inputmode="numeric" id="km-total" name="km_total" required
-                                        placeholder="Ex: 4542" autocomplete="off"
-                                        onkeydown="if(event.key==='-'||event.key==='Minus'||event.key==='e'||event.key==='E'||event.key==='+'||event.code==='NumpadSubtract') event.preventDefault();"
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                        placeholder="Entrada − saída" autocomplete="off" readonly tabindex="-1">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 2º trecho: aparece quando a placa secundária tem 7 caracteres válidos -->
+                        <div class="bloco-km-secundaria" id="bloco-km-secundaria" hidden>
+                            <div class="bloco-km-secundaria-titulo">
+                                <h3>KM da placa secundária <span class="placa-tag" id="km-secundaria-placa"></span></h3>
+                                <small class="dica-campo">Opcional. Se o motorista não souber, a gestão preenche.</small>
+                            </div>
+                            <div class="grid-campos grid-3-col">
+                                <div class="campo-grupo">
+                                    <div class="label-com-tag">
+                                        <label for="km-saida-2">KM SAÍDA (SECUNDÁRIA)</label>
+                                        <span class="tag-motorista">Opcional</span>
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <input type="text" inputmode="numeric" id="km-saida-2" name="km_saida_2"
+                                            placeholder="Ex: 200000" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="campo-grupo">
+                                    <div class="label-com-tag">
+                                        <label for="km-chegada-2">KM ENTRADA (SECUNDÁRIA)</label>
+                                        <span class="tag-motorista">Opcional</span>
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 8 14"></polyline>
+                                        </svg>
+                                        <input type="text" inputmode="numeric" id="km-chegada-2" name="km_entrada_2"
+                                            placeholder="Ex: 200800" autocomplete="off" aria-describedby="erro-km-secundaria">
+                                    </div>
+                                    <small class="erro-km" id="erro-km-secundaria" role="alert" hidden>O KM de entrada não pode ser menor que o de saída.</small>
+                                </div>
+
+                                <div class="campo-grupo campo-calculado">
+                                    <div class="label-com-tag">
+                                        <label for="km-total-2">KM TOTAL (SECUNDÁRIA)</label>
+                                        <span class="tag-auto">Automático</span>
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="4" y1="19" x2="20" y2="19"></line>
+                                            <polyline points="4 15 10 9 14 13 20 7"></polyline>
+                                        </svg>
+                                        <input type="text" id="km-total-2" name="km_total_2" placeholder="Entrada − saída"
+                                            autocomplete="off" readonly tabindex="-1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="km-total-viagem-destaque">
+                                <span>KM TOTAL DA VIAGEM <span class="tag-auto">Automático</span></span>
+                                <strong><span id="km-total-viagem">0</span> km</strong>
+                                <small>Principal + secundária</small>
                             </div>
                         </div>
 
@@ -1633,11 +1705,13 @@
                                             <thead>
                                                 <tr>
                                                     <th class="th-num">#</th>
-                                                    <th style="width: 28%;">POSTO DE ABASTECIMENTO</th>
-                                                    <th style="width: 18%;">NOTA FISCAL</th>
-                                                    <th style="width: 18%;">KM</th>
-                                                    <th style="width: 18%;">VALOR EM R$</th>
-                                                    <th style="width: 18%;">LITROS</th>
+                                                    <th style="width: 24%;">POSTO DE ABASTECIMENTO</th>
+                                                    <th style="width: 13%;">COMBUSTÍVEL</th>
+                                                    <th style="width: 13%;" class="col-placa-abast">PLACA</th>
+                                                    <th style="width: 11%;">NOTA FISCAL</th>
+                                                    <th style="width: 11%;">KM</th>
+                                                    <th style="width: 14%;">VALOR EM R$</th>
+                                                    <th style="width: 14%;">LITROS</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1659,6 +1733,16 @@
                                                     </td>
                                                     <td><select name="posto_ml_1" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
+                                                        </select></td>
+                                                    <td><select name="combustivel_ml_1" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_1" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_1" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
@@ -1703,6 +1787,16 @@
                                                     <td><select name="posto_ml_2" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
                                                         </select></td>
+                                                    <td><select name="combustivel_ml_2" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_2" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_2" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_2"
@@ -1745,6 +1839,16 @@
                                                     </td>
                                                     <td><select name="posto_ml_3" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
+                                                        </select></td>
+                                                    <td><select name="combustivel_ml_3" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_3" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_3" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
@@ -1789,6 +1893,16 @@
                                                     <td><select name="posto_ml_4" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
                                                         </select></td>
+                                                    <td><select name="combustivel_ml_4" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_4" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_4" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_4"
@@ -1831,6 +1945,16 @@
                                                     </td>
                                                     <td><select name="posto_ml_5" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
+                                                        </select></td>
+                                                    <td><select name="combustivel_ml_5" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_5" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_5" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
@@ -1875,6 +1999,16 @@
                                                     <td><select name="posto_ml_6" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
                                                         </select></td>
+                                                    <td><select name="combustivel_ml_6" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_6" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_6" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_6"
@@ -1917,6 +2051,16 @@
                                                     </td>
                                                     <td><select name="posto_ml_7" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
+                                                        </select></td>
+                                                    <td><select name="combustivel_ml_7" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_7" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_7" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
@@ -1961,6 +2105,16 @@
                                                     <td><select name="posto_ml_8" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
                                                         </select></td>
+                                                    <td><select name="combustivel_ml_8" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_8" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_8" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_8"
@@ -2003,6 +2157,16 @@
                                                     </td>
                                                     <td><select name="posto_ml_9" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
+                                                        </select></td>
+                                                    <td><select name="combustivel_ml_9" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_9" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_9" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
@@ -2047,6 +2211,16 @@
                                                     <td><select name="posto_ml_10" class="input-tabela input-posto">
                                                             <option value="">Selecione o posto...</option>
                                                         </select></td>
+                                                    <td><select name="combustivel_ml_10" class="input-tabela input-combustivel">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="diesel_s10">Diesel S10</option>
+                                                            <option value="diesel_s500">Diesel S500</option>
+                                                            <option value="arla">ARLA</option>
+                                                        </select></td>
+                                                    <td class="col-placa-abast"><select name="placa_abast_ml_10" class="input-tabela input-placa-abast">
+                                                            <option value="principal">Placa principal</option>
+                                                            <option value="secundaria">Secundária</option>
+                                                        </select></td>
                                                     <td><input type="text" name="nf_ml_10" class="input-tabela input-nf" inputmode="numeric"
                                                             placeholder="Nº NF"></td>
                                                     <td><input type="text" inputmode="numeric" name="km_ml_10"
@@ -2074,7 +2248,7 @@
                                             </tbody>
                                             <tfoot>
                                                 <tr class="linha-totais-abast">
-                                                    <td colspan="4" class="td-totais-label">
+                                                    <td colspan="6" class="td-totais-label" id="td-totais-label-abast">
                                                         <span class="tag-auto-pequena">Soma Automática</span>
                                                         <strong>TOTAL &gt;&gt;</strong>
                                                     </td>
@@ -2291,10 +2465,20 @@
                                                 <div class="linha-despesa-composta">
                                                     <div class="desc-com-trava">
                                                         <label for="ml-despesa-desc-2">Descrição 2</label>
-                                                        <div class="input-wrapper">
-                                                            <input type="text" id="ml-despesa-desc-2"
-                                                                name="ml_despesa_desc_2"
-                                                                placeholder="Ex: Chapa / Descarga...">
+                                                        <div class="input-wrapper input-select-despesa">
+                                                            <select id="ml-despesa-desc-2" name="ml_despesa_desc_2"
+                                                                class="select-tipo-despesa">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="Manutenção elétrica">Manutenção elétrica</option>
+                                                                <option value="Borracharia">Borracharia</option>
+                                                                <option value="Manutenção mecânica">Manutenção mecânica</option>
+                                                                <option value="Acessórios">Acessórios</option>
+                                                                <option value="Produtos para limpeza">Produtos para limpeza</option>
+                                                                <option value="Lavagem">Lavagem</option>
+                                                                <option value="Guincho">Guincho</option>
+                                                                <option value="Diária">Diária</option>
+                                                                <option value="Pernoite">Pernoite</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="valor-com-rotulo">
@@ -2312,10 +2496,20 @@
                                                 <div class="linha-despesa-composta">
                                                     <div class="desc-com-trava">
                                                         <label for="ml-despesa-desc-3">Descrição 3</label>
-                                                        <div class="input-wrapper">
-                                                            <input type="text" id="ml-despesa-desc-3"
-                                                                name="ml_despesa_desc_3"
-                                                                placeholder="Ex: Borracharia / Manutenção...">
+                                                        <div class="input-wrapper input-select-despesa">
+                                                            <select id="ml-despesa-desc-3" name="ml_despesa_desc_3"
+                                                                class="select-tipo-despesa">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="Manutenção elétrica">Manutenção elétrica</option>
+                                                                <option value="Borracharia">Borracharia</option>
+                                                                <option value="Manutenção mecânica">Manutenção mecânica</option>
+                                                                <option value="Acessórios">Acessórios</option>
+                                                                <option value="Produtos para limpeza">Produtos para limpeza</option>
+                                                                <option value="Lavagem">Lavagem</option>
+                                                                <option value="Guincho">Guincho</option>
+                                                                <option value="Diária">Diária</option>
+                                                                <option value="Pernoite">Pernoite</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="valor-com-rotulo">
@@ -2423,9 +2617,12 @@
                                                 0,00 <span class="indicador-unidade">km/l</span>
                                             </div>
                                             <div class="indicador-formula-base">
-                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros (<span
+                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros de diesel (<span
                                                     id="ml-calc-base-litros">0</span>)
                                             </div>
+                                            <!-- Com placa secundária: média de cada placa (km do trecho ÷ diesel da placa) -->
+                                            <div class="indicador-media-por-placa" id="ml-media-por-placa" hidden></div>
+                                            <div class="indicador-formula-base">ARLA não entra na média (só nos custos)</div>
                                         </div>
 
                                         <!-- Card 2: Despesa Total -->
@@ -2682,6 +2879,9 @@
                 </div>
             </div>
 
+            <!-- KMs, placa secundária e cada abastecimento (preenchido pelo relatorio.js) -->
+            <div class="revisar-detalhes" id="revisar-detalhes-viagem"></div>
+
             <div class="modal-acoes-row">
                 <button type="button" class="modal-btn-acao-secundario" id="btn-revisar-voltar">
                     Voltar para a ficha
@@ -2902,7 +3102,7 @@
     <script src="../JavaScript/senha.js"></script>
     <script src="../JavaScript/trocar-senha-frota.js?v=1"></script>
     <script src="../JavaScript/celular.js"></script>
-    <script src="../JavaScript/relatorio.js?v=2.6"></script>
+    <script src="../JavaScript/relatorio.js?v=2.7"></script>
     <script>
         // Mede a altura real do header fixo e grava em --altura-header,
         // usada pela .barra-admin-operacional para grudar logo abaixo dele.
