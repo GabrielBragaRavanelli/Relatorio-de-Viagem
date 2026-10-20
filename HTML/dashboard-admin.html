@@ -844,6 +844,7 @@
                             </div>
                         </div>
                         <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-placas"></div>
+                        <p class="analises-nota">Quando a ficha tem placa secundária (troca de cavalo), o KM de cada trecho e os abastecimentos (pela coluna "Placa" do abastecimento) vão para a placa certa. A receita (fretes), a comissão, o pedágio, o imposto e as outras despesas ficam na placa principal. Fichas antigas, sem esses dados, ficam inteiras na principal. A média km/l usa só diesel (S10 + S500); o ARLA entra nos custos.</p>
                     </div>
 
                     <div class="analises-grid-2">
@@ -894,6 +895,17 @@
                                 </div>
                             </div>
                             <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-postos"></div>
+                        </div>
+
+                        <!-- Por combustível -->
+                        <div class="chart-card">
+                            <div class="chart-card-header">
+                                <div>
+                                    <h3 class="chart-card-title">Por Combustível</h3>
+                                    <p class="chart-card-subtitle">Litros e valor de Diesel S10, Diesel S500 e ARLA no período</p>
+                                </div>
+                            </div>
+                            <div class="tabela-fichas-responsive analises-tabela-box" id="analises-tabela-combustiveis"></div>
                         </div>
                     </div>
                 </section>
@@ -1494,7 +1506,7 @@
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
     <script src="../JavaScript/senha.js"></script>
-    <script src="../JavaScript/dashboard-admin.js?v=2.2"></script>
+    <script src="../JavaScript/dashboard-admin.js?v=2.3"></script>
 </body>
 
 </html>
