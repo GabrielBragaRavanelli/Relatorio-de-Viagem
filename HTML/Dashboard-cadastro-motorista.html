@@ -328,6 +328,36 @@
         .extra-form input[type="text"], .extra-form input[type="file"] { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; background: #fff; }
         .extra-meta { display: block; font-size: 0.75rem; color: #64748b; margin-top: 2px; }
         @media (max-width: 700px) { .extra-form { grid-template-columns: 1fr; } }
+
+        /* Fotos do documento ("Não tenho o PDF") e botões Abrir/Baixar */
+        .cad-doc-acoes { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .cad-fotos { margin-top: 14px; }
+        .cad-fotos-titulo { font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 8px; }
+        .cad-fotos-grade { display: flex; flex-wrap: wrap; gap: 12px; }
+        .cad-foto { display: grid; gap: 6px; justify-items: center; }
+        .cad-foto-miniatura { width: 128px; height: 96px; padding: 0; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f1f5f9; cursor: zoom-in; }
+        .cad-foto-miniatura img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .cad-foto-miniatura:focus-visible { outline: 3px solid #10b981; outline-offset: 2px; }
+
+        /* Lightbox: tela inteira, botão de fechar sempre visível */
+        .lightbox-foto { position: fixed; inset: 0; z-index: 1100; background: rgba(15, 23, 42, 0.94); display: flex; flex-direction: column; }
+        .lightbox-foto[hidden] { display: none; }
+        .lightbox-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top)); color: #e2e8f0; font-size: 0.85rem; overflow-wrap: anywhere; }
+        .lightbox-fechar { width: 44px; height: 44px; flex-shrink: 0; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 1.2rem; cursor: pointer; }
+        .lightbox-corpo { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+        .lightbox-corpo img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; background: #fff; }
+        .lightbox-botoes { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); }
+        .lightbox-botoes .btn-action-small { min-height: 44px; padding: 10px 18px; font-size: 0.9rem; text-decoration: none; justify-content: center; }
+
+        @media (max-width: 640px) {
+            .driver-modal-overlay { padding: 0; width: auto; height: auto; inset: 0; }
+            .driver-modal-content { width: 100%; max-width: none; height: 100%; max-height: none; border-radius: 0; }
+            #modal-footer-actions .btn-action-small { min-height: 44px; flex: 1 1 calc(50% - 10px); justify-content: center; }
+            .cad-doc { flex-wrap: wrap; }
+            .cad-doc-acoes .btn-action-small, .cad-foto .btn-action-small { min-height: 44px; padding: 8px 14px; }
+            #btn-close-modal { width: 44px; height: 44px; }
+            .lightbox-botoes .btn-action-small { flex: 1; }
+        }
     </style>
 </head>
 
@@ -368,48 +398,6 @@
                             <span class="nav-text">Todas as Fichas</span>
                             <span class="badge-pendentes-sidebar" id="badge-total-count"
                                 style="background-color: #334155;">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#pendentes" class="nav-link" data-filter="pendente" id="nav-pendentes">
-                            <span class="nav-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </span>
-                            <span class="nav-text">Pendentes</span>
-                            <span class="badge-pendentes-sidebar" id="badge-pendente-count">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#analise" class="nav-link" data-filter="analise" id="nav-analise">
-                            <span class="nav-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                </svg>
-                            </span>
-                            <span class="nav-text">Em Análise</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#aprovados" class="nav-link" data-filter="aprovado" id="nav-aprovados">
-                            <span class="nav-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                            </span>
-                            <span class="nav-text">Documentos ok</span>
                         </a>
                     </li>
                 </ul>
@@ -617,6 +605,19 @@
         </div>
     </div>
 
+    <!-- FOTO DO DOCUMENTO AMPLIADA (lightbox) -->
+    <div class="lightbox-foto" id="lightbox-foto" role="dialog" aria-modal="true" aria-labelledby="lightbox-titulo" hidden>
+        <div class="lightbox-topo">
+            <span id="lightbox-titulo">Foto do documento</span>
+            <button type="button" class="lightbox-fechar" data-acao="fechar-foto" aria-label="Fechar foto">✕</button>
+        </div>
+        <div class="lightbox-corpo"><img id="lightbox-img" alt="Foto do documento enviada pelo motorista"></div>
+        <div class="lightbox-botoes">
+            <a id="lightbox-abrir" class="btn-action-small" target="_blank" rel="noopener">Abrir em nova aba</a>
+            <button type="button" class="btn-action-small" id="lightbox-baixar" data-acao="baixar-doc">Baixar</button>
+        </div>
+    </div>
+
     <!-- Script de Gestão Real Conectado Exclusivamente a FichaMultiCadastro -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../JavaScript/supabase-client.js"></script>
@@ -710,18 +711,43 @@
         const camposCrlvNovos = (n) => [['placa', 'Placa'], ['renavam', 'RENAVAM'], ['chassi', 'Chassi'], ['marca', 'Marca'],
             ['modelo', 'Modelo'], ['ano', 'Ano'], ['cor', 'Cor'], ['cidade-emp', 'Cidade de emplacamento'], ['uf', 'UF'],
             ['prop-nome', 'Proprietário'], ['prop-doc', 'CPF/CNPJ do proprietário']].map(([s, r]) => [`crlv${n}-${s}`, r]);
-        const CAMPOS_RNTRC_NOVOS = [['rntrc', 'RNTRC'], ['val-rntrc', 'Validade do RNTRC']];
+        const CAMPOS_RNTRC_NOVOS = [['rntrc', 'RNTRC'], ['val-rntrc', 'Validade do RNTRC'],
+            ['rntrc-doc', 'CPF/CNPJ do titular'], ['rntrc-categoria', 'Categoria']];
         const CAMPOS_RESIDENCIA_NOVOS = SECOES[3][1];
 
-        // [{ doc, titulo, campos, opcional }] na ordem do formulário
+        // [{ doc, titulo, campos }] na ordem do formulário (todos obrigatórios)
         function documentosNovos(d) {
             return [
                 { doc: 'cnh', titulo: 'CNH', campos: CAMPOS_CNH_NOVOS },
                 ...(TIPOLOGIAS[d._tipologia] || []).map((papel, i) => ({ doc: `crlv_${i + 1}`, titulo: nomeCrlv(papel), campos: camposCrlvNovos(i + 1) })),
                 { doc: 'rntrc', titulo: 'RNTRC', campos: CAMPOS_RNTRC_NOVOS },
-                { doc: 'residencia', titulo: 'Comprovante de residência', campos: CAMPOS_RESIDENCIA_NOVOS, opcional: true }
+                { doc: 'residencia', titulo: 'Comprovante de residência', campos: CAMPOS_RESIDENCIA_NOVOS }
             ];
         }
+
+        const CATEGORIAS_RNTRC = {
+            TAC: 'TAC – Transportador Autônomo de Cargas',
+            ETC: 'ETC – Empresa de Transporte Rodoviário de Cargas',
+            CTC: 'CTC – Cooperativa de Transporte Rodoviário de Cargas'
+        };
+
+        function formatarCpfCnpj(v) {
+            const dg = String(v || '').replace(/\D/g, '');
+            if (dg.length === 11) return formatarCpf(dg);
+            if (dg.length === 14) return dg.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            return String(v || '');
+        }
+
+        // Como o campo aparece para o admin; ao salvar, volta ao formato gravado pela edge function
+        const EXIBIR_CAMPO = {
+            'rntrc-doc': formatarCpfCnpj,
+            'rntrc-categoria': (v) => CATEGORIAS_RNTRC[v] || v
+        };
+        const GRAVAR_CAMPO = {
+            'rntrc-doc': (v) => v.replace(/\D/g, ''),
+            'rntrc-categoria': (v) => Object.keys(CATEGORIAS_RNTRC).find((s) => v.toUpperCase().startsWith(s)) || v
+        };
+        const valorCampo = (k, v) => (v && EXIBIR_CAMPO[k] ? EXIBIR_CAMPO[k](v) : (v || ''));
 
         function nomeDocumento(campo, d) {
             if (d._tipologia) {
@@ -803,8 +829,6 @@
             if (txtConc) txtConc.textContent = `${n('concluido')} com cadastro concluído (GR, Shopee e Base)`;
             const badgeTotal = document.getElementById('badge-total-count');
             if (badgeTotal) badgeTotal.textContent = total;
-            const badgePend = document.getElementById('badge-pendente-count');
-            if (badgePend) badgePend.textContent = n('pendente');
             document.getElementById('btn-tab-todos').textContent = `Todos (${total})`;
             document.getElementById('btn-tab-pendentes').textContent = `Pendentes (${n('pendente')})`;
             document.getElementById('btn-tab-analise').textContent = `Em Análise (${n('analise')})`;
@@ -912,11 +936,298 @@
             if (cadastroAberto === id) abrirModal(id);
         }
 
+        // ---------- Arquivos: sempre por link assinado de curta duração (bucket privado) ----------
+        const BUCKET_DOCS = 'documentos-cadastro';
+        const ehFotoDoc = (doc) => /_foto$/.test(String(doc.campo || ''));
+
+        async function linkAssinado(caminho, segundos = 600, download) {
+            const { data, error } = await window.supabaseClient.storage.from(BUCKET_DOCS)
+                .createSignedUrl(caminho, segundos, download ? { download } : undefined);
+            return error || !data ? null : data.signedUrl;
+        }
+
+        // Vários de uma vez: { caminho: link }
+        async function linksAssinados(caminhos, segundos = 600) {
+            if (!caminhos.length) return {};
+            const { data, error } = await window.supabaseClient.storage.from(BUCKET_DOCS).createSignedUrls(caminhos, segundos);
+            if (error || !Array.isArray(data)) return {};
+            const mapa = {};
+            data.forEach((x) => { if (x && x.signedUrl && !x.error) mapa[x.path] = x.signedUrl; });
+            return mapa;
+        }
+
         async function abrirDocumento(caminho) {
-            const { data, error } = await window.supabaseClient.storage
-                .from('documentos-cadastro').createSignedUrl(caminho, 600);
-            if (error || !data) return aviso('Não foi possível abrir o documento. Ele pode não ter sido enviado.');
-            window.open(data.signedUrl, '_blank', 'noopener');
+            const url = await linkAssinado(caminho, 600);
+            if (!url) return aviso('Não foi possível abrir o documento. Ele pode não ter sido enviado.');
+            window.open(url, '_blank', 'noopener');
+        }
+
+        function extensaoDe(doc) {
+            const m = /\.([a-z0-9]{2,4})$/i.exec(String(doc.nome || doc.path || ''));
+            if (m) return m[1].toLowerCase().replace('jpeg', 'jpg');
+            return doc.tipo === 'application/pdf' ? 'pdf' : doc.tipo === 'image/png' ? 'png' : 'jpg';
+        }
+
+        // Nomes legíveis por caminho: CNH_1.pdf, CRLV_do_Cavalo_foto_1.jpg, Extra_Consulta_GR_1.pdf
+        function nomesLegiveis(c) {
+            const d = c.dados || {};
+            const contagem = {};
+            const nomes = {};
+            (Array.isArray(c.documentos) ? c.documentos : []).forEach((doc) => {
+                const campo = String(doc.campo || 'arquivo');
+                const base = campo === 'extra'
+                    ? `Extra ${doc.descricao || ''}`
+                    : `${nomeDocumento(campo.replace(/_foto$/, ''), d)}${ehFotoDoc(doc) ? ' foto' : ''}`;
+                const chave = nomeArquivoSeguro(base.trim().replace(/\s+/g, '_')).replace(/_+/g, '_');
+                contagem[chave] = (contagem[chave] || 0) + 1;
+                nomes[doc.path] = `${chave}_${contagem[chave]}.${extensaoDe(doc)}`;
+            });
+            return nomes;
+        }
+
+        function salvarArquivo(blob, nome) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = nome;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+        }
+
+        // "Baixar" individual: o link assinado já pede o download com o nome legível
+        async function baixarDocumento(caminho) {
+            const c = cadastros.find((x) => x.id === cadastroAberto);
+            const nome = (c && nomesLegiveis(c)[caminho]) || String(caminho).split('/').pop();
+            const url = await linkAssinado(caminho, 120, nome);
+            if (!url) return aviso('Não foi possível baixar o documento. Ele pode não ter sido enviado.');
+            const a = document.createElement('a');
+            a.href = url;
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        // ---------- Foto ampliada (lightbox) ----------
+        async function verFoto(caminho) {
+            const c = cadastros.find((x) => x.id === cadastroAberto);
+            const url = await linkAssinado(caminho, 600);
+            if (!url) return aviso('Não foi possível abrir a foto. Ela pode não ter sido enviada.');
+            const caixa = document.getElementById('lightbox-foto');
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox-abrir').href = url;
+            document.getElementById('lightbox-baixar').setAttribute('data-caminho', caminho);
+            document.getElementById('lightbox-titulo').textContent = (c && nomesLegiveis(c)[caminho]) || 'Foto do documento';
+            caixa.hidden = false;
+            caixa.querySelector('.lightbox-fechar').focus();
+        }
+
+        function fecharFoto() {
+            const caixa = document.getElementById('lightbox-foto');
+            if (!caixa || caixa.hidden) return false;
+            caixa.hidden = true;
+            document.getElementById('lightbox-img').removeAttribute('src');
+            return true;
+        }
+
+        // ---------- Ficha completa do cadastro (impressão e cadastro.html do .zip) ----------
+        const TEXTO_STATUS = {
+            pendente: 'Pendente', analise: 'Em análise', aprovado: 'Documentos ok',
+            concluido: 'Cadastro concluído', recusado: 'Recusado'
+        };
+
+        const CSS_FICHA = `
+            * { box-sizing: border-box; }
+            body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 24px; font-size: 12px; line-height: 1.4; }
+            header { border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 16px; }
+            h1 { font-size: 20px; margin: 0 0 4px; }
+            h2 { font-size: 14px; margin: 0 0 6px; padding: 4px 0; border-bottom: 1px solid #999; break-after: avoid; }
+            section { margin: 0 0 16px; }
+            .situacao { font-weight: normal; font-size: 12px; color: #444; margin-left: 6px; }
+            table { border-collapse: collapse; width: 100%; }
+            tr { break-inside: avoid; }
+            th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+            th { width: 35%; background: #f3f3f3; font-weight: 600; }
+            ul { margin: 6px 0 0; padding-left: 18px; }
+            .fotos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+            .fotos-titulo { width: 100%; font-weight: 600; }
+            figure { margin: 0; width: 160px; break-inside: avoid; }
+            figure img { width: 160px; height: 120px; object-fit: cover; border: 1px solid #ccc; }
+            figcaption { font-size: 10px; color: #555; overflow-wrap: anywhere; }
+            .imprimir { margin: 0 0 16px; padding: 10px 18px; font-size: 14px; font-weight: 700; border: 1px solid #111; border-radius: 8px; background: #fff; cursor: pointer; }
+            @media print { body { margin: 0; } .imprimir { display: none; } @page { margin: 14mm; } }
+            @media (max-width: 600px) { body { margin: 12px; } th { width: 45%; } }`;
+
+        // srcFoto(doc) -> endereço da miniatura (link assinado na impressão; arquivo do .zip no cadastro.html)
+        function fichaHtml(c, { enviados, nomes, srcFoto, imprimir }) {
+            const d = c.dados || {};
+            const docs = Array.isArray(c.documentos) ? c.documentos : [];
+            const novo = !!d._tipologia;
+            const tabela = (linhas) => `<table>${linhas.map(([rotulo, valor]) =>
+                `<tr><th>${esc(rotulo)}</th><td>${esc(valor) || '—'}</td></tr>`).join('')}</table>`;
+            const tabelaCampos = (campos) => tabela(campos.map(([k, rotulo]) => [rotulo, valorCampo(k, d[k])]));
+            const arquivos = (lista) => (lista.length ? `<ul>${lista.map((x) =>
+                `<li>${esc(nomes[x.path] || x.nome)} <small>(enviado como "${esc(x.nome)}")${enviados.has(x.path) ? '' : ' — não chegou a ser enviado'}</small></li>`).join('')}</ul>` : '');
+            const fotos = (lista) => {
+                const comFoto = lista.filter((x) => srcFoto(x));
+                if (!comFoto.length) return '';
+                return `<div class="fotos"><div class="fotos-titulo">Foto enviada pelo motorista</div>${comFoto.map((x) =>
+                    `<figure><img src="${esc(srcFoto(x))}" alt=""><figcaption>${esc(nomes[x.path])}</figcaption></figure>`).join('')}</div>`;
+            };
+            const secao = (titulo, conteudo, situacao = '') =>
+                `<section><h2>${esc(titulo)}${situacao ? ` <span class="situacao">${esc(situacao)}</span>` : ''}</h2>${conteudo}</section>`;
+
+            let secoes;
+            if (novo) {
+                const semPdf = d._sem_pdf || {};
+                secoes = SECOES_FIXAS_NOVAS.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)')
+                    .map(([titulo, campos]) => secao(titulo, tabelaCampos(campos))).join('') +
+                    documentosNovos(d).map(({ doc, titulo, campos }) => {
+                        const anexos = docs.filter((x) => x.campo === doc);
+                        const fotosDoc = docs.filter((x) => x.campo === `${doc}_foto`);
+                        const preenchido = semPdf[doc] === true;
+                        const situacao = anexos.length ? 'Anexado (PDF)'
+                            : preenchido ? `Preenchido pelo motorista${fotosDoc.length ? ` + ${fotosDoc.length} foto(s)` : ''}`
+                            : 'Não enviado';
+                        return secao(titulo, (preenchido ? tabelaCampos(campos) : '') + arquivos(anexos) + arquivos(fotosDoc) + fotos(fotosDoc), situacao);
+                    }).join('');
+            } else {
+                const principais = docs.filter((x) => x.campo !== 'extra');
+                secoes = SECOES.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)')
+                    .filter(([titulo]) => !c.sem_carreta || !titulo.includes('arreta'))
+                    .map(([titulo, campos]) => secao(titulo, tabelaCampos(campos))).join('') +
+                    secao('Documentos', arquivos(principais) || '<p>Nenhum documento anexado.</p>');
+            }
+
+            const aceite = d._aceite_lgpd && d._aceite_lgpd.em
+                ? `Aceita em ${formatarData(d._aceite_lgpd.em)} (versão ${d._aceite_lgpd.versao || '—'})` : 'Não registrado';
+            const resumo = tabela([
+                ['Nome', c.nome],
+                ['CPF', formatarCpf(c.cpf)],
+                ['Celular', c.celular],
+                ['E-mail de contato', c.email],
+                ['Tipo', c.tipo === 'pj' ? 'Pessoa Jurídica' : 'Pessoa Física'],
+                ...(novo ? [['Tipo de veículo', d._tipologia]] : []),
+                ['Situação', TEXTO_STATUS[statusExibido(c)] || c.status],
+                ['Enviado em', formatarData(c.criado_em)],
+                ['Política de Privacidade (LGPD)', aceite],
+                ...(c.analisado_por ? [['Última análise', `${c.analisado_por} em ${formatarData(c.analisado_em)}`]] : []),
+                ...(c.status === 'recusado' && c.motivo_recusa ? [['Motivo da recusa', c.motivo_recusa]] : [])
+            ]);
+            const etapas = tabela(ETAPAS.map(([k, , rotulo]) => {
+                const info = (c.etapas && c.etapas[k]) || {};
+                return [rotulo, info.feito ? `Feito${info.por ? ` por ${info.por}` : ''}${info.em ? ` em ${formatarData(info.em)}` : ''}` : 'Pendente'];
+            }));
+            const extras = docs.filter((x) => x.campo === 'extra');
+            const listaExtras = extras.length ? `<ul>${extras.map((x) => `<li><b>${esc(x.descricao || x.nome)}</b> — ${esc(nomes[x.path] || x.nome)}${x.enviado_por ? ` <small>(enviado por ${esc(x.enviado_por)} em ${formatarData(x.enviado_em)})</small>` : ''}</li>`).join('')}</ul>` : '<p>Nenhum documento extra.</p>';
+
+            return `<!DOCTYPE html>
+<html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro - ${esc(c.nome || '')}</title><style>${CSS_FICHA}</style></head>
+<body>
+${imprimir ? '<button type="button" class="imprimir" onclick="window.print()">Imprimir / Salvar como PDF</button>' : ''}
+<header><h1>Ficha do cadastro</h1><div>AJBorges Transporte &amp; Logística · gerada em ${formatarData(new Date().toISOString())}</div></header>
+${secao('Resumo', resumo)}
+${secao('Etapas de homologação (GR, Shopee e Base)', etapas)}
+${secoes}
+${secao('Documentos extras', listaExtras)}
+</body></html>`;
+        }
+
+        function esperarImagens(doc, limiteMs) {
+            const pendentes = Array.from(doc.images).filter((img) => !img.complete)
+                .map((img) => new Promise((ok) => { img.onload = ok; img.onerror = ok; }));
+            return Promise.race([Promise.all(pendentes), new Promise((ok) => setTimeout(ok, limiteMs))]);
+        }
+
+        // "Baixar ficha do cadastro (PDF)": versão para impressão; o admin escolhe "Salvar como PDF"
+        async function baixarFicha(id) {
+            const c = cadastros.find((x) => x.id === id);
+            if (!c) return;
+            // Abre já no clique para o navegador não bloquear a janela
+            const janela = window.open('', '_blank');
+            if (!janela) return aviso('O navegador bloqueou a nova janela. Permita pop-ups para este site e tente de novo.');
+            janela.document.write('<p style="font-family: sans-serif; padding: 24px;">Preparando a ficha...</p>');
+            try {
+                const enviados = await listarArquivosEnviados(c);
+                const docs = Array.isArray(c.documentos) ? c.documentos : [];
+                const links = await linksAssinados(docs.filter((x) => ehFotoDoc(x) && enviados.has(x.path)).map((x) => x.path), 600);
+                if (janela.closed) return;
+                janela.document.open();
+                janela.document.write(fichaHtml(c, { enviados, nomes: nomesLegiveis(c), srcFoto: (x) => links[x.path] || null, imprimir: true }));
+                janela.document.close();
+                await esperarImagens(janela.document, 10000);
+                janela.focus();
+                janela.print();
+            } catch (err) {
+                console.error('Erro ao montar a ficha:', err && err.message);
+                janela.close();
+                aviso('Não foi possível montar a ficha. Tente novamente.');
+            }
+        }
+
+        // ---------- "Baixar documentos (.zip)" ----------
+        let carregandoJSZip = null;
+        function carregarJSZip() {
+            if (window.JSZip) return Promise.resolve(window.JSZip);
+            if (!carregandoJSZip) {
+                carregandoJSZip = new Promise((ok, falha) => {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+                    s.integrity = 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG';
+                    s.crossOrigin = 'anonymous';
+                    s.onload = () => (window.JSZip ? ok(window.JSZip) : falha(new Error('jszip_ausente')));
+                    s.onerror = () => { carregandoJSZip = null; falha(new Error('jszip_indisponivel')); };
+                    document.head.appendChild(s);
+                });
+            }
+            return carregandoJSZip;
+        }
+
+        async function baixarZip(id, botao) {
+            const c = cadastros.find((x) => x.id === id);
+            if (!c || botao.disabled) return;
+            const textoOriginal = botao.textContent;
+            botao.disabled = true;
+            const progresso = (texto) => { botao.textContent = texto; };
+            try {
+                progresso('Preparando...');
+                const JSZip = await carregarJSZip();
+                const enviados = await listarArquivosEnviados(c);
+                const nomes = nomesLegiveis(c);
+                const docs = (Array.isArray(c.documentos) ? c.documentos : []).filter((x) => enviados.has(x.path));
+                const links = await linksAssinados(docs.map((x) => x.path), 120);
+                const zip = new JSZip();
+                const noZip = new Set();
+                for (let i = 0; i < docs.length; i++) {
+                    progresso(`Baixando ${i + 1} de ${docs.length}...`);
+                    try {
+                        const url = links[docs[i].path];
+                        if (!url) throw new Error('sem_link');
+                        const r = await fetch(url);
+                        if (!r.ok) throw new Error(`http_${r.status}`);
+                        zip.file(nomes[docs[i].path], await r.blob());
+                        noZip.add(docs[i].path);
+                    } catch (err) {
+                        console.warn('Arquivo do cadastro fora do .zip:', err && err.message);
+                    }
+                }
+                zip.file('cadastro.html', fichaHtml(c, {
+                    enviados, nomes, srcFoto: (x) => (noZip.has(x.path) ? nomes[x.path] : null)
+                }));
+                progresso('Gerando o .zip...');
+                const blob = await zip.generateAsync({ type: 'blob' });
+                salvarArquivo(blob, `cadastro_${nomeArquivoSeguro(String(c.nome || 'motorista').replace(/\s+/g, '_'))}.zip`);
+                const faltaram = docs.length - noZip.size;
+                if (faltaram > 0) aviso(`${faltaram} arquivo(s) não puderam ser baixados e ficaram fora do .zip. Tente de novo.`);
+            } catch (err) {
+                console.error('Erro ao gerar o .zip:', err && err.message);
+                aviso('Não foi possível gerar o .zip. Verifique a internet e tente novamente.');
+            } finally {
+                botao.disabled = false;
+                botao.textContent = textoOriginal;
+            }
         }
 
         // Pastas onde os arquivos do cadastro estão: antigas ({user_id}/{id}) e novas (terceiros/{id})
@@ -1040,7 +1351,7 @@
                             ${campos.map(([k, rotulo]) => `
                                 <label class="cad-campo">
                                     <span>${esc(rotulo)}</span>
-                                    <input type="text" data-campo="${esc(k)}" value="${esc(d[k] || '')}" readonly placeholder="—">
+                                    <input type="text" data-campo="${esc(k)}" value="${esc(valorCampo(k, d[k]))}" readonly placeholder="—">
                                 </label>`).join('')}
                         </div>`;
             const secaoFixa = ([titulo, campos]) => `
@@ -1054,22 +1365,21 @@
             if (novo) {
                 const semPdf = d._sem_pdf || {};
                 secoes = SECOES_FIXAS_NOVAS.filter(([titulo]) => c.tipo === 'pj' || titulo !== 'Empresa (PJ)').map(secaoFixa).join('') +
-                    documentosNovos(d).map(({ doc, titulo, campos, opcional }) => {
+                    documentosNovos(d).map(({ doc, titulo, campos }) => {
                         const temAnexo = docs.some((x) => x.campo === doc);
+                        const temFoto = docs.some((x) => x.campo === `${doc}_foto`);
                         const preenchido = semPdf[doc] === true;
-                        const vazio = opcional && !temAnexo && !(preenchido && campos.some(([k]) => d[k]));
                         // Documento que não existia no formulário quando o cadastro foi feito (ex.: RNTRC)
-                        const naoEnviado = !opcional && !temAnexo && !Object.hasOwn(semPdf, doc);
-                        const etiqueta = vazio ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado (opcional)</span>'
-                            : naoEnviado ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado</span>'
+                        const naoEnviado = !temAnexo && !Object.hasOwn(semPdf, doc);
+                        const etiqueta = naoEnviado ? '<span class="cad-etiqueta cad-etiqueta-vazio">Não enviado</span>'
                             : preenchido ? '<span class="cad-etiqueta cad-etiqueta-preenchido">Preenchido pelo motorista</span>'
                             : '<span class="cad-etiqueta cad-etiqueta-anexo">Anexo</span>';
                         const conteudo = naoEnviado
                             ? `<div class="cad-vazio">Não enviado.</div>${grade(campos)}`
                             : preenchido
-                            ? grade(campos)
+                            ? grade(campos) + (temFoto ? `<div class="cad-fotos" data-fotos-de="${esc(doc)}">Carregando fotos...</div>` : '')
                             : (temAnexo ? `<div class="cad-docs" data-docs-de="${esc(doc)}">Carregando documentos...</div>`
-                                : `<div class="${vazio ? 'cad-vazio' : 'cad-doc cad-doc-faltando'}">${vazio ? 'Não enviado (opcional).' : 'Nenhum anexo recebido.'}</div>`);
+                                : '<div class="cad-doc cad-doc-faltando">Nenhum anexo recebido.</div>');
                         return `
                     <fieldset class="cad-secao">
                         <legend>${esc(titulo)} ${etiqueta}</legend>${conteudo}
@@ -1146,6 +1456,8 @@
                 <button type="button" class="btn-action-small" data-acao="fechar">Fechar</button>
                 <button type="button" class="btn-action-small" data-acao="editar" id="btn-editar-dados">Completar / editar dados</button>
                 <button type="button" class="btn-action-small" data-acao="salvar-dados" id="btn-salvar-dados" style="display:none;">Salvar dados</button>
+                <button type="button" class="btn-action-small" data-acao="baixar-zip" data-id="${esc(c.id)}">Baixar documentos (.zip)</button>
+                <button type="button" class="btn-action-small" data-acao="baixar-ficha" data-id="${esc(c.id)}">Baixar ficha do cadastro (PDF)</button>
                 ${c.status !== 'analise' && c.status !== 'aprovado' ? `<button type="button" class="btn-action-small" data-acao="analise" data-id="${esc(c.id)}">Colocar em análise</button>` : ''}
                 ${c.status !== 'recusado' ? `<button type="button" class="btn-action-small btn-action-delete" data-acao="recusar" data-id="${esc(c.id)}">Recusar</button>` : ''}
                 ${c.status !== 'aprovado' ? `<button type="button" class="btn-action-small btn-action-approve" data-acao="aprovar" data-id="${esc(c.id)}">Documentos ok</button>` : ''}`;
@@ -1154,11 +1466,16 @@
 
             const enviados = await listarArquivosEnviados(c);
             if (cadastroAberto !== id) return;
+            const botoesArquivo = (doc) => `
+                <div class="cad-doc-acoes">
+                    <button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>
+                    <button type="button" class="btn-action-small" data-acao="baixar-doc" data-caminho="${esc(doc.path)}">Baixar</button>
+                </div>`;
             const itemDoc = (doc) => {
                 const ok = enviados.has(doc.path);
                 return `<div class="cad-doc ${ok ? '' : 'cad-doc-faltando'}">
                     <span>📎 <b>${esc(nomeDocumento(doc.campo, d))}</b> · ${esc(doc.nome)}</span>
-                    ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não chegou a ser enviado</em>'}
+                    ${ok ? botoesArquivo(doc) : '<em>não chegou a ser enviado</em>'}
                 </div>`;
             };
             const itemExtra = (doc) => {
@@ -1169,8 +1486,9 @@
                         <div>📎 <b>${esc(doc.descricao || doc.nome)}</b> · <span style="color:#64748b; font-size:0.8rem;">${esc(doc.nome)}</span></div>
                         ${infoEnvio ? `<span class="extra-meta">${infoEnvio}</span>` : ''}
                     </div>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>` : '<em>não encontrado</em>'}
+                    <div class="cad-doc-acoes">
+                        ${ok ? `<button type="button" class="btn-action-small" data-acao="abrir-doc" data-caminho="${esc(doc.path)}">Abrir</button>
+                        <button type="button" class="btn-action-small" data-acao="baixar-doc" data-caminho="${esc(doc.path)}">Baixar</button>` : '<em>não encontrado</em>'}
                         <button type="button" class="btn-action-small btn-action-delete" data-acao="remover-extra" data-id="${esc(c.id)}" data-caminho="${esc(doc.path)}">Remover</button>
                     </div>
                 </div>`;
@@ -1179,6 +1497,25 @@
             if (novo) {
                 document.querySelectorAll('#modal-body-content [data-docs-de]').forEach((el) => {
                     el.innerHTML = docs.filter((x) => x.campo === el.getAttribute('data-docs-de')).map(itemDoc).join('');
+                });
+
+                // Fotos enviadas com "Não tenho o PDF": miniaturas por link assinado
+                const fotos = docs.filter((x) => ehFotoDoc(x) && enviados.has(x.path));
+                const links = await linksAssinados(fotos.map((x) => x.path), 600);
+                if (cadastroAberto !== id) return;
+                const nomes = nomesLegiveis(c);
+                const itemFoto = (doc) => (links[doc.path]
+                    ? `<div class="cad-foto">
+                        <button type="button" class="cad-foto-miniatura" data-acao="ver-foto" data-caminho="${esc(doc.path)}" aria-label="Ampliar ${esc(nomes[doc.path])}">
+                            <img src="${esc(links[doc.path])}" alt="" loading="lazy">
+                        </button>
+                        <button type="button" class="btn-action-small" data-acao="baixar-doc" data-caminho="${esc(doc.path)}">Baixar</button>
+                    </div>`
+                    : '<div class="cad-doc cad-doc-faltando"><em>Foto não chegou a ser enviada</em></div>');
+                document.querySelectorAll('#modal-body-content [data-fotos-de]').forEach((el) => {
+                    const lista = docs.filter((x) => x.campo === `${el.getAttribute('data-fotos-de')}_foto`);
+                    el.innerHTML = `<div class="cad-fotos-titulo">Foto enviada pelo motorista</div>
+                        <div class="cad-fotos-grade">${lista.map(itemFoto).join('')}</div>`;
                 });
             } else {
                 const lista = document.getElementById('cad-lista-docs');
@@ -1195,6 +1532,7 @@
         }
 
         function fecharModal() {
+            fecharFoto();
             document.getElementById('driver-modal')?.classList.remove('active');
             cadastroAberto = null;
         }
@@ -1204,7 +1542,9 @@
             if (!c) return;
             const dados = { ...(c.dados || {}) };
             document.querySelectorAll('#modal-body-content input[data-campo]').forEach((inp) => {
-                const v = inp.value.replace(/[<>"'`]/g, '').trim().slice(0, 200);
+                const k = inp.getAttribute('data-campo');
+                let v = inp.value.replace(/[<>"'`]/g, '').trim().slice(0, 200);
+                if (v && GRAVAR_CAMPO[k]) v = GRAVAR_CAMPO[k](v);
                 if (v) dados[inp.getAttribute('data-campo')] = v; else delete dados[inp.getAttribute('data-campo')];
             });
             const nome = `${dados['motorista-nome'] || ''} ${dados['motorista-sobrenome'] || ''}`.trim() || c.nome;
@@ -1298,6 +1638,11 @@
                     case 'analise': decidir(id, 'analise'); break;
                     case 'fechar': fecharModal(); break;
                     case 'abrir-doc': abrirDocumento(alvo.getAttribute('data-caminho')); break;
+                    case 'baixar-doc': baixarDocumento(alvo.getAttribute('data-caminho')); break;
+                    case 'ver-foto': verFoto(alvo.getAttribute('data-caminho')); break;
+                    case 'fechar-foto': fecharFoto(); break;
+                    case 'baixar-zip': baixarZip(id, alvo); break;
+                    case 'baixar-ficha': baixarFicha(id); break;
                     case 'anexar-extra': anexarExtra(id || cadastroAberto); break;
                     case 'remover-extra': removerExtra(id || cadastroAberto, alvo.getAttribute('data-caminho')); break;
                     case 'editar':
@@ -1313,8 +1658,13 @@
             document.getElementById('btn-close-modal')?.addEventListener('click', fecharModal);
             const modal = document.getElementById('driver-modal');
             modal?.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+            const lightbox = document.getElementById('lightbox-foto');
+            lightbox?.addEventListener('click', (e) => {
+                if (e.target === lightbox || e.target.classList.contains('lightbox-corpo')) fecharFoto();
+            });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') fecharModal();
+                // Esc fecha primeiro a foto ampliada, depois o cadastro
+                if (e.key === 'Escape' && !fecharFoto()) fecharModal();
                 if (e.key === 'Enter' && e.target && e.target.id === 'extra-descricao') {
                     e.preventDefault();
                     if (cadastroAberto) anexarExtra(cadastroAberto);
