@@ -43,15 +43,56 @@ if (window.supabase) {
 // 3. OPERAÇÕES DE FICHAS DE VIAGEM (CRUD + REALTIME)
 // ==========================================================================
 
+// Valores aceitos em cada abastecimento (iguais aos do banco, passo 11)
+const COMBUSTIVEIS_FICHA = ['diesel_s10', 'diesel_s500', 'arla'];
+const PLACAS_ABASTECIMENTO = ['principal', 'secundaria'];
+
+// Gestão logada? (cache do auth.js; só decide o que mandar, quem protege é o banco)
+function usuarioEhGestao() {
+    try {
+        const u = JSON.parse(localStorage.getItem('ajborges_usuario_ativo') || 'null');
+        return !!(u && (u.role === 'admin' || u.role === 'diretoria'));
+    } catch (e) {
+        return false;
+    }
+}
+
+const digitosKmFicha = (valor) => String(valor ?? '').replace(/\D/g, '');
+
+// Abastecimento com combustivel e placa só dos valores aceitos (vazio = ficha antiga)
+function normalizarAbastecimento(a) {
+    if (!a || typeof a !== 'object') return a;
+    return {
+        ...a,
+        combustivel: COMBUSTIVEIS_FICHA.includes(a.combustivel) ? a.combustivel : '',
+        placa: PLACAS_ABASTECIMENTO.includes(a.placa) ? a.placa : ''
+    };
+}
+
 /**
- * Placa secundária (troca de cavalo na viagem): sem coluna própria, vai em
- * dados_completos.placaSecundaria. Só entra quando a ficha traz a chave
- * (o envio do motorista não traz; quem grava é a gestão).
+ * KMs dos dois trechos e placa secundária em dados_completos (sem coluna própria):
+ * kmSaida, kmEntrada, placaSecundaria, kmSaida2, kmEntrada2 e, só da gestão,
+ * kmTotal1, kmTotal2 e kmTotal. Para o motorista quem calcula os totais é o banco.
+ * Só entra o que a ficha traz (fichas antigas continuam como estão).
  */
-function comPlacaSecundaria(dadosCompletos, ficha) {
-    const valor = ficha.placaSecundaria ?? ficha.placa_secundaria;
-    if (valor === undefined) return dadosCompletos;
-    return { ...dadosCompletos, placaSecundaria: String(valor || '').trim().toUpperCase() };
+function comCamposDaViagem(dadosCompletos, ficha, gestao) {
+    const dc = { ...dadosCompletos };
+    ['kmSaida', 'kmEntrada', 'kmSaida2', 'kmEntrada2'].forEach((chave) => {
+        if (ficha[chave] !== undefined) dc[chave] = digitosKmFicha(ficha[chave]);
+    });
+    const placa = ficha.placaSecundaria ?? ficha.placa_secundaria;
+    if (placa !== undefined) dc.placaSecundaria = String(placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (gestao) {
+        ['kmTotal1', 'kmTotal2', 'kmTotal'].forEach((chave) => {
+            if (ficha[chave] !== undefined) dc[chave] = digitosKmFicha(ficha[chave]);
+        });
+    } else {
+        delete dc.kmTotal1;
+        delete dc.kmTotal2;
+        delete dc.kmTotal;
+    }
+    if (Array.isArray(dc.abastecimentos)) dc.abastecimentos = dc.abastecimentos.map(normalizarAbastecimento);
+    return dc;
 }
 
 /**
@@ -65,6 +106,7 @@ function mapearFichaParaSupabase(ficha) {
         const n = parseFloat(limpo);
         return isNaN(n) ? 0 : n;
     }
+    const gestao = usuarioEhGestao();
 
     return {
         id: ficha.id,
@@ -74,8 +116,9 @@ function mapearFichaParaSupabase(ficha) {
         data_saida: ficha.data_saida ? formatarDataParaIso(ficha.data_saida) : (ficha.dataSaida ? formatarDataParaIso(ficha.dataSaida) : null),
         data_chegada: ficha.data_chegada ? formatarDataParaIso(ficha.data_chegada) : (ficha.dataChegada ? formatarDataParaIso(ficha.dataChegada) : null),
         km_saida: parseNum(ficha.km_saida ?? ficha.kmSaida),
-        km_chegada: parseNum(ficha.km_chegada ?? ficha.kmChegada),
-        km_total: parseNum(ficha.km_total ?? ficha.kmTotal),
+        km_chegada: parseNum(ficha.km_chegada ?? ficha.kmEntrada ?? ficha.kmChegada),
+        // KM da viagem toda; para o motorista o banco calcula
+        km_total: gestao ? parseNum(ficha.km_total ?? ficha.kmTotal) : null,
         destino_inicial: ficha.destino_inicial || ficha.destinoInicial || null,
         destino_final: ficha.destino_final || ficha.destinoFinal || null,
         frete_origem: parseNum(ficha.frete_origem ?? ficha.freteOrigem),
@@ -88,10 +131,10 @@ function mapearFichaParaSupabase(ficha) {
         media_km_l: parseNum(ficha.media_km_l ?? ficha.mediaKmL),
         saldo_comissao: parseNum(ficha.saldo_comissao ?? ficha.saldoComissao),
         total_despesas: parseNum(ficha.total_despesas ?? ficha.totalDespesas),
-        abastecimentos: ficha.abastecimentos || [],
+        abastecimentos: (ficha.abastecimentos || []).map(normalizarAbastecimento),
         comprovantes: ficha.comprovantes || ficha.anexos || [],
         despesas_extras: ficha.despesas_extras || ficha.outrasDespesas || [],
-        dados_completos: comPlacaSecundaria(ficha.dados_completos || ficha, ficha),
+        dados_completos: comCamposDaViagem(ficha.dados_completos || ficha, ficha, gestao),
         status: ficha.status || 'pendente',
         origem_envio: ficha.origem_envio || ficha.origemEnvio || 'motorista_com_login',
         aprovado_em: ficha.aprovado_em || (ficha.dataAprovacao ? new Date().toISOString() : null),
@@ -138,7 +181,13 @@ function mapearFichaDoSupabase(registro) {
         dataSaida: registro.data_saida || completo.dataSaida,
         dataChegada: registro.data_chegada || completo.dataChegada,
         kmSaida: registro.km_saida?.toString() || completo.kmSaida,
-        kmChegada: registro.km_chegada?.toString() || completo.kmChegada,
+        kmChegada: registro.km_chegada?.toString() || completo.kmEntrada || completo.kmChegada,
+        kmEntrada: registro.km_chegada?.toString() || completo.kmEntrada || completo.kmChegada,
+        // 2º trecho e totais calculados pelo banco (ausentes em fichas antigas)
+        kmSaida2: completo.kmSaida2 || '',
+        kmEntrada2: completo.kmEntrada2 || '',
+        kmTotal1: completo.kmTotal1 || '',
+        kmTotal2: completo.kmTotal2 || '',
         kmTotal: registro.km_total?.toString() || completo.kmTotal,
         destinoInicial: registro.destino_inicial || completo.destinoInicial,
         destinoFinal: registro.destino_final || completo.destinoFinal,
@@ -150,7 +199,7 @@ function mapearFichaDoSupabase(registro) {
         totalDespesas: formatarMoedaBR(registro.total_despesas),
         totalAbastecimento: totAbast || '0,00',
         totalLitros: totLitros || '0,00',
-        abastecimentos: abasts,
+        abastecimentos: Array.isArray(abasts) ? abasts.map(normalizarAbastecimento) : abasts,
         anexos: registro.comprovantes || completo.anexos || [],
         outrasDespesas: registro.despesas_extras || completo.outrasDespesas || [],
         status: registro.status || 'pendente',
