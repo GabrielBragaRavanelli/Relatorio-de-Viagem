@@ -3338,6 +3338,8 @@ function seloSituacaoMotorista(m) {
 function renderizarFrota() {
     const lista = estadoMotoristas.frota;
     const ativos = lista.filter(m => m.status === 'aprovado');
+    // "Válidos (ativos)": todos que não foram desativados, tenham trocado a senha ou não
+    const validos = lista.filter(m => m.status !== 'inativo');
     const naoTrocaram = ativos.filter(m => m.senha_provisoria);
     const semEmail = lista.filter(m => !m.tem_email);
     const inativos = lista.filter(m => m.status === 'inativo');
@@ -3349,7 +3351,7 @@ function renderizarFrota() {
     if (elKpis) {
         const cards = [
             { classe: 'card-frota-kpi', rotulo: 'Motoristas da frota', valor: lista.length },
-            { classe: 'card-entrada', rotulo: 'Ativos', valor: ativos.length },
+            { classe: 'card-entrada', rotulo: 'Ativos', valor: validos.length, nota: 'Clique para filtrar', filtro: 'validos' },
             { classe: 'card-saida mot-kpi-alerta', rotulo: 'Ainda não trocaram a senha', valor: naoTrocaram.length,
                 nota: 'Clique para filtrar', filtro: 'provisoria' },
             { classe: 'card-frota-kpi', rotulo: 'Sem e-mail', valor: semEmail.length },
@@ -3370,8 +3372,11 @@ function renderizarFrota() {
 
     const filtrados = lista.filter(m => {
         if (situacao) {
-            if (situacao === 'provisoria' && !(m.status === 'aprovado' && m.senha_provisoria)) return false;
-            if (situacao !== 'provisoria' && situacaoMotorista(m) !== situacao) return false;
+            if (situacao === 'validos') {
+                if (m.status === 'inativo') return false;
+            } else if (situacao === 'provisoria') {
+                if (!(m.status === 'aprovado' && m.senha_provisoria)) return false;
+            } else if (situacaoMotorista(m) !== situacao) return false;
         }
         if (!termo) return true;
         if (normalizarNomePessoa(m.nome).includes(termo)) return true;
