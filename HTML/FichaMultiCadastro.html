@@ -87,9 +87,9 @@
                 comunicação.
             </p>
             <div class="attention-box">
-                <span class="attention-label">Atenção:</span> tenha em mãos a CNH (frente/verso), o CRLV de cada
-                veículo e, se quiser, o comprovante de residência, digitalizados (PDF/JPG/PNG) no seu celular ou
-                computador. Se não tiver o PDF de algum documento, marque a caixa abaixo dele e preencha os dados.
+                <span class="attention-label">Atenção:</span> tenha em mãos, em PDF, a CNH (frente/verso), o CRLV de cada
+                veículo, o RNTRC e o comprovante de residência. Se não tiver o PDF de algum documento, marque a
+                caixa abaixo dele, preencha os dados e, se quiser, envie uma foto do documento.
             </div>
         </section>
 
@@ -221,9 +221,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-cnh"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-cnh" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-cnh"></div>
                             </div>
@@ -387,9 +387,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-rntrc"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-rntrc" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-rntrc"></div>
                             </div>
@@ -411,13 +411,28 @@
                                     <input type="date" id="pj-val-rntrc">
                                 </div>
                             </div>
+                            <div class="form-row col-2">
+                                <div class="form-group">
+                                    <label for="pj-rntrc-doc">CPF/CNPJ do titular: <span class="required-asterisk">*</span></label>
+                                    <input type="text" id="pj-rntrc-doc" inputmode="numeric" placeholder="CPF ou CNPJ, só números">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pj-rntrc-categoria">Categoria: <span class="required-asterisk">*</span></label>
+                                    <select id="pj-rntrc-categoria">
+                                        <option value="">--- Selecione a escolha ---</option>
+                                        <option value="TAC">TAC – Transportador Autônomo de Cargas</option>
+                                        <option value="ETC">ETC – Empresa de Transporte Rodoviário de Cargas</option>
+                                        <option value="CTC">CTC – Cooperativa de Transporte Rodoviário de Cargas</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="cartao-doc" data-doc="residencia">
                         <div class="cartao-doc-topo">
                             <h4 class="cartao-doc-titulo">Comprovante de Residência</h4>
-                            <span class="etiqueta-doc etiqueta-opcional">Opcional</span>
+                            <span class="etiqueta-doc etiqueta-obrigatorio">Obrigatório</span>
                         </div>
                         <div class="cartao-doc-anexo">
                             <div class="upload-dropzone" data-target="pj-anexo-residencia">
@@ -430,9 +445,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pj-anexo-residencia"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pj-anexo-residencia" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-residencia"></div>
                             </div>
@@ -440,25 +455,24 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pj-sem-pdf-residencia" data-doc="residencia">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o comprovante de residência</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do comprovante de residência</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
-                            <p class="cartao-doc-nota">Opcional: preencha se quiser adiantar a análise.</p>
                             <div class="form-group mb-2">
-                                <label for="pj-mot-endereco">Endereço:</label>
+                                <label for="pj-mot-endereco">Endereço: <span class="required-asterisk">*</span></label>
                                 <input type="text" id="pj-mot-endereco">
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
-                                    <label for="pj-mot-estado">Estado:</label>
+                                    <label for="pj-mot-estado">Estado: <span class="required-asterisk">*</span></label>
                                     <select id="pj-mot-estado" data-cidade="pj-mot-cidade"></select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pj-mot-cidade">Cidade:</label>
+                                    <label for="pj-mot-cidade">Cidade: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pj-mot-cidade">
                                 </div>
                                 <div class="form-group">
-                                    <label for="pj-mot-cep">CEP:</label>
+                                    <label for="pj-mot-cep">CEP: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pj-mot-cep" placeholder="00000-000">
                                 </div>
                             </div>
@@ -600,9 +614,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-cnh"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-cnh" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-cnh"></div>
                             </div>
@@ -766,9 +780,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-rntrc"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-rntrc" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-rntrc"></div>
                             </div>
@@ -790,13 +804,28 @@
                                     <input type="date" id="pf-val-rntrc">
                                 </div>
                             </div>
+                            <div class="form-row col-2">
+                                <div class="form-group">
+                                    <label for="pf-rntrc-doc">CPF/CNPJ do titular: <span class="required-asterisk">*</span></label>
+                                    <input type="text" id="pf-rntrc-doc" inputmode="numeric" placeholder="CPF ou CNPJ, só números">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pf-rntrc-categoria">Categoria: <span class="required-asterisk">*</span></label>
+                                    <select id="pf-rntrc-categoria">
+                                        <option value="">--- Selecione a escolha ---</option>
+                                        <option value="TAC">TAC – Transportador Autônomo de Cargas</option>
+                                        <option value="ETC">ETC – Empresa de Transporte Rodoviário de Cargas</option>
+                                        <option value="CTC">CTC – Cooperativa de Transporte Rodoviário de Cargas</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="cartao-doc" data-doc="residencia">
                         <div class="cartao-doc-topo">
                             <h4 class="cartao-doc-titulo">Comprovante de Residência</h4>
-                            <span class="etiqueta-doc etiqueta-opcional">Opcional</span>
+                            <span class="etiqueta-doc etiqueta-obrigatorio">Obrigatório</span>
                         </div>
                         <div class="cartao-doc-anexo">
                             <div class="upload-dropzone" data-target="pf-anexo-residencia">
@@ -809,9 +838,9 @@
                                     </svg>
                                     <span class="upload-text">Drag & Drop Files, <label for="pf-anexo-residencia"
                                             class="upload-action-link">Choose Files to Upload</label></span>
-                                    <span class="upload-subtext">PDF, PNG ou JPG, até 10 MB. Você pode enviar até 3 arquivos.</span>
+                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
                                     <input type="file" id="pf-anexo-residencia" class="file-input-hidden" multiple
-                                        accept=".pdf,.jpg,.jpeg,.png">
+                                        accept="application/pdf,.pdf">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-residencia"></div>
                             </div>
@@ -819,25 +848,24 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pf-sem-pdf-residencia" data-doc="residencia">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o comprovante de residência</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do comprovante de residência</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
-                            <p class="cartao-doc-nota">Opcional: preencha se quiser adiantar a análise.</p>
                             <div class="form-group mb-2">
-                                <label for="pf-mot-endereco">Endereço:</label>
+                                <label for="pf-mot-endereco">Endereço: <span class="required-asterisk">*</span></label>
                                 <input type="text" id="pf-mot-endereco">
                             </div>
                             <div class="form-row col-3">
                                 <div class="form-group">
-                                    <label for="pf-mot-estado">Estado:</label>
+                                    <label for="pf-mot-estado">Estado: <span class="required-asterisk">*</span></label>
                                     <select id="pf-mot-estado" data-cidade="pf-mot-cidade"></select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pf-mot-cidade">Cidade:</label>
+                                    <label for="pf-mot-cidade">Cidade: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pf-mot-cidade">
                                 </div>
                                 <div class="form-group">
-                                    <label for="pf-mot-cep">CEP:</label>
+                                    <label for="pf-mot-cep">CEP: <span class="required-asterisk">*</span></label>
                                     <input type="text" id="pf-mot-cep" placeholder="00000-000">
                                 </div>
                             </div>

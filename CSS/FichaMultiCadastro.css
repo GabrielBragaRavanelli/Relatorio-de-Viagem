@@ -1248,6 +1248,55 @@ footer {
     display: none;
 }
 
+/* Erro de um campo, logo abaixo dele (ex.: CPF/CNPJ do titular do RNTRC) */
+.aviso-campo {
+    display: block;
+    margin-top: 4px;
+    color: #b91c1c;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.aviso-campo[hidden] {
+    display: none;
+}
+
+/* Foto do documento (opcional), no topo do formulário "Não tenho o PDF" */
+.campo-foto-doc {
+    margin-bottom: 18px;
+}
+
+.rotulo-foto {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cinza-escuro);
+    margin-bottom: 7px;
+}
+
+.campo-foto-doc .cartao-doc-nota {
+    margin: 6px 0 0;
+}
+
+.upload-dropzone[data-processando] {
+    cursor: progress;
+    opacity: 0.75;
+}
+
+.file-preview-miniatura {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--azul-ajborges-claro);
+    background: var(--branco);
+    flex-shrink: 0;
+}
+
+.file-preview-nome {
+    overflow-wrap: anywhere;
+}
+
 /* Caixinha "Não tenho o PDF": input nativo escondido + quadrado personalizado */
 .caixa-sem-pdf {
     display: inline-flex;
