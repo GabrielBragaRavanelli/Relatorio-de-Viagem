@@ -341,9 +341,16 @@ const nomeCrlv = (papel: string) =>
 
 const MAX_ARQUIVOS = 3;
 
-// O anexo principal é só PDF; a foto vai junto do formulário ("não tenho o PDF").
+// O anexo principal aceita PDF, JPG ou PNG (podendo misturar).
 const TIPOS_PDF = ["application/pdf"];
 const TIPOS_FOTO = ["image/png", "image/jpeg"];
+
+// Extensão do arquivo no Storage pelo tipo (a primeira é a acrescentada)
+const EXTENSOES: Record<string, string[]> = {
+  "application/pdf": [".pdf"],
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+};
 
 const TAMANHO_MAX = 10 * 1024 * 1024;
 
@@ -416,6 +423,16 @@ function nomeArquivoSeguro(nome: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9._-]/g, "_")
     .slice(-80) || "arquivo";
+}
+
+function nomeComExtensao(nome: string, tipo: string): string {
+  const extensoes = EXTENSOES[tipo];
+
+  if (!extensoes || extensoes.some((e) => nome.toLowerCase().endsWith(e))) {
+    return nome;
+  }
+
+  return `${nome}${extensoes[0]}`;
 }
 
 function objetoValido(
@@ -603,13 +620,6 @@ Deno.serve(async (req: Request) => {
       semPdf[campo] = semPdfBruto[campo] === true;
     }
 
-    // Fotos opcionais: "{campo}_foto" → documento principal.
-    const fotosDoEnvio: Record<string, string> = {};
-
-    for (const campo of Object.keys(documentosDoEnvio)) {
-      fotosDoEnvio[`${campo}_foto`] = campo;
-    }
-
     // ---------- Campos permitidos ----------
 
     const camposDoc: Record<string, string[]> = {
@@ -683,10 +693,15 @@ Deno.serve(async (req: Request) => {
     }[] = [];
 
     for (const [campo, lista] of Object.entries(docsBrutos)) {
-      const ehFoto = Object.hasOwn(fotosDoEnvio, campo);
+      // As fotos vão na chave do próprio documento; "{campo}_foto" não é mais aceito.
+      if (/_foto$/.test(campo)) {
+        return resp(req, 400, {
+          erro: "Documento inválido.",
+        });
+      }
 
       if (
-        (!Object.hasOwn(documentosDoEnvio, campo) && !ehFoto) ||
+        !Object.hasOwn(documentosDoEnvio, campo) ||
         !Array.isArray(lista)
       ) {
         return resp(req, 400, {
@@ -696,18 +711,9 @@ Deno.serve(async (req: Request) => {
 
       if (lista.length === 0) continue;
 
-      const principal = ehFoto ? fotosDoEnvio[campo] : campo;
-      const nomeDoc = documentosDoEnvio[principal];
+      const nomeDoc = documentosDoEnvio[campo];
 
-      if (ehFoto && !semPdf[principal]) {
-        return resp(req, 400, {
-          erro: `A foto ${
-            comDe(nomeDoc)
-          } só pode ser enviada quando você marca "não tenho o PDF".`,
-        });
-      }
-
-      if (!ehFoto && semPdf[campo]) {
+      if (semPdf[campo]) {
         return resp(req, 400, {
           erro: `Você marcou "não tenho o PDF" para ${nomeDoc}, mas anexou um arquivo. Desmarque a caixa ou remova o anexo.`,
         });
@@ -715,9 +721,7 @@ Deno.serve(async (req: Request) => {
 
       if (lista.length > MAX_ARQUIVOS) {
         return resp(req, 400, {
-          erro: `Envie no máximo ${MAX_ARQUIVOS} ${
-            ehFoto ? "fotos" : "arquivos"
-          } para ${nomeDoc}.`,
+          erro: `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${nomeDoc}.`,
         });
       }
 
@@ -731,17 +735,9 @@ Deno.serve(async (req: Request) => {
         const tipoArq = String(documento.tipo ?? "");
         const tamanho = Number(documento.tamanho ?? 0);
 
-        if (ehFoto && !TIPOS_FOTO.includes(tipoArq)) {
+        if (!TIPOS_PDF.includes(tipoArq) && !TIPOS_FOTO.includes(tipoArq)) {
           return resp(req, 400, {
-            erro: `A foto ${comDe(nomeDoc)} precisa ser PNG ou JPG.`,
-          });
-        }
-
-        if (!ehFoto && !TIPOS_PDF.includes(tipoArq)) {
-          return resp(req, 400, {
-            erro: `O anexo ${
-              comDe(nomeDoc)
-            } precisa ser PDF. Se tiver só a foto, marque 'Não tenho o PDF' e envie a foto no formulário.`,
+            erro: `O anexo ${comDe(nomeDoc)} precisa ser PDF, JPG ou PNG.`,
           });
         }
 
@@ -784,7 +780,7 @@ Deno.serve(async (req: Request) => {
         return resp(req, 400, {
           erro: `Anexe ${
             documentosDoEnvio[campo]
-          } ou marque que não tem o PDF.`,
+          } ou marque que não tem o PDF nem a foto.`,
         });
       }
     }
@@ -991,7 +987,7 @@ Deno.serve(async (req: Request) => {
 
       const path = `terceiros/${cad.id}/${documento.campo}_${
         i + 1
-      }_${nomeArquivoSeguro(documento.nome)}`;
+      }_${nomeComExtensao(nomeArquivoSeguro(documento.nome), documento.tipo)}`;
 
       const { data: assinado, error: erroUrl } = await admin.storage
         .from("documentos-cadastro")
