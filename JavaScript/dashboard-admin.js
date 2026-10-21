@@ -81,10 +81,26 @@ const ehArla = (a) => !!a && a.combustivel === 'arla';
 const listaAbastecimentos = (f) => (Array.isArray(f && f.abastecimentos) ? f.abastecimentos.filter(Boolean) : []);
 const valorAbastecimento = (a) => parseValorMoeda(a.valor || a.total || 0);
 
+// Litros de um abastecimento, com a mesma regra da ficha (parseLitros em relatorio.js):
+// com vírgula, ela é o decimal ("150,5"); sem vírgula, o ponto é milhar ("1.000" = 1000 L).
+// (parseValorMoeda leria "1.000" como 1 L.)
+function parseLitrosAbast(valor) {
+    if (typeof valor === 'number') return isNaN(valor) ? 0 : valor;
+    const s = String(valor ?? '').trim();
+    if (!s) return 0;
+    if (s.includes(',')) {
+        const [inteiro, ...decimais] = s.split(',');
+        const n = parseFloat((inteiro.replace(/\D/g, '') || '0') + '.' + (decimais.join('').replace(/\D/g, '') || '0'));
+        return isNaN(n) ? 0 : n;
+    }
+    const n = parseInt(s.replace(/\D/g, ''), 10);
+    return isNaN(n) ? 0 : n;
+}
+
 // Litros de diesel da ficha (sem ARLA). Sem a lista, usa o total gravado.
 function litrosDieselDaFicha(f) {
     const abasts = listaAbastecimentos(f);
-    if (abasts.length > 0) return abasts.reduce((acc, a) => acc + (ehArla(a) ? 0 : parseValorMoeda(a.litros || 0)), 0);
+    if (abasts.length > 0) return abasts.reduce((acc, a) => acc + (ehArla(a) ? 0 : parseLitrosAbast(a.litros)), 0);
     return parseValorMoeda(f.totalLitros || f.total_litros || 0);
 }
 
@@ -110,6 +126,26 @@ function kmTrechosDaFicha(f) {
     return { total: total || principal + secundaria, principal, secundaria };
 }
 
+// Média de cada placa (ficha com placa secundária): KM do trecho daquela placa ÷ litros de
+// diesel das linhas de abastecimento marcadas com ela (ARLA fora). Mesma regra da ficha e
+// das Análises "Por placa". Sem base (KM ou litros zerados) a média é null ("—").
+function mediasPorPlacaDaFicha(f) {
+    const km = kmTrechosDaFicha(f);
+    const litros = { principal: 0, secundaria: 0 };
+    listaAbastecimentos(f).forEach(a => {
+        if (!ehArla(a)) litros[a.placa === 'secundaria' ? 'secundaria' : 'principal'] += parseLitrosAbast(a.litros);
+    });
+    const parte = (qual) => ({
+        km: km[qual], litros: litros[qual],
+        media: (km[qual] > 0 && litros[qual] > 0) ? km[qual] / litros[qual] : null
+    });
+    return { principal: parte('principal'), secundaria: parte('secundaria') };
+}
+
+// Média da viagem toda: (KM do trecho 1 + KM do trecho 2) ÷ litros de todas as linhas de diesel.
+// Usada no ranking por motorista, no alerta de "menor média" e no gráfico de consumo.
+// Com placa secundária isso é o mesmo que juntar as médias das duas placas pelo peso de cada
+// uma ((km1 + km2) ÷ (l1 + l2)), então fica coerente com a média por placa da ficha.
 function obterMediaRealFicha(f) {
     if (!f) return { valorNum: 0, texto: '0.00' };
 
@@ -266,7 +302,7 @@ function formatarPlacaExibicao(valor) {
 // (placa secundária em dados_completos.placaSecundaria). Nas Análises, KM e abastecimentos
 // de cada trecho vão para a placa certa (ver partesPorPlacaAnalise).
 function placasDaFicha(f, vazio = '') {
-    const principal = String(f.placas || '').trim();
+    const principal = formatarPlacaExibicao(f.placas);
     const secundaria = formatarPlacaExibicao(f.placaSecundaria);
     if (!principal && !secundaria) return vazio;
     return secundaria ? `${principal || '—'} / ${secundaria}` : principal;
@@ -1032,9 +1068,10 @@ function abrirModalResumoFicha(fichaId) {
 
         // Combustível e placa de cada abastecimento (placa só quando há placa secundária)
         const placaSecModal = placaSecundariaDaFicha(ficha);
+        const placaPrincipalModal = formatarPlacaExibicao(ficha.placas);
         const placaDoAbast = (ab) => ab.placa === 'secundaria'
             ? `Secundária (${formatarPlacaExibicao(placaSecModal)})`
-            : (String(ficha.placas || '').trim() || 'Principal');
+            : (placaPrincipalModal ? `Principal (${placaPrincipalModal})` : 'Principal');
         let abastHtml = '';
         if (ficha.abastecimentos && ficha.abastecimentos.length > 0) {
             abastHtml = ficha.abastecimentos.map(ab => `
@@ -1059,13 +1096,24 @@ function abrirModalResumoFicha(fichaId) {
             return isNaN(n) ? '-' : n.toLocaleString('pt-BR');
         };
         const kmLinhasHtml = placaSecModal ? `
-                    <div class="modal-info-linha"><span>KM Saída / Entrada (principal):</span> <strong>${kmTxtModal(ficha.kmSaida)} / ${kmTxtModal(ficha.kmEntrada ?? ficha.kmChegada)}</strong></div>
+                    <div class="modal-info-linha"><span>KM Saída / Chegada (principal):</span> <strong>${kmTxtModal(ficha.kmSaida)} / ${kmTxtModal(ficha.kmEntrada ?? ficha.kmChegada)}</strong></div>
                     <div class="modal-info-linha"><span>Placa secundária:</span> <strong>${escaparHtml(formatarPlacaExibicao(placaSecModal))}</strong></div>
-                    <div class="modal-info-linha"><span>KM Saída / Entrada (secundária):</span> <strong>${kmTxtModal(ficha.kmSaida2)} / ${kmTxtModal(ficha.kmEntrada2)}</strong></div>
+                    <div class="modal-info-linha"><span>KM Saída / Chegada (secundária):</span> <strong>${kmTxtModal(ficha.kmSaida2)} / ${kmTxtModal(ficha.kmEntrada2)}</strong></div>
                     <div class="modal-info-linha"><span>KM principal + secundária:</span> <strong>${kmModal.principal.toLocaleString('pt-BR')} + ${kmModal.secundaria.toLocaleString('pt-BR')} km</strong></div>
                     <div class="modal-info-linha"><span>KM Total da Viagem:</span> <strong>${kmModal.total.toLocaleString('pt-BR')} km</strong></div>` : `
-                    <div class="modal-info-linha"><span>KM Saída / Entrada:</span> <strong>${kmTxtModal(ficha.kmSaida)} / ${kmTxtModal(ficha.kmEntrada ?? ficha.kmChegada)}</strong></div>
+                    <div class="modal-info-linha"><span>KM Saída / Chegada:</span> <strong>${kmTxtModal(ficha.kmSaida)} / ${kmTxtModal(ficha.kmEntrada ?? ficha.kmChegada)}</strong></div>
                     <div class="modal-info-linha"><span>KM Total Rodado:</span> <strong>${kmModal.total.toLocaleString('pt-BR')} km</strong></div>`;
+
+        // Média: com placa secundária, uma linha por placa (km do trecho ÷ diesel da placa)
+        const mediaPorPlacaModal = (rotulo, p) => `
+                    <div class="modal-info-linha"><span>Média Consumo Diesel (${escaparHtml(rotulo)}):</span> <strong style="color: #047857;">${p.media === null ? '—'
+                        : `${p.media.toFixed(2)} km/l <small>(${p.km.toLocaleString('pt-BR')} km ÷ ${p.litros.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L)</small>`}</strong></div>`;
+        const mediasModal = placaSecModal ? mediasPorPlacaDaFicha(ficha) : null;
+        const mediaLinhasHtml = mediasModal
+            ? mediaPorPlacaModal(placaPrincipalModal || 'principal', mediasModal.principal) +
+              mediaPorPlacaModal(formatarPlacaExibicao(placaSecModal), mediasModal.secundaria)
+            : `
+                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${obterMediaRealFicha(ficha).texto} km/l</strong></div>`;
 
         let anexosHtml = '';
         if (ficha.anexos && ficha.anexos.length > 0) {
@@ -1090,7 +1138,7 @@ function abrirModalResumoFicha(fichaId) {
                     <div class="modal-info-linha"><span>Data Envio:</span> <strong>${ficha.dataEnvio || '-'}</strong></div>
                     <div class="modal-info-linha"><span>Período:</span> <strong>${ficha.dataSaida || '-'} até ${ficha.dataChegada || '-'}</strong></div>
                     ${kmLinhasHtml}
-                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${obterMediaRealFicha(ficha).texto} km/l</strong></div>
+                    ${mediaLinhasHtml}
                 </div>
                 <div class="modal-info-box">
                     <div class="modal-info-box-title">Fechamento Financeiro</div>
@@ -2131,7 +2179,7 @@ function renderizarTabelaCombustivel() {
 
     tbodyCombustivel.innerHTML = abastFiltrados.map(ab => {
         const v = parseValorMoeda(ab.valor);
-        const l = parseValorMoeda(ab.litros);
+        const l = parseLitrosAbast(ab.litros);
         const precoL = l > 0 ? (v / l).toFixed(2).replace('.', ',') : '0,00';
         return `
             <tr>
@@ -2223,7 +2271,8 @@ function obterValoresFichaAnalise(f) {
  * vão para a placa certa; receita, comissão, pedágio, imposto e outras ficam na principal.
  */
 function partesPorPlacaAnalise({ ficha, v }) {
-    const principal = (ficha.placas || '').trim() || 'Placa não informada';
+    // ABC1D23 (motorista) e ABC-1D23 (gestão) são a mesma placa
+    const principal = formatarPlacaExibicao(ficha.placas) || 'Placa não informada';
     const secundaria = placaSecundariaDaFicha(ficha);
     if (!secundaria) return [{ placa: principal, v }];
 
@@ -2232,7 +2281,7 @@ function partesPorPlacaAnalise({ ficha, v }) {
     listaAbastecimentos(ficha).forEach(a => {
         const c = comb[a.placa === 'secundaria' ? 'secundaria' : 'principal'];
         if (ehArla(a)) c.arla += valorAbastecimento(a);
-        else { c.diesel += valorAbastecimento(a); c.litros += parseValorMoeda(a.litros || 0); }
+        else { c.diesel += valorAbastecimento(a); c.litros += parseLitrosAbast(a.litros); }
     });
 
     const despesasPrincipal = comb.principal.diesel + comb.principal.arla + v.pedagio + v.imposto + v.outras;
@@ -2734,7 +2783,7 @@ function renderizarAnalises() {
             const chave = normalizarNomePessoa(nome);
             const p = porPosto[chave] = porPosto[chave] || { nome, abastecimentos: 0, litros: 0, valor: 0 };
             p.abastecimentos += 1;
-            p.litros += parseValorMoeda(ab.litros);
+            p.litros += parseLitrosAbast(ab.litros);
             p.valor += parseValorMoeda(ab.valor || ab.total);
         });
     });
@@ -2767,7 +2816,7 @@ function renderizarAnalises() {
         listaAbastecimentos(ficha).forEach(ab => {
             const c = porCombustivel[ROTULOS_COMBUSTIVEL[ab.combustivel] ? ab.combustivel : 'sem'];
             c.qtd += 1;
-            c.litros += parseValorMoeda(ab.litros);
+            c.litros += parseLitrosAbast(ab.litros);
             c.valor += valorAbastecimento(ab);
         });
     });
