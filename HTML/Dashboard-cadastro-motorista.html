@@ -938,7 +938,19 @@
 
         // ---------- Arquivos: sempre por link assinado de curta duração (bucket privado) ----------
         const BUCKET_DOCS = 'documentos-cadastro';
+        // Cadastros antigos: foto em "{doc}_foto". Novos: a foto vem no anexo principal (PDF, JPG ou PNG).
         const ehFotoDoc = (doc) => /_foto$/.test(String(doc.campo || ''));
+        const TIPOS_IMAGEM = ['image/png', 'image/jpeg'];
+        const ehImagemDoc = (doc) => TIPOS_IMAGEM.includes(doc.tipo) || /\.(jpe?g|png)$/i.test(String(doc.path || doc.nome || ''));
+        // "Anexado: 2 fotos + 1 PDF"
+        function descreverAnexos(lista) {
+            const fotos = lista.filter(ehImagemDoc).length;
+            const pdfs = lista.length - fotos;
+            const partes = [];
+            if (fotos) partes.push(`${fotos} ${fotos === 1 ? 'foto' : 'fotos'}`);
+            if (pdfs) partes.push(`${pdfs} ${pdfs === 1 ? 'PDF' : 'PDFs'}`);
+            return `Anexado: ${partes.join(' + ')}`;
+        }
 
         async function linkAssinado(caminho, segundos = 600, download) {
             const { data, error } = await window.supabaseClient.storage.from(BUCKET_DOCS)
@@ -962,10 +974,13 @@
             window.open(url, '_blank', 'noopener');
         }
 
+        // Pelo tipo quando é PDF/JPG/PNG (o nome pode vir sem extensão); senão, pelo nome
         function extensaoDe(doc) {
+            const peloTipo = { 'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg' }[doc.tipo];
+            if (peloTipo) return peloTipo;
             const m = /\.([a-z0-9]{2,4})$/i.exec(String(doc.nome || doc.path || ''));
             if (m) return m[1].toLowerCase().replace('jpeg', 'jpg');
-            return doc.tipo === 'application/pdf' ? 'pdf' : doc.tipo === 'image/png' ? 'png' : 'jpg';
+            return 'jpg';
         }
 
         // Nomes legíveis por caminho: CNH_1.pdf, CRLV_do_Cavalo_foto_1.jpg, Extra_Consulta_GR_1.pdf
@@ -1070,7 +1085,7 @@
             const arquivos = (lista) => (lista.length ? `<ul>${lista.map((x) =>
                 `<li>${esc(nomes[x.path] || x.nome)} <small>(enviado como "${esc(x.nome)}")${enviados.has(x.path) ? '' : ' — não chegou a ser enviado'}</small></li>`).join('')}</ul>` : '');
             const fotos = (lista) => {
-                const comFoto = lista.filter((x) => srcFoto(x));
+                const comFoto = lista.filter((x) => ehImagemDoc(x) && srcFoto(x));
                 if (!comFoto.length) return '';
                 return `<div class="fotos"><div class="fotos-titulo">Foto enviada pelo motorista</div>${comFoto.map((x) =>
                     `<figure><img src="${esc(srcFoto(x))}" alt=""><figcaption>${esc(nomes[x.path])}</figcaption></figure>`).join('')}</div>`;
@@ -1087,10 +1102,10 @@
                         const anexos = docs.filter((x) => x.campo === doc);
                         const fotosDoc = docs.filter((x) => x.campo === `${doc}_foto`);
                         const preenchido = semPdf[doc] === true;
-                        const situacao = anexos.length ? 'Anexado (PDF)'
+                        const situacao = anexos.length ? descreverAnexos(anexos)
                             : preenchido ? `Preenchido pelo motorista${fotosDoc.length ? ` + ${fotosDoc.length} foto(s)` : ''}`
                             : 'Não enviado';
-                        return secao(titulo, (preenchido ? tabelaCampos(campos) : '') + arquivos(anexos) + arquivos(fotosDoc) + fotos(fotosDoc), situacao);
+                        return secao(titulo, (preenchido ? tabelaCampos(campos) : '') + arquivos(anexos) + fotos(anexos) + arquivos(fotosDoc) + fotos(fotosDoc), situacao);
                     }).join('');
             } else {
                 const principais = docs.filter((x) => x.campo !== 'extra');
@@ -1152,7 +1167,7 @@ ${secao('Documentos extras', listaExtras)}
             try {
                 const enviados = await listarArquivosEnviados(c);
                 const docs = Array.isArray(c.documentos) ? c.documentos : [];
-                const links = await linksAssinados(docs.filter((x) => ehFotoDoc(x) && enviados.has(x.path)).map((x) => x.path), 600);
+                const links = await linksAssinados(docs.filter((x) => x.campo !== 'extra' && ehImagemDoc(x) && enviados.has(x.path)).map((x) => x.path), 600);
                 if (janela.closed) return;
                 janela.document.open();
                 janela.document.write(fichaHtml(c, { enviados, nomes: nomesLegiveis(c), srcFoto: (x) => links[x.path] || null, imprimir: true }));
@@ -1495,12 +1510,8 @@ ${secao('Documentos extras', listaExtras)}
             };
 
             if (novo) {
-                document.querySelectorAll('#modal-body-content [data-docs-de]').forEach((el) => {
-                    el.innerHTML = docs.filter((x) => x.campo === el.getAttribute('data-docs-de')).map(itemDoc).join('');
-                });
-
-                // Fotos enviadas com "Não tenho o PDF": miniaturas por link assinado
-                const fotos = docs.filter((x) => ehFotoDoc(x) && enviados.has(x.path));
+                // Fotos (no anexo principal ou, nos cadastros antigos, em "{doc}_foto"): miniaturas por link assinado
+                const fotos = docs.filter((x) => x.campo !== 'extra' && ehImagemDoc(x) && enviados.has(x.path));
                 const links = await linksAssinados(fotos.map((x) => x.path), 600);
                 if (cadastroAberto !== id) return;
                 const nomes = nomesLegiveis(c);
@@ -1512,6 +1523,13 @@ ${secao('Documentos extras', listaExtras)}
                         <button type="button" class="btn-action-small" data-acao="baixar-doc" data-caminho="${esc(doc.path)}">Baixar</button>
                     </div>`
                     : '<div class="cad-doc cad-doc-faltando"><em>Foto não chegou a ser enviada</em></div>');
+                // Anexo principal: PDF abre como antes; foto vira miniatura com lightbox
+                document.querySelectorAll('#modal-body-content [data-docs-de]').forEach((el) => {
+                    const lista = docs.filter((x) => x.campo === el.getAttribute('data-docs-de'));
+                    const fotosAnexo = lista.filter(ehImagemDoc);
+                    el.innerHTML = lista.filter((x) => !ehImagemDoc(x)).map(itemDoc).join('') +
+                        (fotosAnexo.length ? `<div class="cad-fotos-grade">${fotosAnexo.map(itemFoto).join('')}</div>` : '');
+                });
                 document.querySelectorAll('#modal-body-content [data-fotos-de]').forEach((el) => {
                     const lista = docs.filter((x) => x.campo === `${el.getAttribute('data-fotos-de')}_foto`);
                     el.innerHTML = `<div class="cad-fotos-titulo">Foto enviada pelo motorista</div>
