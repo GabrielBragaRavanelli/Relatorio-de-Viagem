@@ -21,8 +21,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
     }
     window.ajbAuth.vigiarSessao('Login.html');
-    // Frota com senha provisória: aviso para cadastrar e-mail e criar senha própria
-    if (window.ajbSenhaFrota) window.ajbSenhaFrota.iniciar(usuarioSessao);
 
     // Elementos do Formulário
     const form = document.getElementById('form-relatorio');

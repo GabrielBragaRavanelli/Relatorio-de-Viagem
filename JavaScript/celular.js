@@ -48,7 +48,7 @@
 
     // 2. Erros perto do campo
     function blocoDoCampo(el) {
-        return el.closest('.form-group, .campo-grupo, .subfield-group, .msf-campo, .caixa-sem-pdf, .linha-despesa-item, td') ||
+        return el.closest('.form-group, .campo-grupo, .subfield-group, .caixa-sem-pdf, .linha-despesa-item, td') ||
             el.parentElement;
     }
 
