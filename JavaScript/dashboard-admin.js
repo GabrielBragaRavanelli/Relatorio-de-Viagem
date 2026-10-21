@@ -3515,25 +3515,16 @@ async function carregarAbaMotoristas() {
 
 // ---------------- Aba Frota ----------------
 
-function situacaoMotorista(m) {
-    if (m.status === 'inativo') return 'inativo';
-    if (m.senha_provisoria) return 'provisoria';
-    return 'trocou';
-}
-
 function seloSituacaoMotorista(m) {
     if (m.status === 'inativo') return '<span class="status-pill mot-selo-inativo">Inativo</span>';
     if (m.status !== 'aprovado') return `<span class="status-pill mot-selo-inativo">${escaparHtml(m.status)}</span>`;
-    if (m.senha_provisoria) return '<span class="status-pill mot-selo-provisoria">Senha provisória</span>';
     return '<span class="status-pill status-concluido">Ativo</span>';
 }
 
 function renderizarFrota() {
     const lista = estadoMotoristas.frota;
-    const ativos = lista.filter(m => m.status === 'aprovado');
-    // "Válidos (ativos)": todos que não foram desativados, tenham trocado a senha ou não
+    // "Válidos (ativos)": todos que não foram desativados
     const validos = lista.filter(m => m.status !== 'inativo');
-    const naoTrocaram = ativos.filter(m => m.senha_provisoria);
     const semEmail = lista.filter(m => !m.tem_email);
     const inativos = lista.filter(m => m.status === 'inativo');
 
@@ -3545,8 +3536,6 @@ function renderizarFrota() {
         const cards = [
             { classe: 'card-frota-kpi', rotulo: 'Motoristas da frota', valor: lista.length },
             { classe: 'card-entrada', rotulo: 'Ativos', valor: validos.length, nota: 'Clique para filtrar', filtro: 'validos' },
-            { classe: 'card-saida mot-kpi-alerta', rotulo: 'Ainda não trocaram a senha', valor: naoTrocaram.length,
-                nota: 'Clique para filtrar', filtro: 'provisoria' },
             { classe: 'card-frota-kpi', rotulo: 'Sem e-mail', valor: semEmail.length },
             { classe: 'card-resultado', rotulo: 'Inativos', valor: inativos.length, filtro: 'inativo' }
         ];
@@ -3564,13 +3553,8 @@ function renderizarFrota() {
     const situacao = document.getElementById('mot-filtro-situacao')?.value || '';
 
     const filtrados = lista.filter(m => {
-        if (situacao) {
-            if (situacao === 'validos') {
-                if (m.status === 'inativo') return false;
-            } else if (situacao === 'provisoria') {
-                if (!(m.status === 'aprovado' && m.senha_provisoria)) return false;
-            } else if (situacaoMotorista(m) !== situacao) return false;
-        }
+        if (situacao === 'validos' && m.status === 'inativo') return false;
+        if (situacao === 'inativo' && m.status !== 'inativo') return false;
         if (!termo) return true;
         if (normalizarNomePessoa(m.nome).includes(termo)) return true;
         return termoDigitos.length >= 3 &&
@@ -3604,7 +3588,7 @@ function renderizarFrota() {
                 <td class="mot-nowrap">${m.ultimo_acesso ? escaparHtml(dataHoraBR(m.ultimo_acesso)) : '<span class="mot-texto-cinza">nunca entrou</span>'}</td>
                 <td>
                     <div class="table-actions-cell">
-                        <button type="button" class="btn-acao-resumo" data-mot-acao="redefinir_senha" data-id="${id}">Redefinir para senha provisória</button>
+                        <button type="button" class="btn-acao-resumo" data-mot-acao="redefinir_senha" data-id="${id}">Redefinir para a senha padrão</button>
                         ${inativo
                             ? `<button type="button" class="btn-acao-aprovar-rapido" data-mot-acao="reativar" data-id="${id}">Reativar</button>`
                             : `<button type="button" class="btn-acao-excluir" data-mot-acao="desativar" data-id="${id}">Desativar</button>`}
@@ -3620,7 +3604,7 @@ async function executarAcaoMotorista(acao, id) {
     if (!m) return;
     const nome = m.nome || 'este motorista';
     const perguntas = {
-        redefinir_senha: `Redefinir a senha de ${nome}?\n\nA senha volta a ser a provisória: os 6 primeiros dígitos do CPF + @frota. As sessões abertas dele serão encerradas e, no próximo acesso, o site pede para ele criar uma senha própria.`,
+        redefinir_senha: `Redefinir a senha de ${nome}?\n\nA senha volta a ser a padrão: os 6 primeiros dígitos do CPF + @frota. As sessões abertas dele serão encerradas.`,
         desativar: `Desativar ${nome}?\n\nEle deixa de conseguir entrar na ficha de viagem e as sessões abertas são encerradas. Dá para reativar depois.`,
         reativar: `Reativar ${nome}?\n\nEle volta a conseguir entrar na ficha de viagem com a senha atual.`
     };
@@ -3632,38 +3616,12 @@ async function executarAcaoMotorista(acao, id) {
         return;
     }
     const mensagens = {
-        redefinir_senha: 'Senha redefinida para a provisória (6 primeiros dígitos do CPF + @frota).',
+        redefinir_senha: 'Senha redefinida para a padrão (6 primeiros dígitos do CPF + @frota).',
         desativar: 'Motorista desativado.',
         reativar: 'Motorista reativado.'
     };
     exibirToast(mensagens[acao], 'sucesso');
     await carregarAbaMotoristas();
-}
-
-// CSV com nome e celular de quem ainda não trocou a senha (para a gestão cobrar)
-function exportarQuemNaoTrocou() {
-    const lista = estadoMotoristas.frota.filter(m => m.status === 'aprovado' && m.senha_provisoria);
-    if (lista.length === 0) {
-        exibirToast('Todos os motoristas ativos já trocaram a senha.', 'info');
-        return;
-    }
-    // Aspas duplas e proteção contra fórmula (= + - @ no início vira texto)
-    const celula = (v) => {
-        let s = String(v ?? '');
-        if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-        return `"${s.replace(/"/g, '""')}"`;
-    };
-    const linhas = [['Nome', 'Celular'], ...lista.map(m => [m.nome || '', formatarCelularBR(m.telefone)])];
-    const csv = '﻿' + linhas.map(l => l.map(celula).join(';')).join('\r\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `frota-nao-trocou-senha-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ---------------- Aba Terceiros e agregados ----------------
@@ -3802,8 +3760,8 @@ async function salvarMotoristaFrota() {
     if (email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith(DOMINIO_SEM_EMAIL))) {
         return mostrarAlertaMot('mot-add-alerta', 'E-mail inválido. Corrija ou deixe em branco.');
     }
-    if (!senha) return mostrarAlertaMot('mot-add-alerta', 'Informe a senha inicial ou use a senha padrão.');
-    const ehPadrao = senha === senhaPadraoFrota(cpf);
+    // Em branco = senha padrão
+    const ehPadrao = !senha || senha === senhaPadraoFrota(cpf);
     if (!ehPadrao && window.ajbSenha) {
         const problema = window.ajbSenha.erro(senha, cpf);
         if (problema) return mostrarAlertaMot('mot-add-alerta', `Senha fora da regra: ${problema}`);
@@ -4063,7 +4021,6 @@ function inicializarAbaMotoristas() {
         if (btn) executarAcaoMotorista(btn.getAttribute('data-mot-acao'), btn.getAttribute('data-id'));
     });
 
-    document.getElementById('mot-btn-exportar')?.addEventListener('click', exportarQuemNaoTrocou);
     document.getElementById('mot-btn-adicionar')?.addEventListener('click', () => {
         limparFormularioMotorista();
         abrirModalMotoristas('modal-mot-adicionar');

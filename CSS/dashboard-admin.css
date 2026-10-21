@@ -2573,7 +2573,7 @@ body.admin-body {
 }
 
 .mot-kpi-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .mot-kpi-clicavel {
@@ -2583,16 +2583,6 @@ body.admin-body {
 .mot-kpi-clicavel:focus-visible {
     outline: 3px solid var(--aj-azul-glow);
     outline-offset: 2px;
-}
-
-/* "Ainda não trocaram a senha" em destaque laranja */
-.mot-kpi-alerta {
-    background: linear-gradient(180deg, #fff7ed 0%, #ffffff 70%);
-    border-color: #fed7aa;
-}
-
-.mot-kpi-alerta .kpi-value {
-    color: #c2410c;
 }
 
 .mot-toolbar {
@@ -2650,12 +2640,6 @@ body.admin-body {
 .mot-texto-cinza {
     color: var(--cor-texto-claro);
     font-style: italic;
-}
-
-.mot-selo-provisoria {
-    background-color: #fff7ed;
-    color: #c2410c;
-    border: 1px solid #fed7aa;
 }
 
 .mot-selo-inativo {
@@ -2960,7 +2944,7 @@ body.admin-body {
 
 @media (max-width: 1280px) {
     .mot-kpi-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
