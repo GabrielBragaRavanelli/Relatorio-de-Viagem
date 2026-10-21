@@ -58,6 +58,28 @@ function usuarioEhGestao() {
 }
 
 const digitosKmFicha = (valor) => String(valor ?? '').replace(/\D/g, '');
+const limparPlacaFicha = (valor) => String(valor || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+// Placa principal para gravar: o motorista manda limpa (ABC1D23), como o banco grava (passo 12);
+// a gestão grava como digitou
+function placaPrincipalParaGravar(ficha, gestao) {
+    const placa = ficha.placas ?? ficha.dados_completos?.placas;
+    if (gestao) return placa || null;
+    return limparPlacaFicha(placa) || null;
+}
+
+// Placa principal para exibir: ABC1D23 e ABC-1D23 viram ABC-1D23 (fichas da gestão e do motorista juntas)
+function placaPrincipalParaExibir(valor) {
+    const limpo = limparPlacaFicha(valor);
+    return limpo.length === 7 ? `${limpo.slice(0, 3)}-${limpo.slice(3)}` : (valor || '');
+}
+
+// Média em km/l com ponto ou vírgula decimal ("2.50", "2,50" ou 2.5); sem média = null
+function parseMediaKmL(val) {
+    if (typeof val === 'number') return isFinite(val) && val > 0 ? val : null;
+    const n = parseFloat(String(val ?? '').replace(',', '.'));
+    return isFinite(n) && n > 0 ? n : null;
+}
 
 // Abastecimento com combustivel e placa só dos valores aceitos (vazio = ficha antiga)
 function normalizarAbastecimento(a) {
@@ -73,10 +95,19 @@ function normalizarAbastecimento(a) {
  * KMs dos dois trechos e placa secundária em dados_completos (sem coluna própria):
  * kmSaida, kmEntrada, placaSecundaria, kmSaida2, kmEntrada2 e, só da gestão,
  * kmTotal1, kmTotal2 e kmTotal. Para o motorista quem calcula os totais é o banco.
+ * Também a placa principal (a mesma da coluna placas) e a média de cada placa
+ * (mediaPrincipal / mediaSecundaria, texto com 2 casas): só para exibição, o
+ * dashboard recalcula pelos KMs e litros.
  * Só entra o que a ficha traz (fichas antigas continuam como estão).
  */
 function comCamposDaViagem(dadosCompletos, ficha, gestao) {
     const dc = { ...dadosCompletos };
+    if (ficha.placas !== undefined) dc.placas = placaPrincipalParaGravar(ficha, gestao) || '';
+    ['mediaPrincipal', 'mediaSecundaria'].forEach((chave) => {
+        if (ficha[chave] === undefined) return;
+        const media = parseMediaKmL(ficha[chave]);
+        dc[chave] = media === null ? '' : media.toFixed(2);
+    });
     ['kmSaida', 'kmEntrada', 'kmSaida2', 'kmEntrada2'].forEach((chave) => {
         if (ficha[chave] !== undefined) dc[chave] = digitosKmFicha(ficha[chave]);
     });
@@ -112,7 +143,7 @@ function mapearFichaParaSupabase(ficha) {
         id: ficha.id,
         motorista: ficha.motorista || 'Motorista',
         motorista_cpf: ficha.motorista_cpf || ficha.motoristaCpf || null,
-        placas: ficha.placas || null,
+        placas: placaPrincipalParaGravar(ficha, gestao),
         data_saida: ficha.data_saida ? formatarDataParaIso(ficha.data_saida) : (ficha.dataSaida ? formatarDataParaIso(ficha.dataSaida) : null),
         data_chegada: ficha.data_chegada ? formatarDataParaIso(ficha.data_chegada) : (ficha.dataChegada ? formatarDataParaIso(ficha.dataChegada) : null),
         km_saida: parseNum(ficha.km_saida ?? ficha.kmSaida),
@@ -128,7 +159,8 @@ function mapearFichaParaSupabase(ficha) {
         total_frete: parseNum(ficha.total_frete ?? ficha.totalFrete),
         vr_comissao: parseNum(ficha.vr_comissao ?? ficha.vrComissao),
         valor_adiantamento: parseNum(ficha.valor_adiantamento ?? ficha.valorAdiantamento),
-        media_km_l: parseNum(ficha.media_km_l ?? ficha.mediaKmL),
+        // "2.44" é decimal (parseNum tiraria o ponto e gravaria 244)
+        media_km_l: parseMediaKmL(ficha.media_km_l ?? ficha.mediaKmL) ?? 0,
         saldo_comissao: parseNum(ficha.saldo_comissao ?? ficha.saldoComissao),
         total_despesas: parseNum(ficha.total_despesas ?? ficha.totalDespesas),
         abastecimentos: (ficha.abastecimentos || []).map(normalizarAbastecimento),
@@ -176,7 +208,7 @@ function mapearFichaDoSupabase(registro) {
         dataEnvio: registro.data_envio ? new Date(registro.data_envio).toLocaleString('pt-BR') : completo.dataEnvio,
         motorista: registro.motorista,
         motoristaCpf: registro.motorista_cpf,
-        placas: registro.placas,
+        placas: placaPrincipalParaExibir(registro.placas),
         placaSecundaria: String(completo.placaSecundaria || '').trim(),
         dataSaida: registro.data_saida || completo.dataSaida,
         dataChegada: registro.data_chegada || completo.dataChegada,
