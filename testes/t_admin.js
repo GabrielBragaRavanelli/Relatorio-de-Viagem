@@ -2,7 +2,7 @@
 const { abrir } = require('./harness');
 
 const FICHA = {
-  id: 'AJB-2026-900', motorista: 'Motorista Teste', placas: 'ABC-1D23', status: 'pendente',
+  id: 'AJB-2026-900', motorista: 'Motorista Teste', placas: 'ABC1D23', status: 'pendente',
   kmSaida: '100000', kmEntrada: '101500', kmChegada: '101500', placaSecundaria: 'XYZ9A87', kmSaida2: '200000', kmEntrada2: '200800',
   fretes: [
     { data: '01/10/2026', cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Santos - SP', valor: '1.000,00', comissao: '100,00', descarga: '' },
@@ -30,24 +30,27 @@ const FICHA = {
     const v = (s) => document.querySelector(s)?.value;
     const visiveis = (sel) => Array.from(document.querySelectorAll(sel)).filter(tr => tr.offsetParent !== null).length;
     return {
+      placa: v('#placas'),
       kms: [v('#km-saida'), v('#km-chegada'), v('#km-total'), v('#placa-secundaria'), v('#km-saida-2'), v('#km-chegada-2'), v('#km-total-2'), document.getElementById('km-total-viagem').textContent],
       editaveis: ['#km-saida', '#placa-secundaria', '#km-saida-2', '#placas'].map(s => !document.querySelector(s).readOnly),
       abast: [1, 2, 3].map(i => `${v(`[name="combustivel_ml_${i}"]`) || '(vazio)'}/${v(`[name="placa_abast_ml_${i}"]`)}`),
       desc2: v('#ml-despesa-desc-2'),
       media: document.getElementById('ml-indicador-media-combustivel').textContent.trim().replace(/\s+/g, ' '),
-      porPlaca: document.getElementById('ml-media-por-placa').textContent,
+      porPlaca: Array.from(document.querySelectorAll('#ml-media-por-placa .media-placa')).map(m => m.innerText.replace(/\s+/g, ' ')),
       linhasFrete: visiveis('table.tabela-fretes-ml tbody tr:not(.linha-adicionar-celular)'),
       linhasAbast: visiveis('table.tabela-abastecimento:not(.tabela-fretes-ml) tbody tr:not(.linha-adicionar-celular)')
     };
   });
-  // Gestão corrige o KM de entrada da secundária e salva
+  // Gestão corrige a placa principal e o KM de chegada da secundária e salva
   await page.evaluate(() => { window.salvarFichaSupabase = async (f) => { const p = window.mapearFichaParaSupabase(f); sessionStorage.setItem('payload', JSON.stringify(p)); return { success: true }; }; });
   await page.$eval('#km-chegada-2', el => { el.value = ''; });
   await page.focus('#km-chegada-2'); await page.keyboard.type('200900');
+  await page.$eval('#placas', el => { el.value = ''; });
+  await page.focus('#placas'); await page.keyboard.type('abc1d24');
   await page.click('#btn-admin-salvar-alteracoes');
   await new Promise(res => setTimeout(res, 800));
   r.salvo = await page.evaluate(() => { window.__payload = JSON.parse(sessionStorage.getItem('payload') || 'null'); return window.__payload && {
-    km_total: window.__payload.km_total, kmTotal: window.__payload.dados_completos.kmTotal,
+    placas: window.__payload.placas, km_total: window.__payload.km_total, kmTotal: window.__payload.dados_completos.kmTotal,
     kmTotal2: window.__payload.dados_completos.kmTotal2, status: window.__payload.status,
     abast: window.__payload.abastecimentos.map(a => `${a.combustivel || '(vazio)'}/${a.placa}`) };
   });
