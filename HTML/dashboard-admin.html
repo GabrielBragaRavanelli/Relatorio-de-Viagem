@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <!-- Folha de Estilos do Dashboard -->
-    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.3">
+    <link rel="stylesheet" href="../CSS/dashboard-admin.css?v=2.4">
 
     <!-- Verificação de Sessão Administrativa (Route Guard) -->
     <script>
@@ -1187,7 +1187,6 @@
                                         <th>Nome</th>
                                         <th>CPF</th>
                                         <th>Celular</th>
-                                        <th>E-mail</th>
                                         <th>Situação</th>
                                         <th>Último acesso</th>
                                         <th class="text-right">Ações</th>
@@ -1404,11 +1403,6 @@
                         <span>Celular <b class="mot-obrigatorio">*</b></span>
                         <input type="text" id="mot-add-celular" inputmode="tel" maxlength="15" placeholder="(00) 00000-0000" autocomplete="off" required>
                     </label>
-                    <label class="mot-campo mot-campo-largo">
-                        <span>E-mail <em>(opcional)</em></span>
-                        <input type="email" id="mot-add-email" maxlength="254" autocomplete="off" placeholder="motorista@exemplo.com">
-                        <small>Pode ficar em branco.</small>
-                    </label>
                     <div class="mot-campo mot-campo-largo">
                         <label for="mot-add-senha">Senha inicial <em>(opcional)</em></label>
                         <div class="mot-senha-linha">
@@ -1501,7 +1495,7 @@
     <script src="../JavaScript/supabase-client.js"></script>
     <script src="../JavaScript/auth.js"></script>
     <script src="../JavaScript/senha.js"></script>
-    <script src="../JavaScript/dashboard-admin.js?v=2.4"></script>
+    <script src="../JavaScript/dashboard-admin.js?v=2.5"></script>
 </body>
 
 </html>

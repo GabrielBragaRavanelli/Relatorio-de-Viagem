@@ -3386,7 +3386,6 @@ window.fazerLogoutAdmin = fazerLogoutAdmin;
 //     Senhas nunca aparecem na tela, no console ou na lista.
 // ==========================================================================
 
-const DOMINIO_SEM_EMAIL = '@sem-email.ajborges.com.br';
 const TAMANHO_LOTE_IMPORTACAO = 50;
 
 const estadoMotoristas = {
@@ -3495,7 +3494,7 @@ async function carregarAbaMotoristas() {
         console.warn('Erro ao carregar a frota:', frota.error.message);
         estadoMotoristas.frota = [];
         const tbody = document.getElementById('mot-tbody');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="tabela-empty-state">Não foi possível carregar a frota. Confira se o passo 9 do banco foi aplicado e atualize a página.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="tabela-empty-state">Não foi possível carregar a frota. Confira se o passo 9 do banco foi aplicado e atualize a página.</td></tr>';
     } else {
         estadoMotoristas.frota = Array.isArray(frota.data) ? frota.data : [];
     }
@@ -3525,7 +3524,6 @@ function renderizarFrota() {
     const lista = estadoMotoristas.frota;
     // "Válidos (ativos)": todos que não foram desativados
     const validos = lista.filter(m => m.status !== 'inativo');
-    const semEmail = lista.filter(m => !m.tem_email);
     const inativos = lista.filter(m => m.status === 'inativo');
 
     const qtdAba = document.getElementById('mot-aba-frota-qtd');
@@ -3536,7 +3534,6 @@ function renderizarFrota() {
         const cards = [
             { classe: 'card-frota-kpi', rotulo: 'Motoristas da frota', valor: lista.length },
             { classe: 'card-entrada', rotulo: 'Ativos', valor: validos.length, nota: 'Clique para filtrar', filtro: 'validos' },
-            { classe: 'card-frota-kpi', rotulo: 'Sem e-mail', valor: semEmail.length },
             { classe: 'card-resultado', rotulo: 'Inativos', valor: inativos.length, filtro: 'inativo' }
         ];
         elKpis.innerHTML = cards.map(c => `
@@ -3567,7 +3564,7 @@ function renderizarFrota() {
     const tbody = document.getElementById('mot-tbody');
     if (!tbody) return;
     if (filtrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="tabela-empty-state">${lista.length === 0
+        tbody.innerHTML = `<tr><td colspan="6" class="tabela-empty-state">${lista.length === 0
             ? 'Nenhum motorista da frota cadastrado. Use <strong>Adicionar motorista da frota</strong> ou <strong>Importar planilha</strong>.'
             : 'Nenhum motorista encontrado para a busca ou o filtro.'}</td></tr>`;
         return;
@@ -3583,7 +3580,6 @@ function renderizarFrota() {
                     ${tambemTerceiro ? '<span class="mot-selo-duplo" title="Este CPF também tem cadastro de terceiro/agregado">também é terceiro</span>' : ''}</td>
                 <td class="mot-nowrap">${escaparHtml(formatarCpfCompleto(m.cpf))}</td>
                 <td class="mot-nowrap">${escaparHtml(formatarCelularBR(m.telefone)) || '—'}</td>
-                <td>${m.tem_email ? escaparHtml(m.email) : '<span class="mot-texto-cinza">sem e-mail</span>'}</td>
                 <td>${seloSituacaoMotorista(m)}</td>
                 <td class="mot-nowrap">${m.ultimo_acesso ? escaparHtml(dataHoraBR(m.ultimo_acesso)) : '<span class="mot-texto-cinza">nunca entrou</span>'}</td>
                 <td>
@@ -3751,15 +3747,11 @@ async function salvarMotoristaFrota() {
     const nome = document.getElementById('mot-add-nome').value.replace(/\s+/g, ' ').trim();
     const cpf = somenteDigitos(document.getElementById('mot-add-cpf').value);
     const celular = limparCelularBR(document.getElementById('mot-add-celular').value);
-    const email = document.getElementById('mot-add-email').value.trim().toLowerCase();
     const senha = document.getElementById('mot-add-senha').value;
 
     if (!nome) return mostrarAlertaMot('mot-add-alerta', 'Informe o nome completo.');
     if (!cpfValidoBR(cpf)) return mostrarAlertaMot('mot-add-alerta', 'CPF inválido. Confira os números.');
     if (!celular) return mostrarAlertaMot('mot-add-alerta', 'Celular inválido. Use DDD + número.');
-    if (email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith(DOMINIO_SEM_EMAIL))) {
-        return mostrarAlertaMot('mot-add-alerta', 'E-mail inválido. Corrija ou deixe em branco.');
-    }
     // Em branco = senha padrão
     const ehPadrao = !senha || senha === senhaPadraoFrota(cpf);
     if (!ehPadrao && window.ajbSenha) {
@@ -3773,7 +3765,6 @@ async function salvarMotoristaFrota() {
     botao.textContent = 'Cadastrando...';
     try {
         const corpo = { acao: 'criar', nome, cpf, celular };
-        if (email) corpo.email = email;
         if (!ehPadrao) corpo.senha = senha; // a padrão o servidor monta sozinho
         const r = await chamarGerenciarFrota(corpo);
         if (!r.ok) {
