@@ -493,25 +493,19 @@ input::-ms-clear {
     display: none !important;
 }
 
-/* Opções de Formulário (Esqueci a senha) */
+/* Opções de Formulário (Esqueceu a senha? -> texto, sem link) */
 .form-options {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 22px;
     font-size: 13px;
 }
 
-.link-recuperar {
-    color: var(--azul-ajborges);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.link-recuperar:hover {
-    color: var(--azul-ajborges-escuro);
-    text-decoration: underline;
+.texto-esqueceu {
+    margin: 0;
+    color: var(--cinza-texto);
+    line-height: 1.4;
 }
 
 /* Botões de Acesso (Submit) */
@@ -982,7 +976,6 @@ footer {
         justify-content: center;
     }
 
-    .link-recuperar,
     .link-cadastro,
     .contato-info a,
     .footer-bottom a {

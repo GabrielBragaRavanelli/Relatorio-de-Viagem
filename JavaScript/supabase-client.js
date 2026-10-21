@@ -528,8 +528,8 @@ window.reservarNumeroFichaSupabase = reservarNumeroFichaSupabase;
 window.escutarAlteracoesFichasSupabase = escutarAlteracoesFichasSupabase;
 
 // ==========================================================================
-// 6. LOGIN, CADASTRO E RECUPERAÇÃO DE SENHA
-//    Login e recuperação passam pelas edge functions (limite de tentativas,
+// 6. LOGIN E CADASTRO
+//    Login e cadastro passam pelas edge functions (limite de tentativas,
 //    papel validado no servidor). O navegador nunca lê a tabela perfis sem login.
 // ==========================================================================
 
@@ -564,7 +564,9 @@ async function loginSupabase({ tipo, cpf, email, senha }) {
         return { sucesso: false, erro: (r.dados && r.dados.erro) || 'Não foi possível entrar. Tente novamente.' };
     }
     await window.ajbAuth.definirSessao(r.dados.session);
-    return { sucesso: true, usuario: r.dados.usuario };
+    // A edge function ainda devolve usuario.trocar_senha; a frota não troca mais a senha, então é ignorado.
+    const { trocar_senha, ...usuario } = r.dados.usuario || {};
+    return { sucesso: true, usuario };
 }
 
 /**
@@ -584,56 +586,5 @@ async function solicitarCadastroAgregado(corpo) {
     return { sucesso: true, cadastroId: r.dados.cadastro_id, uploads: r.dados.uploads || [] };
 }
 
-/**
- * Esqueci a senha - etapa 1: pede o código para o e-mail cadastrado.
- * Se o e-mail não estiver cadastrado, a edge function responde 404.
- */
-async function solicitarRecuperacaoSenha(email) {
-    const r = await chamarEdgeFunction('recuperar-senha', { email: (email || '').trim().toLowerCase() });
-    if (!r.ok) return { sucesso: false, status: r.status, erro: (r.dados && r.dados.erro) || 'Serviço indisponível no momento.' };
-    return { sucesso: true, mensagem: r.dados.mensagem };
-}
-
-/**
- * Esqueci a senha - etapa 2: confere o código recebido por e-mail e abre a
- * sessão de recuperação. Devolve { sucesso, cpf } (o CPF serve para conferir a regra da senha).
- */
-async function verificarCodigoRecuperacao(email, codigo) {
-    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
-    const { data, error } = await supabaseClient.auth.verifyOtp({
-        email: (email || '').trim().toLowerCase(),
-        token: String(codigo || '').replace(/\s/g, ''),
-        type: 'recovery'
-    });
-    if (error || !data || !data.session) {
-        return { sucesso: false, erro: 'Código inválido ou expirado. Confira o e-mail ou peça um novo código.' };
-    }
-    let cpf = '';
-    try {
-        const { data: perfil } = await supabaseClient.from('perfis').select('cpf').eq('id', data.user.id).maybeSingle();
-        cpf = (perfil && perfil.cpf) || '';
-    } catch (e) { /* segue sem CPF */ }
-    return { sucesso: true, cpf };
-}
-
-/**
- * Esqueci a senha - etapa 2: grava a senha nova (precisa da sessão aberta pelo código).
- */
-async function definirNovaSenhaSupabase(novaSenha) {
-    if (!supabaseClient) return { sucesso: false, erro: 'Serviço indisponível no momento.' };
-    const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
-    if (error) {
-        const msg = String(error.message || '');
-        if (/different from the old/i.test(msg)) return { sucesso: false, erro: 'A nova senha precisa ser diferente da anterior.' };
-        if (/session|jwt|expired/i.test(msg)) return { sucesso: false, erro: 'O código expirou. Peça um novo código.' };
-        return { sucesso: false, erro: 'Não foi possível salvar a nova senha.' };
-    }
-    await supabaseClient.auth.signOut().catch(() => {});
-    return { sucesso: true };
-}
-
 window.loginSupabase = loginSupabase;
 window.solicitarCadastroAgregado = solicitarCadastroAgregado;
-window.verificarCodigoRecuperacao = verificarCodigoRecuperacao;
-window.solicitarRecuperacaoSenha = solicitarRecuperacaoSenha;
-window.definirNovaSenhaSupabase = definirNovaSenhaSupabase;
