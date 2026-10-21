@@ -188,11 +188,14 @@
                                 </div>
                             </div>
 
-                            <!-- Placas -->
+                            <!-- Placa principal: o motorista preenche (a gestão pode corrigir) -->
                             <div class="campo-grupo">
-                                <label for="placas">
-                                    PLACAS <span class="tag-bloqueado-frota">Definido pela Gestão</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="placas">
+                                        PLACA PRINCIPAL <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -200,8 +203,8 @@
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
-                                    <input type="text" id="placas" name="placas" placeholder="Definido pela Gestão"
-                                        maxlength="8" autocomplete="off" readonly="true" tabindex="-1" class="campo-bloqueado-gestao">
+                                    <input type="text" id="placas" name="placas" placeholder="Ex: ABC-1D23" required
+                                        maxlength="8" autocomplete="off" autocapitalize="characters">
                                 </div>
                             </div>
 
@@ -314,11 +317,11 @@
                                 </div>
                             </div>
 
-                            <!-- KM Entrada -->
+                            <!-- KM Chegada -->
                             <div class="campo-grupo">
                                 <div class="label-com-tag">
                                     <label for="km-chegada">
-                                        KM ENTRADA <span class="asterisco">*</span>
+                                        KM CHEGADA <span class="asterisco">*</span>
                                     </label>
                                     <span class="tag-motorista">Motorista</span>
                                 </div>
@@ -334,7 +337,7 @@
                                         onkeydown="if(event.key==='-'||event.key==='Minus'||event.key==='e'||event.key==='E'||event.key==='+'||event.code==='NumpadSubtract') event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
-                                <small class="erro-km" id="erro-km-principal" role="alert" hidden>O KM de entrada não pode ser menor que o de saída.</small>
+                                <small class="erro-km" id="erro-km-principal" role="alert" hidden>O KM de chegada não pode ser menor que o de saída.</small>
                             </div>
 
                             <!-- KM Total -->
@@ -353,7 +356,7 @@
                                         <polyline points="4 15 10 9 14 13 20 7"></polyline>
                                     </svg>
                                     <input type="text" inputmode="numeric" id="km-total" name="km_total" required
-                                        placeholder="Entrada − saída" autocomplete="off" readonly tabindex="-1">
+                                        placeholder="Chegada − saída" autocomplete="off" readonly tabindex="-1">
                                 </div>
                             </div>
                         </div>
@@ -362,13 +365,13 @@
                         <div class="bloco-km-secundaria" id="bloco-km-secundaria" hidden>
                             <div class="bloco-km-secundaria-titulo">
                                 <h3>KM da placa secundária <span class="placa-tag" id="km-secundaria-placa"></span></h3>
-                                <small class="dica-campo">Opcional. Se o motorista não souber, a gestão preenche.</small>
+                                <small class="dica-campo">Obrigatório quando há placa secundária.</small>
                             </div>
                             <div class="grid-campos grid-3-col">
                                 <div class="campo-grupo">
                                     <div class="label-com-tag">
-                                        <label for="km-saida-2">KM SAÍDA (SECUNDÁRIA)</label>
-                                        <span class="tag-motorista">Opcional</span>
+                                        <label for="km-saida-2">KM SAÍDA (SECUNDÁRIA) <span class="asterisco">*</span></label>
+                                        <span class="tag-motorista">Motorista</span>
                                     </div>
                                     <div class="input-wrapper">
                                         <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -384,8 +387,8 @@
 
                                 <div class="campo-grupo">
                                     <div class="label-com-tag">
-                                        <label for="km-chegada-2">KM ENTRADA (SECUNDÁRIA)</label>
-                                        <span class="tag-motorista">Opcional</span>
+                                        <label for="km-chegada-2">KM CHEGADA (SECUNDÁRIA) <span class="asterisco">*</span></label>
+                                        <span class="tag-motorista">Motorista</span>
                                     </div>
                                     <div class="input-wrapper">
                                         <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -397,7 +400,7 @@
                                         <input type="text" inputmode="numeric" id="km-chegada-2" name="km_entrada_2"
                                             placeholder="Ex: 200800" autocomplete="off" aria-describedby="erro-km-secundaria">
                                     </div>
-                                    <small class="erro-km" id="erro-km-secundaria" role="alert" hidden>O KM de entrada não pode ser menor que o de saída.</small>
+                                    <small class="erro-km" id="erro-km-secundaria" role="alert" hidden>O KM de chegada não pode ser menor que o de saída.</small>
                                 </div>
 
                                 <div class="campo-grupo campo-calculado">
@@ -412,7 +415,7 @@
                                             <line x1="4" y1="19" x2="20" y2="19"></line>
                                             <polyline points="4 15 10 9 14 13 20 7"></polyline>
                                         </svg>
-                                        <input type="text" id="km-total-2" name="km_total_2" placeholder="Entrada − saída"
+                                        <input type="text" id="km-total-2" name="km_total_2" placeholder="Chegada − saída"
                                             autocomplete="off" readonly tabindex="-1">
                                     </div>
                                 </div>
@@ -1703,7 +1706,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_1" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_1" class="input-tabela input-nf" inputmode="numeric"
@@ -1756,7 +1759,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_2" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_2" class="input-tabela input-nf" inputmode="numeric"
@@ -1809,7 +1812,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_3" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_3" class="input-tabela input-nf" inputmode="numeric"
@@ -1862,7 +1865,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_4" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_4" class="input-tabela input-nf" inputmode="numeric"
@@ -1915,7 +1918,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_5" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_5" class="input-tabela input-nf" inputmode="numeric"
@@ -1968,7 +1971,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_6" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_6" class="input-tabela input-nf" inputmode="numeric"
@@ -2021,7 +2024,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_7" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_7" class="input-tabela input-nf" inputmode="numeric"
@@ -2074,7 +2077,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_8" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_8" class="input-tabela input-nf" inputmode="numeric"
@@ -2127,7 +2130,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_9" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_9" class="input-tabela input-nf" inputmode="numeric"
@@ -2180,7 +2183,7 @@
                                                             <option value="arla">ARLA</option>
                                                         </select></td>
                                                     <td class="col-placa-abast"><select name="placa_abast_ml_10" class="input-tabela input-placa-abast">
-                                                            <option value="principal">Placa principal</option>
+                                                            <option value="principal">Principal</option>
                                                             <option value="secundaria">Secundária</option>
                                                         </select></td>
                                                     <td><input type="text" name="nf_ml_10" class="input-tabela input-nf" inputmode="numeric"
@@ -2585,11 +2588,12 @@
                                             <div class="indicador-valor-principal" id="ml-indicador-media-combustivel">
                                                 0,00 <span class="indicador-unidade">km/l</span>
                                             </div>
-                                            <div class="indicador-formula-base">
+                                            <div class="indicador-formula-base" id="ml-media-base-geral">
                                                 KM Total (<span id="ml-calc-base-km">0</span>) / Litros de diesel (<span
                                                     id="ml-calc-base-litros">0</span>)
                                             </div>
-                                            <!-- Com placa secundária: média de cada placa (km do trecho ÷ diesel da placa) -->
+                                            <!-- Com placa secundária: no lugar do valor acima, a média de cada placa
+                                                 (km do trecho ÷ diesel das linhas daquela placa), uma embaixo da outra -->
                                             <div class="indicador-media-por-placa" id="ml-media-por-placa" hidden></div>
                                             <div class="indicador-formula-base">ARLA não entra na média (só nos custos)</div>
                                         </div>

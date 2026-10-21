@@ -1171,7 +1171,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     // ------------------------------------------
     // 4. Cálculo Automático do KM Total (trecho da principal + trecho da secundária)
     // ------------------------------------------
-    // Um trecho: entrada − saída. Sem total se faltar um dos dois ou se a entrada for menor.
+    // Um trecho: chegada − saída. Sem total se faltar um dos dois ou se a chegada for menor.
     function kmTrecho(inputSaida, inputEntrada) {
         const saida = parseInt((inputSaida?.value || '').replace(/\D/g, ''), 10);
         const entrada = parseInt((inputEntrada?.value || '').replace(/\D/g, ''), 10);
@@ -1232,14 +1232,23 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const tabelaAbastecimento = document.querySelector('table.tabela-abastecimento:not(.tabela-fretes-ml)');
     const selectsPlacaAbast = () => Array.from(document.querySelectorAll('select.input-placa-abast'));
 
-    // Textos das opções: "ABC-1D23" (ou "Placa principal") e "Secundária (XYZ9A87)".
-    // Os valores gravados são sempre 'principal' e 'secundaria'.
+    function placaPrincipalAtual() {
+        const limpo = limparPlaca(inputPlacas?.value);
+        return placaValida(limpo) ? limpo : '';
+    }
+
+    // Texto de cada placa: "Principal (ABC-1D23)" e "Secundária (XYZ-9A87)" (sem placa: só o nome)
+    function rotuloPlacaAbast(qual) {
+        const placa = qual === 'secundaria' ? placaSecundariaAtual() : placaPrincipalAtual();
+        const nome = qual === 'secundaria' ? 'Secundária' : 'Principal';
+        return placa ? `${nome} (${formatarPlaca(placa)})` : nome;
+    }
+
+    // Os valores gravados são sempre 'principal' e 'secundaria'; só o texto mostra a placa
     function atualizarOpcoesPlacaAbast() {
-        const principal = limparPlaca(inputPlacas?.value);
-        const secundaria = placaSecundariaAtual();
         selectsPlacaAbast().forEach(sel => {
-            if (sel.options[0]) sel.options[0].textContent = principal.length === 7 ? formatarPlaca(principal) : 'Placa principal';
-            if (sel.options[1]) sel.options[1].textContent = secundaria ? `Secundária (${secundaria})` : 'Secundária';
+            if (sel.options[0]) sel.options[0].textContent = rotuloPlacaAbast('principal');
+            if (sel.options[1]) sel.options[1].textContent = rotuloPlacaAbast('secundaria');
         });
     }
 
@@ -1251,6 +1260,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const tagPlaca = document.getElementById('km-secundaria-placa');
         if (tagPlaca) tagPlaca.textContent = ativo ? formatarPlaca(secundaria) : '';
         if (tabelaAbastecimento) tabelaAbastecimento.classList.toggle('com-placa-secundaria', ativo);
+        // Com placa secundária, KM de saída e de chegada do 2º trecho são obrigatórios
+        [inputKmSaida2, inputKmChegada2].forEach(input => { if (input) input.required = ativo; });
         // O rótulo "TOTAL" cobre a coluna Placa só quando ela aparece
         const tdTotais = document.getElementById('td-totais-label-abast');
         if (tdTotais) tdTotais.colSpan = ativo ? 6 : 5;
@@ -1286,7 +1297,13 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             if (typeof salvarProgressoMl === 'function') salvarProgressoMl();
         });
     }
-    if (inputPlacas) inputPlacas.addEventListener('input', atualizarOpcoesPlacaAbast);
+    if (inputPlacas) {
+        inputPlacas.addEventListener('input', () => {
+            atualizarOpcoesPlacaAbast();
+            // O card de média mostra a placa ao lado da média
+            if (typeof calcularIndicadoresViagemMl === 'function') calcularIndicadoresViagemMl();
+        });
+    }
 
     // ------------------------------------------
     // 5. Formatação e Cálculo Monetário (R$) e Litros
@@ -2038,15 +2055,30 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (mlCalcBaseKm) mlCalcBaseKm.textContent = kmTotalNum > 0 ? formatarMilhar(kmTotalNum) : '0';
         if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(diesel.total);
 
-        // Com 2º trecho: média de cada placa (km do trecho ÷ diesel daquela placa)
+        // Com 2º trecho: no lugar do valor único, a média de cada placa, uma embaixo da outra
+        // (km do trecho ÷ diesel das linhas daquela placa). Não há média geral somando as duas.
+        const doisTrechos = segundoTrechoAtivo();
         const mediaPorPlaca = document.getElementById('ml-media-por-placa');
+        const baseGeral = document.getElementById('ml-media-base-geral');
+        if (mlIndicadorMedia) mlIndicadorMedia.hidden = doisTrechos;
+        if (baseGeral) baseGeral.hidden = doisTrechos;
         if (mediaPorPlaca) {
-            mediaPorPlaca.hidden = !segundoTrechoAtivo();
-            if (segundoTrechoAtivo()) {
-                const texto = (km, litros) => (km && litros) ? `${formatarDecimal(media(km, litros), 2)} km/l` : '—';
-                mediaPorPlaca.textContent =
-                    `Principal: ${texto(kms.t1.total, diesel.principal)} · ` +
-                    `Secundária (${placaSecundariaAtual()}): ${texto(kms.t2.total, diesel.secundaria)}`;
+            mediaPorPlaca.hidden = !doisTrechos;
+            if (doisTrechos) {
+                const esc = escapeHTMLAutocomplete;
+                const bloco = (qual, km, litros) => {
+                    const placa = qual === 'secundaria' ? placaSecundariaAtual() : placaPrincipalAtual();
+                    const rotulo = placa ? formatarPlaca(placa) : (qual === 'secundaria' ? 'Secundária' : 'Principal');
+                    const temBase = km > 0 && litros > 0;
+                    const valor = temBase ? `${formatarDecimal(media(km, litros), 2)} <span class="indicador-unidade">km/l</span>` : '—';
+                    const base = temBase ? `${formatarMilhar(km)} km ÷ ${formatarLitros(litros)} L` : 'Falta KM ou litros de diesel';
+                    return `<div class="media-placa" data-placa="${qual}">` +
+                        `<span class="media-placa-rotulo">${esc(rotulo)}</span>` +
+                        `<strong class="media-placa-valor">${valor}</strong>` +
+                        `<small class="indicador-formula-base">${esc(base)}</small></div>`;
+                };
+                mediaPorPlaca.innerHTML = bloco('principal', kms.t1.total || 0, diesel.principal) +
+                    bloco('secundaria', kms.t2.total || 0, diesel.secundaria);
             }
         }
 
@@ -2928,7 +2960,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     if (inputPlacas) {
                         const pl = dados.cabecalho.placas;
                         if (pl && pl.trim() !== '' && pl.trim() !== 'A definir pela Gestão') {
-                            inputPlacas.value = pl.trim();
+                            inputPlacas.value = formatarPlaca(pl);
                         } else {
                             inputPlacas.value = '';
                         }
@@ -3206,7 +3238,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const placasVal = ficha.placas || ficha.dados_completos?.placas;
         if (inputPlacas) {
             if (placasVal && placasVal.trim() !== '' && placasVal.trim() !== 'A definir pela Gestão') {
-                inputPlacas.value = placasVal.trim();
+                inputPlacas.value = formatarPlaca(placasVal);
             } else {
                 inputPlacas.value = '';
             }
@@ -3224,7 +3256,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const dataChegadaVal = ficha.dataChegada || ficha.data_chegada || ficha.dados_completos?.dataChegada;
         if (inputDataChegada && dataChegadaVal) inputDataChegada.value = normalizarDataExibicao(dataChegadaVal);
 
-        // KMs com ponto de milhar; o total é recalculado no fim (entrada − saída)
+        // KMs com ponto de milhar; o total é recalculado no fim (chegada − saída)
         const kmSaidaVal = ficha.kmSaida ?? ficha.km_saida ?? ficha.dados_completos?.kmSaida;
         if (inputKmSaida && kmSaidaVal !== undefined && kmSaidaVal !== null) inputKmSaida.value = formatarMilhar(kmSaidaVal);
 
@@ -3601,9 +3633,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // -------------------------------------------------------------
         // SEPARAÇÃO DOS CAMPOS DE GOVERNANÇA (Tarefas 1, 2, 3 e 4)
         // -------------------------------------------------------------
-        // Grupo 1: Motorista e Veículo (Definido pela Gestão no modo motorista)
-        // (placa secundária e KMs de saída/entrada ficam livres: motorista e gestão preenchem)
-        const camposAdminVeiculo = [inputMotorista, inputPlacas].filter(Boolean);
+        // Grupo 1: Motorista (Definido pela Gestão no modo motorista)
+        // (placa principal, placa secundária e KMs de saída/chegada ficam livres: motorista e gestão preenchem)
+        const camposAdminVeiculo = [inputMotorista].filter(Boolean);
 
         // Grupo 2: Fretes da Empresa (Definido pela Frota no modo motorista)
         const camposFretesFrota = [
@@ -3754,7 +3786,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 inputPlacas.removeAttribute('disabled');
                 inputPlacas.removeAttribute('tabindex');
                 inputPlacas.classList.remove('campo-bloqueado-gestao');
-                inputPlacas.placeholder = 'Ex: GAB-1234';
+                inputPlacas.placeholder = 'Ex: ABC-1D23';
             }
             if (inputPlacaSecundaria) {
                 liberarCampoBloqueado(inputPlacaSecundaria);
@@ -4054,22 +4086,17 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (barraAdmin) barraAdmin.classList.remove('ativa');
         if (barraMotorista) barraMotorista.style.display = 'flex';
 
-        // 1. TAREFA 2: Bloqueio rigoroso de Motorista e Placas com "Definido pela Administração"
+        // 1. TAREFA 2: Bloqueio rigoroso do Motorista com "Definido pela Administração"
         camposAdminVeiculo.forEach(input => {
             aplicarBloqueioCampo(input, 'Definido pela Administração');
             input.setAttribute('readonly', 'true');
         });
 
-        // Campo Placas (Uso Exclusivo da Gestão - Bloqueado para o Motorista)
+        // Placa principal: o motorista preenche (obrigatória no envio)
         if (inputPlacas) {
-            aplicarBloqueioCampo(inputPlacas, 'Definido pela Gestão');
-            inputPlacas.setAttribute('readonly', 'true');
-            inputPlacas.setAttribute('tabindex', '-1');
-            inputPlacas.classList.add('campo-bloqueado-gestao');
-            inputPlacas.placeholder = 'Definido pela Gestão';
-            if (!inputPlacas.value || inputPlacas.value.trim() === 'A definir pela Gestão') {
-                inputPlacas.value = '';
-            }
+            liberarCampoBloqueado(inputPlacas);
+            inputPlacas.placeholder = 'Ex: ABC-1D23';
+            if (inputPlacas.value.trim() === 'A definir pela Gestão') inputPlacas.value = '';
         }
 
         // Campo Motorista (Bloqueado como readonly com a tag Definido pela Administração)
@@ -4130,18 +4157,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 inputMotorista.setAttribute('readonly', 'true');
             }
 
-            // Campo Placas (Uso Exclusivo da Gestão - Bloqueado para o Motorista)
-            if (inputPlacas) {
-                aplicarBloqueioCampo(inputPlacas, 'Definido pela Gestão');
-                inputPlacas.setAttribute('readonly', 'true');
-                inputPlacas.setAttribute('tabindex', '-1');
-                inputPlacas.classList.add('campo-bloqueado-gestao');
-                inputPlacas.placeholder = 'Definido pela Gestão';
-                if (!inputPlacas.value || inputPlacas.value.trim() === 'A definir pela Gestão') {
-                    inputPlacas.value = '';
-                }
-            }
-
             if (motoristaSaudacao) {
                 motoristaSaudacao.innerHTML = `Olá, <strong>${nomeMotoristaValido || 'Motorista'}</strong> • Conectado via Portal`;
             }
@@ -4176,6 +4191,19 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         return '0.00';
     }
 
+    // Média de cada placa para gravar em dados_completos (só exibição; o dashboard recalcula).
+    // Sem placa secundária, a principal é a viagem toda e a secundária fica vazia.
+    function mediasPorPlacaParaSalvar() {
+        const kms = kmsDaViagem();
+        const diesel = litrosDieselPorPlaca();
+        const texto = (km, litros) => (km > 0 && litros > 0) ? (km / litros).toFixed(2) : '';
+        if (!segundoTrechoAtivo()) return { mediaPrincipal: texto(kms.t1.total || 0, diesel.total), mediaSecundaria: '' };
+        return {
+            mediaPrincipal: texto(kms.t1.total || 0, diesel.principal),
+            mediaSecundaria: texto(kms.t2.total || 0, diesel.secundaria)
+        };
+    }
+
     // Placa secundária é opcional; se preenchida, precisa ser uma placa válida (antiga ou Mercosul)
     function placaSecundariaValida() {
         if (!inputPlacaSecundaria || inputPlacaSecundaria.readOnly || inputPlacaSecundaria.disabled) return true;
@@ -4194,15 +4222,16 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const km = (valor) => (valor === null || valor === '' ? '—' : `${formatarMilhar(valor)} km`);
         const kms = kmsDaViagem();
         const secundaria = placaSecundariaAtual();
-        const principal = limparPlaca(inputPlacas?.value);
+        const principal = placaPrincipalAtual();
         const linha = (rotulo, valor) => `<div class="revisar-linha"><span>${esc(rotulo)}</span><strong>${esc(valor)}</strong></div>`;
 
         let html = '<h3>Quilometragem</h3>';
-        html += linha('KM saída / entrada', `${km(inputKmSaida?.value)} → ${km(inputKmChegada?.value)}`);
+        html += linha('Placa principal', principal ? formatarPlaca(principal) : '—');
+        html += linha('KM saída / chegada', `${km(inputKmSaida?.value)} → ${km(inputKmChegada?.value)}`);
         html += linha(secundaria ? 'KM total (principal)' : 'KM total', km(kms.t1.total));
         if (secundaria) {
             html += linha('Placa secundária', formatarPlaca(secundaria));
-            html += linha('KM saída / entrada (secundária)', `${km(inputKmSaida2?.value)} → ${km(inputKmChegada2?.value)}`);
+            html += linha('KM saída / chegada (secundária)', `${km(inputKmSaida2?.value)} → ${km(inputKmChegada2?.value)}`);
             html += linha('KM total (secundária)', km(kms.t2.total));
             html += linha('KM total da viagem', km(kms.viagem));
         }
@@ -4214,11 +4243,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
             const litros = document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '';
             const partes = [ROTULOS_COMBUSTIVEL[comb] || 'Sem combustível'];
-            if (secundaria) {
-                partes.push(placaDaLinhaAbast(i) === 'secundaria'
-                    ? `Secundária (${secundaria})`
-                    : (principal.length === 7 ? formatarPlaca(principal) : 'Placa principal'));
-            }
+            if (secundaria) partes.push(rotuloPlacaAbast(placaDaLinhaAbast(i)));
             if (valor) partes.push(`R$ ${valor}`);
             if (litros) partes.push(`${litros} L`);
             abasts.push(linha(`#${abasts.length + 1}`, partes.join(' · ')));
@@ -4266,26 +4291,44 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         return false;
     }
 
-    // Validação dos campos novos antes de gravar. O motorista precisa dos KMs e do
-    // combustível; a gestão pode salvar fichas antigas sem eles.
+    // Validação dos campos novos antes de gravar. O motorista precisa da placa principal,
+    // dos KMs (dos dois trechos, com placa secundária) e do combustível; a gestão pode
+    // salvar fichas antigas sem eles. As mesmas regras estão no banco (passo 12).
     function validarKmCombustivelDespesas(modoAdmin) {
+        if (!modoAdmin && !placaPrincipalAtual()) {
+            return falharValidacao(inputPlacas, 'Informe a placa principal (ex.: ABC-1D23).');
+        }
         if (!placaSecundariaValida()) return false;
+        const secundaria = placaSecundariaAtual();
+        if (secundaria && secundaria === limparPlaca(inputPlacas?.value)) {
+            return falharValidacao(inputPlacaSecundaria, 'A placa secundária não pode ser igual à principal.');
+        }
 
         if (!modoAdmin) {
             if (!(inputKmSaida?.value || '').trim()) return falharValidacao(inputKmSaida, 'Informe o KM de saída.');
-            if (!(inputKmChegada?.value || '').trim()) return falharValidacao(inputKmChegada, 'Informe o KM de entrada.');
+            if (!(inputKmChegada?.value || '').trim()) return falharValidacao(inputKmChegada, 'Informe o KM de chegada.');
+            if (secundaria) {
+                const semKm2 = [inputKmSaida2, inputKmChegada2].find(input => !(input?.value || '').trim());
+                if (semKm2) return falharValidacao(semKm2, 'Informe o KM de saída e o KM de chegada da placa secundária.');
+            }
         }
         const kms = kmsDaViagem();
-        if (kms.t1.invalido) return falharValidacao(inputKmChegada, 'O KM de entrada não pode ser menor que o de saída.');
-        if (kms.t2.invalido) return falharValidacao(inputKmChegada2, 'O KM de entrada não pode ser menor que o de saída.');
+        if (kms.t1.invalido) return falharValidacao(inputKmChegada, 'O KM de chegada não pode ser menor que o de saída.');
+        if (kms.t2.invalido) return falharValidacao(inputKmChegada2, 'O KM de chegada não pode ser menor que o de saída.');
 
         if (!modoAdmin) {
             for (let i = 1; i <= 10; i++) {
                 const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`);
                 const valor = document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '';
                 const litros = document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '';
-                if (comb && linhaEmUso(comb) && !comb.value && (parseMoeda(valor) > 0 || parseLitros(litros) > 0)) {
+                const preenchida = parseMoeda(valor) > 0 || parseLitros(litros) > 0;
+                if (comb && linhaEmUso(comb) && !comb.value && preenchida) {
                     return falharValidacao(comb, 'Escolha o combustível');
+                }
+                // Com placa secundária, cada linha preenchida diz de qual placa é
+                const selPlaca = document.querySelector(`select[name="placa_abast_ml_${i}"]`);
+                if (secundaria && selPlaca && linhaEmUso(selPlaca) && preenchida && !['principal', 'secundaria'].includes(selPlaca.value)) {
+                    return falharValidacao(selPlaca, 'Escolha a placa');
                 }
             }
         }
@@ -4355,6 +4398,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
             mediaKmL: extrairMediaCombustivelMlParaSalvar(),
             media_km_l: extrairMediaCombustivelMlParaSalvar(),
+            ...mediasPorPlacaParaSalvar(),
             status_acerto: (index >= 0 && todas[index].status_acerto) ? todas[index].status_acerto : 'nao_confirmado',
             statusAcerto: (index >= 0 && todas[index].statusAcerto) ? todas[index].statusAcerto : 'nao_confirmado',
             pedagios: [
@@ -4505,16 +4549,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                 const isComLogin = usuarioAtivo && usuarioAtivo.role === 'motorista';
 
-                // Valida placa apenas se o campo estiver liberado para edição (modo gestão)
-                if (inputPlacas && !inputPlacas.disabled && !inputPlacas.readOnly) {
-                    const limpoPlaca = (inputPlacas.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    if (limpoPlaca.length > 0 && limpoPlaca.length !== 7) {
-                        exibirToast('A placa deve conter obrigatoriamente exatamente 7 caracteres (Ex: GAB-1234 ou GAB-1C34).', 'erro');
-                        inputPlacas.focus();
-                        return;
-                    }
-                }
-
                 const motoristaIdentificado = (inputMotorista && inputMotorista.value.trim() !== '') || (isComLogin && usuarioAtivo?.nome);
                 const impostoFederalPreenchido = inputMlImpFederal && inputMlImpFederal.value.trim() !== '';
 
@@ -4628,6 +4662,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
                     media_km_l: extrairMediaCombustivelMlParaSalvar(),
                     mediaKmL: extrairMediaCombustivelMlParaSalvar(),
+                    ...mediasPorPlacaParaSalvar(),
                     pedagios: [
                         inputsPedagioMl[0]?.value || '',
                         inputsPedagioMl[1]?.value || '',

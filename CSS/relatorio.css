@@ -421,7 +421,7 @@ main {
     margin-left: 0;
 }
 
-/* KM de entrada menor que o de saída */
+/* KM de chegada menor que o de saída */
 .erro-km {
     font-size: 13px;
     font-weight: 600;
@@ -502,15 +502,47 @@ main {
     padding-left: 14px;
 }
 
-/* Média de cada placa no card de média */
+/* Média de cada placa no card de média (com placa secundária), uma embaixo da outra */
 .indicador-media-por-placa {
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 12px 0 6px;
 }
 
-.indicador-media-por-placa[hidden] {
+.indicador-media-por-placa[hidden],
+.indicador-valor-principal[hidden],
+.indicador-formula-base[hidden] {
     display: none;
+}
+
+.media-placa {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.media-placa + .media-placa {
+    padding-top: 10px;
+    border-top: 1px solid rgba(37, 99, 235, 0.18);
+}
+
+.media-placa-rotulo {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.media-placa-valor {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.1;
+}
+
+.media-placa .indicador-formula-base {
+    overflow-wrap: anywhere;
 }
 
 /* Revisão antes de enviar: KMs e abastecimentos */
