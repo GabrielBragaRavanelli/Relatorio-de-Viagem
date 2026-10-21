@@ -42,9 +42,9 @@
                 comunicação.
             </p>
             <div class="attention-box">
-                <span class="attention-label">Atenção:</span> tenha em mãos, em PDF, a CNH (frente/verso), o CRLV de cada
-                veículo, o RNTRC e o comprovante de residência. Se não tiver o PDF de algum documento, marque a
-                caixa abaixo dele, preencha os dados e, se quiser, envie uma foto do documento.
+                <span class="attention-label">Atenção:</span> tenha em mãos, em PDF ou foto (JPG/PNG), a CNH (frente/verso), o CRLV de cada
+                veículo, o RNTRC e o comprovante de residência. Se não tiver o PDF nem a foto de algum documento,
+                marque a caixa abaixo dele e preencha os dados.
             </div>
         </section>
 
@@ -154,7 +154,7 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">02 - Documentos</h3>
                     </div>
-                    <p class="step-subtitle">Anexe cada documento. Se não tiver o PDF, marque a caixa abaixo dele e preencha os dados.</p>
+                    <p class="step-subtitle">Anexe cada documento (PDF, JPG ou PNG). Se não tiver o PDF nem a foto, marque a caixa abaixo dele e preencha os dados.</p>
                 </div>
 
                 <div class="step-body">
@@ -174,11 +174,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-cnh"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pj-anexo-cnh"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pj-anexo-cnh" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-cnh"></div>
                             </div>
@@ -186,7 +186,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pj-sem-pdf-cnh" data-doc="cnh">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF da CNH</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto da CNH</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-row col-3">
@@ -340,11 +340,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-rntrc"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pj-anexo-rntrc"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pj-anexo-rntrc" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-rntrc"></div>
                             </div>
@@ -352,7 +352,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pj-sem-pdf-rntrc" data-doc="rntrc">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do RNTRC</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto do RNTRC</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-row col-2">
@@ -398,11 +398,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pj-anexo-residencia"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pj-anexo-residencia"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pj-anexo-residencia" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pj-anexo-residencia"></div>
                             </div>
@@ -410,7 +410,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pj-sem-pdf-residencia" data-doc="residencia">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do comprovante de residência</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto do comprovante de residência</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-group mb-2">
@@ -547,7 +547,7 @@
                         <span class="step-bar"></span>
                         <h3 class="step-title">02 - Documentos</h3>
                     </div>
-                    <p class="step-subtitle">Anexe cada documento. Se não tiver o PDF, marque a caixa abaixo dele e preencha os dados.</p>
+                    <p class="step-subtitle">Anexe cada documento (PDF, JPG ou PNG). Se não tiver o PDF nem a foto, marque a caixa abaixo dele e preencha os dados.</p>
                 </div>
 
                 <div class="step-body">
@@ -567,11 +567,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-cnh"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pf-anexo-cnh"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pf-anexo-cnh" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-cnh"></div>
                             </div>
@@ -579,7 +579,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pf-sem-pdf-cnh" data-doc="cnh">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF da CNH</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto da CNH</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-row col-3">
@@ -733,11 +733,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-rntrc"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pf-anexo-rntrc"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pf-anexo-rntrc" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-rntrc"></div>
                             </div>
@@ -745,7 +745,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pf-sem-pdf-rntrc" data-doc="rntrc">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do RNTRC</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto do RNTRC</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-row col-2">
@@ -791,11 +791,11 @@
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="pf-anexo-residencia"
-                                            class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                                    <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
+                                    <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="pf-anexo-residencia"
+                                            class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                                    <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
                                     <input type="file" id="pf-anexo-residencia" class="file-input-hidden" multiple
-                                        accept="application/pdf,.pdf">
+                                        accept="application/pdf,image/png,image/jpeg">
                                 </div>
                                 <div class="file-preview-list" id="preview-pf-anexo-residencia"></div>
                             </div>
@@ -803,7 +803,7 @@
                         <label class="caixa-sem-pdf">
                             <input type="checkbox" id="pf-sem-pdf-residencia" data-doc="residencia">
                             <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                            <span class="caixa-sem-pdf-texto">Não tenho o PDF do comprovante de residência</span>
+                            <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto do comprovante de residência</span>
                         </label>
                         <div class="cartao-doc-form" hidden>
                             <div class="form-group mb-2">

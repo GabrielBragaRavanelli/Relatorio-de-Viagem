@@ -189,26 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
     applyMask(document.getElementById('pj-telefone-empresa'), maskPhone);
     bloquearNumeros(document.getElementById('pj-responsavel'));
 
-    // Zona de anexo principal (só PDF) ou de foto do documento (JPG/PNG)
-    const ehCampoFoto = (input) => input?.dataset.foto === '1';
+    // Arquivos de cada zona de anexo (input -> [{ arquivo, chave, preparando }]).
+    // Cada escolha soma à lista; o input é zerado depois de cada escolha.
+    const listasAnexo = new WeakMap();
+    const itensDe = (input) => listasAnexo.get(input) || [];
 
-    // Mesma checagem para "Choose Files" e para arrastar e soltar
-    function conferirArquivos(files, ehFoto) {
-        const lista = Array.from(files || []);
-        if (lista.length > MAX_ARQUIVOS) {
-            return `Envie no máximo ${MAX_ARQUIVOS} ${ehFoto ? 'fotos' : 'arquivos'} por documento.`;
-        }
-        for (const f of lista) {
-            if (ehFoto) {
-                // O tamanho da foto é conferido depois da redução
-                if (!TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é uma foto JPG ou PNG.`;
-                continue;
-            }
-            if (!TIPOS_PDF.includes(f.type)) {
-                return f.type.startsWith('image/') ? AVISO_SO_PDF : `O arquivo "${f.name}" não é PDF.`;
-            }
-            if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
-        }
+    // Mesma checagem para "escolha os arquivos" e para arrastar e soltar (um arquivo por vez)
+    function conferirArquivo(f) {
+        if (!TIPOS_PDF.includes(f.type) && !TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é PDF, JPG ou PNG.`;
+        // O tamanho da foto é conferido depois da redução
+        if (TIPOS_PDF.includes(f.type) && f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
         return null;
     }
 
@@ -247,29 +237,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Troca as fotos escolhidas pelas versões reduzidas. Se a redução falhar,
+    // "processando" na zona enquanto alguma foto da lista ainda está sendo reduzida
+    function marcarProcessando(input) {
+        const zone = input.closest('.upload-dropzone');
+        if (!zone) return;
+        if (itensDe(input).some((item) => item.preparando)) zone.dataset.processando = '1';
+        else delete zone.dataset.processando;
+    }
+
+    // Troca as fotos novas pelas versões reduzidas. Se a redução falhar,
     // segue a original, desde que tenha até 10 MB.
-    async function prepararFotos(input, zone) {
-        const vez = String(Number(input.dataset.vez || 0) + 1);
-        input.dataset.vez = vez;
-        zone.dataset.processando = '1';
-        const prontas = [];
+    async function prepararFotos(input, itens) {
         const recusadas = [];
-        for (const f of Array.from(input.files || [])) {
+        for (const item of itens) {
             try {
-                prontas.push(await reduzirFoto(f));
+                item.arquivo = await reduzirFoto(item.arquivo);
             } catch (err) {
                 console.warn('Foto não reduzida; usando a original:', err && err.message);
-                if (f.size <= TAMANHO_MAX) prontas.push(f);
-                else recusadas.push(f.name);
+                if (item.arquivo.size > TAMANHO_MAX) {
+                    recusadas.push(item.arquivo.name);
+                    listasAnexo.set(input, itensDe(input).filter((x) => x !== item));
+                }
             }
+            item.preparando = false;
+            // A lista pode ter sido limpa ou mudado no meio: só redesenha a atual
+            marcarProcessando(input);
+            renderFileList(input, input.closest('.upload-dropzone')?.querySelector('.file-preview-list'));
         }
-        if (input.dataset.vez !== vez) return; // outra escolha começou no meio
-        delete zone.dataset.processando;
-        const lista = new DataTransfer();
-        prontas.forEach((f) => lista.items.add(f));
-        input.files = lista.files;
         if (recusadas.length) alert(`Não foi possível usar a foto "${recusadas.join('", "')}": passa de 10 MB. Tente outra foto.`);
+    }
+
+    // Soma os arquivos escolhidos (ou soltos) à lista da zona.
+    // Repetido (mesmo nome e tamanho) é ignorado; tipo errado e o que passar de 3 são recusados.
+    function adicionarArquivos(input, novos) {
+        if (input.disabled) return;
+        const itens = itensDe(input);
+        const avisos = [];
+        const fotos = [];
+        let passou = false;
+        for (const f of Array.from(novos || [])) {
+            const chave = `${f.name}|${f.size}`;
+            if (itens.some((item) => item.chave === chave)) continue;
+            const problema = conferirArquivo(f);
+            if (problema) {
+                avisos.push(problema);
+                continue;
+            }
+            if (itens.length >= MAX_ARQUIVOS) {
+                passou = true;
+                continue;
+            }
+            const item = { arquivo: f, chave, preparando: TIPOS_FOTO.includes(f.type) };
+            itens.push(item);
+            if (item.preparando) fotos.push(item);
+        }
+        if (passou) avisos.push(`Este documento aceita no máximo ${MAX_ARQUIVOS} arquivos. Remova um para adicionar outro.`);
+        listasAnexo.set(input, itens);
+        input.value = '';
+        marcarProcessando(input);
+        renderFileList(input, input.closest('.upload-dropzone')?.querySelector('.file-preview-list'));
+        if (avisos.length) alert(avisos.join('\n'));
+        if (fotos.length) prepararFotos(input, fotos);
     }
 
     // Busca o input e a prévia dentro da própria zona: funciona também com
@@ -302,28 +330,20 @@ document.addEventListener('DOMContentLoaded', () => {
             zone.classList.remove('dragover');
             const arquivos = e.dataTransfer && e.dataTransfer.files;
             if (!arquivos || arquivos.length === 0 || input.disabled) return;
-            const problema = conferirArquivos(arquivos, ehCampoFoto(input));
-            if (problema) return alert(problema);
-            input.files = arquivos;
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            adicionarArquivos(input, arquivos);
+            // Avisa o cartão (o aviso de erro do bloco some quando ele muda)
+            zone.dispatchEvent(new Event('change', { bubbles: true }));
         });
 
-        input.addEventListener('change', async () => {
-            const problema = conferirArquivos(input.files, ehCampoFoto(input));
-            if (problema) {
-                alert(problema);
-                input.value = '';
-            } else if (ehCampoFoto(input) && input.files.length > 0) {
-                previewList.textContent = 'Preparando a foto...';
-                await prepararFotos(input, zone);
-            }
-            renderFileList(input, previewList);
+        input.addEventListener('change', () => {
+            if (input.files && input.files.length > 0) adicionarArquivos(input, input.files);
         });
     }
 
     function limparArquivos(input) {
         if (!input) return;
         input.value = '';
+        listasAnexo.set(input, []);
         delete input.closest('.upload-dropzone')?.dataset.processando;
         renderFileList(input, input.closest('.upload-dropzone')?.querySelector('.file-preview-list'));
     }
@@ -339,32 +359,39 @@ document.addEventListener('DOMContentLoaded', () => {
         (container.miniaturas || []).forEach((url) => URL.revokeObjectURL(url));
         container.miniaturas = [];
         container.innerHTML = '';
-        Array.from(input.files || []).forEach((file, i) => {
+        itensDe(input).forEach((registro) => {
+            const file = registro.arquivo;
             const item = document.createElement('span');
             item.className = 'file-preview-item';
             const sizeKb = (file.size / 1024).toFixed(0);
-            if (file.type.startsWith('image/')) {
+            // Foto ainda sendo reduzida fica sem miniatura até ficar pronta
+            if (file.type.startsWith('image/') && !registro.preparando) {
                 const miniatura = document.createElement('img');
                 miniatura.className = 'file-preview-miniatura';
                 miniatura.alt = '';
                 miniatura.src = URL.createObjectURL(file);
                 container.miniaturas.push(miniatura.src);
                 item.appendChild(miniatura);
+            } else if (!file.type.startsWith('image/')) {
+                const icone = document.createElement('span');
+                icone.className = 'file-preview-icone';
+                icone.setAttribute('aria-hidden', 'true');
+                icone.textContent = 'PDF';
+                item.appendChild(icone);
             }
             const nome = document.createElement('span');
             nome.className = 'file-preview-nome';
-            nome.textContent = `${file.name} (${sizeKb} KB)`;
+            nome.textContent = registro.preparando ? `${file.name}: Preparando a foto...` : `${file.name} (${sizeKb} KB)`;
             item.appendChild(nome);
             const remover = document.createElement('button');
             remover.type = 'button';
             remover.className = 'file-preview-remover';
             remover.setAttribute('aria-label', `Remover ${file.name}`);
-            remover.textContent = '×';
+            remover.textContent = '✕';
             remover.addEventListener('click', (e) => {
                 e.stopPropagation(); // não abre o seletor de arquivos da zona
-                const restantes = new DataTransfer();
-                Array.from(input.files).forEach((f, j) => { if (j !== i) restantes.items.add(f); });
-                input.files = restantes.files;
+                listasAnexo.set(input, itensDe(input).filter((x) => x !== registro));
+                marcarProcessando(input);
                 renderFileList(input, container);
             });
             item.appendChild(remover);
@@ -410,13 +437,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'Rio Grande do Sul (RS)', 'Rondônia (RO)', 'Roraima (RR)', 'Santa Catarina (SC)', 'São Paulo (SP)',
         'Sergipe (SE)', 'Tocantins (TO)'];
     const MAX_ARQUIVOS = 3;
-    // Anexo principal só em PDF; a foto vai no formulário ("Não tenho o PDF")
+    // Anexo principal: PDF, JPG ou PNG (podendo misturar), até 3 por documento
     const TIPOS_PDF = ['application/pdf'];
     const TIPOS_FOTO = ['image/png', 'image/jpeg'];
     const TAMANHO_MAX = 10 * 1024 * 1024;
     const LADO_MAX_FOTO = 2000;
     const QUALIDADE_FOTO = 0.85;
-    const AVISO_SO_PDF = "Aqui só PDF. Se você tem a foto do documento, marque 'Não tenho o PDF' e envie a foto no formulário.";
     // Data da "Última atualização" da Política de Privacidade (HTML/politica-privacidade.html)
     const VERSAO_POLITICA = '2026-10-19';
 
@@ -454,41 +480,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartaoDe = (prefixo, doc) => campo(prefixo, 'docs')?.querySelector(`.cartao-doc[data-doc="${doc}"]`);
     const semPdf = (prefixo, doc) => !!campo(prefixo, `sem-pdf-${doc}`)?.checked;
     const anexoDe = (prefixo, doc) => campo(prefixo, `anexo-${doc.replace('_', '-')}`);
-    const fotoDe = (prefixo, doc) => cartaoDe(prefixo, doc)?.querySelector('input[data-foto="1"]');
-    const listaDe = (el) => (el && el.files ? Array.from(el.files) : []);
+    // Lista da zona (não o input.files, que é zerado a cada escolha)
+    const listaDe = (el) => (el ? itensDe(el).map((item) => item.arquivo) : []);
     const arquivosDe = (prefixo, doc) => listaDe(anexoDe(prefixo, doc));
-    const fotosDe = (prefixo, doc) => listaDe(fotoDe(prefixo, doc));
-
-    // "Foto do documento (opcional)", no topo do formulário que abre com a caixinha.
-    // Sem "capture": no celular dá para escolher entre câmera e galeria.
-    function campoFotoHtml(id) {
-        return `
-            <div class="campo-foto-doc">
-                <label class="rotulo-foto" for="${id}">Foto do documento <span class="field-optional">(opcional)</span></label>
-                <div class="upload-dropzone upload-dropzone-foto" data-target="${id}">
-                    <div class="upload-inner-card">
-                        <svg class="upload-icon" viewBox="0 0 24 24" width="28" height="28" fill="none"
-                            stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                            <circle cx="12" cy="13" r="4" />
-                        </svg>
-                        <span class="upload-text"><span class="upload-texto-mouse">Arraste a foto aqui ou <label for="${id}"
-                                class="upload-action-link">escolha a foto</label></span><span class="upload-texto-toque">Toque para escolher a foto</span></span>
-                        <span class="upload-subtext">JPG ou PNG. Até 3 fotos.</span>
-                        <input type="file" id="${id}" class="file-input-hidden" multiple accept="image/png,image/jpeg" data-foto="1">
-                    </div>
-                    <div class="file-preview-list" id="preview-${id}"></div>
-                </div>
-                <p class="cartao-doc-nota">A foto ajuda na conferência, mas não substitui os campos abaixo.</p>
-            </div>`;
-    }
-
-    function inserirCampoFoto(cartao, id) {
-        const form = cartao?.querySelector('.cartao-doc-form');
-        if (!form || form.querySelector('.campo-foto-doc')) return;
-        form.insertAdjacentHTML('afterbegin', campoFotoHtml(id));
-        ligarDropzone(form.querySelector('.upload-dropzone'));
-    }
 
     // ---------- Estado -> Cidade (municípios da API do IBGE) ----------
     // A cidade é um campo de texto com <datalist> dos municípios do estado.
@@ -645,10 +639,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
-                        <span class="upload-text"><span class="upload-texto-mouse">Drag & Drop Files, <label for="${anexo}"
-                                class="upload-action-link">Choose Files to Upload</label></span><span class="upload-texto-toque">Toque para escolher</span></span>
-                        <span class="upload-subtext">Apenas PDF, até 10 MB. Até 3 arquivos.</span>
-                        <input type="file" id="${anexo}" class="file-input-hidden" multiple accept="application/pdf,.pdf">
+                        <span class="upload-text"><span class="upload-texto-mouse">Arraste aqui ou <label for="${anexo}"
+                                class="upload-action-link">escolha os arquivos</label></span><span class="upload-texto-toque">Toque para escolher o arquivo ou tirar a foto</span></span>
+                        <span class="upload-subtext">PDF, JPG ou PNG. Até 3 arquivos (10 MB cada).</span>
+                        <input type="file" id="${anexo}" class="file-input-hidden" multiple accept="application/pdf,image/png,image/jpeg">
                     </div>
                     <div class="file-preview-list" id="preview-${anexo}"></div>
                 </div>
@@ -656,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="caixa-sem-pdf">
                 <input type="checkbox" id="${prefixo}-sem-pdf-crlv_${n}" data-doc="crlv_${n}">
                 <span class="caixa-sem-pdf-quadrado" aria-hidden="true"></span>
-                <span class="caixa-sem-pdf-texto">Não tenho o PDF do ${esc(nomeCrlv(papel))}</span>
+                <span class="caixa-sem-pdf-texto">Não tenho o PDF nem a foto do ${esc(nomeCrlv(papel))}</span>
             </label>
             <div class="cartao-doc-form" hidden>
                 <div class="form-row col-3">
@@ -690,14 +684,13 @@ document.addEventListener('DOMContentLoaded', () => {
         applyMask(el('prop-doc'), maskCpfCnpj);
         ligarEstadoCidade(el('uf'));
         ligarDropzone(cartao.querySelector('.upload-dropzone'));
-        inserirCampoFoto(cartao, `${prefixo}-foto-crlv-${n}`);
         return cartao;
     }
 
     function cartaoPreenchido(cartao) {
         if (!cartao) return false;
         const arquivo = cartao.querySelector('input[type="file"]');
-        if (arquivo && arquivo.files && arquivo.files.length > 0) return true;
+        if (listaDe(arquivo).length > 0) return true;
         return Array.from(cartao.querySelectorAll('.cartao-doc-form input, .cartao-doc-form select'))
             .some((el) => el.value.trim() !== '');
     }
@@ -745,7 +738,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const anexo = cartao.querySelector('.cartao-doc-anexo');
             const arquivo = anexoDe(prefixo, doc);
             anexo.hidden = marcado;
-            if (marcado && arquivo && arquivo.value) limparArquivos(arquivo);
+            if (arquivo) arquivo.disabled = marcado;
+            if (marcado && listaDe(arquivo).length) limparArquivos(arquivo);
 
             // Formulário do documento: só com a caixa marcada; escondido fica limpo e desativado
             const form = cartao.querySelector('.cartao-doc-form');
@@ -755,12 +749,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.disabled = !marcado || !ativo;
                 el.required = marcado && ativo && obrigatorio;
             });
-            // Foto do documento: opcional; desmarcar a caixa limpa as fotos
-            const foto = fotoDe(prefixo, doc);
-            if (foto) {
-                if (!marcado && foto.value) limparArquivos(foto);
-                foto.disabled = !marcado || !ativo;
-            }
             form.querySelectorAll('select[data-cidade]').forEach(sincronizarCidade);
         });
     }
@@ -809,25 +797,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function problemaArquivosDoc(prefixo, { doc, titulo, obrigatorio }) {
         const artigo = doc === 'cnh' ? 'a' : 'o';
-        if (semPdf(prefixo, doc)) {
-            if (fotoDe(prefixo, doc)?.closest('.upload-dropzone')?.dataset.processando) {
-                return 'Aguarde: as fotos ainda estão sendo preparadas.';
-            }
-            const fotos = fotosDe(prefixo, doc);
-            if (fotos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} fotos para ${artigo} ${titulo}.`;
-            for (const f of fotos) {
-                if (!TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é uma foto JPG ou PNG.`;
-                if (f.size > TAMANHO_MAX) return `A foto "${f.name}" passa de 10 MB.`;
-            }
-            return null;
+        // Caixinha marcada: vale o formulário, sem arquivos
+        if (semPdf(prefixo, doc)) return null;
+        if (anexoDe(prefixo, doc)?.closest('.upload-dropzone')?.dataset.processando) {
+            return 'Aguarde: as fotos ainda estão sendo preparadas.';
         }
         const arquivos = arquivosDe(prefixo, doc);
-        if (obrigatorio && arquivos.length === 0) return `Anexe ${artigo} ${titulo} ou marque que não tem o PDF.`;
+        if (obrigatorio && arquivos.length === 0) return `Anexe ${artigo} ${titulo} ou marque que não tem o PDF nem a foto.`;
         if (arquivos.length > MAX_ARQUIVOS) return `Envie no máximo ${MAX_ARQUIVOS} arquivos para ${artigo} ${titulo}.`;
         for (const f of arquivos) {
-            if (!TIPOS_PDF.includes(f.type)) {
-                return `O anexo d${artigo} ${titulo} precisa ser PDF. Se tiver só a foto, marque 'Não tenho o PDF' e envie a foto no formulário.`;
-            }
+            if (!TIPOS_PDF.includes(f.type) && !TIPOS_FOTO.includes(f.type)) return `O arquivo "${f.name}" não é PDF, JPG ou PNG.`;
             if (f.size > TAMANHO_MAX) return `O arquivo "${f.name}" passa de 10 MB.`;
         }
         return null;
@@ -849,11 +828,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const documentos = {};
         const arquivos = [];
         docs.forEach(({ doc }) => {
-            // Sem o PDF, seguem as fotos (opcionais) em "{doc}_foto"
-            const lista = sem_pdf[doc] ? fotosDe(prefixo, doc) : arquivosDe(prefixo, doc);
+            // PDF e fotos vão juntos na chave do próprio documento; com a caixinha marcada, nenhum arquivo
+            const lista = sem_pdf[doc] ? [] : arquivosDe(prefixo, doc);
             if (lista.length === 0) return;
-            documentos[sem_pdf[doc] ? `${doc}_foto` : doc] =
-                lista.map((f) => ({ nome: f.name, tipo: f.type, tamanho: f.size }));
+            documentos[doc] = lista.map((f) => ({ nome: f.name, tipo: f.type, tamanho: f.size }));
             arquivos.push(...lista); // mesma ordem que o servidor usa em "indice"
         });
         return {
@@ -924,7 +902,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.matches('.caixa-sem-pdf input')) aplicarCaixas(prefixo);
         });
         form.querySelectorAll('select[data-cidade]').forEach(ligarEstadoCidade);
-        ['cnh', 'rntrc', 'residencia'].forEach((doc) => inserirCampoFoto(cartaoDe(prefixo, doc), `${prefixo}-foto-${doc}`));
         montarCrlvs(prefixo);
         aplicarCaixas(prefixo);
 
@@ -955,10 +932,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const { corpo } = montarEnvio(prefixo);
             const situacao = ({ doc }) => {
-                if ((corpo.documentos[doc] || []).length) return 'Anexado (PDF)';
-                const fotos = (corpo.documentos[`${doc}_foto`] || []).length;
-                if (fotos) return `Preenchido no formulário + ${fotos} ${fotos === 1 ? 'foto' : 'fotos'}`;
-                return 'Preenchido no formulário';
+                const lista = corpo.documentos[doc] || [];
+                if (!lista.length) return 'Preenchido no formulário';
+                const fotos = lista.filter((f) => TIPOS_FOTO.includes(f.tipo)).length;
+                const pdfs = lista.length - fotos;
+                const partes = [];
+                if (fotos) partes.push(`${fotos} ${fotos === 1 ? 'foto' : 'fotos'}`);
+                if (pdfs) partes.push(`${pdfs} ${pdfs === 1 ? 'PDF' : 'PDFs'}`);
+                return `Anexado: ${partes.join(' + ')}`;
             };
             const nome = `${corpo.dados['motorista-nome'] || ''} ${corpo.dados['motorista-sobrenome'] || ''}`.trim();
             document.getElementById('resumo-cadastro').innerHTML = `
@@ -1004,6 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Entre em contato com a gestão da AJBorges para completar o envio.';
             }
             form.reset();
+            form.querySelectorAll('.upload-dropzone input[type="file"]').forEach(limparArquivos);
             form.querySelectorAll('.file-preview-list').forEach((c) => { c.innerHTML = ''; });
             campo(prefixo, 'crlvs').innerHTML = '';
             aplicarCaixas(prefixo);
