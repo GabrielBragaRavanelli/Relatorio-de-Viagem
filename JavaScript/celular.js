@@ -1,5 +1,5 @@
 // ==========================================
-// AJBorges - Ajustes de celular (ficha de viagem, cadastro, login e recuperação de senha)
+// AJBorges - Ajustes de celular (ficha de viagem, cadastro e login)
 // - O campo em uso não fica escondido atrás do teclado
 // - Erro de validação aparece logo abaixo do campo, e a tela rola até o primeiro
 // ==========================================

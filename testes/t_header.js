@@ -1,6 +1,6 @@
 // Header das páginas: linhas de links, altura, logo, rolagem horizontal e se cobre o conteúdo
 const { abrir } = require('./harness');
-const PAGINAS = (process.argv[3] || 'index,Contato,FichaMultiCadastro,Login,Nossosfretes,Sobrenos,politica-privacidade,recuperar-senha,relatorio-viagem').split(',');
+const PAGINAS = (process.argv[3] || 'index,Contato,FichaMultiCadastro,Login,Nossosfretes,Sobrenos,politica-privacidade,relatorio-viagem').split(',');
 const LARGURAS = (process.argv[2] || '320,360,390,430,641,700,780,781,860,900,1024,1280,1440').split(',').map(Number);
 
 (async () => {
