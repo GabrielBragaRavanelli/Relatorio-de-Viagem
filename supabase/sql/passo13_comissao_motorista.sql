@@ -304,8 +304,11 @@ begin
                                                       v_novo_dc -> 'destinoInicial'), 120) #>> '{}'), '');
   v_destino_fim  := nullif(btrim(public._txt(coalesce(nullif(to_jsonb(new) -> 'destino_final', 'null'::jsonb),
                                                       v_novo_dc -> 'destinoFinal'), 120) #>> '{}'), '');
-  v_adiantamento := coalesce(public._moeda(to_jsonb(new) -> 'valor_adiantamento'),
-                             public._moeda(v_novo_dc -> 'valorAdiantamento'));
+  -- (a coluna tem default 0: o 0 dela não pode esconder o valor de dados_completos)
+  v_adiantamento := coalesce(nullif(public._moeda(to_jsonb(new) -> 'valor_adiantamento'), 0),
+                             public._moeda(v_novo_dc -> 'valorAdiantamento'),
+                             public._moeda(to_jsonb(new) -> 'valor_adiantamento'));
+  -- total_frete, vr_comissao e saldo_comissao não são lidos da coluna: são calculados abaixo
 
   -- passo 13: totais calculados a partir das linhas limpas
   select coalesce(sum(public._moeda(f -> 'valor')), 0),

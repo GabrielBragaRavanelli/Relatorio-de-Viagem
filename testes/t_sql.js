@@ -1,4 +1,4 @@
-// Roda supabase/sql/referencia_fichas_atual.sql + passo9 + passo11 + passo12 + passo13 num Postgres em WASM
+// Roda supabase/sql/referencia_fichas_atual.sql + passo9 + passo11 + passo12 + passo13 + passo13b num Postgres em WASM
 // (PGlite), com auth.uid()/auth.jwt()/is_admin() simulados, e confere o trigger do motorista e da gestão.
 // As conferências do passo 12 e do passo 13 (depois do commit) também rodam, bloco a bloco, como estão no arquivo.
 const fs = require('fs');
@@ -49,7 +49,7 @@ async function conferencias(db, sql, prefixo) {
       data_envio timestamptz, aprovado_em timestamptz, iniciada_em timestamptz,
       data_saida date, data_chegada date,
       km_saida numeric, km_chegada numeric, km_total numeric, retorno_1 numeric, retorno_2 numeric, retorno_3 numeric,
-      total_frete numeric, vr_comissao numeric, valor_adiantamento numeric, recibo_tm_1 numeric, saldo_comissao numeric, total_despesas numeric,
+      total_frete numeric, vr_comissao numeric, valor_adiantamento numeric default 0, recibo_tm_1 numeric, saldo_comissao numeric, total_despesas numeric,
       abastecimentos jsonb, comprovantes jsonb, despesas_extras jsonb, dados_completos jsonb, motorista_id uuid
     );
     create role authenticated;
@@ -70,11 +70,18 @@ async function conferencias(db, sql, prefixo) {
   const p13 = ler('supabase/sql/passo13_comissao_motorista.sql');
   await db.exec(ateCommit(p13));
   await db.exec(ateCommit(p13));
+  // Passo 13b (só a função corrigida do adiantamento); também tem que poder ser reexecutado
+  const p13b = ler('supabase/sql/passo13b_adiantamento.sql');
+  if (process.env.SEM_13B !== '1') {
+    await db.exec(ateCommit(p13b));
+    await db.exec(ateCommit(p13b));
+  }
 
   const r = {};
   // Conferências dos arquivos, como o usuário vai rodar no SQL Editor (passo 12 continua igual com o trigger novo)
   r.conferenciasPasso12 = await conferencias(db, p12, '2');
   r.conferenciasPasso13 = await conferencias(db, p13, '7');
+  r.conferenciasPasso13b = await conferencias(db, p13b, '2');
   r.perfilDepoisDasConferencias = (await db.query(`select tipo_veiculo, comissao_alim_carreta, comissao_alim_rodotrem from public.perfis`)).rows[0];
   r.limparFretesDuasVersoes = (await db.query(`select pg_get_function_identity_arguments(oid) args from pg_proc where proname = '_limpar_fretes' order by 1`)).rows.map(x => x.args);
 
