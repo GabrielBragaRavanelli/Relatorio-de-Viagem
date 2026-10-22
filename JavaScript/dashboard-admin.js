@@ -3446,6 +3446,52 @@ function senhaPadraoFrota(cpf) {
     return `${somenteDigitos(cpf).slice(0, 6)}@frota`;
 }
 
+// Tipo de veículo do motorista (perfis.tipo_veiculo, passo 13)
+const ROTULOS_TIPO_VEICULO = { carreta: 'Carreta', rodotrem: 'Rodotrem', carreta_rodotrem: 'Carreta ou rodotrem' };
+const tipoComRodotrem = (tipo) => tipo === 'rodotrem' || tipo === 'carreta_rodotrem';
+
+// % da tela ("10,5", "6" ou vazio). Mesma regra da edge function (lerComissao):
+// de 0 a 100 com até 2 casas. Devolve { ok, valor } com valor '' = em branco.
+function lerPercentualTela(texto) {
+    const t = String(texto ?? '').trim().replace(',', '.');
+    if (!t) return { ok: true, valor: '' };
+    if (!/^\d{1,3}(\.\d{1,2})?$/.test(t) || Number(t) > 100) return { ok: false };
+    return { ok: true, valor: t };
+}
+
+// 10.5 -> "10,5" (vazio fica vazio)
+function formatarPercentual(valor) {
+    if (valor === null || valor === undefined || valor === '' || !isFinite(Number(valor))) return '';
+    return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+}
+
+// "Rodotrem · rodotrem 10,5%" / "Carreta · carreta 6%" (texto para escapar antes de montar HTML)
+function textoVeiculoMotorista(m) {
+    const tipo = ROTULOS_TIPO_VEICULO[m.tipo_veiculo] ? m.tipo_veiculo : 'carreta';
+    const especiais = [];
+    if (formatarPercentual(m.comissao_alim_carreta)) especiais.push(`carreta ${formatarPercentual(m.comissao_alim_carreta)}%`);
+    if (tipoComRodotrem(tipo) && formatarPercentual(m.comissao_alim_rodotrem)) especiais.push(`rodotrem ${formatarPercentual(m.comissao_alim_rodotrem)}%`);
+    return { tipo: ROTULOS_TIPO_VEICULO[tipo], especiais: especiais.join(' · ') };
+}
+
+// Tipo e comissões do formulário (prefixo 'mot-add' ou 'mot-edit'); erro = mensagem para a tela
+function lerVeiculoFormulario(prefixo) {
+    const tipo = document.getElementById(`${prefixo}-tipo`)?.value || 'carreta';
+    if (!ROTULOS_TIPO_VEICULO[tipo]) return { erro: 'Escolha o tipo de veículo.' };
+    const carreta = lerPercentualTela(document.getElementById(`${prefixo}-com-carreta`)?.value);
+    if (!carreta.ok) return { erro: 'Comissão especial de carreta inválida. Use um número de 0 a 100 (ex.: 10,5) ou deixe em branco.' };
+    const rodotrem = tipoComRodotrem(tipo) ? lerPercentualTela(document.getElementById(`${prefixo}-com-rodotrem`)?.value) : { ok: true, valor: '' };
+    if (!rodotrem.ok) return { erro: 'Comissão especial de rodotrem inválida. Use um número de 0 a 100 (ex.: 10,5) ou deixe em branco.' };
+    return { dados: { tipo_veiculo: tipo, comissao_alim_carreta: carreta.valor, comissao_alim_rodotrem: rodotrem.valor } };
+}
+
+// A comissão de rodotrem só aparece para Rodotrem e Carreta ou rodotrem
+function atualizarCampoRodotrem(prefixo) {
+    const tipo = document.getElementById(`${prefixo}-tipo`)?.value;
+    const campo = document.getElementById(`${prefixo}-com-rodotrem-campo`);
+    if (campo) campo.hidden = !tipoComRodotrem(tipo);
+}
+
 function dataHoraBR(iso) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -3494,7 +3540,7 @@ async function carregarAbaMotoristas() {
         console.warn('Erro ao carregar a frota:', frota.error.message);
         estadoMotoristas.frota = [];
         const tbody = document.getElementById('mot-tbody');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="tabela-empty-state">Não foi possível carregar a frota. Confira se o passo 9 do banco foi aplicado e atualize a página.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="tabela-empty-state">Não foi possível carregar a frota. Confira se o passo 9 do banco foi aplicado e atualize a página.</td></tr>';
     } else {
         estadoMotoristas.frota = Array.isArray(frota.data) ? frota.data : [];
     }
@@ -3564,7 +3610,7 @@ function renderizarFrota() {
     const tbody = document.getElementById('mot-tbody');
     if (!tbody) return;
     if (filtrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="tabela-empty-state">${lista.length === 0
+        tbody.innerHTML = `<tr><td colspan="7" class="tabela-empty-state">${lista.length === 0
             ? 'Nenhum motorista da frota cadastrado. Use <strong>Adicionar motorista da frota</strong> ou <strong>Importar planilha</strong>.'
             : 'Nenhum motorista encontrado para a busca ou o filtro.'}</td></tr>`;
         return;
@@ -3574,16 +3620,19 @@ function renderizarFrota() {
         const id = escaparHtml(m.id);
         const tambemTerceiro = estadoMotoristas.cpfsTerceiros.has(somenteDigitos(m.cpf));
         const inativo = m.status === 'inativo';
+        const veiculo = textoVeiculoMotorista(m);
         return `
             <tr>
                 <td><strong>${escaparHtml(m.nome || 'Sem nome')}</strong>
                     ${tambemTerceiro ? '<span class="mot-selo-duplo" title="Este CPF também tem cadastro de terceiro/agregado">também é terceiro</span>' : ''}</td>
                 <td class="mot-nowrap">${escaparHtml(formatarCpfCompleto(m.cpf))}</td>
                 <td class="mot-nowrap">${escaparHtml(formatarCelularBR(m.telefone)) || '—'}</td>
+                <td class="mot-veiculo">${escaparHtml(veiculo.tipo)}${veiculo.especiais ? `<span class="mot-veiculo-especial"> · ${escaparHtml(veiculo.especiais)}</span>` : ''}</td>
                 <td>${seloSituacaoMotorista(m)}</td>
                 <td class="mot-nowrap">${m.ultimo_acesso ? escaparHtml(dataHoraBR(m.ultimo_acesso)) : '<span class="mot-texto-cinza">nunca entrou</span>'}</td>
                 <td>
                     <div class="table-actions-cell">
+                        <button type="button" class="btn-acao-conferir" data-mot-acao="editar" data-id="${id}">Editar</button>
                         <button type="button" class="btn-acao-resumo" data-mot-acao="redefinir_senha" data-id="${id}">Redefinir para a senha padrão</button>
                         ${inativo
                             ? `<button type="button" class="btn-acao-aprovar-rapido" data-mot-acao="reativar" data-id="${id}">Reativar</button>`
@@ -3598,6 +3647,7 @@ function renderizarFrota() {
 async function executarAcaoMotorista(acao, id) {
     const m = estadoMotoristas.frota.find(x => x.id === id);
     if (!m) return;
+    if (acao === 'editar') return abrirEdicaoMotorista(m);
     const nome = m.nome || 'este motorista';
     const perguntas = {
         redefinir_senha: `Redefinir a senha de ${nome}?\n\nA senha volta a ser a padrão: os 6 primeiros dígitos do CPF + @frota. As sessões abertas dele serão encerradas.`,
@@ -3618,6 +3668,63 @@ async function executarAcaoMotorista(acao, id) {
     };
     exibirToast(mensagens[acao], 'sucesso');
     await carregarAbaMotoristas();
+}
+
+// ---------------- Editar motorista ----------------
+
+function abrirEdicaoMotorista(m) {
+    const definir = (id, valor) => { const el = document.getElementById(id); if (el) el.value = valor; };
+    definir('mot-edit-id', m.id);
+    definir('mot-edit-nome', m.nome || '');
+    definir('mot-edit-cpf', mascaraCpfDigitando(m.cpf));
+    definir('mot-edit-celular', mascaraCelularDigitando(m.telefone));
+    definir('mot-edit-tipo', ROTULOS_TIPO_VEICULO[m.tipo_veiculo] ? m.tipo_veiculo : 'carreta');
+    definir('mot-edit-com-carreta', formatarPercentual(m.comissao_alim_carreta));
+    definir('mot-edit-com-rodotrem', formatarPercentual(m.comissao_alim_rodotrem));
+    atualizarCampoRodotrem('mot-edit');
+    mostrarAlertaMot('mot-edit-alerta', '');
+    abrirModalMotoristas('modal-mot-editar');
+    setTimeout(() => document.getElementById('mot-edit-nome')?.focus(), 100);
+}
+
+async function salvarEdicaoMotorista() {
+    const id = document.getElementById('mot-edit-id').value;
+    const m = estadoMotoristas.frota.find(x => x.id === id);
+    if (!m) return;
+    const nome = document.getElementById('mot-edit-nome').value.replace(/\s+/g, ' ').trim();
+    const cpf = somenteDigitos(document.getElementById('mot-edit-cpf').value);
+    const celular = limparCelularBR(document.getElementById('mot-edit-celular').value);
+
+    if (!nome) return mostrarAlertaMot('mot-edit-alerta', 'Informe o nome completo.');
+    if (!cpfValidoBR(cpf)) return mostrarAlertaMot('mot-edit-alerta', 'CPF inválido. Confira os números.');
+    if (!celular) return mostrarAlertaMot('mot-edit-alerta', 'Celular inválido. Use DDD + número.');
+    const veiculo = lerVeiculoFormulario('mot-edit');
+    if (veiculo.erro) return mostrarAlertaMot('mot-edit-alerta', veiculo.erro);
+    mostrarAlertaMot('mot-edit-alerta', '');
+
+    const cpfMudou = cpf !== somenteDigitos(m.cpf);
+    const pergunta = cpfMudou
+        ? `O CPF de ${nome} vai mudar. Ele passa a entrar com o CPF novo, a senha volta a ser a padrão (6 primeiros dígitos do CPF novo + @frota) e as sessões abertas dele serão encerradas. Continuar?`
+        : `Salvar as alterações de ${nome}?`;
+    if (!confirm(pergunta)) return;
+
+    const botao = document.getElementById('mot-edit-salvar');
+    botao.disabled = true;
+    botao.textContent = 'Salvando...';
+    try {
+        const r = await chamarGerenciarFrota({ acao: 'editar', id, nome, cpf, celular, ...veiculo.dados });
+        if (!r.ok) {
+            mostrarAlertaMot('mot-edit-alerta', (r.dados && r.dados.erro) || 'Não foi possível salvar as alterações.');
+            return;
+        }
+        const cpfAlterado = !!(r.dados && r.dados.cpf_alterado);
+        exibirToast(`Dados de ${nome} atualizados.${cpfAlterado ? ' A senha agora é a padrão do CPF novo.' : ''}`, 'sucesso');
+        fecharModalMotoristas(document.getElementById('modal-mot-editar'));
+        await carregarAbaMotoristas();
+    } finally {
+        botao.disabled = false;
+        botao.textContent = 'Salvar alterações';
+    }
 }
 
 // ---------------- Aba Terceiros e agregados ----------------
@@ -3715,6 +3822,7 @@ function limparFormularioMotorista() {
     document.getElementById('mot-add-sucesso').hidden = true;
     document.getElementById('mot-add-salvar').hidden = false;
     document.getElementById('mot-add-outro').hidden = true;
+    atualizarCampoRodotrem('mot-add');
     avaliarSenhaInicial();
 }
 
@@ -3752,6 +3860,8 @@ async function salvarMotoristaFrota() {
     if (!nome) return mostrarAlertaMot('mot-add-alerta', 'Informe o nome completo.');
     if (!cpfValidoBR(cpf)) return mostrarAlertaMot('mot-add-alerta', 'CPF inválido. Confira os números.');
     if (!celular) return mostrarAlertaMot('mot-add-alerta', 'Celular inválido. Use DDD + número.');
+    const veiculo = lerVeiculoFormulario('mot-add');
+    if (veiculo.erro) return mostrarAlertaMot('mot-add-alerta', veiculo.erro);
     // Em branco = senha padrão
     const ehPadrao = !senha || senha === senhaPadraoFrota(cpf);
     if (!ehPadrao && window.ajbSenha) {
@@ -3764,7 +3874,7 @@ async function salvarMotoristaFrota() {
     botao.disabled = true;
     botao.textContent = 'Cadastrando...';
     try {
-        const corpo = { acao: 'criar', nome, cpf, celular };
+        const corpo = { acao: 'criar', nome, cpf, celular, ...veiculo.dados };
         if (!ehPadrao) corpo.senha = senha; // a padrão o servidor monta sozinho
         const r = await chamarGerenciarFrota(corpo);
         if (!r.ok) {
@@ -4023,7 +4133,7 @@ function inicializarAbaMotoristas() {
     });
 
     // Fechar modais (botões, clique fora e Esc)
-    ['modal-mot-adicionar', 'modal-mot-importar'].forEach(id => {
+    ['modal-mot-adicionar', 'modal-mot-editar', 'modal-mot-importar'].forEach(id => {
         const modal = document.getElementById(id);
         if (!modal) return;
         modal.addEventListener('click', (e) => {
@@ -4032,8 +4142,21 @@ function inicializarAbaMotoristas() {
     });
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        document.querySelectorAll('#modal-mot-adicionar.active, #modal-mot-importar.active').forEach(fecharModalMotoristas);
+        document.querySelectorAll('#modal-mot-adicionar.active, #modal-mot-editar.active, #modal-mot-importar.active').forEach(fecharModalMotoristas);
     });
+
+    // Tipo de veículo: a comissão de rodotrem só aparece para Rodotrem / Carreta ou rodotrem
+    ['mot-add', 'mot-edit'].forEach(prefixo => {
+        document.getElementById(`${prefixo}-tipo`)?.addEventListener('change', () => atualizarCampoRodotrem(prefixo));
+    });
+
+    // Formulário de editar
+    const cpfEdit = document.getElementById('mot-edit-cpf');
+    cpfEdit?.addEventListener('input', () => { cpfEdit.value = mascaraCpfDigitando(cpfEdit.value); });
+    const celularEdit = document.getElementById('mot-edit-celular');
+    celularEdit?.addEventListener('input', () => { celularEdit.value = mascaraCelularDigitando(celularEdit.value); });
+    document.getElementById('mot-edit-salvar')?.addEventListener('click', salvarEdicaoMotorista);
+    document.getElementById('mot-edit-form')?.addEventListener('submit', (e) => { e.preventDefault(); salvarEdicaoMotorista(); });
 
     // Formulário de adicionar
     const cpf = document.getElementById('mot-add-cpf');

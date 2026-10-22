@@ -1187,6 +1187,7 @@
                                         <th>Nome</th>
                                         <th>CPF</th>
                                         <th>Celular</th>
+                                        <th>Veículo</th>
                                         <th>Situação</th>
                                         <th>Último acesso</th>
                                         <th class="text-right">Ações</th>
@@ -1403,6 +1404,24 @@
                         <span>Celular <b class="mot-obrigatorio">*</b></span>
                         <input type="text" id="mot-add-celular" inputmode="tel" maxlength="15" placeholder="(00) 00000-0000" autocomplete="off" required>
                     </label>
+                    <label class="mot-campo mot-campo-largo">
+                        <span>Tipo de veículo <b class="mot-obrigatorio">*</b></span>
+                        <select id="mot-add-tipo" required>
+                            <option value="carreta">Carreta</option>
+                            <option value="rodotrem">Rodotrem</option>
+                            <option value="carreta_rodotrem">Carreta ou rodotrem</option>
+                        </select>
+                    </label>
+                    <label class="mot-campo">
+                        <span>Comissão especial no Alimentício: carreta (%) <em>(opcional)</em></span>
+                        <input type="text" id="mot-add-com-carreta" inputmode="decimal" maxlength="6" placeholder="Ex.: 6" autocomplete="off">
+                        <small>Em branco = 11%.</small>
+                    </label>
+                    <label class="mot-campo" id="mot-add-com-rodotrem-campo" hidden>
+                        <span>Comissão especial no Alimentício: rodotrem (%) <em>(opcional)</em></span>
+                        <input type="text" id="mot-add-com-rodotrem" inputmode="decimal" maxlength="6" placeholder="Ex.: 10,5" autocomplete="off">
+                        <small>Em branco = 9%, ou 8% com origem Viana (ES).</small>
+                    </label>
                     <div class="mot-campo mot-campo-largo">
                         <label for="mot-add-senha">Senha inicial <em>(opcional)</em></label>
                         <div class="mot-senha-linha">
@@ -1430,6 +1449,66 @@
                 <button type="button" class="btn-modal-secundario" data-mot-fechar>Fechar</button>
                 <button type="button" class="btn-modal-secundario" id="mot-add-outro" hidden>Cadastrar outro</button>
                 <button type="button" class="btn-modal-sucesso" id="mot-add-salvar">Cadastrar motorista</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         MODAL: EDITAR MOTORISTA DA FROTA (edge function gerenciar-frota, ação editar)
+         ==================================================================== -->
+    <div class="modal-overlay" id="modal-mot-editar" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="mot-edit-titulo">
+        <div class="modal-container mot-modal">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <span class="badge-modal">Frota</span>
+                    <h3 class="modal-title" id="mot-edit-titulo">Editar motorista da frota</h3>
+                </div>
+                <button type="button" class="modal-close-btn" data-mot-fechar aria-label="Fechar">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mot-alerta" id="mot-edit-alerta" role="alert" hidden></div>
+
+                <form id="mot-edit-form" class="mot-form" novalidate>
+                    <input type="hidden" id="mot-edit-id">
+                    <label class="mot-campo mot-campo-largo">
+                        <span>Nome completo <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-edit-nome" maxlength="120" autocomplete="off" required>
+                    </label>
+                    <label class="mot-campo">
+                        <span>CPF <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-edit-cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required>
+                        <small>Mudar o CPF muda o login e volta a senha para a padrão do CPF novo.</small>
+                    </label>
+                    <label class="mot-campo">
+                        <span>Celular <b class="mot-obrigatorio">*</b></span>
+                        <input type="text" id="mot-edit-celular" inputmode="tel" maxlength="15" placeholder="(00) 00000-0000" autocomplete="off" required>
+                    </label>
+                    <label class="mot-campo mot-campo-largo">
+                        <span>Tipo de veículo <b class="mot-obrigatorio">*</b></span>
+                        <select id="mot-edit-tipo" required>
+                            <option value="carreta">Carreta</option>
+                            <option value="rodotrem">Rodotrem</option>
+                            <option value="carreta_rodotrem">Carreta ou rodotrem</option>
+                        </select>
+                    </label>
+                    <label class="mot-campo">
+                        <span>Comissão especial no Alimentício: carreta (%) <em>(opcional)</em></span>
+                        <input type="text" id="mot-edit-com-carreta" inputmode="decimal" maxlength="6" placeholder="Ex.: 6" autocomplete="off">
+                        <small>Em branco = 11%.</small>
+                    </label>
+                    <label class="mot-campo" id="mot-edit-com-rodotrem-campo" hidden>
+                        <span>Comissão especial no Alimentício: rodotrem (%) <em>(opcional)</em></span>
+                        <input type="text" id="mot-edit-com-rodotrem" inputmode="decimal" maxlength="6" placeholder="Ex.: 10,5" autocomplete="off">
+                        <small>Em branco = 9%, ou 8% com origem Viana (ES).</small>
+                    </label>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-secundario" data-mot-fechar>Cancelar</button>
+                <button type="button" class="btn-modal-sucesso" id="mot-edit-salvar">Salvar alterações</button>
             </div>
         </div>
     </div>

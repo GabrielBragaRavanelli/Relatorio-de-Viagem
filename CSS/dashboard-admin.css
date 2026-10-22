@@ -2722,7 +2722,8 @@ body.admin-body {
     color: var(--vermelho-perigo);
 }
 
-.mot-campo input {
+.mot-campo input,
+.mot-campo select {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #cbd5e1;
@@ -2735,6 +2736,18 @@ body.admin-body {
     transition: var(--transicao-rapida);
 }
 
+/* Comissão de rodotrem só aparece para Rodotrem / Carreta ou rodotrem */
+.mot-campo[hidden] {
+    display: none;
+}
+
+/* Coluna "Veículo": tipo e, ao lado, as comissões especiais */
+.mot-veiculo-especial {
+    font-size: 0.78rem;
+    color: var(--cor-texto-mutado);
+}
+
+.mot-campo select:focus,
 .mot-campo input:focus {
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
@@ -2985,7 +2998,8 @@ body.admin-body {
         flex-basis: 100%;
     }
 
-    .mot-campo input {
+    .mot-campo input,
+    .mot-campo select {
         font-size: 16px; /* evita o zoom automático do iPhone */
     }
 
