@@ -1856,7 +1856,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const selectCombustivel = document.querySelector(`select[name="combustivel_ml_${i}"]`);
         const selectPlacaAbast = document.querySelector(`select[name="placa_abast_ml_${i}"]`);
 
-        // Combustível (ARLA fica fora da média) e placa (média por placa) mudam os indicadores
+        // Combustível (totais diesel/ARLA) e placa (média por placa) mudam os indicadores
         [selectCombustivel, selectPlacaAbast].forEach(sel => {
             if (!sel) return;
             sel.addEventListener('change', () => {
@@ -1978,12 +1978,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (placa) placa.value = ab?.placa === 'secundaria' ? 'secundaria' : 'principal';
     }
 
-    // Litros de diesel (S10 + S500 + sem combustível) por placa; o ARLA não entra na média
-    function litrosDieselPorPlaca() {
+    // Litros da média por placa: todas as linhas de abastecimento (diesel S10, S500, sem
+    // combustível e ARLA). Os valores em R$ continuam separados nos totais do rodapé.
+    function litrosPorPlaca() {
         const litros = { principal: 0, secundaria: 0, total: 0 };
         for (let i = 1; i <= 10; i++) {
-            const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`)?.value || '';
-            if (comb === 'arla') continue;
             const l = parseLitros(document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '');
             litros[placaDaLinhaAbast(i)] += l;
             litros.total += l;
@@ -2095,19 +2094,19 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const totaisCombustivel = calcularTotaisAbastecimentoMl();
         const totaisDespesas = calcularTotaisDespesasMl();
         const totalFreteRelacao = calcularTotaisFreteMl();
-        // Média só com diesel (S10 + S500); o ARLA entra só nos custos
-        const diesel = litrosDieselPorPlaca();
+        // Média com todos os litros (diesel + ARLA); os valores em R$ ficam separados nos totais
+        const litrosMedia = litrosPorPlaca();
         const media = (km, litros) => (km > 0 && litros > 0 && isFinite(km / litros)) ? km / litros : 0;
 
-        // 1. Média de Combustível (KM Total / Litros de diesel)
+        // 1. Média de Combustível (KM Total / Litros, diesel + ARLA)
         if (mlIndicadorMedia) {
-            mlIndicadorMedia.innerHTML = `${formatarDecimal(media(kmTotalNum, diesel.total), 2)} <span class="indicador-unidade">km/l</span>`;
+            mlIndicadorMedia.innerHTML = `${formatarDecimal(media(kmTotalNum, litrosMedia.total), 2)} <span class="indicador-unidade">km/l</span>`;
         }
         if (mlCalcBaseKm) mlCalcBaseKm.textContent = kmTotalNum > 0 ? formatarMilhar(kmTotalNum) : '0';
-        if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(diesel.total);
+        if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(litrosMedia.total);
 
         // Com 2º trecho: no lugar do valor único, a média de cada placa, uma embaixo da outra
-        // (km do trecho ÷ diesel das linhas daquela placa). Não há média geral somando as duas.
+        // (km do trecho ÷ litros, diesel + ARLA, das linhas daquela placa). Não há média geral somando as duas.
         const doisTrechos = segundoTrechoAtivo();
         const mediaPorPlaca = document.getElementById('ml-media-por-placa');
         const baseGeral = document.getElementById('ml-media-base-geral');
@@ -2122,14 +2121,14 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     const rotulo = placa ? formatarPlaca(placa) : (qual === 'secundaria' ? 'Secundária' : 'Principal');
                     const temBase = km > 0 && litros > 0;
                     const valor = temBase ? `${formatarDecimal(media(km, litros), 2)} <span class="indicador-unidade">km/l</span>` : '—';
-                    const base = temBase ? `${formatarMilhar(km)} km ÷ ${formatarLitros(litros)} L` : 'Falta KM ou litros de diesel';
+                    const base = temBase ? `${formatarMilhar(km)} km ÷ ${formatarLitros(litros)} L` : 'Falta KM ou litros';
                     return `<div class="media-placa" data-placa="${qual}">` +
                         `<span class="media-placa-rotulo">${esc(rotulo)}</span>` +
                         `<strong class="media-placa-valor">${valor}</strong>` +
                         `<small class="indicador-formula-base">${esc(base)}</small></div>`;
                 };
-                mediaPorPlaca.innerHTML = bloco('principal', kms.t1.total || 0, diesel.principal) +
-                    bloco('secundaria', kms.t2.total || 0, diesel.secundaria);
+                mediaPorPlaca.innerHTML = bloco('principal', kms.t1.total || 0, litrosMedia.principal) +
+                    bloco('secundaria', kms.t2.total || 0, litrosMedia.secundaria);
             }
         }
 
@@ -3653,10 +3652,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         ].filter(Boolean);
 
         // Grupo 3: Campos Operacionais Corporativos
-        // (destinos e adiantamento ficam livres: o motorista preenche)
+        // (datas, destinos e adiantamento ficam livres: o motorista preenche)
         const camposOperacionaisFrota = [
-            inputDataSaida,
-            inputDataChegada,
             document.getElementById('ml-pedagio-1'),
             document.getElementById('ml-pedagio-2'),
             document.getElementById('ml-pedagio-3'),
@@ -4146,12 +4143,15 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // 6. Status de Pedágio
         if (badgePedagio) badgePedagio.textContent = 'Definido pela Frota';
 
-        // 7. Desabilita seletores de data
+        // 7. Desabilita seletores de data (menos os da data de saída e de chegada, que o motorista preenche)
+        const camposDatasViagem = [inputDataSaida, inputDataChegada].filter(Boolean);
         botoesPickerData.forEach(btn => {
+            if (camposDatasViagem.some(input => input.parentElement === btn.parentElement)) return;
             btn.setAttribute('disabled', 'true');
             btn.style.pointerEvents = 'none';
             btn.style.opacity = '0.4';
         });
+        camposDatasViagem.forEach(input => liberarCampoBloqueado(input));
 
         // Abre automaticamente o formulário oficial para lançamento de fretes e diesel
         toggleFormularioUnificado(true, false);
@@ -4196,11 +4196,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 }
             }
         }
-        // Mesma regra do indicador: KM da viagem ÷ litros de diesel
+        // Mesma regra do indicador: KM da viagem ÷ litros (diesel + ARLA)
         const kmTotal = kmsDaViagem().viagem || 0;
-        const litrosDiesel = litrosDieselPorPlaca().total;
-        if (kmTotal > 0 && litrosDiesel > 0) {
-            const med = kmTotal / litrosDiesel;
+        const litrosTotal = litrosPorPlaca().total;
+        if (kmTotal > 0 && litrosTotal > 0) {
+            const med = kmTotal / litrosTotal;
             if (!isNaN(med) && isFinite(med) && med > 0) {
                 return med.toFixed(2);
             }
@@ -4212,12 +4212,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     // Sem placa secundária, a principal é a viagem toda e a secundária fica vazia.
     function mediasPorPlacaParaSalvar() {
         const kms = kmsDaViagem();
-        const diesel = litrosDieselPorPlaca();
+        const litrosMedia = litrosPorPlaca();
         const texto = (km, litros) => (km > 0 && litros > 0) ? (km / litros).toFixed(2) : '';
-        if (!segundoTrechoAtivo()) return { mediaPrincipal: texto(kms.t1.total || 0, diesel.total), mediaSecundaria: '' };
+        if (!segundoTrechoAtivo()) return { mediaPrincipal: texto(kms.t1.total || 0, litrosMedia.total), mediaSecundaria: '' };
         return {
-            mediaPrincipal: texto(kms.t1.total || 0, diesel.principal),
-            mediaSecundaria: texto(kms.t2.total || 0, diesel.secundaria)
+            mediaPrincipal: texto(kms.t1.total || 0, litrosMedia.principal),
+            mediaSecundaria: texto(kms.t2.total || 0, litrosMedia.secundaria)
         };
     }
 
@@ -4244,6 +4244,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const linha = (rotulo, valor) => `<div class="revisar-linha"><span>${esc(rotulo)}</span><strong>${esc(valor)}</strong></div>`;
 
         let html = '<h3>Viagem</h3>';
+        html += linha('Saída / chegada', `${(inputDataSaida?.value || '').trim() || '—'} → ${(inputDataChegada?.value || '').trim() || '—'}`);
         html += linha('Destino inicial', (inputDestinoInicial?.value || '').trim() || '—');
         html += linha('Destino final', (inputDestinoFinal?.value || '').trim() || '—');
         html += linha('Adiantamento', inputAdiantamento?.value ? `R$ ${inputAdiantamento.value}` : '—');
@@ -4257,6 +4258,18 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             html += linha('KM saída / chegada (secundária)', `${km(inputKmSaida2?.value)} → ${km(inputKmChegada2?.value)}`);
             html += linha('KM total (secundária)', km(kms.t2.total));
             html += linha('KM total da viagem', km(kms.viagem));
+        }
+
+        // Média de combustível (km ÷ litros, diesel + ARLA): uma por placa quando há placa secundária
+        const litrosMedia = litrosPorPlaca();
+        const mediaTexto = (kmTrecho, litros) => (kmTrecho > 0 && litros > 0)
+            ? `${formatarDecimal(kmTrecho / litros, 2)} km/l (${formatarMilhar(kmTrecho)} km ÷ ${formatarLitros(litros)} L)`
+            : '—';
+        if (secundaria) {
+            html += linha(`Média (diesel + ARLA) ${principal ? formatarPlaca(principal) : 'principal'}`, mediaTexto(kms.t1.total || 0, litrosMedia.principal));
+            html += linha(`Média (diesel + ARLA) ${formatarPlaca(secundaria)}`, mediaTexto(kms.t2.total || 0, litrosMedia.secundaria));
+        } else {
+            html += linha('Média (diesel + ARLA)', mediaTexto(kms.viagem || 0, litrosMedia.total));
         }
 
         const rotulosCliente = { alimenticio: 'Alimentício', shopee: 'Shopee', mercado_livre: 'Mercado Livre' };
@@ -4329,6 +4342,16 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }));
     }
 
+    // DD/MM/AAAA válida (ano de 2020 a 2100, como public._data do passo 14) -> 'AAAA-MM-DD'; senão null
+    function dataDoCampo(input) {
+        const m = (input?.value || '').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return null;
+        const [, d, mes, a] = m.map(Number);
+        const data = new Date(Date.UTC(a, mes - 1, d));
+        if (a < 2020 || a > 2100 || data.getUTCMonth() !== mes - 1 || data.getUTCDate() !== d) return null;
+        return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+
     function falharValidacao(el, mensagem) {
         marcarErroCampo(el, mensagem);
         exibirToast(mensagem, 'erro');
@@ -4364,10 +4387,16 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (kms.t1.invalido) return falharValidacao(inputKmChegada, 'O KM de chegada não pode ser menor que o de saída.');
         if (kms.t2.invalido) return falharValidacao(inputKmChegada2, 'O KM de chegada não pode ser menor que o de saída.');
 
-        // Destinos e adiantamento: o motorista preenche (adiantamento 0,00 se não houve)
+        // Datas, destino inicial e adiantamento: o motorista preenche (adiantamento 0,00 se não houve;
+        // destino final é opcional). Mensagens iguais às do banco (passo 14).
         if (!modoAdmin) {
+            const saida = dataDoCampo(inputDataSaida);
+            const chegada = dataDoCampo(inputDataChegada);
+            if (!saida || !chegada) {
+                return falharValidacao(!saida ? inputDataSaida : inputDataChegada, 'Informe a data de saída e a data de chegada.');
+            }
+            if (chegada < saida) return falharValidacao(inputDataChegada, 'A data de chegada não pode ser antes da data de saída.');
             if (!(inputDestinoInicial?.value || '').trim()) return falharValidacao(inputDestinoInicial, 'Informe o destino inicial.');
-            if (!(inputDestinoFinal?.value || '').trim()) return falharValidacao(inputDestinoFinal, 'Informe o destino final.');
             if (!(inputAdiantamento?.value || '').trim()) return falharValidacao(inputAdiantamento, 'Informe o valor do adiantamento (0,00 se não houve).');
 
             // Cada frete preenchido precisa do valor; no Alimentício, o rodotrem escolhe o veículo

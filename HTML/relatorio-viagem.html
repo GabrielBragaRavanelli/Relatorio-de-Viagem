@@ -231,9 +231,12 @@
                         <div class="grid-campos grid-2-col">
                             <!-- Data Saída -->
                             <div class="campo-grupo">
-                                <label for="data-saida">
-                                    DATA SAÍDA <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="data-saida">
+                                        DATA SAÍDA <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper input-wrapper-data">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -263,9 +266,12 @@
 
                             <!-- Data Chegada -->
                             <div class="campo-grupo">
-                                <label for="data-chegada">
-                                    DATA CHEGADA <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="data-chegada">
+                                        DATA CHEGADA <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper input-wrapper-data">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -460,7 +466,7 @@
                             <div class="campo-grupo">
                                 <div class="label-com-tag">
                                     <label for="destino-final">
-                                        DESTINO: FINAL <span class="asterisco">*</span>
+                                        DESTINO: FINAL <em class="dica-campo">(opcional)</em>
                                     </label>
                                     <span class="tag-motorista">Motorista</span>
                                 </div>
@@ -471,8 +477,8 @@
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
-                                    <input type="text" id="destino-final" name="destino_final" required
-                                        placeholder="Ex: Santos - SP" autocomplete="off"
+                                    <input type="text" id="destino-final" name="destino_final"
+                                        placeholder="Ex: Santos - SP (opcional)" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">
                                     <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
@@ -2573,13 +2579,13 @@
                                                 0,00 <span class="indicador-unidade">km/l</span>
                                             </div>
                                             <div class="indicador-formula-base" id="ml-media-base-geral">
-                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros de diesel (<span
+                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros (diesel + ARLA) (<span
                                                     id="ml-calc-base-litros">0</span>)
                                             </div>
                                             <!-- Com placa secundária: no lugar do valor acima, a média de cada placa
-                                                 (km do trecho ÷ diesel das linhas daquela placa), uma embaixo da outra -->
+                                                 (km do trecho ÷ litros, diesel + ARLA, das linhas daquela placa), uma embaixo da outra -->
                                             <div class="indicador-media-por-placa" id="ml-media-por-placa" hidden></div>
-                                            <div class="indicador-formula-base">ARLA não entra na média (só nos custos)</div>
+                                            <div class="indicador-formula-base">Média com diesel + ARLA</div>
                                         </div>
 
                                         <!-- Card 2: Despesa Total -->
