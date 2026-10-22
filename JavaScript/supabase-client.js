@@ -46,6 +46,8 @@ if (window.supabase) {
 // Valores aceitos em cada abastecimento (iguais aos do banco, passo 11)
 const COMBUSTIVEIS_FICHA = ['diesel_s10', 'diesel_s500', 'arla'];
 const PLACAS_ABASTECIMENTO = ['principal', 'secundaria'];
+// Veículo de cada frete (passo 13); '' = motorista de rodotrem que não escolheu
+const VEICULOS_FRETE = ['carreta', 'rodotrem'];
 
 // Gestão logada? (cache do auth.js; só decide o que mandar, quem protege é o banco)
 function usuarioEhGestao() {
@@ -91,6 +93,19 @@ function normalizarAbastecimento(a) {
     };
 }
 
+// Frete para gravar: veiculo só dos valores aceitos
+function normalizarFreteParaGravar(f) {
+    if (!f || typeof f !== 'object') return f;
+    return { ...f, veiculo: VEICULOS_FRETE.includes(f.veiculo) ? f.veiculo : '' };
+}
+
+// Frete lido: ficha antiga (sem a chave veiculo) era toda de carreta; só para exibição
+function normalizarFreteLido(f) {
+    if (!f || typeof f !== 'object') return f;
+    if (!('veiculo' in f)) return { ...f, veiculo: 'carreta' };
+    return { ...f, veiculo: VEICULOS_FRETE.includes(f.veiculo) ? f.veiculo : '' };
+}
+
 /**
  * KMs dos dois trechos e placa secundária em dados_completos (sem coluna própria):
  * kmSaida, kmEntrada, placaSecundaria, kmSaida2, kmEntrada2 e, só da gestão,
@@ -123,6 +138,7 @@ function comCamposDaViagem(dadosCompletos, ficha, gestao) {
         delete dc.kmTotal;
     }
     if (Array.isArray(dc.abastecimentos)) dc.abastecimentos = dc.abastecimentos.map(normalizarAbastecimento);
+    if (Array.isArray(dc.fretes)) dc.fretes = dc.fretes.map(normalizarFreteParaGravar);
     return dc;
 }
 
@@ -152,10 +168,8 @@ function mapearFichaParaSupabase(ficha) {
         km_total: gestao ? parseNum(ficha.km_total ?? ficha.kmTotal) : null,
         destino_inicial: ficha.destino_inicial || ficha.destinoInicial || null,
         destino_final: ficha.destino_final || ficha.destinoFinal || null,
-        frete_origem: parseNum(ficha.frete_origem ?? ficha.freteOrigem),
-        retorno_1: parseNum(ficha.retorno_1 ?? ficha.retorno1),
-        retorno_2: parseNum(ficha.retorno_2 ?? ficha.retorno2),
-        retorno_3: parseNum(ficha.retorno_3 ?? ficha.retorno3),
+        // frete_origem e retorno_1..3 não são mais enviados (fichas antigas guardam os seus).
+        // Total frete e vr comissão = totais da Relação de fretes; para o motorista o banco recalcula.
         total_frete: parseNum(ficha.total_frete ?? ficha.totalFrete),
         vr_comissao: parseNum(ficha.vr_comissao ?? ficha.vrComissao),
         valor_adiantamento: parseNum(ficha.valor_adiantamento ?? ficha.valorAdiantamento),
@@ -232,6 +246,7 @@ function mapearFichaDoSupabase(registro) {
         totalAbastecimento: totAbast || '0,00',
         totalLitros: totLitros || '0,00',
         abastecimentos: Array.isArray(abasts) ? abasts.map(normalizarAbastecimento) : abasts,
+        fretes: Array.isArray(completo.fretes) ? completo.fretes.map(normalizarFreteLido) : completo.fretes,
         anexos: registro.comprovantes || completo.anexos || [],
         outrasDespesas: registro.despesas_extras || completo.outrasDespesas || [],
         status: registro.status || 'pendente',
