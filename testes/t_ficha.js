@@ -100,7 +100,11 @@ const { abrir } = require('./harness');
   await page.select('[name="placa_abast_ml_5"]', 'secundaria');
   await page.select('[name="placa_abast_ml_6"]', 'secundaria');
 
-  // Revisão e envio (com as duas placas)
+  // Revisão e envio (com as duas placas): destinos e adiantamento são obrigatórios para o motorista
+  r.semDestinos = (await tentarEnviar()).erros;
+  await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.$eval('#destino-final', el => { el.value = 'Santos - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await digitar('#valor-adiantamento', '0');
   r.envio = await tentarEnviar();
   r.revisao = await page.$eval('#revisar-detalhes-viagem', el => el.innerText.replace(/\n+/g, ' | '));
   await page.click('#btn-revisar-confirmar');
@@ -113,7 +117,9 @@ const { abrir } = require('./harness');
       placas: p.placas, dcPlacas: dc.placas,
       dc: { kmSaida: dc.kmSaida, kmEntrada: dc.kmEntrada, placaSecundaria: dc.placaSecundaria, kmSaida2: dc.kmSaida2, kmEntrada2: dc.kmEntrada2 },
       medias: { mediaPrincipal: dc.mediaPrincipal, mediaSecundaria: dc.mediaSecundaria, media_km_l: p.media_km_l },
-      abast: p.abastecimentos.map(a => `${a.combustivel}/${a.placa}/${a.litros}`)
+      abast: p.abastecimentos.map(a => `${a.combustivel}/${a.placa}/${a.litros}`),
+      destinos: [p.destino_inicial, p.destino_final, p.valor_adiantamento],
+      totaisAbastecimento: { total: dc.totalAbastecimento, diesel: dc.totalDiesel, arla: dc.totalArla }
     };
   });
 

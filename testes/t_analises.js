@@ -44,6 +44,24 @@ const ANTIGA = {
   await page.goto(`${base}/HTML/dashboard-admin.html`, { waitUntil: 'load' });
   await new Promise(r => setTimeout(r, 500));
   const r = await page.evaluate((fichas) => {
+    // Ficha do passo 13 como o banco devolve (sem o bloco Resumo: total frete e comissão vêm da
+    // Relação de fretes) e a mesma ficha no formato antigo, com frete origem/retornos
+    const passo13 = mapearFichaDoSupabase({
+      id: 'AJB-2026-913', motorista: 'Motorista Ficticio', placas: 'ABC1D23', status: 'aprovado', data_saida: '2026-10-10',
+      km_saida: 100000, km_chegada: 101500, km_total: 1500, destino_inicial: 'Viana - ES', destino_final: 'Marília - SP',
+      total_frete: 22000, vr_comissao: 2550, valor_adiantamento: 500, saldo_comissao: 2050,
+      abastecimentos: [
+        { posto: 'Posto A', valor: '600,00', litros: '100', combustivel: 'diesel_s10' },
+        { posto: 'Posto A', valor: '900,00', litros: '150', combustivel: 'diesel_s500' },
+        { posto: 'Posto B', valor: '100,00', litros: '20', combustivel: 'arla' }],
+      dados_completos: { kmSaida: '100000', kmEntrada: '101500', fretes: [
+        { data: '01/10/2026', cliente: 'alimenticio', veiculo: 'rodotrem', origem: 'Viana - ES', destino: 'Marília - SP', valor: '10.000,00', comissao: '1.050,00', descarga: '' },
+        { data: '02/10/2026', cliente: 'alimenticio', veiculo: 'carreta', origem: 'Marília - SP', destino: 'Santos - SP', valor: '10.000,00', comissao: '1.100,00', descarga: '' },
+        { data: '03/10/2026', cliente: 'mercado_livre', veiculo: null, origem: 'Santos - SP', destino: 'Viana - ES', valor: '2.000,00', comissao: '400,00', descarga: '' }] }
+    });
+    const formatoAntigo = { ...passo13, id: 'AJB-2026-914', freteOrigem: '10.000,00', retorno1: '10.000,00', retorno2: '2.000,00',
+      fretes: passo13.fretes.map(({ veiculo, ...f }) => f) };
+    fichas = [...fichas, passo13];
     appState.fichas = fichas;
     document.getElementById('analises-filtro-status').value = 'todas';
     renderizarAnalises();
@@ -69,7 +87,28 @@ const ANTIGA = {
       mediaViagemNova: obterMediaRealFicha(fichas[0]).texto,
       mediaViagemDiferente: obterMediaRealFicha(diferente).texto,
       mediaGestao: obterMediaRealFicha(fichas[1]).texto,
-      litros: ['1.000', '1.200', '150,5', '800', 1000.5].map(parseLitrosAbast)
+      litros: ['1.000', '1.200', '150,5', '800', 1000.5].map(parseLitrosAbast),
+      // Passo 13: Análises com a receita e a comissão de sempre (total_frete e vr_comissao)
+      analisesPasso13: (() => {
+        const n = obterValoresFichaAnalise(passo13), a = obterValoresFichaAnalise(formatoAntigo);
+        return { nova: { frete: n.frete, comissao: n.comissao, diesel: n.diesel, arla: n.arla }, formatoAntigo: { frete: a.frete, comissao: a.comissao },
+          iguais: n.frete === a.frete && n.comissao === a.comissao };
+      })(),
+      operacoes: tabela('analises-tabela-operacoes'),
+      modalPasso13: (() => {
+        abrirModalResumoFicha('AJB-2026-913');
+        const c = document.getElementById('modal-ficha-conteudo');
+        return {
+          linhas: Array.from(c.querySelectorAll('.modal-info-linha')).map(l => l.textContent.trim().replace(/\s+/g, ' ')).filter(t => /Destino|Diesel|ARLA|Adiantamento|Saldo|Frete/.test(t)),
+          fretes: Array.from(c.querySelectorAll('.modal-tabela-resumo'))[0].innerText.split('\n').filter(Boolean).slice(0, 5)
+        };
+      })(),
+      modalAntigaSemVeiculo: (() => {
+        abrirModalResumoFicha('AJB-2026-050');
+        const c = document.getElementById('modal-ficha-conteudo');
+        return { cabecalhoFretes: Array.from(c.querySelectorAll('.modal-tabela-resumo'))[0].querySelector('thead').innerText.trim(),
+          diesel: Array.from(c.querySelectorAll('.modal-info-linha')).map(l => l.textContent.trim().replace(/\s+/g, ' ')).filter(t => /Diesel|ARLA/.test(t)) };
+      })()
     };
   }, [NOVA, GESTAO, ANTIGA]);
   r.erros = erros.filter(e => !/Chart is not defined|limparDadosLocais/.test(e));

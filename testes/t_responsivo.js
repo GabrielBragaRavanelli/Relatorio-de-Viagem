@@ -17,6 +17,11 @@ const LARGURAS = (process.argv[2] || '320,360,390,430').split(',').map(Number);
     await digitar('#placa-secundaria', 'XYZ9A87');
     await digitar('#km-saida-2', '200000');
     await digitar('#km-chegada-2', '200800');
+    // Destinos e adiantamento: o motorista preenche (obrigatórios no envio)
+    for (const [sel, v] of [['#destino-inicial', 'Marília - SP'], ['#destino-final', 'Santos - SP']]) {
+      await page.$eval(sel, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, v);
+    }
+    await digitar('#valor-adiantamento', '50000');
     const tabAbast = 'table.tabela-abastecimento:not(.tabela-fretes-ml)';
     for (const [i, comb, placa, valor, litros] of [[1, 'diesel_s10', 'principal', '60000', '100'], [2, 'diesel_s10', 'principal', '90000', '150'], [3, 'diesel_s500', 'secundaria', '1000000', '1200']]) {
       if (i > 1) await page.click(`${tabAbast} .btn-adicionar-linha-celular`);

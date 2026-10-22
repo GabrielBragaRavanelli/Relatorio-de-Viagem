@@ -24,3 +24,20 @@ const antiga = ctx.mapearFichaDoSupabase({ id: 'Y', placas: 'DEF-5678', km_saida
 console.log('leitura antiga:', JSON.stringify({ placas: antiga.placas, s: antiga.kmSaida, e: antiga.kmEntrada, c: antiga.kmChegada, p: antiga.placaSecundaria, t1: antiga.kmTotal1, t: antiga.kmTotal, ab: antiga.abastecimentos }));
 const soDc = ctx.mapearFichaDoSupabase({ id: 'Z', placas: null, dados_completos: { kmEntrada: '7000' } });
 console.log('leitura só dados_completos.kmEntrada:', JSON.stringify({ placas: soDc.placas, e: soDc.kmEntrada, c: soDc.kmChegada }));
+// Passo 13: veículo de cada frete (ida e volta), frete origem/retornos fora do envio
+ls.ajborges_usuario_ativo = JSON.stringify({ role: 'motorista' });
+const comFretes = { ...ficha, destinoInicial: 'Viana - ES', destinoFinal: 'Marília - SP', valorAdiantamento: '500,00', totalFrete: '20.000,00', vrComissao: '2.150,00', saldoComissao: '1.650,00',
+  freteOrigem: '1,00', retorno1: '2,00',
+  fretes: [{ cliente: 'alimenticio', veiculo: 'rodotrem', valor: '10.000,00' }, { cliente: 'alimenticio', veiculo: 'x', valor: '10.000,00' }, { cliente: 'shopee', valor: '1,00' }] };
+comFretes.dados_completos = { ...comFretes };
+const ida = ctx.mapearFichaParaSupabase(comFretes);
+console.log('envio passo 13:', JSON.stringify({ destino_inicial: ida.destino_inicial, destino_final: ida.destino_final, valor_adiantamento: ida.valor_adiantamento,
+  total_frete: ida.total_frete, vr_comissao: ida.vr_comissao, saldo_comissao: ida.saldo_comissao,
+  semFreteOrigemERetornos: !['frete_origem', 'retorno_1', 'retorno_2', 'retorno_3'].some(k => k in ida),
+  veiculos: ida.dados_completos.fretes.map(f => f.veiculo || '(vazio)') }));
+const volta = ctx.mapearFichaDoSupabase({ id: 'P13', destino_inicial: 'Viana - ES', destino_final: 'Marília - SP', valor_adiantamento: 500, total_frete: 20000, vr_comissao: 2150, saldo_comissao: 1650,
+  dados_completos: { fretes: [{ cliente: 'alimenticio', veiculo: 'rodotrem' }, { cliente: 'mercado_livre', veiculo: null }] } });
+console.log('leitura passo 13:', JSON.stringify({ destinoInicial: volta.destinoInicial, destinoFinal: volta.destinoFinal, valorAdiantamento: volta.valorAdiantamento,
+  totalFrete: volta.totalFrete, vrComissao: volta.vrComissao, saldoComissao: volta.saldoComissao, veiculos: volta.fretes.map(f => f.veiculo || '(vazio)') }));
+const antigaFretes = ctx.mapearFichaDoSupabase({ id: 'OLD', frete_origem: 900, retorno_1: 100, total_frete: 1000, dados_completos: { freteOrigem: '900,00', fretes: [{ cliente: 'alimenticio', valor: '1.000,00', comissao: '100,00' }] } });
+console.log('leitura antiga sem veículo (exibição = carreta):', JSON.stringify({ veiculos: antigaFretes.fretes.map(f => f.veiculo), totalFrete: antigaFretes.totalFrete, freteOrigem: antigaFretes.freteOrigem }));
