@@ -8,11 +8,15 @@
 // Configuração no painel: Verify JWT LIGADO (quem chama é a gestão logada).
 // Secrets: ALLOWED_ORIGINS.
 // Depende do supabase/sql/passo9_frota.sql (colunas vinculo e senha_provisoria,
-// status 'inativo' e a RPC encerrar_sessoes_usuario).
+// status 'inativo' e a RPC encerrar_sessoes_usuario) e do passo13_comissao_motorista.sql
+// (tipo_veiculo, comissao_alim_carreta e comissao_alim_rodotrem em perfis).
 //
 // Ações (POST JSON, campo "acao"):
-//   importar        { motoristas: [{ linha?, nome, cpf, celular }] }  (até 200)
-//   criar           { nome, cpf, celular, email?, senha? }
+//   importar        { motoristas: [{ linha?, nome, cpf, celular }] }  (até 200; todos carreta)
+//   criar           { nome, cpf, celular, email?, senha?,
+//                     tipo_veiculo?, comissao_alim_carreta?, comissao_alim_rodotrem? }
+//   editar          { id, nome, cpf, celular, tipo_veiculo, comissao_alim_carreta, comissao_alim_rodotrem }
+//                   CPF novo = senha padrão do CPF novo, e-mail interno novo e sessões encerradas
 //   redefinir_senha { id }   senha volta a ser a padrão (senhaPadrao)
 //   desativar       { id }   status 'inativo' e derruba as sessões
 //   reativar        { id }   status 'aprovado'
@@ -111,11 +115,52 @@ function limparCelular(v: unknown): string | null {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// ---------- Tipo de veículo e comissões especiais do Alimentício (passo 13) ----------
+const TIPOS_VEICULO = ["carreta", "rodotrem", "carreta_rodotrem"];
+
+type Veiculo = {
+  tipo_veiculo: string;
+  comissao_alim_carreta: number | null;
+  comissao_alim_rodotrem: number | null;
+};
+
+// Vazio = carreta (o padrão); outro texto fora da lista = inválido (null)
+function lerTipoVeiculo(v: unknown): string | null {
+  if (v === undefined || v === null || v === "") return "carreta";
+  return typeof v === "string" && TIPOS_VEICULO.includes(v) ? v : null;
+}
+
+// Comissão em %: vazio = null (segue a regra normal); aceita 10.5 ou "10,5";
+// de 0 a 100 com até 2 casas. undefined no retorno = inválido.
+function lerComissao(v: unknown): number | null | undefined {
+  if (v === undefined || v === null || (typeof v === "string" && v.trim() === "")) return null;
+  const t = typeof v === "number" ? String(v) : typeof v === "string" ? v.trim().replace(",", ".") : "";
+  if (!/^\d{1,3}(\.\d{1,2})?$/.test(t)) return undefined;
+  const n = Number(t);
+  return n >= 0 && n <= 100 ? n : undefined;
+}
+
+// Os três campos do corpo; erro = mensagem para responder 400.
+// Motorista só de carreta não usa a comissão de rodotrem: ela fica vazia.
+function lerVeiculo(corpo: Record<string, unknown>): { ok: true; dados: Veiculo } | { ok: false; erro: string } {
+  const tipo = lerTipoVeiculo(corpo.tipo_veiculo);
+  if (!tipo) return { ok: false, erro: "Tipo de veículo inválido. Use carreta, rodotrem ou carreta_rodotrem." };
+  const carreta = lerComissao(corpo.comissao_alim_carreta);
+  if (carreta === undefined) return { ok: false, erro: "Comissão especial de carreta inválida. Use um número de 0 a 100 (ex.: 10,5) ou deixe em branco." };
+  const rodotrem = lerComissao(corpo.comissao_alim_rodotrem);
+  if (rodotrem === undefined) return { ok: false, erro: "Comissão especial de rodotrem inválida. Use um número de 0 a 100 (ex.: 10,5) ou deixe em branco." };
+  return {
+    ok: true,
+    dados: { tipo_veiculo: tipo, comissao_alim_carreta: carreta, comissao_alim_rodotrem: tipo === "carreta" ? null : rodotrem },
+  };
+}
+
 type Admin = ReturnType<typeof createClient>;
 type Resultado = { ok: true; id: string } | { ok: false; status: number; motivo: string };
 
 // Cria a conta e marca o perfil como frota aprovada. Desfaz a conta se algo falhar.
-async function criarMotorista(admin: Admin, m: { nome: string; cpf: string; celular: string; email: string; senha: string }): Promise<Resultado> {
+// veiculo vazio = o padrão da tabela (carreta, sem comissões especiais).
+async function criarMotorista(admin: Admin, m: { nome: string; cpf: string; celular: string; email: string; senha: string; veiculo?: Veiculo }): Promise<Resultado> {
   const { data: criado, error: erroCriar } = await admin.auth.admin.createUser({
     email: m.email,
     password: m.senha,
@@ -138,6 +183,7 @@ async function criarMotorista(admin: Admin, m: { nome: string; cpf: string; celu
   const { data: linhas, error: erroPerfil } = await admin.from("perfis").update({
     status: "aprovado", vinculo: "frota", senha_provisoria: true,
     nome: m.nome, telefone: m.celular, cpf: m.cpf, email: m.email,
+    ...(m.veiculo ?? {}),
   }).eq("id", uid).select("id");
   if (erroPerfil || !linhas?.length) {
     console.error("gerenciar-frota: falha ao marcar perfil, desfazendo conta", uid);
@@ -251,6 +297,8 @@ Deno.serve(async (req: Request) => {
       if (!nome) return resp(req, 400, { erro: "Informe o nome completo." });
       if (!cpfValido(cpf)) return resp(req, 400, { erro: "CPF inválido." });
       if (!celular) return resp(req, 400, { erro: "Celular inválido. Use DDD + número." });
+      const veiculo = lerVeiculo(corpo);
+      if (!veiculo.ok) return resp(req, 400, { erro: veiculo.erro });
 
       let email = emailProvisorio(cpf);
       const emailInformado = String(corpo.email ?? "").trim().toLowerCase();
@@ -275,11 +323,100 @@ Deno.serve(async (req: Request) => {
         if (emailEmUso) return resp(req, 409, { erro: "Este e-mail já está em uso." });
       }
 
-      const r = await criarMotorista(admin, { nome, cpf, celular, email, senha });
+      const r = await criarMotorista(admin, { nome, cpf, celular, email, senha, veiculo: veiculo.dados });
       if (!r.ok) return resp(req, r.status, { erro: r.motivo });
 
-      console.log(`gerenciar-frota: criar por ${quem.user.id} id=${r.id}`);
+      console.log(`gerenciar-frota: criar por ${quem.user.id} id=${r.id} tipo=${veiculo.dados.tipo_veiculo}`);
       return resp(req, 200, { sucesso: true, id: r.id });
+    }
+
+    // ---------------- editar ----------------
+    // Ordem: perfis primeiro (dá para voltar com os valores antigos) e depois o Auth numa
+    // chamada só (metadados, senha e e-mail juntos). Se o Auth recusar, o perfis volta.
+    if (acao === "editar") {
+      const perfil = await perfilFrota(admin, corpo.id);
+      if (!perfil) return resp(req, 404, { erro: "Motorista não encontrado." });
+
+      const cpf = String(corpo.cpf ?? "").replace(/\D/g, "");
+      const nome = limparNome(corpo.nome);
+      const celular = limparCelular(corpo.celular);
+      if (!nome) return resp(req, 400, { erro: "Informe o nome completo." });
+      if (!cpfValido(cpf)) return resp(req, 400, { erro: "CPF inválido." });
+      if (!celular) return resp(req, 400, { erro: "Celular inválido. Use DDD + número." });
+      const veiculo = lerVeiculo(corpo);
+      if (!veiculo.ok) return resp(req, 400, { erro: veiculo.erro });
+
+      // CPF de outro perfil (qualquer papel)
+      const { data: outros, error: erroOutros } = await admin.from("perfis").select("id").eq("cpf", cpf).neq("id", perfil.id).limit(1);
+      if (erroOutros) {
+        console.error("gerenciar-frota: editar, falha ao consultar CPF", perfil.id, erroOutros.code ?? "erro");
+        return resp(req, 503, { erro: "Serviço temporariamente indisponível." });
+      }
+      if (outros?.length) return resp(req, 409, { erro: "Já existe um cadastro com este CPF." });
+
+      // Como está hoje (para desfazer)
+      const { data: antes, error: erroAntes } = await admin.from("perfis")
+        .select("nome, cpf, telefone, email, senha_provisoria, tipo_veiculo, comissao_alim_carreta, comissao_alim_rodotrem")
+        .eq("id", perfil.id).maybeSingle();
+      const { data: conta, error: erroConta } = await admin.auth.admin.getUserById(perfil.id);
+      if (erroAntes || !antes || erroConta || !conta?.user) {
+        console.error("gerenciar-frota: editar, falha ao ler o cadastro atual", perfil.id);
+        return resp(req, 503, { erro: "Serviço temporariamente indisponível." });
+      }
+
+      const cpfAntigo = String(antes.cpf ?? "");
+      const cpfAlterado = cpf !== cpfAntigo;
+      const emailAntes = String(conta.user.email ?? "").toLowerCase();
+      // Só o e-mail interno acompanha o CPF; e-mail de verdade do motorista fica como está
+      const emailNovo = cpfAlterado && emailAntes === emailProvisorio(cpfAntigo) ? emailProvisorio(cpf) : null;
+
+      // 1. perfis
+      const { data: linhas, error: erroPerfil } = await admin.from("perfis").update({
+        nome, cpf, telefone: celular, ...veiculo.dados,
+        ...(emailNovo ? { email: emailNovo } : {}),
+        ...(cpfAlterado ? { senha_provisoria: true } : {}),
+      }).eq("id", perfil.id).select("id");
+      if (erroPerfil || !linhas?.length) {
+        if ((erroPerfil as { code?: string } | null)?.code === "23505") {
+          return resp(req, 409, { erro: "Já existe um cadastro com este CPF." });
+        }
+        console.error("gerenciar-frota: editar, falha ao gravar perfis", perfil.id, `cpf_final4=${final4(cpf)}`, erroPerfil?.code ?? "sem linhas");
+        return resp(req, 500, { erro: "Não foi possível salvar. Nada foi alterado." });
+      }
+
+      // 2. Auth: metadados e, com CPF novo, a senha padrão do CPF novo e o e-mail interno novo
+      const atributos: Record<string, unknown> = {
+        user_metadata: { ...(conta.user.user_metadata ?? {}), nome, cpf, telefone: celular },
+      };
+      if (cpfAlterado) atributos.password = senhaPadrao(cpf);
+      if (emailNovo) {
+        atributos.email = emailNovo;
+        atributos.email_confirm = true;
+      }
+      const { error: erroAuth } = await admin.auth.admin.updateUserById(perfil.id, atributos);
+      if (erroAuth) {
+        console.error("gerenciar-frota: editar, Auth recusou; desfazendo perfis", perfil.id, `cpf_final4=${final4(cpf)}`,
+          (erroAuth as { code?: string }).code ?? "erro");
+        const { error: erroVolta } = await admin.from("perfis").update({
+          nome: antes.nome, cpf: antes.cpf, telefone: antes.telefone, email: antes.email,
+          senha_provisoria: antes.senha_provisoria, tipo_veiculo: antes.tipo_veiculo,
+          comissao_alim_carreta: antes.comissao_alim_carreta, comissao_alim_rodotrem: antes.comissao_alim_rodotrem,
+        }).eq("id", perfil.id);
+        if (erroVolta) {
+          console.error("gerenciar-frota: editar, FALHA AO DESFAZER perfis", perfil.id, `cpf_final4=${final4(cpfAntigo)}`, erroVolta.code ?? "erro");
+        }
+        return resp(req, 500, { erro: "Não foi possível salvar. Nada foi alterado." });
+      }
+
+      if (cpfAlterado) {
+        // O trigger do passo 9 acabou de pôr false (a senha mudou): volta para true, como no redefinir_senha
+        const { error: erroMarca } = await admin.from("perfis").update({ senha_provisoria: true }).eq("id", perfil.id);
+        if (erroMarca) console.error("gerenciar-frota: editar, falha ao marcar provisória", perfil.id);
+        await encerrarSessoes(admin, perfil.id);
+      }
+
+      console.log(`gerenciar-frota: editar por ${quem.user.id} id=${perfil.id} cpf_alterado=${cpfAlterado} tipo=${veiculo.dados.tipo_veiculo}`);
+      return resp(req, 200, { sucesso: true, id: perfil.id, cpf_alterado: cpfAlterado });
     }
 
     // ---------------- redefinir_senha / desativar / reativar ----------------
