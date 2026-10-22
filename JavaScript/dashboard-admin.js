@@ -1051,20 +1051,43 @@ function abrirModalResumoFicha(fichaId) {
     }
 
     if (elConteudo) {
+        // Veículo de cada frete (passo 13): sem a chave = ficha antiga, de carreta; '' = rodotrem sem escolha.
+        // A coluna só aparece quando algum frete não é de carreta.
+        const veiculoDoFrete = (fr) => (fr.veiculo === undefined ? 'carreta' : (fr.veiculo || ''));
+        const rotuloVeiculo = { carreta: 'Carreta', rodotrem: 'Rodotrem' };
+        const fretesModal = Array.isArray(ficha.fretes) ? ficha.fretes.filter(Boolean) : [];
+        const temVeiculo = fretesModal.some(fr => veiculoDoFrete(fr) !== 'carreta');
         let fretesHtml = '';
-        if (ficha.fretes && ficha.fretes.length > 0) {
-            fretesHtml = ficha.fretes.map(fr => `
+        if (fretesModal.length > 0) {
+            fretesHtml = fretesModal.map(fr => `
                 <tr>
-                    <td>${fr.data || '-'}</td>
-                    <td><strong>${formatarNomeCliente(fr.cliente)}</strong></td>
-                    <td>${fr.origem || '-'} ➔ ${fr.destino || '-'}</td>
-                    <td><strong>R$ ${fr.valor || '0,00'}</strong></td>
-                    <td>R$ ${fr.comissao || '0,00'}</td>
+                    <td>${escaparHtml(fr.data || '-')}</td>
+                    <td><strong>${escaparHtml(formatarNomeCliente(fr.cliente))}</strong></td>
+                    ${temVeiculo ? `<td>${escaparHtml(rotuloVeiculo[veiculoDoFrete(fr)] || '—')}</td>` : ''}
+                    <td>${escaparHtml(fr.origem || '-')} ➔ ${escaparHtml(fr.destino || '-')}</td>
+                    <td><strong>R$ ${escaparHtml(fr.valor || '0,00')}</strong></td>
+                    <td>R$ ${escaparHtml(fr.comissao || '0,00')}</td>
                 </tr>
             `).join('');
         } else {
-            fretesHtml = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Nenhum frete lançado</td></tr>`;
+            fretesHtml = `<tr><td colspan="${temVeiculo ? 6 : 5}" style="text-align: center; color: #94a3b8;">Nenhum frete lançado</td></tr>`;
         }
+
+        // Totais do abastecimento separados: diesel (S10, S500 e sem combustível) e ARLA.
+        // Sem a lista de abastecimentos (ficha antiga), o total gravado conta como diesel.
+        const abastModal = listaAbastecimentos(ficha);
+        const totaisCombustivel = { diesel: { valor: 0, litros: 0 }, arla: { valor: 0, litros: 0 } };
+        if (abastModal.length > 0) {
+            abastModal.forEach(ab => {
+                const alvo = ehArla(ab) ? totaisCombustivel.arla : totaisCombustivel.diesel;
+                alvo.valor += valorAbastecimento(ab);
+                alvo.litros += parseLitrosAbast(ab.litros);
+            });
+        } else {
+            totaisCombustivel.diesel.valor = parseValorMoeda(ficha.totalAbastecimento);
+            totaisCombustivel.diesel.litros = parseValorMoeda(ficha.totalLitros);
+        }
+        const totalCombustivelTxt = (t) => `R$ ${formatarMoedaSemPrefixo(t.valor)} · ${t.litros.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} L`;
 
         // Combustível e placa de cada abastecimento (placa só quando há placa secundária)
         const placaSecModal = placaSecundariaDaFicha(ficha);
@@ -1137,15 +1160,18 @@ function abrirModalResumoFicha(fichaId) {
                     <div class="modal-info-box-title">Dados Operacionais da Viagem</div>
                     <div class="modal-info-linha"><span>Data Envio:</span> <strong>${ficha.dataEnvio || '-'}</strong></div>
                     <div class="modal-info-linha"><span>Período:</span> <strong>${ficha.dataSaida || '-'} até ${ficha.dataChegada || '-'}</strong></div>
+                    <div class="modal-info-linha"><span>Destino inicial:</span> <strong>${escaparHtml(ficha.destinoInicial || '-')}</strong></div>
+                    <div class="modal-info-linha"><span>Destino final:</span> <strong>${escaparHtml(ficha.destinoFinal || '-')}</strong></div>
                     ${kmLinhasHtml}
                     ${mediaLinhasHtml}
                 </div>
                 <div class="modal-info-box">
                     <div class="modal-info-box-title">Fechamento Financeiro</div>
                     <div class="modal-info-linha"><span>Total Frete Bruto:</span> <strong style="color: #047857;">R$ ${ficha.totalFrete || '0,00'}</strong></div>
-                    <div class="modal-info-linha"><span>Total Diesel:</span> <strong>R$ ${ficha.totalAbastecimento || '0,00'}</strong></div>
+                    <div class="modal-info-linha"><span>Total Diesel:</span> <strong>${totalCombustivelTxt(totaisCombustivel.diesel)}</strong></div>
+                    <div class="modal-info-linha"><span>Total ARLA:</span> <strong>${totalCombustivelTxt(totaisCombustivel.arla)}</strong></div>
                     <div class="modal-info-linha"><span>Pedágios + Imposto:</span> <strong>R$ ${formatarMoedaSemPrefixo(parseValorMoeda(ficha.totalPedagio) + parseValorMoeda(ficha.impFederal))}</strong></div>
-                    <div class="modal-info-linha"><span>Adiantamento Concedido:</span> <strong>R$ ${ficha.valorAdiantamento || '0,00'}</strong></div>
+                    <div class="modal-info-linha"><span>Adiantamento Concedido:</span> <strong>R$ ${escaparHtml(ficha.valorAdiantamento || '0,00')}</strong></div>
                     <div class="modal-info-linha"><span>Saldo Comissão:</span> <strong style="color: #8b5cf6;">R$ ${ficha.saldoComissao || '0,00'}</strong></div>
                 </div>
             </div>
@@ -1155,7 +1181,7 @@ function abrirModalResumoFicha(fichaId) {
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                     <table class="modal-tabela-resumo">
                         <thead>
-                            <tr><th>Data</th><th>Cliente</th><th>Trecho</th><th>Valor</th><th>Comissão</th></tr>
+                            <tr><th>Data</th><th>Cliente</th>${temVeiculo ? '<th>Veículo</th>' : ''}<th>Trecho</th><th>Valor</th><th>Comissão</th></tr>
                         </thead>
                         <tbody>${fretesHtml}</tbody>
                     </table>
