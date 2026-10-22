@@ -76,6 +76,8 @@ const comissaoDaLinha = (page, i) => page.$eval(`[name="comissao_frete_ml_${i}"]
 async function cabecalhoValido(page) {
   const digitar = async (sel, txt) => { await page.focus(sel); await page.keyboard.type(txt); };
   await digitar('#placas', 'ABC1D23');
+  await digitar('#data-saida', '01102026');
+  await digitar('#data-chegada', '05102026');
   await digitar('#km-saida', '100000');
   await digitar('#km-chegada', '101500');
   await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
@@ -225,8 +227,10 @@ async function testarFicha({ base, page }) {
   });
   // Obrigatórios do motorista: destino inicial/final, adiantamento e valor de cada frete
   const mudar = (sel, v) => page.$eval(sel, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, v);
+  // Destino final é opcional (passo 14): sem ele a revisão abre
   await mudar('#destino-final', '');
-  r.semDestinoFinal = (await tentarEnviar(page)).erros;
+  r.semDestinoFinalEnvia = await tentarEnviar(page);
+  if (r.semDestinoFinalEnvia.revisaoAberta) { await page.click('#btn-revisar-voltar'); await new Promise(res => setTimeout(res, 200)); }
   await mudar('#destino-final', 'Santos - SP');
   await mudar('#valor-adiantamento', '');
   r.semAdiantamento = (await tentarEnviar(page)).erros;
@@ -496,9 +500,14 @@ async function testarDashboard({ base, page }) {
     if (PARTE === 'tudo' || PARTE === 'admin') r.admin = await testarAdmin(ctx);
     if (PARTE === 'tudo' || PARTE === 'celular') r.celular = await testarCelular(ctx);
     if (PARTE === 'tudo' || PARTE === 'dashboard') r.dashboard = await testarDashboard(ctx);
+  } catch (e) {
+    r.falha = String((e && e.stack) || e);
+    process.exitCode = 1;
   } finally {
     r.erros = ctx.erros.filter(e => !/Chart is not defined|limparDadosLocais/.test(e));
     console.log(JSON.stringify(r, null, 2));
-    await ctx.browser.close(); ctx.srv.close();
+    // No Windows o Chrome às vezes ainda segura a pasta temporária ao fechar (EBUSY): não é falha do teste
+    await ctx.browser.close().catch(() => {});
+    ctx.srv.close();
   }
 })().catch(e => { console.error(e); process.exit(1); });

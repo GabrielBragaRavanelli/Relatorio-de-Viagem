@@ -100,10 +100,27 @@ const { abrir } = require('./harness');
   await page.select('[name="placa_abast_ml_5"]', 'secundaria');
   await page.select('[name="placa_abast_ml_6"]', 'secundaria');
 
-  // Revisão e envio (com as duas placas): destinos e adiantamento são obrigatórios para o motorista
-  r.semDestinos = (await tentarEnviar()).erros;
-  await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
-  await page.$eval('#destino-final', el => { el.value = 'Santos - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  // Revisão e envio (com as duas placas): datas, destino inicial e adiantamento são obrigatórios
+  // para o motorista; destino final é opcional (passo 14)
+  const mudar = (sel, v) => page.$eval(sel, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, v);
+  r.datasDoMotorista = await page.evaluate(() => ['#data-saida', '#data-chegada'].map(sel => {
+    const el = document.querySelector(sel);
+    const btn = el.parentElement.querySelector('.btn-picker-data');
+    return `${sel}: ${el.readOnly ? 'SÓ LEITURA' : 'editável'}, tag "${el.closest('.campo-grupo').querySelector('.tag-motorista')?.textContent || '(sem)'}", ` +
+      `calendário ${btn.disabled || btn.style.pointerEvents === 'none' ? 'DESLIGADO' : 'ligado'}, obrigatório ${el.required}`;
+  }));
+  r.semDatas = (await tentarEnviar()).erros;
+  await digitar('#data-saida', '01102026');
+  r.semChegada = (await tentarEnviar()).erros;
+  // Calendário da chegada: o seletor nativo preenche o campo
+  await page.$eval('#data-chegada-picker', el => { el.value = '2026-09-30'; el.dispatchEvent(new Event('change', { bubbles: true })); });
+  r.chegadaPeloCalendario = await page.$eval('#data-chegada', el => el.value);
+  r.chegadaAntes = (await tentarEnviar()).erros;
+  await mudar('#data-chegada', '');
+  await digitar('#data-chegada', '05102026');
+  r.semDestinoInicial = (await tentarEnviar()).erros;
+  await mudar('#destino-inicial', 'Marília - SP');
+  r.destinoFinal = await page.$eval('#destino-final', el => ({ obrigatorio: el.required, rotulo: el.closest('.campo-grupo').querySelector('label').textContent.replace(/\s+/g, ' ').trim(), valor: el.value || '(vazio)' }));
   await digitar('#valor-adiantamento', '0');
   r.envio = await tentarEnviar();
   r.revisao = await page.$eval('#revisar-detalhes-viagem', el => el.innerText.replace(/\n+/g, ' | '));
@@ -132,6 +149,7 @@ const { abrir } = require('./harness');
       medias: { mediaPrincipal: dc.mediaPrincipal, mediaSecundaria: dc.mediaSecundaria, media_km_l: p.media_km_l },
       abast: p.abastecimentos.map(a => `${a.combustivel}/${a.placa}/${a.litros}`),
       destinos: [p.destino_inicial, p.destino_final, p.valor_adiantamento],
+      datas: { data_saida: p.data_saida, data_chegada: p.data_chegada, dcSaida: dc.dataSaida, dcChegada: dc.dataChegada },
       totaisAbastecimento: { total: dc.totalAbastecimento, diesel: dc.totalDiesel, arla: dc.totalArla }
     };
   });
@@ -154,6 +172,46 @@ const { abrir } = require('./harness');
     placas: await page.evaluate(() => [1, 2].map(i => document.querySelector(`[name="placa_abast_ml_${i}"]`).value)),
     km2: await page.evaluate(() => [document.querySelector('#km-saida-2').value, document.querySelector('#km-chegada-2').value, document.querySelector('#km-saida-2').required])
   };
+
+  // ARLA na média (passo 14): 1.500 km, 2 linhas de diesel (200 L e 100 L) e 1 de ARLA (50 L) = 1.500 ÷ 350 = 4,29
+  await page.evaluate(() => localStorage.removeItem('ajborges_relatorio_viagem_ml_draft'));
+  await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
+  await page.evaluate(() => {
+    window.reservarNumeroFichaSupabase = async () => 'AJB-2026-998';
+    window.salvarFichaSupabase = async (f) => { window.__payload = window.mapearFichaParaSupabase(f); return { success: true }; };
+  });
+  await digitar('#placas', 'ABC1D23');
+  await digitar('#data-saida', '01102026');
+  await digitar('#data-chegada', '05102026');
+  await digitar('#km-saida', '100000');
+  await digitar('#km-chegada', '101500');
+  await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await digitar('#valor-adiantamento', '0');
+  await linhaAbast(1, 'diesel_s10', null, '200');
+  await linhaAbast(2, 'diesel_s500', null, '100');
+  await linhaAbast(3, 'arla', null, '50');
+  r.mediaComArla = await card();
+  r.mediaComArlaEnvio = await tentarEnviar();
+  r.mediaComArlaRevisao = await page.$eval('#revisar-detalhes-viagem', el => (el.innerText.match(/Média[^\n]*\n[^\n]*/g) || []).map(t => t.replace(/\n/g, ': ')));
+  await page.click('#btn-revisar-confirmar');
+  await new Promise(res => setTimeout(res, 600));
+  r.mediaComArlaPayload = await page.evaluate(() => window.__payload && { media_km_l: window.__payload.media_km_l, mediaPrincipal: window.__payload.dados_completos.mediaPrincipal });
+
+  // Duas placas: cada placa soma as suas linhas, inclusive ARLA.
+  // Principal 1.000 km ÷ (150 diesel + 50 ARLA) = 5,00; secundária 900 km ÷ (200 diesel + 25 ARLA) = 4,00
+  await page.evaluate(() => localStorage.removeItem('ajborges_relatorio_viagem_ml_draft'));
+  await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
+  await digitar('#placas', 'ABC1D23');
+  await digitar('#km-saida', '100000');
+  await digitar('#km-chegada', '101000');
+  await digitar('#placa-secundaria', 'XYZ9A87');
+  await digitar('#km-saida-2', '200000');
+  await digitar('#km-chegada-2', '200900');
+  await linhaAbast(1, 'diesel_s10', 'principal', '150');
+  await linhaAbast(2, 'arla', 'principal', '50');
+  await linhaAbast(3, 'diesel_s10', 'secundaria', '200');
+  await linhaAbast(4, 'arla', 'secundaria', '25');
+  r.duasPlacasComArla = await card();
 
   r.dialogos = page._dialogos || [];
   r.erros = erros;

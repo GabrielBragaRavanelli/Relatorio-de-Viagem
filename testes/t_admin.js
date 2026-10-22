@@ -4,6 +4,7 @@ const { abrir } = require('./harness');
 const FICHA = {
   id: 'AJB-2026-900', motorista: 'Motorista Teste', placas: 'ABC1D23', status: 'pendente',
   kmSaida: '100000', kmEntrada: '101500', kmChegada: '101500', placaSecundaria: 'XYZ9A87', kmSaida2: '200000', kmEntrada2: '200800',
+  dataSaida: '2026-10-01', dataChegada: '2026-10-05',
   fretes: [
     { data: '01/10/2026', cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Santos - SP', valor: '1.000,00', comissao: '100,00', descarga: '' },
     { data: '02/10/2026', cliente: 'shopee', origem: 'Santos - SP', destino: 'Campinas - SP', valor: '2.000,00', comissao: '220,00', descarga: '' },
@@ -32,7 +33,8 @@ const FICHA = {
     return {
       placa: v('#placas'),
       kms: [v('#km-saida'), v('#km-chegada'), v('#km-total'), v('#placa-secundaria'), v('#km-saida-2'), v('#km-chegada-2'), v('#km-total-2'), document.getElementById('km-total-viagem').textContent],
-      editaveis: ['#km-saida', '#placa-secundaria', '#km-saida-2', '#placas'].map(s => !document.querySelector(s).readOnly),
+      editaveis: ['#km-saida', '#placa-secundaria', '#km-saida-2', '#placas', '#data-saida', '#data-chegada'].map(s => !document.querySelector(s).readOnly),
+      datas: [v('#data-saida'), v('#data-chegada')],
       abast: [1, 2, 3].map(i => `${v(`[name="combustivel_ml_${i}"]`) || '(vazio)'}/${v(`[name="placa_abast_ml_${i}"]`)}`),
       desc2: v('#ml-despesa-desc-2'),
       media: document.getElementById('ml-indicador-media-combustivel').textContent.trim().replace(/\s+/g, ' '),

@@ -111,6 +111,60 @@ const ANTIGA = {
       })()
     };
   }, [NOVA, GESTAO, ANTIGA]);
+  // Passo 14: ARLA na média. 1.500 km com 2 linhas de diesel (200 L e 100 L) e 1 de ARLA (50 L)
+  // -> 1.500 ÷ 350 = 4,29 no modal, no ranking (gráfico por motorista), no alerta, no KPI e nas Análises
+  const MEDIA = {
+    id: 'AJB-2026-960', motorista: 'Motorista Media Ficticio', placas: 'ABC1D23', status: 'aprovado',
+    dataSaida: '2026-10-01', dataChegada: '2026-10-05', kmSaida: '100000', kmEntrada: '101500', kmTotal: '1500',
+    totalFrete: '5.000,00', vrComissao: '550,00',
+    abastecimentos: [
+      { posto: 'Posto A', valor: '1.200,00', litros: '200', combustivel: 'diesel_s10', placa: 'principal' },
+      { posto: 'Posto A', valor: '600,00', litros: '100', combustivel: 'diesel_s500', placa: 'principal' },
+      { posto: 'Posto B', valor: '250,00', litros: '50', combustivel: 'arla', placa: 'principal' }],
+    outrasDespesas: []
+  };
+  // Duas placas: principal 1.000 km ÷ (150 diesel + 50 ARLA) = 5,00; secundária 900 km ÷ (200 diesel + 25 ARLA) = 4,00
+  const DUAS = {
+    id: 'AJB-2026-961', motorista: 'Motorista Duas Placas Ficticio', placas: 'ABC1D23', placaSecundaria: 'XYZ9A87', status: 'aprovado',
+    dataSaida: '01/10/2026', dataChegada: '06/10/2026', kmSaida: '100000', kmEntrada: '101000', kmSaida2: '200000', kmEntrada2: '200900',
+    kmTotal1: '1000', kmTotal2: '900', kmTotal: '1900', totalFrete: '1.000,00', vrComissao: '110,00',
+    abastecimentos: [
+      { posto: 'Posto A', valor: '900,00', litros: '150', combustivel: 'diesel_s10', placa: 'principal' },
+      { posto: 'Posto A', valor: '250,00', litros: '50', combustivel: 'arla', placa: 'principal' },
+      { posto: 'Posto C', valor: '1.200,00', litros: '200', combustivel: 'diesel_s10', placa: 'secundaria' },
+      { posto: 'Posto C', valor: '125,00', litros: '25', combustivel: 'arla', placa: 'secundaria' }],
+    outrasDespesas: []
+  };
+  r.mediaComArla = await page.evaluate((fichas) => {
+    appState.fichas = fichas;
+    const linhasModal = (id) => {
+      abrirModalResumoFicha(id);
+      return Array.from(document.querySelectorAll('#modal-ficha-conteudo .modal-info-linha'))
+        .map(l => l.textContent.trim().replace(/\s+/g, ' ')).filter(t => /Média|Data de|Total Diesel|Total ARLA/.test(t));
+    };
+    const modal = linhasModal('AJB-2026-960');
+    const modalDuas = linhasModal('AJB-2026-961');
+    appState.fichas = [fichas[0]];
+    calcularMetricasDashboard();
+    const kpi = document.getElementById('kpi-media-consumo-geral').textContent.trim();
+    const alerta = document.getElementById('alerta-consumo-texto')?.textContent.trim().replace(/\s+/g, ' ') || '';
+    appState.fichas = fichas;
+    const ranking = obterDadosGraficosReais().consumo;
+    document.getElementById('analises-filtro-status').value = 'todas';
+    renderizarAnalises();
+    const tabela = (id) => Array.from(document.querySelectorAll(`#${id} tr`)).map(tr => Array.from(tr.children).map(c => c.textContent.trim().replace(/\s+/g, ' ')).join(' | '));
+    const duas = mediasPorPlacaDaFicha(fichas[1]);
+    return {
+      obterMediaRealFicha: obterMediaRealFicha(fichas[0]).texto,
+      litrosDaFicha: litrosDaFicha(fichas[0]),
+      modal, kpi, alerta,
+      ranking: ranking.labels.map((l, i) => `${l}: ${ranking.data[i]}`),
+      analisesMotoristas: tabela('analises-tabela-motoristas').filter(l => /Media Ficticio|Motorista \|/.test(l)),
+      analisesPlacas: tabela('analises-tabela-placas'),
+      duasPlacas: { principal: duas.principal.media?.toFixed(2), secundaria: duas.secundaria.media?.toFixed(2), litros: [duas.principal.litros, duas.secundaria.litros] },
+      modalDuas
+    };
+  }, [MEDIA, DUAS]);
   r.erros = erros.filter(e => !/Chart is not defined|limparDadosLocais/.test(e));
   console.log(JSON.stringify(r, null, 2));
   await browser.close(); srv.close();

@@ -82,6 +82,12 @@ async function conferencias(db, sql, prefixo) {
   r.conferenciasPasso12 = await conferencias(db, p12, '2');
   r.conferenciasPasso13 = await conferencias(db, p13, '7');
   r.conferenciasPasso13b = await conferencias(db, p13b, '2');
+  // Passo 14 (datas do motorista) depois do 13 e do 13b, duas vezes; as conferências acima
+  // são as de cada passo no estado em que foram rodadas
+  const p14 = ler('supabase/sql/passo14_datas_motorista.sql');
+  await db.exec(ateCommit(p14));
+  await db.exec(ateCommit(p14));
+  r.conferenciasPasso14 = await conferencias(db, p14, '3');
   r.perfilDepoisDasConferencias = (await db.query(`select tipo_veiculo, comissao_alim_carreta, comissao_alim_rodotrem from public.perfis`)).rows[0];
   r.limparFretesDuasVersoes = (await db.query(`select pg_get_function_identity_arguments(oid) args from pg_proc where proname = '_limpar_fretes' order by 1`)).rows.map(x => x.args);
 
@@ -96,7 +102,7 @@ async function conferencias(db, sql, prefixo) {
   await db.query(`insert into public.fichas_viagem (id, motorista, placas, status, km_total, abastecimentos, dados_completos) values
     ('AJB-TESTE-P11', 'teste', 'abc-1d23', 'pendente', 999, $1::jsonb->'abastecimentos', $1)`, [{
       placas: 'abc-1d23', kmSaida: '100.000', kmEntrada: '101.500', placaSecundaria: 'XYZ-9A87', kmSaida2: '200000', kmEntrada2: '200.800',
-      kmTotal: '999', kmTotal1: '999', kmTotal2: '999',
+      kmTotal: '999', kmTotal1: '999', kmTotal2: '999', dataSaida: '01/10/2026', dataChegada: '05/10/2026',
       abastecimentos: [
         { posto: 'Posto A', valor: '600,00', litros: '100', combustivel: 'diesel_s10', placa: 'principal' },
         { posto: 'Posto A', valor: '900,00', litros: '150', combustivel: 'diesel_s10', placa: 'principal' },
@@ -110,7 +116,8 @@ async function conferencias(db, sql, prefixo) {
       (select string_agg(concat_ws('/', f->>'cliente', coalesce(f->>'veiculo','(sem)'), f->>'valor', f->>'comissao', f->>'descarga'), ' ; ') from jsonb_array_elements(dados_completos->'fretes') f) fretes,
       total_frete::text, vr_comissao::text, valor_adiantamento::text, saldo_comissao::text, destino_inicial, destino_final,
       dados_completos->>'totalFrete' dc_total_frete, dados_completos->>'vrComissao' dc_vr, dados_completos->>'saldoComissao' dc_saldo,
-      dados_completos->>'valorAdiantamento' dc_adiant, dados_completos->>'destinoInicial' dc_dest_ini
+      dados_completos->>'valorAdiantamento' dc_adiant, dados_completos->>'destinoInicial' dc_dest_ini,
+      data_saida::text, data_chegada::text, dados_completos->>'dataSaida' dc_saida, dados_completos->>'dataChegada' dc_chegada
       from public.fichas_viagem where id = 'AJB-TESTE-P11'`)).rows[0];
   r.motoristaInsert = await linha();
 
@@ -162,6 +169,27 @@ async function conferencias(db, sql, prefixo) {
   r.semVeiculoEnvio = await tentar('ABC1D23', { ...km1, fretes: semVeiculo });
   // Alimentício sem valor não exige veículo
   r.semVeiculoSemValor = await tentar('ABC1D23', { ...km1, fretes: [{ cliente: 'alimenticio', origem: 'A', valor: '' }] });
+
+  // Passo 14 no UPDATE: datas da coluna (ou de dados_completos quando a coluna vem null)
+  const tentarDatas = async (saida, chegada, dc, status = 'pendente') => {
+    try {
+      await db.query(`update public.fichas_viagem set status = $4, placas = 'ABC1D23', data_saida = $1, data_chegada = $2, dados_completos = $3 where id = 'AJB-TESTE-P11'`,
+        [saida, chegada, { ...km1, ...dc }, status]);
+      const l = await linha();
+      return `PASSOU: ${l.data_saida} / ${l.data_chegada} (dc ${l.dc_saida} / ${l.dc_chegada})`;
+    } catch (e) { return 'bloqueado: ' + e.message; }
+  };
+  r.datasUpdate = {
+    colunas: await tentarDatas('2026-10-02', '2026-10-06', {}),
+    soDadosCompletos: await tentarDatas(null, null, { dataSaida: '03/10/2026', dataChegada: '2026-10-07' }),
+    mesmoDia: await tentarDatas('2026-10-08', '2026-10-08', {}),
+    semChegada: await tentarDatas('2026-10-02', null, { dataChegada: '' }),
+    chegadaAntes: await tentarDatas('2026-10-02', '2026-10-01', {}),
+    dataInvalida: await tentarDatas(null, null, { dataSaida: '31/02/2026', dataChegada: '05/10/2026' }),
+    anoForaDaFaixa: await tentarDatas(null, null, { dataSaida: '01/10/2019', dataChegada: '05/10/2026' }),
+    rascunhoSemDatas: await tentarDatas(null, null, {}, 'rascunho'),
+    semDestinoFinal: await tentarDatas('2026-10-02', '2026-10-06', { destinoInicial: 'Marília - SP', destinoFinal: '' })
+  };
   // Motorista não muda o próprio tipo de veículo
   await db.exec(`set role authenticated`);
   await db.query(`update public.perfis set tipo_veiculo = 'carreta', comissao_alim_rodotrem = 99 where id = auth.uid()`);

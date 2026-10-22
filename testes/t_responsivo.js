@@ -17,7 +17,9 @@ const LARGURAS = (process.argv[2] || '320,360,390,430').split(',').map(Number);
     await digitar('#placa-secundaria', 'XYZ9A87');
     await digitar('#km-saida-2', '200000');
     await digitar('#km-chegada-2', '200800');
-    // Destinos e adiantamento: o motorista preenche (obrigatórios no envio)
+    // Datas, destinos e adiantamento: o motorista preenche (datas obrigatórias no envio)
+    await digitar('#data-saida', '01102026');
+    await digitar('#data-chegada', '05102026');
     for (const [sel, v] of [['#destino-inicial', 'Marília - SP'], ['#destino-final', 'Santos - SP']]) {
       await page.$eval(sel, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, v);
     }
