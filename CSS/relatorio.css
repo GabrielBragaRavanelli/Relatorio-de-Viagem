@@ -3502,6 +3502,26 @@ input.campo-bloqueado-gestao {
     transform: translateY(0) scale(1);
 }
 
+/* Computador: o card não passa da altura da tela, rola por dentro e os botões
+   ficam presos no rodapé (no celular a regra é a do bloco de 640px / 500px) */
+@media (min-width: 641px) and (min-height: 501px) {
+    .modal-card-custom {
+        max-height: calc(100vh - 40px);
+        max-height: calc(100dvh - 40px);
+        overflow-y: auto;
+    }
+
+    .modal-card-custom .modal-acoes-row {
+        position: sticky;
+        bottom: -32px; /* encosta na borda de baixo, por cima do padding do card */
+        margin-top: 8px;
+        margin-bottom: -32px;
+        padding: 16px 0 32px;
+        background: #ffffff;
+        z-index: 2;
+    }
+}
+
 .modal-protocolo-box {
     background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
     border: 2px dashed #6366f1;

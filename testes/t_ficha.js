@@ -3,7 +3,7 @@
 const { abrir } = require('./harness');
 
 (async () => {
-  const { srv, base, browser, page, erros } = await abrir({ largura: Number(process.argv[2] || 1280) });
+  const { srv, base, browser, page, erros } = await abrir({ largura: Number(process.argv[2] || 1280), altura: Number(process.argv[3] || 0) || undefined });
   await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
   // Captura o envio em vez de chamar o Supabase
   await page.evaluate(() => {
@@ -107,6 +107,19 @@ const { abrir } = require('./harness');
   await digitar('#valor-adiantamento', '0');
   r.envio = await tentarEnviar();
   r.revisao = await page.$eval('#revisar-detalhes-viagem', el => el.innerText.replace(/\n+/g, ' | '));
+  // Confirmar visível e clicável sem rolar a página: dentro da tela e é o elemento no ponto do clique
+  r.modalRevisao = await page.evaluate(() => {
+    const card = document.querySelector('#modal-revisar-envio .modal-card-custom').getBoundingClientRect();
+    const b = document.getElementById('btn-revisar-confirmar').getBoundingClientRect();
+    const noPonto = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return {
+      tela: `${window.innerWidth}x${window.innerHeight}`,
+      card: `${Math.round(card.height)}px, ${card.top >= 0 && card.bottom <= window.innerHeight ? 'cabe na tela' : 'NÃO cabe'}`,
+      confirmarVisivel: b.top >= 0 && b.bottom <= window.innerHeight,
+      confirmarClicavel: !!noPonto && noPonto.closest('#btn-revisar-confirmar') !== null,
+      rolagemDaPagina: window.scrollY
+    };
+  });
   await page.click('#btn-revisar-confirmar');
   await new Promise(res => setTimeout(res, 800));
   r.enviado = await page.evaluate(() => {

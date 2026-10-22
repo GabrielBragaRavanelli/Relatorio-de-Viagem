@@ -1,6 +1,7 @@
 // Servidor estático do projeto + Chrome headless com auth/Supabase simulados.
 // Uso (na raiz do projeto, uma vez): npm i --no-save puppeteer-core@23.11.1 @electric-sql/pglite@0.2.17
-// Depois: node testes/t_ficha.js [largura]   (Chrome em CHROME=... se não estiver no caminho padrão)
+// Depois: node testes/t_ficha.js [largura] [altura]   (Chrome em CHROME=... se não estiver no caminho padrão;
+// a altura também vale por ALTURA=... para os outros testes; padrão 900)
 // Nada vai para o Supabase: auth.js é trocado por um usuário de teste e o CDN fica vazio.
 const http = require('http');
 const fs = require('fs');
@@ -55,7 +56,7 @@ async function abrir(opcoes = {}) {
     if (!u.startsWith(base)) return r.respond({ status: 200, contentType: 'text/javascript', body: '' });
     r.continue();
   });
-  await page.setViewport({ width: opcoes.largura || 1280, height: 900 });
+  await page.setViewport({ width: opcoes.largura || 1280, height: opcoes.altura || Number(process.env.ALTURA) || 900 });
   return { srv, base, browser, page, erros };
 }
 
