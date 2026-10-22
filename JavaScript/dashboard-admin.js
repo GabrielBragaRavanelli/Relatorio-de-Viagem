@@ -97,10 +97,10 @@ function parseLitrosAbast(valor) {
     return isNaN(n) ? 0 : n;
 }
 
-// Litros de diesel da ficha (sem ARLA). Sem a lista, usa o total gravado.
-function litrosDieselDaFicha(f) {
+// Litros da ficha para a média km/l: diesel + ARLA (todas as linhas). Sem a lista, usa o total gravado.
+function litrosDaFicha(f) {
     const abasts = listaAbastecimentos(f);
-    if (abasts.length > 0) return abasts.reduce((acc, a) => acc + (ehArla(a) ? 0 : parseLitrosAbast(a.litros)), 0);
+    if (abasts.length > 0) return abasts.reduce((acc, a) => acc + parseLitrosAbast(a.litros), 0);
     return parseValorMoeda(f.totalLitros || f.total_litros || 0);
 }
 
@@ -126,14 +126,14 @@ function kmTrechosDaFicha(f) {
     return { total: total || principal + secundaria, principal, secundaria };
 }
 
-// Média de cada placa (ficha com placa secundária): KM do trecho daquela placa ÷ litros de
-// diesel das linhas de abastecimento marcadas com ela (ARLA fora). Mesma regra da ficha e
+// Média de cada placa (ficha com placa secundária): KM do trecho daquela placa ÷ litros
+// (diesel + ARLA) das linhas de abastecimento marcadas com ela. Mesma regra da ficha e
 // das Análises "Por placa". Sem base (KM ou litros zerados) a média é null ("—").
 function mediasPorPlacaDaFicha(f) {
     const km = kmTrechosDaFicha(f);
     const litros = { principal: 0, secundaria: 0 };
     listaAbastecimentos(f).forEach(a => {
-        if (!ehArla(a)) litros[a.placa === 'secundaria' ? 'secundaria' : 'principal'] += parseLitrosAbast(a.litros);
+        litros[a.placa === 'secundaria' ? 'secundaria' : 'principal'] += parseLitrosAbast(a.litros);
     });
     const parte = (qual) => ({
         km: km[qual], litros: litros[qual],
@@ -142,7 +142,7 @@ function mediasPorPlacaDaFicha(f) {
     return { principal: parte('principal'), secundaria: parte('secundaria') };
 }
 
-// Média da viagem toda: (KM do trecho 1 + KM do trecho 2) ÷ litros de todas as linhas de diesel.
+// Média da viagem toda: (KM do trecho 1 + KM do trecho 2) ÷ litros de todas as linhas (diesel + ARLA).
 // Usada no ranking por motorista, no alerta de "menor média" e no gráfico de consumo.
 // Com placa secundária isso é o mesmo que juntar as médias das duas placas pelo peso de cada
 // uma ((km1 + km2) ÷ (l1 + l2)), então fica coerente com a média por placa da ficha.
@@ -157,8 +157,8 @@ function obterMediaRealFicha(f) {
         km = parseMilharOuFloat(f.km_total);
     }
 
-    // Só diesel (S10 + S500); o ARLA não entra na média
-    const litros = litrosDieselDaFicha(f);
+    // Diesel + ARLA (todas as linhas de abastecimento)
+    const litros = litrosDaFicha(f);
 
     if (km > 0 && litros > 0) {
         const mediaCalc = km / litros;
@@ -290,6 +290,13 @@ function escaparHtml(valor) {
     return String(valor ?? '').replace(/[&<>"'`]/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;'
     }[c]));
+}
+
+// Data da ficha para exibir: AAAA-MM-DD (coluna) vira DD/MM/AAAA; DD/MM/AAAA fica como está
+function dataDaFichaBR(valor) {
+    const s = String(valor || '').trim();
+    const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : s;
 }
 
 // Placa no formato de exibição (XYZ9A87 -> XYZ-9A87)
@@ -587,8 +594,8 @@ function calcularMetricasDashboard() {
         // KM da viagem toda (principal + secundária)
         somaKmTotal += kmTrechosDaFicha(f).total;
 
-        // Média da frota só com diesel (o valor do ARLA continua na saída acima)
-        somaLitrosTotal += litrosDieselDaFicha(f);
+        // Média da frota com diesel + ARLA (os valores em R$ continuam na saída acima)
+        somaLitrosTotal += litrosDaFicha(f);
     });
 
     const resultadoLiquido = totalEntrada - totalSaida;
@@ -1129,14 +1136,14 @@ function abrirModalResumoFicha(fichaId) {
 
         // Média: com placa secundária, uma linha por placa (km do trecho ÷ diesel da placa)
         const mediaPorPlacaModal = (rotulo, p) => `
-                    <div class="modal-info-linha"><span>Média Consumo Diesel (${escaparHtml(rotulo)}):</span> <strong style="color: #047857;">${p.media === null ? '—'
+                    <div class="modal-info-linha"><span>Média (diesel + ARLA) (${escaparHtml(rotulo)}):</span> <strong style="color: #047857;">${p.media === null ? '—'
                         : `${p.media.toFixed(2)} km/l <small>(${p.km.toLocaleString('pt-BR')} km ÷ ${p.litros.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L)</small>`}</strong></div>`;
         const mediasModal = placaSecModal ? mediasPorPlacaDaFicha(ficha) : null;
         const mediaLinhasHtml = mediasModal
             ? mediaPorPlacaModal(placaPrincipalModal || 'principal', mediasModal.principal) +
               mediaPorPlacaModal(formatarPlacaExibicao(placaSecModal), mediasModal.secundaria)
             : `
-                    <div class="modal-info-linha"><span>Média Consumo Diesel:</span> <strong style="color: #047857;">${obterMediaRealFicha(ficha).texto} km/l</strong></div>`;
+                    <div class="modal-info-linha"><span>Média (diesel + ARLA):</span> <strong style="color: #047857;">${obterMediaRealFicha(ficha).texto} km/l</strong></div>`;
 
         let anexosHtml = '';
         if (ficha.anexos && ficha.anexos.length > 0) {
@@ -1159,7 +1166,8 @@ function abrirModalResumoFicha(fichaId) {
                 <div class="modal-info-box">
                     <div class="modal-info-box-title">Dados Operacionais da Viagem</div>
                     <div class="modal-info-linha"><span>Data Envio:</span> <strong>${ficha.dataEnvio || '-'}</strong></div>
-                    <div class="modal-info-linha"><span>Período:</span> <strong>${ficha.dataSaida || '-'} até ${ficha.dataChegada || '-'}</strong></div>
+                    <div class="modal-info-linha"><span>Data de saída:</span> <strong>${escaparHtml(dataDaFichaBR(ficha.dataSaida) || '-')}</strong></div>
+                    <div class="modal-info-linha"><span>Data de chegada:</span> <strong>${escaparHtml(dataDaFichaBR(ficha.dataChegada) || '-')}</strong></div>
                     <div class="modal-info-linha"><span>Destino inicial:</span> <strong>${escaparHtml(ficha.destinoInicial || '-')}</strong></div>
                     <div class="modal-info-linha"><span>Destino final:</span> <strong>${escaparHtml(ficha.destinoFinal || '-')}</strong></div>
                     ${kmLinhasHtml}
@@ -2254,7 +2262,7 @@ function dividirOuNulo(a, b) {
 /**
  * Valores de uma ficha, com as mesmas regras usadas no restante do dashboard.
  * despesas = diesel + ARLA + pedágio + imposto federal + outras (sem a comissão).
- * litros = só diesel (S10 + S500; sem combustível conta como diesel), para a média km/l.
+ * litros = diesel + ARLA (todas as linhas de abastecimento), para a média km/l.
  */
 function obterValoresFichaAnalise(f) {
     const abasts = listaAbastecimentos(f);
@@ -2280,7 +2288,7 @@ function obterValoresFichaAnalise(f) {
         return acc + parseValorMoeda(d.valor);
     }, 0);
 
-    const litros = litrosDieselDaFicha(f);
+    const litros = litrosDaFicha(f);
 
     const frete = parseValorMoeda(f.totalFrete ?? f.total_frete);
     const comissao = parseValorMoeda(f.vrComissao ?? f.vr_comissao);
@@ -2306,8 +2314,10 @@ function partesPorPlacaAnalise({ ficha, v }) {
     const comb = { principal: { diesel: 0, arla: 0, litros: 0 }, secundaria: { diesel: 0, arla: 0, litros: 0 } };
     listaAbastecimentos(ficha).forEach(a => {
         const c = comb[a.placa === 'secundaria' ? 'secundaria' : 'principal'];
+        // R$ separados (diesel, ARLA); os litros da média somam os dois
         if (ehArla(a)) c.arla += valorAbastecimento(a);
-        else { c.diesel += valorAbastecimento(a); c.litros += parseLitrosAbast(a.litros); }
+        else c.diesel += valorAbastecimento(a);
+        c.litros += parseLitrosAbast(a.litros);
     });
 
     const despesasPrincipal = comb.principal.diesel + comb.principal.arla + v.pedagio + v.imposto + v.outras;
@@ -2552,13 +2562,13 @@ function renderizarAnalises() {
             { classe: 'card-entrada', rotulo: 'Frete total', valor: moeda(total.frete) },
             { classe: 'card-saida', rotulo: 'Comissão total', valor: moeda(total.comissao) },
             { classe: 'card-saida', rotulo: 'Despesas totais', valor: moeda(total.despesas), nota: 'Diesel + ARLA + pedágio + imposto + outras' },
-            { classe: 'card-saida', rotulo: 'ARLA (R$)', valor: moeda(total.arla), nota: 'Entra nos custos, fora da média km/l' },
+            { classe: 'card-saida', rotulo: 'ARLA (R$)', valor: moeda(total.arla), nota: 'Entra nos custos e na média km/l (diesel + ARLA)' },
             {
                 classe: 'card-resultado', rotulo: 'Resultado do período', valor: moeda(total.resultado),
                 classeValor: total.resultado > 0 ? 'analises-positivo' : total.resultado < 0 ? 'analises-negativo' : '',
                 nota: `Margem ${textoOuTraco(dividirOuNulo(total.resultado, total.frete), n => `${formatarNumeroBR(n * 100, 1)}%`)} · frete − despesas − comissão`
             },
-            { classe: 'card-frota-kpi', rotulo: 'Média km/l', valor: textoOuTraco(mediaGeral, kmlTxt), nota: `Só diesel (S10 + S500) · Meta: ${formatarNumeroBR(meta, 2)} km/l` }
+            { classe: 'card-frota-kpi', rotulo: 'Média km/l', valor: textoOuTraco(mediaGeral, kmlTxt), nota: `Diesel + ARLA · Meta: ${formatarNumeroBR(meta, 2)} km/l` }
         ];
         elResumo.innerHTML = cards.map(c => `
             <div class="kpi-card ${c.classe}">
@@ -2831,7 +2841,7 @@ function renderizarAnalises() {
     }
 
     // ---------------- 9. Por combustível ----------------
-    // Ficha antiga sem combustível aparece numa linha à parte (conta como diesel na média)
+    // Ficha antiga sem combustível aparece numa linha à parte (conta como diesel nos valores)
     const porCombustivel = {
         diesel_s10: { nome: 'Diesel S10', litros: 0, valor: 0, qtd: 0 },
         diesel_s500: { nome: 'Diesel S500', litros: 0, valor: 0, qtd: 0 },
