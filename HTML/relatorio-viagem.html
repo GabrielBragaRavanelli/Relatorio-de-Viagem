@@ -431,9 +431,12 @@
                         <div class="grid-campos grid-2-col">
                             <!-- Destino Inicial -->
                             <div class="campo-grupo">
-                                <label for="destino-inicial">
-                                    DESTINO: INICIAL
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="destino-inicial">
+                                        DESTINO: INICIAL <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper combobox-cidade-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -441,7 +444,7 @@
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
-                                    <input type="text" id="destino-inicial" name="destino_inicial"
+                                    <input type="text" id="destino-inicial" name="destino_inicial" required
                                         placeholder="Ex: Marília - SP" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">
@@ -455,9 +458,12 @@
 
                             <!-- Destino Final -->
                             <div class="campo-grupo">
-                                <label for="destino-final">
-                                    DESTINO: FINAL
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="destino-final">
+                                        DESTINO: FINAL <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper combobox-cidade-wrapper">
                                     <svg class="input-icone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -465,8 +471,8 @@
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                         <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
-                                    <input type="text" id="destino-final" name="destino_final"
-                                        placeholder="Ex: Santos - SP (opcional)" autocomplete="off"
+                                    <input type="text" id="destino-final" name="destino_final" required
+                                        placeholder="Ex: Santos - SP" autocomplete="off"
                                         onkeydown="if(/[0-9%$#@!&*()+=[\]{};:?^~|<>`\\\/_]/.test(event.key)) event.preventDefault();"
                                         oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s\-]/g, '');">
                                     <button type="button" class="btn-combobox-seta" aria-label="Abrir opções de cidades" tabindex="-1">
@@ -481,107 +487,16 @@
                         <div class="grid-campos grid-1-col">
                             <!-- Valor Adiantamento -->
                             <div class="campo-grupo">
-                                <label for="valor-adiantamento">
-                                    VALOR ADIANTAMENTO: R$ <span class="asterisco">*</span>
-                                </label>
+                                <div class="label-com-tag">
+                                    <label for="valor-adiantamento">
+                                        VALOR ADIANTAMENTO: R$ <span class="asterisco">*</span>
+                                    </label>
+                                    <span class="tag-motorista">Motorista</span>
+                                </div>
                                 <div class="input-wrapper">
                                     <span class="input-prefixo">R$</span>
                                     <input type="text" id="valor-adiantamento" name="valor_adiantamento" required
                                         placeholder="0,00" inputmode="decimal">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BLOCO INTERNO: Resumo Financeiro de Fretes -->
-                    <div class="subbloco-fretes">
-                        <div class="subbloco-cabecalho">
-                            <div class="subbloco-titulo">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                <div>
-                                    <h3>Resumo Financeiro de Fretes</h3>
-                                    <p>Informe os valores apurados de frete de origem e retornos.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tabela-fretes-grid">
-                            <!-- Frete Origem -->
-                            <div class="frete-coluna frete-coluna-origem">
-                                <label for="frete-origem">
-                                    FRETE ORIGEM
-                                </label>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="frete-origem" name="frete_origem" placeholder="0,00"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- Retorno (I) -->
-                            <div class="frete-coluna">
-                                <label for="retorno-1">
-                                    RETORNO (I)
-                                </label>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="retorno-1" name="retorno_1" placeholder="0,00"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- Retorno (II) -->
-                            <div class="frete-coluna">
-                                <label for="retorno-2">
-                                    RETORNO (II)
-                                </label>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="retorno-2" name="retorno_2" placeholder="0,00"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- Retorno (III) -->
-                            <div class="frete-coluna">
-                                <label for="retorno-3">
-                                    RETORNO (III)
-                                </label>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="retorno-3" name="retorno_3" placeholder="0,00"
-                                        inputmode="decimal">
-                                </div>
-                            </div>
-
-                            <!-- Total Frete -->
-                            <div class="frete-coluna frete-destaque-total">
-                                <div class="label-com-tag">
-                                    <label for="total-frete">TOTAL FRETE</label>
-                                    <span class="tag-auto">Soma</span>
-                                </div>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="total-frete" name="total_frete" placeholder="0,00"
-                                        inputmode="decimal" readonly>
-                                </div>
-                            </div>
-
-                            <!-- Vr Comissão -->
-                            <div class="frete-coluna frete-destaque-comissao">
-                                <div class="label-com-tag">
-                                    <label for="vr-comissao">VR COMISSÃO</label>
-                                    <span class="tag-auto">Cálculo</span>
-                                </div>
-                                <div class="input-wrapper input-moeda">
-                                    <span class="input-prefixo">R$</span>
-                                    <input type="text" id="vr-comissao" name="vr_comissao" placeholder="0,00"
-                                        inputmode="decimal" readonly>
                                 </div>
                             </div>
                         </div>
@@ -716,6 +631,9 @@
                                         </div>
                                     </div>
 
+                                    <p class="aviso-veiculo-frete" id="aviso-veiculo-frete" role="status" hidden>
+                                        Não foi possível carregar o tipo de veículo; a comissão final é conferida pela gestão.
+                                    </p>
                                     <div class="tabela-abastecimento-wrapper">
                                         <table class="tabela-abastecimento tabela-fretes-ml">
                                             <thead>
@@ -723,21 +641,12 @@
                                                     <th class="th-num">#</th>
                                                     <th style="width: 11%;">DATA</th>
                                                     <th style="width: 14%;">OPERAÇÃO</th>
+                                                    <th style="width: 11%;" class="col-veiculo-frete">VEÍCULO</th>
                                                     <th style="width: 15%;">ORIGEM</th>
                                                     <th style="width: 15%;">DESTINO</th>
                                                     <th style="width: 15%;">
                                                         VALOR FRETE
-                                                        <span class="tag-bloqueado-frota th-tag-gestao"
-                                                            title="Definido pela Gestão">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9"
-                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                                stroke-width="2.5" stroke-linecap="round"
-                                                                stroke-linejoin="round">
-                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z">
-                                                                </path>
-                                                            </svg>
-                                                            <span>GESTÃO</span>
-                                                        </span>
+                                                        <span class="tag-motorista">Motorista</span>
                                                     </th>
                                                     <th style="width: 15%;">
                                                         COMISSÃO
@@ -755,17 +664,7 @@
                                                     </th>
                                                     <th style="width: 15%;">
                                                         DESCARGA
-                                                        <span class="tag-bloqueado-frota th-tag-gestao"
-                                                            title="Definido pela Gestão">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9"
-                                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                                stroke-width="2.5" stroke-linecap="round"
-                                                                stroke-linejoin="round">
-                                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z">
-                                                                </path>
-                                                            </svg>
-                                                            <span>GESTÃO</span>
-                                                        </span>
+                                                        <span class="tag-motorista">Motorista</span>
                                                     </th>
                                                 </tr>
                                             </thead>
@@ -816,6 +715,14 @@
                                                             <option value="alimenticio">Alimentício</option>
                                                             <option value="shopee">Shopee</option>
                                                             <option value="mercado_livre">Mercado Livre</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_1"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
                                                         </select>
                                                     </td>
                                                     <td>
@@ -915,6 +822,14 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_2"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
+                                                        </select>
+                                                    </td>
                                                     <td>
                                                         <div class="combobox-cidade-wrap">
                                                             <input type="text" name="origem_frete_ml_2" class="input-tabela"
@@ -1010,6 +925,14 @@
                                                             <option value="alimenticio">Alimentício</option>
                                                             <option value="shopee">Shopee</option>
                                                             <option value="mercado_livre">Mercado Livre</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_3"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
                                                         </select>
                                                     </td>
                                                     <td>
@@ -1109,6 +1032,14 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_4"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
+                                                        </select>
+                                                    </td>
                                                     <td>
                                                         <div class="combobox-cidade-wrap">
                                                             <input type="text" name="origem_frete_ml_4" class="input-tabela"
@@ -1204,6 +1135,14 @@
                                                             <option value="alimenticio">Alimentício</option>
                                                             <option value="shopee">Shopee</option>
                                                             <option value="mercado_livre">Mercado Livre</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_5"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
                                                         </select>
                                                     </td>
                                                     <td>
@@ -1303,6 +1242,14 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_6"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
+                                                        </select>
+                                                    </td>
                                                     <td>
                                                         <div class="combobox-cidade-wrap">
                                                             <input type="text" name="origem_frete_ml_6" class="input-tabela"
@@ -1398,6 +1345,14 @@
                                                             <option value="alimenticio">Alimentício</option>
                                                             <option value="shopee">Shopee</option>
                                                             <option value="mercado_livre">Mercado Livre</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_7"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
                                                         </select>
                                                     </td>
                                                     <td>
@@ -1497,6 +1452,14 @@
                                                             <option value="mercado_livre">Mercado Livre</option>
                                                         </select>
                                                     </td>
+                                                    <td class="col-veiculo-frete">
+                                                        <select name="veiculo_frete_ml_8"
+                                                            class="input-tabela select-veiculo-frete-ml">
+                                                            <option value="">Selecione...</option>
+                                                            <option value="carreta">Carreta</option>
+                                                            <option value="rodotrem">Rodotrem</option>
+                                                        </select>
+                                                    </td>
                                                     <td>
                                                         <div class="combobox-cidade-wrap">
                                                             <input type="text" name="origem_frete_ml_8" class="input-tabela"
@@ -1548,7 +1511,7 @@
                                                 </tr>
                                                     <!-- "+ Adicionar": mostra a próxima linha guardada (as linhas acima são fixas) -->
                                                     <tr class="linha-adicionar-celular">
-                                                        <td colspan="8">
+                                                        <td colspan="9">
                                                             <button type="button" class="btn-adicionar-linha-celular" data-adicionar="fretes"><span aria-hidden="true">+</span> Adicionar frete</button>
                                                             <small class="texto-limite-linhas" hidden>Limite de 8 fretes</small>
                                                         </td>
@@ -1556,7 +1519,7 @@
                                             </tbody>
                                             <tfoot>
                                                 <tr class="linha-totais-abast">
-                                                    <td colspan="5" class="td-totais-label">
+                                                    <td colspan="5" class="td-totais-label" id="td-totais-label-fretes">
                                                         <span class="tag-auto-pequena">Soma Automática</span>
                                                         <strong>TOTAIS &gt;&gt;</strong>
                                                     </td>
@@ -2219,22 +2182,43 @@
                                                     </tr>
                                             </tbody>
                                             <tfoot>
-                                                <tr class="linha-totais-abast">
+                                                <!-- Diesel = S10 + S500 + linhas sem combustível escolhido -->
+                                                <tr class="linha-totais-abast linha-total-diesel">
                                                     <td colspan="6" class="td-totais-label" id="td-totais-label-abast">
                                                         <span class="tag-auto-pequena">Soma Automática</span>
-                                                        <strong>TOTAL &gt;&gt;</strong>
+                                                        <strong>TOTAL DIESEL &gt;&gt;</strong>
                                                     </td>
                                                     <td class="td-total-valor">
                                                         <div class="tabela-moeda-wrap wrap-total-destaque">
                                                             <span class="tabela-moeda-prefixo">R$</span>
-                                                            <input type="text" id="ml-total-valor-combustivel" readonly
-                                                                value="0,00" class="input-tabela input-total-campo">
+                                                            <input type="text" id="ml-total-valor-diesel" readonly
+                                                                value="0,00" class="input-tabela input-total-campo" title="Total diesel em R$">
                                                         </div>
                                                     </td>
                                                     <td class="td-total-litros">
                                                         <div class="tabela-litros-wrap wrap-total-destaque">
-                                                            <input type="text" id="ml-total-litros-combustivel" readonly
-                                                                value="0" class="input-tabela input-total-campo">
+                                                            <input type="text" id="ml-total-litros-diesel" readonly
+                                                                value="0" class="input-tabela input-total-campo" title="Total de litros de diesel">
+                                                            <span class="tabela-litros-sufixo">L</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="linha-totais-abast linha-total-arla">
+                                                    <td colspan="6" class="td-totais-label" id="td-totais-label-arla">
+                                                        <span class="tag-auto-pequena">Soma Automática</span>
+                                                        <strong>TOTAL ARLA &gt;&gt;</strong>
+                                                    </td>
+                                                    <td class="td-total-valor">
+                                                        <div class="tabela-moeda-wrap wrap-total-destaque">
+                                                            <span class="tabela-moeda-prefixo">R$</span>
+                                                            <input type="text" id="ml-total-valor-arla" readonly
+                                                                value="0,00" class="input-tabela input-total-campo" title="Total ARLA em R$">
+                                                        </div>
+                                                    </td>
+                                                    <td class="td-total-litros">
+                                                        <div class="tabela-litros-wrap wrap-total-destaque">
+                                                            <input type="text" id="ml-total-litros-arla" readonly
+                                                                value="0" class="input-tabela input-total-campo" title="Total de litros de ARLA">
                                                             <span class="tabela-litros-sufixo">L</span>
                                                         </div>
                                                     </td>

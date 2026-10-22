@@ -497,6 +497,23 @@ main {
     display: none !important;
 }
 
+/* Relação de fretes: coluna "Veículo" só para motorista de rodotrem */
+.tabela-fretes-ml:not(.com-veiculo) .col-veiculo-frete {
+    display: none !important;
+}
+
+/* Tipo de veículo do motorista não carregou (a ficha segue como carreta) */
+.aviso-veiculo-frete {
+    margin: 0 0 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+}
+
 /* Outras despesas 2 e 3: lista de tipos */
 .input-select-despesa select {
     padding-left: 14px;
@@ -706,26 +723,8 @@ main {
 }
 
 /* ==========================================
-   SUB-BLOCO INTERNO: Resumo Financeiro de Fretes
+   SUB-BLOCO INTERNO: título dos blocos da ficha
    ========================================== */
-.subbloco-fretes {
-    background: linear-gradient(135deg, #ffffff 0%, #f6f9fe 100%);
-    border: 2px solid rgba(61, 61, 144, 0.18);
-    border-radius: 14px;
-    padding: 24px;
-    margin: 30px 0;
-    box-shadow: 0 6px 20px rgba(61, 61, 144, 0.05);
-    overflow: hidden;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.subbloco-cabecalho {
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(61, 61, 144, 0.12);
-}
-
 .subbloco-titulo {
     display: flex;
     align-items: center;
@@ -752,117 +751,6 @@ main {
     font-size: 13px;
     color: #64748b;
     margin-top: 2px;
-}
-
-/* Grid da Tabela de Fretes: 4 Colunas no topo (Origem + 3 Retornos) e 2 Totais destacados na base */
-.tabela-fretes-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    align-items: stretch;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.frete-coluna {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--branco);
-    padding: 14px 12px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-.frete-coluna:hover {
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.frete-coluna label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    line-height: 1.2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 4px;
-    min-width: 0;
-}
-
-.frete-coluna-origem {
-    border-left: 3.5px solid var(--azul-ajborges);
-}
-
-/* Destaque: Total Frete & Vr Comissão ocupando as 2 metades da linha inferior */
-.frete-destaque-total {
-    grid-column: span 2;
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    border: 1.5px solid #6366f1;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
-}
-
-.frete-destaque-total .label-com-tag {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 4px;
-}
-
-.frete-destaque-total label {
-    color: #3730a3;
-    font-size: 10.5px;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-}
-
-.frete-destaque-total input {
-    font-size: 15px;
-    font-weight: 700;
-    color: #3730a3;
-}
-
-.frete-destaque-total .tag-auto {
-    background: #4338ca;
-    color: var(--branco);
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 10px;
-    letter-spacing: 0.3px;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
-/* Destaque: Vr Comissão */
-.frete-destaque-comissao {
-    grid-column: span 2;
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border: 1.5px solid #10b981;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
-}
-
-.frete-destaque-comissao label {
-    color: #065f46;
-}
-
-.frete-destaque-comissao input {
-    font-size: 15px;
-    font-weight: 700;
-    color: #065f46;
-}
-
-.frete-destaque-comissao .input-prefixo {
-    color: #065f46;
 }
 
 /* ==========================================
@@ -2237,16 +2125,6 @@ select.input-tabela option {
    Responsividade
    ========================================== */
 @media (max-width: 1080px) {
-    .tabela-fretes-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .frete-destaque-total,
-    .frete-destaque-comissao {
-        grid-column: span 1;
-    }
-
     .grid-indicadores-viagem {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -2277,10 +2155,6 @@ select.input-tabela option {
         gap: 16px;
     }
 
-    .tabela-fretes-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .opcoes-relatorio-grid {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -2305,16 +2179,6 @@ select.input-tabela option {
 @media (max-width: 480px) {
     .titulo-relatorio {
         font-size: 20px;
-    }
-
-    .tabela-fretes-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .frete-destaque-total,
-    .frete-destaque-comissao {
-        grid-column: span 1;
     }
 
     .grid-indicadores-viagem {
@@ -4152,8 +4016,8 @@ input.campo-bloqueado-gestao {
 
     /* Campos largos ocupam a linha toda: posto; origem e destino */
     .tabela-abastecimento:not(.tabela-fretes-ml) tbody td:nth-child(2),
-    .tabela-fretes-ml tbody td:nth-child(4),
     .tabela-fretes-ml tbody td:nth-child(5),
+    .tabela-fretes-ml tbody td:nth-child(6),
     .tabela-abastecimento tfoot td.td-totais-label {
         grid-column: 1 / -1;
     }
@@ -4304,11 +4168,6 @@ input.campo-bloqueado-gestao {
 
     .form-relatorio {
         padding: 20px 14px;
-    }
-
-    /* Uma coluna: nada lado a lado no celular */
-    .tabela-fretes-grid {
-        grid-template-columns: minmax(0, 1fr);
     }
 
     /* Rodapé em uma coluna */

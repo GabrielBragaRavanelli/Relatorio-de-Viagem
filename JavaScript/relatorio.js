@@ -42,14 +42,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const inputDestinoFinal = document.getElementById('destino-final');
     const inputAdiantamento = document.getElementById('valor-adiantamento');
 
-    // Sub-bloco de Fretes
-    const inputFreteOrigem = document.getElementById('frete-origem');
-    const inputRetorno1 = document.getElementById('retorno-1');
-    const inputRetorno2 = document.getElementById('retorno-2');
-    const inputRetorno3 = document.getElementById('retorno-3');
-    const inputTotalFrete = document.getElementById('total-frete');
-    const inputVrComissao = document.getElementById('vr-comissao');
-
     // Elementos de Acionamento e Ficha do Formulário Unificado
     const btnIniciarRelatorio = document.getElementById('btn-iniciar-relatorio');
     const secaoFormularioUnificado = document.getElementById('secao-formulario-ml');
@@ -1260,9 +1252,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (tabelaAbastecimento) tabelaAbastecimento.classList.toggle('com-placa-secundaria', ativo);
         // Com placa secundária, KM de saída e de chegada do 2º trecho são obrigatórios
         [inputKmSaida2, inputKmChegada2].forEach(input => { if (input) input.required = ativo; });
-        // O rótulo "TOTAL" cobre a coluna Placa só quando ela aparece
-        const tdTotais = document.getElementById('td-totais-label-abast');
-        if (tdTotais) tdTotais.colSpan = ativo ? 6 : 5;
+        // Os rótulos "TOTAL DIESEL" e "TOTAL ARLA" cobrem a coluna Placa só quando ela aparece
+        ['td-totais-label-abast', 'td-totais-label-arla'].forEach(id => {
+            const tdTotais = document.getElementById(id);
+            if (tdTotais) tdTotais.colSpan = ativo ? 6 : 5;
+        });
         atualizarOpcoesPlacaAbast();
         calcularKmTotal();
     }
@@ -1452,27 +1446,17 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         });
     }
 
-    // Aplica máscara nos campos monetários de frete e adiantamento
-    const camposMoedaTopo = [
-        inputAdiantamento,
-        inputFreteOrigem,
-        inputRetorno1,
-        inputRetorno2,
-        inputRetorno3
-    ];
-
-    camposMoedaTopo.forEach(campo => {
-        if (campo) {
-            aplicarMascaraMoeda(campo, () => {
-                if (typeof calcularIndicadoresViagemMl === 'function') {
-                    calcularIndicadoresViagemMl();
-                }
-                if (typeof salvarProgressoMl === 'function') {
-                    salvarProgressoMl();
-                }
-            });
-        }
-    });
+    // Aplica máscara no valor do adiantamento
+    if (inputAdiantamento) {
+        aplicarMascaraMoeda(inputAdiantamento, () => {
+            if (typeof calcularIndicadoresViagemMl === 'function') {
+                calcularIndicadoresViagemMl();
+            }
+            if (typeof salvarProgressoMl === 'function') {
+                salvarProgressoMl();
+            }
+        });
+    }
 
 
 
@@ -1519,11 +1503,91 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const inputTotalRelacaoFrete = document.getElementById('ml-total-relacao-frete');
     const inputTotalRelacaoComissao = document.getElementById('ml-total-relacao-comissao');
     const inputTotalRelacaoDescarga = document.getElementById('ml-total-relacao-descarga');
+    const tabelaFretesMl = document.querySelector('table.tabela-fretes-ml');
+
+    // Tipo de veículo do motorista da ficha e comissões especiais do Alimentício
+    // (RPC veiculo_do_motorista, passo 13). Sem resposta do banco vale carreta, sem
+    // comissões especiais: a tela só mostra a conta, quem grava a comissão é o banco.
+    const veiculoMotorista = { tipo: 'carreta', comCarreta: null, comRodotrem: null };
+    const ROTULOS_VEICULO = { carreta: 'Carreta', rodotrem: 'Rodotrem' };
+    const motoristaEscolheVeiculo = () => veiculoMotorista.tipo === 'rodotrem' || veiculoMotorista.tipo === 'carreta_rodotrem';
+
+    // Origem Viana (ES): sem acento, sem diferenciar maiúsculas e sem espaços sobrando.
+    // "Viana", "Viana/ES", "Viana - ES", "Viana ES" e "Viana, ES"; outro estado não vale.
+    // Mesma regra de public._eh_viana_es (passo 13).
+    function ehVianaES(texto) {
+        const t = String(texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .toLowerCase().replace(/\s+/g, ' ').trim();
+        return /^viana(\s*[\/,-]\s*es|\s+es)?$/.test(t);
+    }
+
+    // Veículo da linha: motorista de carreta é sempre 'carreta'; o de rodotrem escolhe ('' = não escolheu)
+    function veiculoDaLinhaFrete(i) {
+        if (!motoristaEscolheVeiculo()) return 'carreta';
+        const v = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`)?.value || '';
+        return ROTULOS_VEICULO[v] ? v : '';
+    }
+
+    // REGRA DA COMISSÃO (a mesma de public._limpar_fretes, passo 13). null = sem comissão.
+    // Mercado Livre R$ 400; Shopee 11%; Alimentício pelo veículo da linha: rodotrem usa a
+    // especial de rodotrem do motorista, senão 8% (origem Viana-ES) ou 9%; carreta usa a
+    // especial de carreta, senão 11%.
+    function calcularComissaoFrete(cliente, valor, origem, veiculo) {
+        const centavos = Math.round((Number(valor) || 0) * 100);
+        if (!(centavos > 0)) return null;
+        if (cliente === 'mercado_livre') return 400;
+        let pct = null;
+        if (cliente === 'shopee') pct = 11;
+        else if (cliente === 'alimenticio' && veiculo === 'rodotrem') pct = veiculoMotorista.comRodotrem ?? (ehVianaES(origem) ? 8 : 9);
+        else if (cliente === 'alimenticio' && veiculo === 'carreta') pct = veiculoMotorista.comCarreta ?? 11;
+        if (pct === null) return null;
+        // Em centavos e centésimos de %, arredondando em 2 casas como o round() do banco
+        return Math.floor((centavos * Math.round(pct * 100) + 5000) / 10000) / 100;
+    }
+
+    // Mostra/esconde a coluna "Veículo" (motorista de rodotrem) e, se pedido, refaz as comissões
+    function aplicarTipoVeiculoFretes(recalcular) {
+        const mostrar = motoristaEscolheVeiculo();
+        if (tabelaFretesMl) tabelaFretesMl.classList.toggle('com-veiculo', mostrar);
+        const tdTotais = document.getElementById('td-totais-label-fretes');
+        if (tdTotais) tdTotais.colSpan = mostrar ? 6 : 5;
+        if (recalcular) {
+            for (let i = 1; i <= 8; i++) atualizarLinhaFreteMl(i, false);
+        }
+        calcularTotaisFreteMl();
+        calcularIndicadoresViagemMl();
+    }
+
+    // Busca o tipo de veículo e as comissões especiais. Motorista: o próprio perfil (sem
+    // parâmetro); gestão: o motorista da ficha. Se falhar, segue como carreta e avisa.
+    async function carregarVeiculoMotorista(motoristaId, recalcular) {
+        let dados = null;
+        let falhou = false;
+        try {
+            const cliente = window.supabaseClient;
+            if (!cliente) throw new Error('Supabase indisponível');
+            const { data, error } = await cliente.rpc('veiculo_do_motorista', motoristaId ? { p_id: motoristaId } : {});
+            if (error) throw error;
+            dados = Array.isArray(data) ? data[0] : data;
+        } catch (e) {
+            console.warn('Não foi possível carregar o tipo de veículo:', (e && e.message) || e);
+            falhou = true;
+        }
+        const pct = (v) => (v === null || v === undefined || v === '' || !isFinite(Number(v))) ? null : Number(v);
+        const tipo = dados && ['rodotrem', 'carreta_rodotrem'].includes(dados.tipo_veiculo) ? dados.tipo_veiculo : 'carreta';
+        veiculoMotorista.tipo = falhou ? 'carreta' : tipo;
+        veiculoMotorista.comCarreta = falhou ? null : pct(dados && dados.comissao_alim_carreta);
+        veiculoMotorista.comRodotrem = falhou ? null : pct(dados && dados.comissao_alim_rodotrem);
+        const aviso = document.getElementById('aviso-veiculo-frete');
+        if (aviso) aviso.hidden = !falhou;
+        aplicarTipoVeiculoFretes(recalcular);
+    }
 
     function atualizarLinhaFreteMl(index, acaoDisparadaPorSelect = false) {
         const selectCli = document.querySelector(`select[name="cliente_frete_ml_${index}"]`);
         const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${index}"]`);
         const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${index}"]`);
+        const inputOrigem = document.querySelector(`input[name="origem_frete_ml_${index}"]`);
 
         if (!selectCli || !inputValFrete || !inputComissao) return;
 
@@ -1536,56 +1600,32 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const isModoAdminAtivo = (modeUrlAtual === 'admin') || (userSalvo && (userSalvo.role === 'admin' || userSalvo.role === 'diretoria') && modeUrlAtual !== 'motorista');
 
         const tipoOperacao = selectCli.value;
+        if (!tipoOperacao && acaoDisparadaPorSelect) inputValFrete.value = '';
+
+        const comissao = calcularComissaoFrete(tipoOperacao, parseMoeda(inputValFrete.value), inputOrigem?.value, veiculoDaLinhaFrete(index));
+        const textoComissao = comissao === null ? '' : formatarMoedaSemPrefixo(comissao);
+
+        // Valor do frete: o motorista e a gestão preenchem
+        inputValFrete.removeAttribute('readonly');
+        inputValFrete.removeAttribute('disabled');
+        inputValFrete.classList.remove('campo-bloqueado-gestao');
 
         if (isModoAdminAtivo) {
-            // No Modo Administrador: 100% livre e editável com recálculo em tempo real
-            inputValFrete.removeAttribute('readonly');
-            inputValFrete.removeAttribute('disabled');
-            inputValFrete.classList.remove('campo-bloqueado-gestao');
-
+            // No Modo Administrador: comissão editável; o cálculo automático não passa
+            // por cima do que a gestão digitou (só quando ela troca o cliente ou o veículo)
             inputComissao.removeAttribute('readonly');
             inputComissao.removeAttribute('disabled');
             inputComissao.classList.remove('campo-bloqueado-gestao');
 
-            if (tipoOperacao === 'mercado_livre') {
-                if (acaoDisparadaPorSelect) inputComissao.value = '400,00';
-            } else if (tipoOperacao === 'shopee') {
-                const valorNum = parseMoeda(inputValFrete.value);
-                if (valorNum > 0 && (acaoDisparadaPorSelect || !inputComissao.dataset.editadoManual)) {
-                    inputComissao.value = formatarMoedaSemPrefixo(valorNum * 0.11);
-                }
-            } else if (tipoOperacao === 'alimenticio') {
-                if (acaoDisparadaPorSelect) inputComissao.value = '';
-            } else {
-                if (acaoDisparadaPorSelect) {
-                    inputValFrete.value = '';
-                    inputComissao.value = '';
-                }
+            if (acaoDisparadaPorSelect || !inputComissao.dataset.editadoManual) {
+                inputComissao.value = textoComissao;
+                inputComissao.dataset.editadoManual = '';
             }
         } else {
-            // No Modo Motorista: campos financeiros de frete protegidos com readonly
-            inputValFrete.setAttribute('readonly', 'true');
-            inputValFrete.classList.add('campo-bloqueado-gestao');
+            // No Modo Motorista: comissão calculada sozinha e só para leitura (o banco recalcula no envio)
             inputComissao.setAttribute('readonly', 'true');
             inputComissao.classList.add('campo-bloqueado-gestao');
-
-            if (tipoOperacao === 'mercado_livre') {
-                inputComissao.value = '400,00';
-            } else if (tipoOperacao === 'shopee') {
-                const valorNum = parseMoeda(inputValFrete.value);
-                if (valorNum > 0) {
-                    inputComissao.value = formatarMoedaSemPrefixo(valorNum * 0.11);
-                } else {
-                    inputComissao.value = '';
-                }
-            } else if (tipoOperacao === 'alimenticio') {
-                if (acaoDisparadaPorSelect) inputComissao.value = '';
-            } else {
-                if (acaoDisparadaPorSelect) {
-                    inputValFrete.value = '';
-                    inputComissao.value = '';
-                }
-            }
+            inputComissao.value = textoComissao;
         }
     }
 
@@ -1631,6 +1671,24 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 calcularIndicadoresViagemMl();
                 salvarProgressoMl();
             });
+            // Gestão digitou a comissão: o cálculo automático deixa de mexer nela
+            inputComissao.addEventListener('input', (e) => {
+                if (e.isTrusted && !inputComissao.readOnly) inputComissao.dataset.editadoManual = '1';
+            });
+        }
+
+        // Veículo da linha (motorista de rodotrem): muda a comissão do Alimentício
+        const selectVeiculo = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
+        if (selectVeiculo) {
+            selectVeiculo.addEventListener('change', () => {
+                atualizarLinhaFreteMl(i, true);
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
+                salvarProgressoMl();
+                if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
+                    atualizarListaLinhasPreenchidasPopover();
+                }
+            });
         }
 
         if (inputDescarga) {
@@ -1657,6 +1715,10 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
         if (inputOrigemFrete) {
             inputOrigemFrete.addEventListener('input', () => {
+                // Origem Viana (ES) muda a comissão do rodotrem
+                atualizarLinhaFreteMl(i, false);
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
                 salvarProgressoMl();
                 if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
                     atualizarListaLinhasPreenchidasPopover();
@@ -1712,24 +1774,17 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             inputTotalRelacaoDescarga.value = formatarMoedaSemPrefixo(somaDescarga);
         }
 
-        // Sincroniza automaticamente a soma total de comissões com o campo "VR COMISSÃO" do cabeçalho
-        if (inputVrComissao) {
-            inputVrComissao.value = somaComissao > 0 ? formatarMoedaSemPrefixo(somaComissao) : '';
-        }
-
-        // Sincroniza automaticamente com o campo "TOTAL FRETE" do cabeçalho
-        if (inputTotalFrete) {
-            inputTotalFrete.value = somaFrete > 0 ? formatarMoedaSemPrefixo(somaFrete) : '';
-        }
-
+        // Estes totais são o "Total frete" e o "Vr comissão" da ficha (indicadores e envio)
         return { frete: somaFrete, comissao: somaComissao, descarga: somaDescarga };
     }
 
     // 15.2. Abastecimento ML (10 Linhas - Sem Média)
     const inputsValorAbastMl = [];
     const inputsLitrosAbastMl = [];
-    const inputTotalValorCombustivelMl = document.getElementById('ml-total-valor-combustivel');
-    const inputTotalLitrosCombustivelMl = document.getElementById('ml-total-litros-combustivel');
+    const inputTotalValorDieselMl = document.getElementById('ml-total-valor-diesel');
+    const inputTotalLitrosDieselMl = document.getElementById('ml-total-litros-diesel');
+    const inputTotalValorArlaMl = document.getElementById('ml-total-valor-arla');
+    const inputTotalLitrosArlaMl = document.getElementById('ml-total-litros-arla');
 
     // Lista Oficial dos 38 Postos de Combustíveis Conveniados da AJBorges
     const POSTOS_COMBUSTIVEL_CONVENIADOS = [
@@ -1878,27 +1933,25 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
     }
 
+    // TOTAL DIESEL = Diesel S10, Diesel S500 e linhas sem combustível escolhido; TOTAL ARLA = só ARLA.
+    // valor/litros continuam sendo a soma dos dois (Despesa total e envio).
     function calcularTotaisAbastecimentoMl() {
-        let somaValor = 0;
-        let somaLitros = 0;
+        const diesel = { valor: 0, litros: 0 };
+        const arla = { valor: 0, litros: 0 };
 
-        inputsValorAbastMl.forEach(input => {
-            somaValor += parseMoeda(input.value);
-        });
-
-        inputsLitrosAbastMl.forEach(input => {
-            somaLitros += parseLitros(input.value);
-        });
-
-        if (inputTotalValorCombustivelMl) {
-            inputTotalValorCombustivelMl.value = formatarMoedaSemPrefixo(somaValor);
+        for (let i = 1; i <= 10; i++) {
+            const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`)?.value || '';
+            const alvo = comb === 'arla' ? arla : diesel;
+            alvo.valor += parseMoeda(document.querySelector(`input[name="valor_ml_${i}"]`)?.value || '');
+            alvo.litros += parseLitros(document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '');
         }
 
-        if (inputTotalLitrosCombustivelMl) {
-            inputTotalLitrosCombustivelMl.value = formatarLitros(somaLitros);
-        }
+        if (inputTotalValorDieselMl) inputTotalValorDieselMl.value = formatarMoedaSemPrefixo(diesel.valor);
+        if (inputTotalLitrosDieselMl) inputTotalLitrosDieselMl.value = formatarLitros(diesel.litros);
+        if (inputTotalValorArlaMl) inputTotalValorArlaMl.value = formatarMoedaSemPrefixo(arla.valor);
+        if (inputTotalLitrosArlaMl) inputTotalLitrosArlaMl.value = formatarLitros(arla.litros);
 
-        return { valor: somaValor, litros: somaLitros };
+        return { valor: diesel.valor + arla.valor, litros: diesel.litros + arla.litros, diesel, arla };
     }
 
     // Combustíveis do abastecimento (valor gravado -> texto). Vazio (ficha antiga) conta como diesel.
@@ -2080,8 +2133,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             }
         }
 
-        // 2. Despesa Total = Combustível + Impostos/Pedágios + Outras Despesas + Vr Comissão + Descarga
-        const vrComissaoNum = parseMoeda(inputVrComissao ? inputVrComissao.value : '');
+        // 2. Despesa Total = Combustível (diesel + ARLA) + Impostos/Pedágios + Outras Despesas + Vr Comissão + Descarga
+        // (Vr Comissão = total de comissões da Relação de fretes)
+        const vrComissaoNum = totalFreteRelacao.comissao;
         const totalDescargaNum = totalFreteRelacao && totalFreteRelacao.descarga ? totalFreteRelacao.descarga : 0;
 
         const despesaTotalCalculada = totaisCombustivel.valor +
@@ -2093,11 +2147,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             mlIndicadorDespesa.textContent = formatarMoeda(despesaTotalCalculada);
         }
 
-        // 3. Resultado da Viagem = Total Frete - Despesa Total
-        let totalFreteFinal = parseMoeda(inputTotalFrete ? inputTotalFrete.value : '');
-        if (totalFreteFinal === 0 && totalFreteRelacao && totalFreteRelacao.frete > 0) {
-            totalFreteFinal = totalFreteRelacao.frete;
-        }
+        // 3. Resultado da Viagem = Total Frete (da Relação de fretes) - Despesa Total
+        const totalFreteFinal = totalFreteRelacao.frete;
 
         const resultadoViagemCalculado = totalFreteFinal - despesaTotalCalculada;
         if (mlIndicadorResultado) {
@@ -2361,6 +2412,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     function verificarLinhaFretePreenchida(i) {
         const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
         const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+        const selVeic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
         const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
         const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
         const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
@@ -2369,6 +2421,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
         return !!((dt && dt.value.trim() !== '') ||
             (selCli && selCli.value.trim() !== '') ||
+            (selVeic && motoristaEscolheVeiculo() && selVeic.value !== '') ||
             (og && og.value.trim() !== '') ||
             (dst && dst.value.trim() !== '') ||
             (vl && vl.value.trim() !== '') ||
@@ -2391,6 +2444,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 'mercado_livre': 'Mercado Livre'
             };
             partes.push(rotulosOp[selCli.value] || selCli.value);
+        }
+        if (motoristaEscolheVeiculo() && ROTULOS_VEICULO[veiculoDaLinhaFrete(i)]) {
+            partes.push(ROTULOS_VEICULO[veiculoDaLinhaFrete(i)]);
         }
         if (dst && dst.value.trim()) {
             partes.push(dst.value.trim());
@@ -2419,10 +2475,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
         const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
         const pickerNativo = dt && dt.parentElement ? dt.parentElement.querySelector('.input-picker-data-nativo') : null;
+        const selVeic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
 
         if (dt) dt.value = '';
         if (pickerNativo) pickerNativo.value = '';
         if (selCli) selCli.value = '';
+        if (selVeic) selVeic.value = '';
         if (og) og.value = '';
         if (dst) dst.value = '';
         if (vl) {
@@ -2496,10 +2554,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`);
                 const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`);
                 const pickerNativo = dt && dt.parentElement ? dt.parentElement.querySelector('.input-picker-data-nativo') : null;
+                const selVeic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
 
                 if (dt) dt.value = '';
                 if (pickerNativo) pickerNativo.value = '';
                 if (selCli) selCli.value = '';
+                if (selVeic) selVeic.value = '';
                 if (og) og.value = '';
                 if (dst) dst.value = '';
                 if (vl) {
@@ -2742,13 +2802,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 kmEntrada2: inputKmChegada2?.value || '',
                 destinoInicial: inputDestinoInicial?.value?.trim() || '',
                 destinoFinal: inputDestinoFinal?.value?.trim() || '',
-                valorAdiantamento: inputAdiantamento?.value || '',
-                freteOrigem: inputFreteOrigem?.value || '',
-                retorno1: inputRetorno1?.value || '',
-                retorno2: inputRetorno2?.value || '',
-                retorno3: inputRetorno3?.value || '',
-                totalFrete: inputTotalFrete?.value || '',
-                vrComissao: inputVrComissao?.value || ''
+                valorAdiantamento: inputAdiantamento?.value || ''
             };
 
             const fretesMl = [];
@@ -2756,6 +2810,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 fretesMl.push({
                     data: document.querySelector(`input[name="data_frete_ml_${i}"]`)?.value || '',
                     cliente: document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '',
+                    veiculo: document.querySelector(`select[name="veiculo_frete_ml_${i}"]`)?.value || '',
                     origem: document.querySelector(`input[name="origem_frete_ml_${i}"]`)?.value || '',
                     destino: document.querySelector(`input[name="destino_frete_ml_${i}"]`)?.value || '',
                     valor: document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || '',
@@ -2823,17 +2878,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (inputDestinoInicial) inputDestinoInicial.value = '';
         if (inputDestinoFinal) inputDestinoFinal.value = '';
         if (inputAdiantamento) inputAdiantamento.value = '';
-        if (inputFreteOrigem) inputFreteOrigem.value = '';
-        if (inputRetorno1) inputRetorno1.value = '';
-        if (inputRetorno2) inputRetorno2.value = '';
-        if (inputRetorno3) inputRetorno3.value = '';
-        if (inputTotalFrete) inputTotalFrete.value = '';
-        if (inputVrComissao) inputVrComissao.value = '';
 
         // Limpar as 8 linhas de frete
         for (let i = 1; i <= 8; i++) {
             const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
             const cli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+            const veic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
             const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
             const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
             const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
@@ -2842,6 +2892,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
             if (dt) dt.value = '';
             if (cli) cli.value = '';
+            if (veic) veic.value = '';
             if (og) og.value = '';
             if (dst) dst.value = '';
             if (vl) vl.value = '';
@@ -2978,12 +3029,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     if (inputDestinoInicial && dados.cabecalho.destinoInicial) inputDestinoInicial.value = dados.cabecalho.destinoInicial;
                     if (inputDestinoFinal && dados.cabecalho.destinoFinal) inputDestinoFinal.value = dados.cabecalho.destinoFinal;
                     if (inputAdiantamento && dados.cabecalho.valorAdiantamento) inputAdiantamento.value = dados.cabecalho.valorAdiantamento;
-                    if (inputFreteOrigem && dados.cabecalho.freteOrigem) inputFreteOrigem.value = dados.cabecalho.freteOrigem;
-                    if (inputRetorno1 && dados.cabecalho.retorno1) inputRetorno1.value = dados.cabecalho.retorno1;
-                    if (inputRetorno2 && dados.cabecalho.retorno2) inputRetorno2.value = dados.cabecalho.retorno2;
-                    if (inputRetorno3 && dados.cabecalho.retorno3) inputRetorno3.value = dados.cabecalho.retorno3;
-                    if (inputTotalFrete && dados.cabecalho.totalFrete) inputTotalFrete.value = dados.cabecalho.totalFrete;
-                    if (inputVrComissao && dados.cabecalho.vrComissao) inputVrComissao.value = dados.cabecalho.vrComissao;
                 }
 
                 // Restaurar fretes
@@ -2993,6 +3038,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                         const i = idx + 1;
                         const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
                         const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+                        const selVeic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
                         const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
                         const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                         const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
@@ -3001,60 +3047,22 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                         if (dt && f.data) dt.value = normalizarDataExibicao(f.data);
                         if (selCli && f.cliente !== undefined) selCli.value = f.cliente;
+                        if (selVeic) selVeic.value = ROTULOS_VEICULO[f.veiculo] ? f.veiculo : '';
                         if (og && f.origem) og.value = f.origem;
                         if (dst && f.destino) dst.value = f.destino;
+                        if (vl && f.valor) vl.value = f.valor;
                         if (desc && f.descarga) desc.value = f.descarga;
+                        if (com) {
+                            com.dataset.editadoManual = '';
+                            com.value = f.comissao || '';
+                        }
 
                         if (f.cliente || f.valor || f.origem || f.destino || f.descarga) {
                             temFretePreenchido = true;
                         }
 
-                        if (f.cliente === 'mercado_livre') {
-                            if (vl) {
-                                vl.removeAttribute('readonly');
-                                if (f.valor) vl.value = f.valor;
-                            }
-                            if (com) {
-                                com.setAttribute('readonly', 'true');
-                                com.dataset.editadoManual = '';
-                                com.value = '400,00';
-                            }
-                        } else if (f.cliente === 'shopee') {
-                            if (vl) {
-                                vl.removeAttribute('readonly');
-                                if (f.valor) vl.value = f.valor;
-                            }
-                            if (com) {
-                                com.setAttribute('readonly', 'true');
-                                com.dataset.editadoManual = '';
-                                if (f.comissao) {
-                                    com.value = f.comissao;
-                                } else if (vl && vl.value) {
-                                    const vNum = parseMoeda(vl.value);
-                                    com.value = vNum > 0 ? formatarMoedaSemPrefixo(vNum * 0.11) : '';
-                                }
-                            }
-                        } else if (f.cliente === 'alimenticio') {
-                            if (vl) {
-                                vl.removeAttribute('readonly');
-                                if (f.valor) vl.value = f.valor;
-                            }
-                            if (com) {
-                                com.removeAttribute('readonly');
-                                com.dataset.editadoManual = '';
-                                if (f.comissao) com.value = f.comissao;
-                            }
-                        } else {
-                            if (vl) {
-                                vl.removeAttribute('readonly');
-                                if (f.valor) vl.value = f.valor;
-                            }
-                            if (com) {
-                                com.setAttribute('readonly', 'true');
-                                com.dataset.editadoManual = '';
-                                if (f.comissao) com.value = f.comissao;
-                            }
-                        }
+                        // Comissão sempre pela regra (o tipo de veículo do motorista chega depois e refaz a conta)
+                        atualizarLinhaFreteMl(i, false);
                     });
                 }
 
@@ -3171,9 +3179,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`)?.value || '';
             const com = document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || '';
             const desc = document.querySelector(`input[name="descarga_frete_ml_${i}"]`)?.value || '';
+            // 'carreta' | 'rodotrem'; '' = motorista de rodotrem que não escolheu (o banco grava null)
+            const veiculo = veiculoDaLinhaFrete(i);
 
             if (dt || cli || og || dst || vl || com) {
-                fretes.push({ data: dt, cliente: cli, origem: og, destino: dst, valor: vl, comissao: com, descarga: desc });
+                fretes.push({ data: dt, cliente: cli, veiculo, origem: og, destino: dst, valor: vl, comissao: com, descarga: desc });
             }
         }
         return fretes;
@@ -3215,6 +3225,21 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             kmEntrada2: secundaria ? digitos(inputKmChegada2) : '',
             kmTotal2: secundaria ? texto(kms.t2.total) : '',
             kmTotal: texto(kms.viagem)
+        };
+    }
+
+    // Totais para gravar, no formato da ficha ("1.234,56"): total frete e vr comissão vêm da
+    // Relação de fretes; o total do abastecimento é diesel + ARLA, com os dois também separados
+    function totaisParaGravar() {
+        const fretes = calcularTotaisFreteMl();
+        const abast = calcularTotaisAbastecimentoMl();
+        return {
+            totalFrete: formatarMoedaSemPrefixo(fretes.frete),
+            vrComissao: formatarMoedaSemPrefixo(fretes.comissao),
+            totalAbastecimento: formatarMoedaSemPrefixo(abast.valor),
+            totalLitros: formatarLitros(abast.litros),
+            totalDiesel: formatarMoedaSemPrefixo(abast.diesel.valor),
+            totalArla: formatarMoedaSemPrefixo(abast.arla.valor)
         };
     }
 
@@ -3280,23 +3305,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const adiantamentoVal = ficha.valorAdiantamento || ficha.valor_adiantamento || ficha.dados_completos?.valorAdiantamento;
         if (inputAdiantamento && adiantamentoVal) inputAdiantamento.value = adiantamentoVal;
 
-        const freteOrigemVal = ficha.freteOrigem || ficha.frete_origem || ficha.dados_completos?.freteOrigem;
-        if (inputFreteOrigem && freteOrigemVal) inputFreteOrigem.value = freteOrigemVal;
-
-        const retorno1Val = ficha.retorno1 || ficha.retorno_1 || ficha.dados_completos?.retorno1;
-        if (inputRetorno1 && retorno1Val) inputRetorno1.value = retorno1Val;
-
-        const retorno2Val = ficha.retorno2 || ficha.retorno_2 || ficha.dados_completos?.retorno2;
-        if (inputRetorno2 && retorno2Val) inputRetorno2.value = retorno2Val;
-
-        const retorno3Val = ficha.retorno3 || ficha.retorno_3 || ficha.dados_completos?.retorno3;
-        if (inputRetorno3 && retorno3Val) inputRetorno3.value = retorno3Val;
-
-        const totalFreteVal = ficha.totalFrete || ficha.total_frete || ficha.dados_completos?.totalFrete;
-        if (inputTotalFrete && totalFreteVal) inputTotalFrete.value = totalFreteVal;
-
-        const vrComissaoVal = ficha.vrComissao || ficha.vr_comissao || ficha.dados_completos?.vrComissao;
-        if (inputVrComissao && vrComissaoVal) inputVrComissao.value = vrComissaoVal;
+        // Frete origem, retornos, total frete e vr comissão de fichas antigas não têm mais
+        // campo na tela: o total frete e a comissão vêm da Relação de fretes
 
         // Fretes Operacionais
         const fretesLista = Array.isArray(ficha.fretes) ? ficha.fretes : (Array.isArray(ficha.dados_completos?.fretes) ? ficha.dados_completos.fretes : []);
@@ -3305,6 +3315,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 const i = idx + 1;
                 const dt = document.querySelector(`input[name="data_frete_ml_${i}"]`);
                 const selCli = document.querySelector(`select[name="cliente_frete_ml_${i}"]`);
+                const selVeic = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
                 const og = document.querySelector(`input[name="origem_frete_ml_${i}"]`);
                 const dst = document.querySelector(`input[name="destino_frete_ml_${i}"]`);
                 const vl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
@@ -3313,13 +3324,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                 if (dt && f.data) dt.value = normalizarDataExibicao(f.data);
                 if (selCli && f.cliente) selCli.value = f.cliente;
+                if (selVeic) selVeic.value = ROTULOS_VEICULO[f.veiculo] ? f.veiculo : '';
                 if (og && f.origem) og.value = f.origem;
                 if (dst && f.destino) dst.value = f.destino;
                 if (vl && f.valor) vl.value = f.valor;
+                // A comissão gravada aparece como está (a gestão pode ter ajustado à mão)
                 if (com && f.comissao) com.value = f.comissao;
-                // Mercado Livre tem comissão fixa de R$ 400,00. Se a ficha veio sem o valor
-                // (o banco descarta o que o motorista manda nesse campo), aplica a regra aqui.
-                if (com && f.cliente === 'mercado_livre' && !f.comissao) com.value = '400,00';
                 if (desc && f.descarga) desc.value = f.descarga;
             });
             if (typeof calcularTotaisFreteMl === 'function') calcularTotaisFreteMl();
@@ -3534,8 +3544,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     td.dataset.rotulo = td.classList.contains('td-num') ? item : rotulos[i] || '';
                 });
             });
-            tabela.querySelector('tfoot .td-total-valor')?.setAttribute('data-rotulo', 'Total em R$');
-            tabela.querySelector('tfoot .td-total-litros')?.setAttribute('data-rotulo', 'Total de litros');
+            tabela.querySelectorAll('tfoot .td-total-valor').forEach(td => td.setAttribute('data-rotulo', 'Total em R$'));
+            tabela.querySelectorAll('tfoot .td-total-litros').forEach(td => td.setAttribute('data-rotulo', 'Total de litros'));
 
             // "+ Adicionar": mostra a próxima linha guardada e já põe o foco nela
             tabela.querySelector('.btn-adicionar-linha-celular')?.addEventListener('click', () => {
@@ -3635,26 +3645,18 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         // (placa principal, placa secundária e KMs de saída/chegada ficam livres: motorista e gestão preenchem)
         const camposAdminVeiculo = [inputMotorista].filter(Boolean);
 
-        // Grupo 2: Fretes da Empresa (Definido pela Frota no modo motorista)
+        // Grupo 2: Totais da Relação de fretes (Definido pela Frota no modo motorista)
         const camposFretesFrota = [
-            inputFreteOrigem,
-            inputRetorno1,
-            inputRetorno2,
-            inputRetorno3,
-            inputTotalFrete,
-            inputVrComissao,
             document.getElementById('ml-total-relacao-frete'),
             document.getElementById('ml-total-relacao-comissao'),
             document.getElementById('ml-total-relacao-descarga')
         ].filter(Boolean);
 
         // Grupo 3: Campos Operacionais Corporativos
+        // (destinos e adiantamento ficam livres: o motorista preenche)
         const camposOperacionaisFrota = [
             inputDataSaida,
             inputDataChegada,
-            inputDestinoInicial,
-            inputDestinoFinal,
-            inputAdiantamento,
             document.getElementById('ml-pedagio-1'),
             document.getElementById('ml-pedagio-2'),
             document.getElementById('ml-pedagio-3'),
@@ -3832,6 +3834,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             toggleFormularioUnificado(true, false);
 
             let fichaCarregada = null;
+            // Motorista dono da ficha (o tipo de veículo e as comissões especiais são dele, não da gestão)
+            let motoristaIdDaFicha = null;
 
             if (fichaIdUrl) {
                 const todas = obterListaFichasCentral();
@@ -3854,6 +3858,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                             if (registro && mapearFn) {
                                 fichaCarregada = mapearFn(registro);
                             }
+                            if (registro && registro.motorista_id) motoristaIdDaFicha = registro.motorista_id;
                         } catch (errSupabase) {
                             console.warn('Erro ao consultar ficha no Supabase:', errSupabase);
                         }
@@ -3888,6 +3893,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                     atualizarDisplayNumeroFicha(fichaCarregada.id);
                     carregarFichaEmCampos(fichaCarregada);
+
+                    // Coluna "Veículo" e cálculo automático com o tipo do motorista DA FICHA.
+                    // As comissões gravadas não são recalculadas ao abrir (a gestão pode ter ajustado).
+                    const idMotorista = motoristaIdDaFicha || fichaCarregada.motorista_id || fichaCarregada.motoristaId;
+                    if (idMotorista && idMotorista !== 'anonimo') carregarVeiculoMotorista(idMotorista, false);
 
                     if (adminTitulo) {
                         adminTitulo.innerHTML = `Conferência da Ficha: <strong>${fichaCarregada.id}</strong>`;
@@ -4039,6 +4049,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                     if (registro && mapearFn) {
                         fichaView = mapearFn(registro);
+                        if (registro.motorista_id) fichaView.motorista_id = registro.motorista_id;
                     }
                 } catch (e) {
                     console.warn('Erro ao carregar ficha no modo view via Supabase:', e);
@@ -4049,6 +4060,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 atualizarDisplayNumeroFicha(fichaView.id);
                 carregarFichaEmCampos(fichaView);
                 toggleFormularioUnificado(true, false);
+                // Coluna "Veículo" de quem enviou a ficha (só exibição; nada é recalculado)
+                const idMotoristaView = fichaView.motorista_id || fichaView.motoristaId;
+                if (idMotoristaView && idMotoristaView !== 'anonimo') carregarVeiculoMotorista(idMotoristaView, false);
 
                 // Bloqueia todos os inputs para leitura
                 document.querySelectorAll('#form-relatorio input, #form-relatorio select').forEach(el => {
@@ -4110,11 +4124,13 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
 
         // 2. TAREFA 3: Bloqueio de Fretes com "Definido pela Frota"
+        // (valor do frete e descarga ficam livres; a comissão é calculada sozinha)
         camposFretesFrota.forEach(input => aplicarBloqueioCampo(input, 'Definido pela Frota'));
-        camposTabelaFretes.forEach(input => {
+        camposTabelaFretes.filter(input => input.classList.contains('input-comissao-frete-ml')).forEach(input => {
             input.setAttribute('readonly', 'true');
             input.classList.add('campo-bloqueado-gestao');
         });
+        [inputDestinoInicial, inputDestinoFinal, inputAdiantamento].forEach(input => liberarCampoBloqueado(input));
         document.querySelectorAll('.th-tag-gestao').forEach(t => t.style.display = 'inline-flex');
 
         // 3. Bloqueio de Campos Operacionais Corporativos
@@ -4139,6 +4155,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
         // Abre automaticamente o formulário oficial para lançamento de fretes e diesel
         toggleFormularioUnificado(true, false);
+
+        // Tipo de veículo e comissões especiais do próprio motorista (coluna "Veículo" e comissão)
+        carregarVeiculoMotorista(null, true);
 
         // Verifica estado do Motorista (Com Login ou Sem Login)
         const motoristaSaudacao = document.getElementById('motorista-saudacao-texto');
@@ -4212,7 +4231,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         return false;
     }
 
-    // Modal de revisão: KMs, placa secundária e combustível/placa de cada abastecimento
+    // Modal de revisão: destinos, adiantamento, KMs, placa secundária, fretes (veículo e
+    // comissão calculada) e combustível/placa de cada abastecimento com os totais diesel e ARLA
     function preencherDetalhesRevisao() {
         const caixa = document.getElementById('revisar-detalhes-viagem');
         if (!caixa) return;
@@ -4223,7 +4243,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const principal = placaPrincipalAtual();
         const linha = (rotulo, valor) => `<div class="revisar-linha"><span>${esc(rotulo)}</span><strong>${esc(valor)}</strong></div>`;
 
-        let html = '<h3>Quilometragem</h3>';
+        let html = '<h3>Viagem</h3>';
+        html += linha('Destino inicial', (inputDestinoInicial?.value || '').trim() || '—');
+        html += linha('Destino final', (inputDestinoFinal?.value || '').trim() || '—');
+        html += linha('Adiantamento', inputAdiantamento?.value ? `R$ ${inputAdiantamento.value}` : '—');
+
+        html += '<h3>Quilometragem</h3>';
         html += linha('Placa principal', principal ? formatarPlaca(principal) : '—');
         html += linha('KM saída / chegada', `${km(inputKmSaida?.value)} → ${km(inputKmChegada?.value)}`);
         html += linha(secundaria ? 'KM total (principal)' : 'KM total', km(kms.t1.total));
@@ -4232,6 +4257,26 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             html += linha('KM saída / chegada (secundária)', `${km(inputKmSaida2?.value)} → ${km(inputKmChegada2?.value)}`);
             html += linha('KM total (secundária)', km(kms.t2.total));
             html += linha('KM total da viagem', km(kms.viagem));
+        }
+
+        const rotulosCliente = { alimenticio: 'Alimentício', shopee: 'Shopee', mercado_livre: 'Mercado Livre' };
+        const fretes = [];
+        for (let i = 1; i <= 8; i++) {
+            const valorEl = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+            if (!linhaEmUso(valorEl) || !verificarLinhaFretePreenchida(i)) continue;
+            const cliente = document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '';
+            const comissao = document.querySelector(`input[name="comissao_frete_ml_${i}"]`)?.value || '';
+            const partes = [rotulosCliente[cliente] || 'Sem operação'];
+            if (motoristaEscolheVeiculo()) partes.push(ROTULOS_VEICULO[veiculoDaLinhaFrete(i)] || 'Veículo não escolhido');
+            partes.push(valorEl.value ? `Frete R$ ${valorEl.value}` : 'Sem valor');
+            partes.push(`Comissão ${comissao ? `R$ ${comissao}` : '—'}`);
+            fretes.push(linha(`#${fretes.length + 1}`, partes.join(' · ')));
+        }
+        if (fretes.length) {
+            const totaisFrete = calcularTotaisFreteMl();
+            html += '<h3>Fretes</h3>' + fretes.join('');
+            html += linha('Total frete', formatarMoeda(totaisFrete.frete));
+            html += linha('Total comissão', formatarMoeda(totaisFrete.comissao));
         }
 
         const abasts = [];
@@ -4246,7 +4291,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             if (litros) partes.push(`${litros} L`);
             abasts.push(linha(`#${abasts.length + 1}`, partes.join(' · ')));
         }
-        if (abasts.length) html += '<h3>Abastecimentos</h3>' + abasts.join('');
+        if (abasts.length) {
+            const totaisAbast = calcularTotaisAbastecimentoMl();
+            html += '<h3>Abastecimentos</h3>' + abasts.join('');
+            html += linha('Total diesel', `${formatarMoeda(totaisAbast.diesel.valor)} · ${formatarLitros(totaisAbast.diesel.litros)} L`);
+            html += linha('Total ARLA', `${formatarMoeda(totaisAbast.arla.valor)} · ${formatarLitros(totaisAbast.arla.litros)} L`);
+        }
         caixa.innerHTML = html;
     }
 
@@ -4314,6 +4364,25 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (kms.t1.invalido) return falharValidacao(inputKmChegada, 'O KM de chegada não pode ser menor que o de saída.');
         if (kms.t2.invalido) return falharValidacao(inputKmChegada2, 'O KM de chegada não pode ser menor que o de saída.');
 
+        // Destinos e adiantamento: o motorista preenche (adiantamento 0,00 se não houve)
+        if (!modoAdmin) {
+            if (!(inputDestinoInicial?.value || '').trim()) return falharValidacao(inputDestinoInicial, 'Informe o destino inicial.');
+            if (!(inputDestinoFinal?.value || '').trim()) return falharValidacao(inputDestinoFinal, 'Informe o destino final.');
+            if (!(inputAdiantamento?.value || '').trim()) return falharValidacao(inputAdiantamento, 'Informe o valor do adiantamento (0,00 se não houve).');
+
+            // Cada frete preenchido precisa do valor; no Alimentício, o rodotrem escolhe o veículo
+            for (let i = 1; i <= 8; i++) {
+                const valor = document.querySelector(`input[name="valor_frete_ml_${i}"]`);
+                if (!valor || !linhaEmUso(valor) || !verificarLinhaFretePreenchida(i)) continue;
+                if (!(parseMoeda(valor.value) > 0)) return falharValidacao(valor, 'Informe o valor do frete');
+                const cliente = document.querySelector(`select[name="cliente_frete_ml_${i}"]`)?.value || '';
+                const veiculo = document.querySelector(`select[name="veiculo_frete_ml_${i}"]`);
+                if (cliente === 'alimenticio' && motoristaEscolheVeiculo() && !veiculoDaLinhaFrete(i)) {
+                    return falharValidacao(veiculo, 'Escolha o veículo (carreta ou rodotrem) em cada frete do Alimentício.');
+                }
+            }
+        }
+
         if (!modoAdmin) {
             for (let i = 1; i <= 10; i++) {
                 const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`);
@@ -4355,6 +4424,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
 
         const kmPlaca = coletarKmEPlacaSecundaria();
+        const totais = totaisParaGravar();
         const dadosAtualizados = {
             id: idFicha,
             protocolo: idFicha,
@@ -4376,24 +4446,18 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             destino_inicial: inputDestinoInicial?.value?.trim() || '',
             destinoFinal: inputDestinoFinal?.value?.trim() || '',
             destino_final: inputDestinoFinal?.value?.trim() || '',
-            freteOrigem: inputFreteOrigem?.value || '',
-            frete_origem: inputFreteOrigem?.value || '',
-            retorno1: inputRetorno1?.value || '',
-            retorno_1: inputRetorno1?.value || '',
-            retorno2: inputRetorno2?.value || '',
-            retorno_2: inputRetorno2?.value || '',
-            retorno3: inputRetorno3?.value || '',
-            retorno_3: inputRetorno3?.value || '',
-            totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
-            total_frete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
-            vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
-            vr_comissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+            totalFrete: totais.totalFrete,
+            total_frete: totais.totalFrete,
+            vrComissao: totais.vrComissao,
+            vr_comissao: totais.vrComissao,
             valorAdiantamento: inputAdiantamento?.value || '',
             valor_adiantamento: inputAdiantamento?.value || '',
             fretes: coletarFretesAtuais(),
             abastecimentos: coletarAbastecimentosAtuais(),
-            totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
-            totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+            totalAbastecimento: totais.totalAbastecimento,
+            totalLitros: totais.totalLitros,
+            totalDiesel: totais.totalDiesel,
+            totalArla: totais.totalArla,
             mediaKmL: extrairMediaCombustivelMlParaSalvar(),
             media_km_l: extrairMediaCombustivelMlParaSalvar(),
             ...mediasPorPlacaParaSalvar(),
@@ -4615,6 +4679,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
                 const nomeFinalMotorista = inputMotorista?.value.trim() || (isComLogin ? usuarioAtivo?.nome : '') || 'Motorista';
                 const kmPlaca = coletarKmEPlacaSecundaria();
+                // Totais da tela; o banco recalcula total frete, comissão e saldo do motorista
+                const totais = totaisParaGravar();
 
                 const novaFicha = {
                     id: novoIdFicha,
@@ -4640,24 +4706,18 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     destinoInicial: inputDestinoInicial?.value?.trim() || '',
                     destino_final: inputDestinoFinal?.value?.trim() || '',
                     destinoFinal: inputDestinoFinal?.value?.trim() || '',
-                    frete_origem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
-                    freteOrigem: inputFreteOrigem?.value || (fretesAtuais[0]?.valor || '0,00'),
-                    retorno_1: inputRetorno1?.value || '',
-                    retorno1: inputRetorno1?.value || '',
-                    retorno_2: inputRetorno2?.value || '',
-                    retorno2: inputRetorno2?.value || '',
-                    retorno_3: inputRetorno3?.value || '',
-                    retorno3: inputRetorno3?.value || '',
-                    total_frete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
-                    totalFrete: document.getElementById('ml-total-relacao-frete')?.value || inputTotalFrete?.value || '0,00',
-                    vr_comissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
-                    vrComissao: document.getElementById('ml-total-relacao-comissao')?.value || inputVrComissao?.value || '0,00',
+                    total_frete: totais.totalFrete,
+                    totalFrete: totais.totalFrete,
+                    vr_comissao: totais.vrComissao,
+                    vrComissao: totais.vrComissao,
                     valor_adiantamento: inputAdiantamento?.value || '',
                     valorAdiantamento: inputAdiantamento?.value || '',
                     fretes: fretesAtuais,
                     abastecimentos: abastsAtuais,
-                    totalAbastecimento: document.getElementById('ml-total-abast-valor')?.value || '0,00',
-                    totalLitros: document.getElementById('ml-total-abast-litros')?.value || '0,00',
+                    totalAbastecimento: totais.totalAbastecimento,
+                    totalLitros: totais.totalLitros,
+                    totalDiesel: totais.totalDiesel,
+                    totalArla: totais.totalArla,
                     media_km_l: extrairMediaCombustivelMlParaSalvar(),
                     mediaKmL: extrairMediaCombustivelMlParaSalvar(),
                     ...mediasPorPlacaParaSalvar(),
