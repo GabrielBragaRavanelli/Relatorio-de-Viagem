@@ -3654,10 +3654,13 @@ function renderizarFrota() {
     const termo = normalizarNomePessoa(document.getElementById('mot-busca')?.value || '');
     const termoDigitos = somenteDigitos(termo);
     const situacao = document.getElementById('mot-filtro-situacao')?.value || '';
+    // Sem tipo_veiculo válido o motorista conta como carreta (igual a textoVeiculoMotorista)
+    const veiculo = document.getElementById('mot-filtro-veiculo')?.value || '';
 
     const filtrados = lista.filter(m => {
         if (situacao === 'validos' && m.status === 'inativo') return false;
         if (situacao === 'inativo' && m.status !== 'inativo') return false;
+        if (veiculo && (ROTULOS_TIPO_VEICULO[m.tipo_veiculo] ? m.tipo_veiculo : 'carreta') !== veiculo) return false;
         if (!termo) return true;
         if (normalizarNomePessoa(m.nome).includes(termo)) return true;
         return termoDigitos.length >= 3 &&
@@ -4157,6 +4160,7 @@ function inicializarAbaMotoristas() {
 
     document.getElementById('mot-busca')?.addEventListener('input', renderizarFrota);
     document.getElementById('mot-filtro-situacao')?.addEventListener('change', renderizarFrota);
+    document.getElementById('mot-filtro-veiculo')?.addEventListener('change', renderizarFrota);
     document.getElementById('ter-busca')?.addEventListener('input', renderizarTerceiros);
 
     // Cards clicáveis aplicam o filtro de situação (clicar de novo limpa)
