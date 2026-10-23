@@ -1512,9 +1512,9 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     const ROTULOS_VEICULO = { carreta: 'Carreta', rodotrem: 'Rodotrem' };
     const motoristaEscolheVeiculo = () => veiculoMotorista.tipo === 'rodotrem' || veiculoMotorista.tipo === 'carreta_rodotrem';
 
-    // Origem Viana (ES): sem acento, sem diferenciar maiúsculas e sem espaços sobrando.
+    // Destino Viana (ES): sem acento, sem diferenciar maiúsculas e sem espaços sobrando.
     // "Viana", "Viana/ES", "Viana - ES", "Viana ES" e "Viana, ES"; outro estado não vale.
-    // Mesma regra de public._eh_viana_es (passo 13).
+    // Mesma regra de public._eh_viana_es (passo 13; usada no destino desde o passo 15).
     function ehVianaES(texto) {
         const t = String(texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
             .toLowerCase().replace(/\s+/g, ' ').trim();
@@ -1528,17 +1528,17 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         return ROTULOS_VEICULO[v] ? v : '';
     }
 
-    // REGRA DA COMISSÃO (a mesma de public._limpar_fretes, passo 13). null = sem comissão.
+    // REGRA DA COMISSÃO (a mesma de public._limpar_fretes, passo 15). null = sem comissão.
     // Mercado Livre R$ 400; Shopee 11%; Alimentício pelo veículo da linha: rodotrem usa a
-    // especial de rodotrem do motorista, senão 8% (origem Viana-ES) ou 9%; carreta usa a
+    // especial de rodotrem do motorista, senão 8% (destino Viana-ES) ou 9%; carreta usa a
     // especial de carreta, senão 11%.
-    function calcularComissaoFrete(cliente, valor, origem, veiculo) {
+    function calcularComissaoFrete(cliente, valor, destino, veiculo) {
         const centavos = Math.round((Number(valor) || 0) * 100);
         if (!(centavos > 0)) return null;
         if (cliente === 'mercado_livre') return 400;
         let pct = null;
         if (cliente === 'shopee') pct = 11;
-        else if (cliente === 'alimenticio' && veiculo === 'rodotrem') pct = veiculoMotorista.comRodotrem ?? (ehVianaES(origem) ? 8 : 9);
+        else if (cliente === 'alimenticio' && veiculo === 'rodotrem') pct = veiculoMotorista.comRodotrem ?? (ehVianaES(destino) ? 8 : 9);
         else if (cliente === 'alimenticio' && veiculo === 'carreta') pct = veiculoMotorista.comCarreta ?? 11;
         if (pct === null) return null;
         // Em centavos e centésimos de %, arredondando em 2 casas como o round() do banco
@@ -1587,7 +1587,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const selectCli = document.querySelector(`select[name="cliente_frete_ml_${index}"]`);
         const inputValFrete = document.querySelector(`input[name="valor_frete_ml_${index}"]`);
         const inputComissao = document.querySelector(`input[name="comissao_frete_ml_${index}"]`);
-        const inputOrigem = document.querySelector(`input[name="origem_frete_ml_${index}"]`);
+        const inputDestino = document.querySelector(`input[name="destino_frete_ml_${index}"]`);
 
         if (!selectCli || !inputValFrete || !inputComissao) return;
 
@@ -1602,7 +1602,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const tipoOperacao = selectCli.value;
         if (!tipoOperacao && acaoDisparadaPorSelect) inputValFrete.value = '';
 
-        const comissao = calcularComissaoFrete(tipoOperacao, parseMoeda(inputValFrete.value), inputOrigem?.value, veiculoDaLinhaFrete(index));
+        const comissao = calcularComissaoFrete(tipoOperacao, parseMoeda(inputValFrete.value), inputDestino?.value, veiculoDaLinhaFrete(index));
         const textoComissao = comissao === null ? '' : formatarMoedaSemPrefixo(comissao);
 
         // Valor do frete: o motorista e a gestão preenchem
@@ -1715,10 +1715,6 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
         if (inputOrigemFrete) {
             inputOrigemFrete.addEventListener('input', () => {
-                // Origem Viana (ES) muda a comissão do rodotrem
-                atualizarLinhaFreteMl(i, false);
-                calcularTotaisFreteMl();
-                calcularIndicadoresViagemMl();
                 salvarProgressoMl();
                 if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
                     atualizarListaLinhasPreenchidasPopover();
@@ -1727,6 +1723,10 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         }
         if (inputDestinoFrete) {
             inputDestinoFrete.addEventListener('input', () => {
+                // Destino Viana (ES) muda a comissão do rodotrem
+                atualizarLinhaFreteMl(i, false);
+                calcularTotaisFreteMl();
+                calcularIndicadoresViagemMl();
                 salvarProgressoMl();
                 if (typeof atualizarListaLinhasPreenchidasPopover === 'function') {
                     atualizarListaLinhasPreenchidasPopover();
