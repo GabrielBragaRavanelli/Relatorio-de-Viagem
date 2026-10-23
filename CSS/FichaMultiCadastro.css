@@ -70,6 +70,14 @@ header {
     align-items: center;
 }
 
+/* Computador (links lado a lado): links logo depois do logo, a 56px dele; o espaço que sobra fica à direita */
+@media (min-width: 781px) and (min-height: 501px) {
+    .header-AJBorges {
+        justify-content: flex-start;
+        gap: 56px;
+    }
+}
+
 .logotipo-AJBorges {
     display: flex;
     align-items: center;
