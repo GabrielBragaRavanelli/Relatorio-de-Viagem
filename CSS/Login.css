@@ -590,6 +590,21 @@ input::-ms-clear {
     text-decoration: underline;
 }
 
+/* "Faça parte da nossa frota" (WhatsApp do RH): a linha do cadastro fica logo abaixo dela */
+.form-footer-frota + .form-footer {
+    margin-top: 10px;
+}
+
+.form-footer-frota .link-cadastro {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.icone-whatsapp-link {
+    flex-shrink: 0;
+}
+
 /* Espaçador para manter altura e simetria 100% idênticas entre os dois perfis */
 .form-footer-placeholder {
     margin-top: 22px;
