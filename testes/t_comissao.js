@@ -110,19 +110,20 @@ const colunaVeiculo = (page) => page.evaluate(() => {
 async function testarFicha({ base, page }) {
   const r = {};
 
-  // 1 e 2. Exemplos da REGRA DA COMISSÃO (fretes de R$ 10.000,00)
+  // 1 e 2. Exemplos da REGRA DA COMISSÃO (fretes de R$ 10.000,00). Desde o passo 15 o Viana (ES)
+  // é o DESTINO da linha (A a D são as conferências do passo15_viana_destino.sql)
   const exemplos = [
-    ['Rodotrem, Alimentício, origem Viana (linha rodotrem) = 8%', RODOTREM, { cliente: 'alimenticio', origem: 'Viana - ES', veiculo: 'rodotrem' }, '800,00'],
-    ['Rodotrem, Alimentício, origem Marília (linha rodotrem) = 9%', RODOTREM, { cliente: 'alimenticio', origem: 'Marília - SP', veiculo: 'rodotrem' }, '900,00'],
-    ['Rodotrem, linha marcada Carreta = 11%', RODOTREM, { cliente: 'alimenticio', origem: 'Viana - ES', veiculo: 'carreta' }, '1.100,00'],
-    ['José Luiz Aguiar, linha Rodotrem, origem Viana = 10,5%', JOSE, { cliente: 'alimenticio', origem: 'Viana/ES', veiculo: 'rodotrem' }, '1.050,00'],
-    ['José Luiz Aguiar, linha Rodotrem, origem Marília = 10,5%', JOSE, { cliente: 'alimenticio', origem: 'Marília - SP', veiculo: 'rodotrem' }, '1.050,00'],
-    ['José Luiz Aguiar, linha Carreta = 11%', JOSE, { cliente: 'alimenticio', origem: 'Viana - ES', veiculo: 'carreta' }, '1.100,00'],
+    ['A: Rodotrem, origem Marília, destino Viana (linha rodotrem) = 8%', RODOTREM, { cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Viana - ES', veiculo: 'rodotrem' }, '800,00'],
+    ['B: Rodotrem, origem Viana, destino Cravinhos (linha rodotrem) = 9%', RODOTREM, { cliente: 'alimenticio', origem: 'Viana - ES', destino: 'Cravinhos - SP', veiculo: 'rodotrem' }, '900,00'],
+    ['C: José Luiz Aguiar (especial rodotrem 10,5), destino Viana = 10,5%', JOSE, { cliente: 'alimenticio', destino: 'Viana/ES', veiculo: 'rodotrem' }, '1.050,00'],
+    ['D: Rodotrem, linha marcada Carreta, destino Viana = 11%', RODOTREM, { cliente: 'alimenticio', destino: 'Viana - ES', veiculo: 'carreta' }, '1.100,00'],
+    ['José Luiz Aguiar, linha Rodotrem, destino Santos = 10,5%', JOSE, { cliente: 'alimenticio', destino: 'Santos - SP', veiculo: 'rodotrem' }, '1.050,00'],
+    ['José Luiz Aguiar, linha Carreta = 11%', JOSE, { cliente: 'alimenticio', destino: 'Viana - ES', veiculo: 'carreta' }, '1.100,00'],
     ['Clóvis (carreta, especial 6), Alimentício = 6%', CLOVIS, { cliente: 'alimenticio' }, '600,00'],
     ['Qualquer motorista, Shopee = 11%', RODOTREM, { cliente: 'shopee', veiculo: 'rodotrem' }, '1.100,00'],
     ['Qualquer motorista, Mercado Livre = R$ 400', CLOVIS, { cliente: 'mercado_livre' }, '400,00'],
-    ['Rodotrem, origem "Viana/MA" = 9%', RODOTREM, { cliente: 'alimenticio', origem: 'Viana/MA', veiculo: 'rodotrem' }, '900,00'],
-    ['Carreta sem especial, Alimentício = 11%', CARRETA, { cliente: 'alimenticio', origem: 'Viana - ES' }, '1.100,00']
+    ['Rodotrem, destino "Viana/MA" = 9%', RODOTREM, { cliente: 'alimenticio', destino: 'Viana/MA', veiculo: 'rodotrem' }, '900,00'],
+    ['Carreta sem especial, Alimentício = 11%', CARRETA, { cliente: 'alimenticio', destino: 'Viana - ES' }, '1.100,00']
   ];
   r.exemplos = [];
   for (const [nome, cfg, linha, esperado] of exemplos) {
@@ -132,17 +133,19 @@ async function testarFicha({ base, page }) {
     r.exemplos.push(`${obtido === esperado ? 'OK ' : 'ERRO'} ${nome}: ${obtido} (esperado ${esperado})`);
   }
 
-  // Comissão recalcula ao trocar origem e veículo (rodotrem)
+  // Comissão recalcula ao trocar o destino e o veículo (rodotrem); trocar a origem não muda nada
   await abrirFicha(page, base, RODOTREM);
-  await linhaFrete(page, 1, { cliente: 'alimenticio', origem: 'Marília - SP', veiculo: 'rodotrem' });
+  await linhaFrete(page, 1, { cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Santos - SP', veiculo: 'rodotrem' });
   const antes = await comissaoDaLinha(page, 1);
   await page.$eval('[name="origem_frete_ml_1"]', el => { el.value = 'Viana - ES'; el.dispatchEvent(new Event('input', { bubbles: true })); });
   const depoisOrigem = await comissaoDaLinha(page, 1);
+  await page.$eval('[name="destino_frete_ml_1"]', el => { el.value = 'Viana - ES'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  const depoisDestino = await comissaoDaLinha(page, 1);
   await page.select('[name="veiculo_frete_ml_1"]', 'carreta');
   const depoisVeiculo = await comissaoDaLinha(page, 1);
   await page.select('[name="veiculo_frete_ml_1"]', '');
   const semVeiculo = await comissaoDaLinha(page, 1);
-  r.recalculo = `Marília ${antes} → Viana ${depoisOrigem} → carreta ${depoisVeiculo} → sem veículo "${semVeiculo}"`;
+  r.recalculo = `destino Santos ${antes} → origem Viana ${depoisOrigem} → destino Viana ${depoisDestino} → carreta ${depoisVeiculo} → sem veículo "${semVeiculo}"`;
 
   // 3. Carreta: a coluna não aparece
   await abrirFicha(page, base, CARRETA);
@@ -258,7 +261,7 @@ async function testarFicha({ base, page }) {
   // Envio de um motorista de rodotrem: o veículo de cada frete vai no payload
   await abrirFicha(page, base, JOSE);
   await cabecalhoValido(page);
-  await linhaFrete(page, 1, { cliente: 'alimenticio', origem: 'Viana - ES', veiculo: 'rodotrem' });
+  await linhaFrete(page, 1, { cliente: 'alimenticio', destino: 'Viana - ES', veiculo: 'rodotrem' });
   await page.evaluate(() => document.querySelector('table.tabela-fretes-ml .btn-adicionar-linha-celular').click());
   await linhaFrete(page, 2, { cliente: 'alimenticio', origem: 'Marília - SP', veiculo: 'carreta' });
   await page.evaluate(() => document.querySelector('table.tabela-fretes-ml .btn-adicionar-linha-celular').click());
@@ -278,9 +281,9 @@ async function testarFicha({ base, page }) {
 async function testarAdmin({ base, page }) {
   const FICHA = {
     id: 'AJB-2026-950', motorista: 'Motorista Ficticio', motoristaId: 'mot-rodotrem-1', placas: 'ABC1D23', status: 'pendente',
-    kmSaida: '100000', kmEntrada: '101500', destinoInicial: 'Viana - ES', destinoFinal: 'Marília - SP', valorAdiantamento: '500,00',
+    kmSaida: '100000', kmEntrada: '101500', destinoInicial: 'Marília - SP', destinoFinal: 'Viana - ES', valorAdiantamento: '500,00',
     fretes: [
-      { data: '01/10/2026', cliente: 'alimenticio', veiculo: 'rodotrem', origem: 'Viana - ES', destino: 'Marília - SP', valor: '10.000,00', comissao: '800,00', descarga: '' },
+      { data: '01/10/2026', cliente: 'alimenticio', veiculo: 'rodotrem', origem: 'Marília - SP', destino: 'Viana - ES', valor: '10.000,00', comissao: '800,00', descarga: '' },
       { data: '02/10/2026', cliente: 'shopee', origem: 'Marília - SP', destino: 'Santos - SP', valor: '2.000,00', comissao: '220,00', descarga: '' }
     ],
     abastecimentos: [], outrasDespesas: []
@@ -330,7 +333,7 @@ async function testarCelular({ base, page }) {
   for (const w of [360, 390, 430]) {
     await page.setViewport({ width: w, height: 780 });
     await abrirFicha(page, base, RODOTREM);
-    await linhaFrete(page, 1, { cliente: 'alimenticio', origem: 'Viana - ES', veiculo: 'rodotrem' });
+    await linhaFrete(page, 1, { cliente: 'alimenticio', destino: 'Viana - ES', veiculo: 'rodotrem' });
     await page.evaluate(() => document.querySelector('table.tabela-fretes-ml .btn-adicionar-linha-celular').click());
     await linhaFrete(page, 2, { cliente: 'shopee', veiculo: 'carreta' });
     const m = await page.evaluate(() => {

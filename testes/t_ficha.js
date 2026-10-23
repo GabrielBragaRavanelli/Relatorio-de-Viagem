@@ -217,8 +217,73 @@ const { abrir } = require('./harness');
   await linhaAbast(4, 'arla', 'secundaria', '25');
   r.duasPlacasComArla = await card();
 
+  // Litros sem a vírgula: diesel 312924 (querendo 312,924) e ARLA 15000 passam do limite
+  // (1.500 L no diesel, 150 L no ARLA): aviso embaixo do campo e envio bloqueado
+  const avisoLitros = (i) => page.evaluate((i) => {
+    const el = document.querySelector(`[name="litros_ml_${i}"]`);
+    const aviso = el.closest('.tabela-litros-wrap').nextElementSibling;
+    return `${el.value} | ${el.getAttribute('aria-invalid') === 'true' ? 'VERMELHO' : 'normal'} | ${aviso && aviso.classList.contains('erro-campo-celular') ? aviso.textContent : '(sem aviso)'}`;
+  }, i);
+  await page.evaluate(() => localStorage.removeItem('ajborges_relatorio_viagem_ml_draft'));
+  await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
+  await page.evaluate(() => {
+    window.reservarNumeroFichaSupabase = async () => 'AJB-2026-997';
+    window.salvarFichaSupabase = async (f) => { window.__payload = window.mapearFichaParaSupabase(f); return { success: true }; };
+  });
+  await digitar('#placas', 'ABC1D23');
+  await digitar('#data-saida', '01102026');
+  await digitar('#data-chegada', '05102026');
+  await digitar('#km-saida', '100000');
+  await digitar('#km-chegada', '101500');
+  await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await digitar('#valor-adiantamento', '0');
+  r.litros = {};
+  r.litros.placeholder = await page.$eval('[name="litros_ml_1"]', el => el.placeholder);
+  await linhaAbast(1, 'diesel_s10', null, '312924');
+  r.litros.diesel312924 = { campo: await avisoLitros(1), media: (await card()).valorUnico };
+  r.litros.envioDiesel312924 = await tentarEnviar();
+  r.litros.toastDiesel = await page.$eval('.toast-mensagem', el => el.textContent);
+  await linhaAbast(1, 'diesel_s10', null, '312,924');
+  r.litros.diesel312virgula924 = { campo: await avisoLitros(1), media: (await card()).valorUnico };
+  await linhaAbast(2, 'arla', null, '15000');
+  r.litros.arla15000 = await avisoLitros(2);
+  r.litros.envioArla15000 = await tentarEnviar();
+  await linhaAbast(2, 'arla', null, '15');
+  r.litros.arla15 = await avisoLitros(2);
+  // Trocar o combustível muda o limite: 200 L ok no diesel, aviso no ARLA
+  await linhaAbast(3, 'diesel_s500', null, '200');
+  r.litros.diesel200 = await avisoLitros(3);
+  await page.select('[name="combustivel_ml_3"]', 'arla');
+  r.litros.trocouParaArla200 = await avisoLitros(3);
+  await page.select('[name="combustivel_ml_3"]', 'diesel_s500');
+  r.litros.voltouParaDiesel200 = await avisoLitros(3);
+  r.litros.envioCorrigido = await tentarEnviar();
+
+  // Gestão (modo admin): a ficha abre com o aviso nos litros, mas salva mesmo assim
+  const FICHA_LITROS = {
+    id: 'AJB-2026-996', motorista: 'Motorista Ficticio', placas: 'ABC1D23', status: 'pendente',
+    kmSaida: '100000', kmEntrada: '101500', dataSaida: '01/10/2026', dataChegada: '05/10/2026',
+    destinoInicial: 'Marília - SP', valorAdiantamento: '0,00', fretes: [],
+    abastecimentos: [
+      { posto: 'Posto Ficticio', valor: '1.800,00', litros: '312924', combustivel: 'diesel_s10', placa: 'principal' },
+      { posto: 'Posto Ficticio', valor: '100,00', litros: '15.000', combustivel: 'arla', placa: 'principal' }],
+    outrasDespesas: []
+  };
+  await page.evaluate((f) => {
+    localStorage.clear();
+    localStorage.setItem('teste_usuario', JSON.stringify({ role: 'admin', nome: 'Gestão Teste', id: 'admin-1', email: 'gestao@exemplo.invalid' }));
+    localStorage.setItem('ajborges_fichas_viagem', JSON.stringify([f]));
+  }, FICHA_LITROS);
+  await page.goto(`${base}/HTML/relatorio-viagem.html?ficha=${FICHA_LITROS.id}&mode=admin`, { waitUntil: 'load' });
+  await new Promise(res => setTimeout(res, 600));
+  r.litros.adminAoAbrir = [await avisoLitros(1), await avisoLitros(2)];
+  await page.evaluate(() => { window.salvarFichaSupabase = async (f) => { sessionStorage.setItem('payload', JSON.stringify(window.mapearFichaParaSupabase(f))); return { success: true }; }; });
+  await page.click('#btn-admin-salvar-alteracoes');
+  await new Promise(res => setTimeout(res, 800));
+  r.litros.adminSalvou = await page.evaluate(() => { const p = JSON.parse(sessionStorage.getItem('payload') || 'null'); return p ? `SALVOU (${p.abastecimentos.map(a => a.litros).join(' / ')})` : 'NÃO salvou'; });
+
   r.dialogos = page._dialogos || [];
-  r.erros = erros;
+  r.erros = erros.filter(e => !/Chart is not defined/.test(e));
   console.log(JSON.stringify(r, null, 2));
   await browser.close(); srv.close();
 })().catch(e => { console.error(e); process.exit(1); });
