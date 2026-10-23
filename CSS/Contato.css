@@ -970,6 +970,17 @@ main {
   box-shadow: 0 6px 18px rgba(61, 61, 144, 0.35);
 }
 
+/* Botão do WhatsApp do RH: mesmo tamanho do btn-apoio-fretes, no verde do "Falar com Operacional" */
+.btn-apoio-whatsapp {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.32);
+}
+
+.btn-apoio-whatsapp:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.42);
+}
+
 @media (min-width: 901px) {
   .contato-linha-inferior .info-card.info-card-horizontal,
   .contato-linha-inferior .info-card.info-card-atendimento {
