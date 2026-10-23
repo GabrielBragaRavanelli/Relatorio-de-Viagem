@@ -1856,7 +1856,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const selectCombustivel = document.querySelector(`select[name="combustivel_ml_${i}"]`);
         const selectPlacaAbast = document.querySelector(`select[name="placa_abast_ml_${i}"]`);
 
-        // Combustível (totais diesel/ARLA) e placa (média por placa) mudam os indicadores
+        // Combustível (ARLA fica fora da média) e placa (média por placa) mudam os indicadores
         [selectCombustivel, selectPlacaAbast].forEach(sel => {
             if (!sel) return;
             sel.addEventListener('change', () => {
@@ -1978,11 +1978,21 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         if (placa) placa.value = ab?.placa === 'secundaria' ? 'secundaria' : 'principal';
     }
 
-    // Litros da média por placa: todas as linhas de abastecimento (diesel S10, S500, sem
-    // combustível e ARLA). Os valores em R$ continuam separados nos totais do rodapé.
-    function litrosPorPlaca() {
+    // Litros de diesel (S10 + S500 + sem combustível) por placa; o ARLA não entra na média
+    function litrosDieselPorPlaca() {
+        return litrosAbastPorPlaca(comb => comb !== 'arla');
+    }
+
+    // Litros de ARLA por placa, só para a "Média ARLA" informativa
+    function litrosArlaPorPlaca() {
+        return litrosAbastPorPlaca(comb => comb === 'arla');
+    }
+
+    function litrosAbastPorPlaca(usarLinha) {
         const litros = { principal: 0, secundaria: 0, total: 0 };
         for (let i = 1; i <= 10; i++) {
+            const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`)?.value || '';
+            if (!usarLinha(comb)) continue;
             const l = parseLitros(document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '');
             litros[placaDaLinhaAbast(i)] += l;
             litros.total += l;
@@ -2094,19 +2104,19 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         const totaisCombustivel = calcularTotaisAbastecimentoMl();
         const totaisDespesas = calcularTotaisDespesasMl();
         const totalFreteRelacao = calcularTotaisFreteMl();
-        // Média com todos os litros (diesel + ARLA); os valores em R$ ficam separados nos totais
-        const litrosMedia = litrosPorPlaca();
+        // Média só com diesel (S10 + S500); o ARLA entra só nos custos
+        const diesel = litrosDieselPorPlaca();
         const media = (km, litros) => (km > 0 && litros > 0 && isFinite(km / litros)) ? km / litros : 0;
 
-        // 1. Média de Combustível (KM Total / Litros, diesel + ARLA)
+        // 1. Média de Combustível (KM Total / Litros de diesel)
         if (mlIndicadorMedia) {
-            mlIndicadorMedia.innerHTML = `${formatarDecimal(media(kmTotalNum, litrosMedia.total), 2)} <span class="indicador-unidade">km/l</span>`;
+            mlIndicadorMedia.innerHTML = `${formatarDecimal(media(kmTotalNum, diesel.total), 2)} <span class="indicador-unidade">km/l</span>`;
         }
         if (mlCalcBaseKm) mlCalcBaseKm.textContent = kmTotalNum > 0 ? formatarMilhar(kmTotalNum) : '0';
-        if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(litrosMedia.total);
+        if (mlCalcBaseLitros) mlCalcBaseLitros.textContent = formatarLitros(diesel.total);
 
         // Com 2º trecho: no lugar do valor único, a média de cada placa, uma embaixo da outra
-        // (km do trecho ÷ litros, diesel + ARLA, das linhas daquela placa). Não há média geral somando as duas.
+        // (km do trecho ÷ diesel das linhas daquela placa). Não há média geral somando as duas.
         const doisTrechos = segundoTrechoAtivo();
         const mediaPorPlaca = document.getElementById('ml-media-por-placa');
         const baseGeral = document.getElementById('ml-media-base-geral');
@@ -2121,14 +2131,32 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     const rotulo = placa ? formatarPlaca(placa) : (qual === 'secundaria' ? 'Secundária' : 'Principal');
                     const temBase = km > 0 && litros > 0;
                     const valor = temBase ? `${formatarDecimal(media(km, litros), 2)} <span class="indicador-unidade">km/l</span>` : '—';
-                    const base = temBase ? `${formatarMilhar(km)} km ÷ ${formatarLitros(litros)} L` : 'Falta KM ou litros';
+                    const base = temBase ? `${formatarMilhar(km)} km ÷ ${formatarLitros(litros)} L` : 'Falta KM ou litros de diesel';
                     return `<div class="media-placa" data-placa="${qual}">` +
                         `<span class="media-placa-rotulo">${esc(rotulo)}</span>` +
                         `<strong class="media-placa-valor">${valor}</strong>` +
                         `<small class="indicador-formula-base">${esc(base)}</small></div>`;
                 };
-                mediaPorPlaca.innerHTML = bloco('principal', kms.t1.total || 0, litrosMedia.principal) +
-                    bloco('secundaria', kms.t2.total || 0, litrosMedia.secundaria);
+                mediaPorPlaca.innerHTML = bloco('principal', kms.t1.total || 0, diesel.principal) +
+                    bloco('secundaria', kms.t2.total || 0, diesel.secundaria);
+            }
+        }
+
+        // Média ARLA (KM ÷ litros de ARLA), só informativa; com 2º trecho, uma por placa
+        const mediaArlaEl = document.getElementById('ml-media-arla');
+        if (mediaArlaEl) {
+            const arla = litrosArlaPorPlaca();
+            const linhaArla = (rotulo, km, litros) => `<div class="media-arla-linha">${escapeHTMLAutocomplete(rotulo)}: <strong>` +
+                (km > 0 && litros > 0 ? `${formatarDecimal(km / litros, 2)} km/l` : '—') + '</strong> (KM ÷ litros de ARLA)</div>';
+            if (doisTrechos) {
+                const rotuloPlaca = (qual) => {
+                    const placa = qual === 'secundaria' ? placaSecundariaAtual() : placaPrincipalAtual();
+                    return `Média ARLA ${placa ? formatarPlaca(placa) : (qual === 'secundaria' ? 'Secundária' : 'Principal')}`;
+                };
+                mediaArlaEl.innerHTML = linhaArla(rotuloPlaca('principal'), kms.t1.total || 0, arla.principal) +
+                    linhaArla(rotuloPlaca('secundaria'), kms.t2.total || 0, arla.secundaria);
+            } else {
+                mediaArlaEl.innerHTML = linhaArla('Média ARLA', kmTotalNum, arla.total);
             }
         }
 
@@ -4196,11 +4224,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 }
             }
         }
-        // Mesma regra do indicador: KM da viagem ÷ litros (diesel + ARLA)
+        // Mesma regra do indicador: KM da viagem ÷ litros de diesel
         const kmTotal = kmsDaViagem().viagem || 0;
-        const litrosTotal = litrosPorPlaca().total;
-        if (kmTotal > 0 && litrosTotal > 0) {
-            const med = kmTotal / litrosTotal;
+        const litrosDiesel = litrosDieselPorPlaca().total;
+        if (kmTotal > 0 && litrosDiesel > 0) {
+            const med = kmTotal / litrosDiesel;
             if (!isNaN(med) && isFinite(med) && med > 0) {
                 return med.toFixed(2);
             }
@@ -4212,12 +4240,12 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
     // Sem placa secundária, a principal é a viagem toda e a secundária fica vazia.
     function mediasPorPlacaParaSalvar() {
         const kms = kmsDaViagem();
-        const litrosMedia = litrosPorPlaca();
+        const diesel = litrosDieselPorPlaca();
         const texto = (km, litros) => (km > 0 && litros > 0) ? (km / litros).toFixed(2) : '';
-        if (!segundoTrechoAtivo()) return { mediaPrincipal: texto(kms.t1.total || 0, litrosMedia.total), mediaSecundaria: '' };
+        if (!segundoTrechoAtivo()) return { mediaPrincipal: texto(kms.t1.total || 0, diesel.total), mediaSecundaria: '' };
         return {
-            mediaPrincipal: texto(kms.t1.total || 0, litrosMedia.principal),
-            mediaSecundaria: texto(kms.t2.total || 0, litrosMedia.secundaria)
+            mediaPrincipal: texto(kms.t1.total || 0, diesel.principal),
+            mediaSecundaria: texto(kms.t2.total || 0, diesel.secundaria)
         };
     }
 
@@ -4260,16 +4288,22 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
             html += linha('KM total da viagem', km(kms.viagem));
         }
 
-        // Média de combustível (km ÷ litros, diesel + ARLA): uma por placa quando há placa secundária
-        const litrosMedia = litrosPorPlaca();
+        // Média de combustível (km ÷ litros de diesel) e, abaixo, a média ARLA (km ÷ litros de ARLA,
+        // só informativa): uma de cada por placa quando há placa secundária
+        const diesel = litrosDieselPorPlaca();
+        const arla = litrosArlaPorPlaca();
         const mediaTexto = (kmTrecho, litros) => (kmTrecho > 0 && litros > 0)
             ? `${formatarDecimal(kmTrecho / litros, 2)} km/l (${formatarMilhar(kmTrecho)} km ÷ ${formatarLitros(litros)} L)`
             : '—';
         if (secundaria) {
-            html += linha(`Média (diesel + ARLA) ${principal ? formatarPlaca(principal) : 'principal'}`, mediaTexto(kms.t1.total || 0, litrosMedia.principal));
-            html += linha(`Média (diesel + ARLA) ${formatarPlaca(secundaria)}`, mediaTexto(kms.t2.total || 0, litrosMedia.secundaria));
+            const rotuloPrincipal = principal ? formatarPlaca(principal) : 'principal';
+            html += linha(`Média de combustível ${rotuloPrincipal}`, mediaTexto(kms.t1.total || 0, diesel.principal));
+            html += linha(`Média ARLA ${rotuloPrincipal}`, mediaTexto(kms.t1.total || 0, arla.principal));
+            html += linha(`Média de combustível ${formatarPlaca(secundaria)}`, mediaTexto(kms.t2.total || 0, diesel.secundaria));
+            html += linha(`Média ARLA ${formatarPlaca(secundaria)}`, mediaTexto(kms.t2.total || 0, arla.secundaria));
         } else {
-            html += linha('Média (diesel + ARLA)', mediaTexto(kms.viagem || 0, litrosMedia.total));
+            html += linha('Média de combustível (só diesel)', mediaTexto(kms.viagem || 0, diesel.total));
+            html += linha('Média ARLA', mediaTexto(kms.viagem || 0, arla.total));
         }
 
         const rotulosCliente = { alimenticio: 'Alimentício', shopee: 'Shopee', mercado_livre: 'Mercado Livre' };

@@ -2579,13 +2579,15 @@
                                                 0,00 <span class="indicador-unidade">km/l</span>
                                             </div>
                                             <div class="indicador-formula-base" id="ml-media-base-geral">
-                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros (diesel + ARLA) (<span
+                                                KM Total (<span id="ml-calc-base-km">0</span>) / Litros de diesel (<span
                                                     id="ml-calc-base-litros">0</span>)
                                             </div>
                                             <!-- Com placa secundária: no lugar do valor acima, a média de cada placa
-                                                 (km do trecho ÷ litros, diesel + ARLA, das linhas daquela placa), uma embaixo da outra -->
+                                                 (km do trecho ÷ diesel das linhas daquela placa), uma embaixo da outra -->
                                             <div class="indicador-media-por-placa" id="ml-media-por-placa" hidden></div>
-                                            <div class="indicador-formula-base">Média com diesel + ARLA</div>
+                                            <!-- Média ARLA (km ÷ litros de ARLA), só informativa: não entra na meta nem nos rankings -->
+                                            <div class="indicador-formula-base indicador-media-arla" id="ml-media-arla">Média ARLA: <strong>—</strong> (KM ÷ litros de ARLA)</div>
+                                            <div class="indicador-formula-base">ARLA não entra na média (só nos custos)</div>
                                         </div>
 
                                         <!-- Card 2: Despesa Total -->
