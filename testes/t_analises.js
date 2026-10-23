@@ -111,8 +111,9 @@ const ANTIGA = {
       })()
     };
   }, [NOVA, GESTAO, ANTIGA]);
-  // Passo 14: ARLA na média. 1.500 km com 2 linhas de diesel (200 L e 100 L) e 1 de ARLA (50 L)
-  // -> 1.500 ÷ 350 = 4,29 no modal, no ranking (gráfico por motorista), no alerta, no KPI e nas Análises
+  // Média só diesel. 1.500 km com 2 linhas de diesel (200 L e 100 L) e 1 de ARLA (50 L)
+  // -> 1.500 ÷ 300 = 5,00 no modal, no ranking (gráfico por motorista), no alerta, no KPI e nas Análises;
+  // a média ARLA (1.500 ÷ 50 = 30,00) só aparece no modal
   const MEDIA = {
     id: 'AJB-2026-960', motorista: 'Motorista Media Ficticio', placas: 'ABC1D23', status: 'aprovado',
     dataSaida: '2026-10-01', dataChegada: '2026-10-05', kmSaida: '100000', kmEntrada: '101500', kmTotal: '1500',
@@ -123,7 +124,8 @@ const ANTIGA = {
       { posto: 'Posto B', valor: '250,00', litros: '50', combustivel: 'arla', placa: 'principal' }],
     outrasDespesas: []
   };
-  // Duas placas: principal 1.000 km ÷ (150 diesel + 50 ARLA) = 5,00; secundária 900 km ÷ (200 diesel + 25 ARLA) = 4,00
+  // Duas placas, cada uma só com as suas linhas: principal 1.000 km ÷ 150 diesel = 6,67 (ARLA 1.000 ÷ 50 = 20,00);
+  // secundária 900 km ÷ 200 diesel = 4,50 (ARLA 900 ÷ 25 = 36,00)
   const DUAS = {
     id: 'AJB-2026-961', motorista: 'Motorista Duas Placas Ficticio', placas: 'ABC1D23', placaSecundaria: 'XYZ9A87', status: 'aprovado',
     dataSaida: '01/10/2026', dataChegada: '06/10/2026', kmSaida: '100000', kmEntrada: '101000', kmSaida2: '200000', kmEntrada2: '200900',
@@ -135,7 +137,7 @@ const ANTIGA = {
       { posto: 'Posto C', valor: '125,00', litros: '25', combustivel: 'arla', placa: 'secundaria' }],
     outrasDespesas: []
   };
-  r.mediaComArla = await page.evaluate((fichas) => {
+  r.mediaSoDiesel = await page.evaluate((fichas) => {
     appState.fichas = fichas;
     const linhasModal = (id) => {
       abrirModalResumoFicha(id);
@@ -156,7 +158,9 @@ const ANTIGA = {
     const duas = mediasPorPlacaDaFicha(fichas[1]);
     return {
       obterMediaRealFicha: obterMediaRealFicha(fichas[0]).texto,
-      litrosDaFicha: litrosDaFicha(fichas[0]),
+      litrosDieselDaFicha: litrosDieselDaFicha(fichas[0]),
+      // A média ARLA não aparece fora do modal (KPI, ranking, Análises)
+      mediaArlaForaDoModal: (() => { const c = document.body.cloneNode(true); c.querySelector('#modal-ficha-conteudo')?.remove(); return /Média ARLA/.test(c.textContent); })(),
       modal, kpi, alerta,
       ranking: ranking.labels.map((l, i) => `${l}: ${ranking.data[i]}`),
       analisesMotoristas: tabela('analises-tabela-motoristas').filter(l => /Media Ficticio|Motorista \|/.test(l)),

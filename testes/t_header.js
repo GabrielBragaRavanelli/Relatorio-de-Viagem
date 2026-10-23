@@ -1,7 +1,7 @@
 // Header das páginas: linhas de links, altura, logo, rolagem horizontal e se cobre o conteúdo
 const { abrir } = require('./harness');
 const PAGINAS = (process.argv[3] || 'index,Contato,FichaMultiCadastro,Login,Nossosfretes,Sobrenos,politica-privacidade,relatorio-viagem').split(',');
-const LARGURAS = (process.argv[2] || '320,360,390,430,641,700,780,781,860,900,1024,1280,1440').split(',').map(Number);
+const LARGURAS = (process.argv[2] || '320,360,390,430,641,700,780,781,860,900,1024,1280,1440,1920').split(',').map(Number);
 
 (async () => {
   const { srv, base, browser, page } = await abrir({});
@@ -20,14 +20,21 @@ const LARGURAS = (process.argv[2] || '320,360,390,430,641,700,780,781,860,900,10
         // Conteúdo coberto: primeiro elemento do main começa embaixo do header?
         const main = document.querySelector('main') || document.body.children[1];
         const cobre = getComputedStyle(header).position === 'fixed' && main && (main.firstElementChild || main).getBoundingClientRect().top < header.getBoundingClientRect().bottom - 1;
+        // Logo -> primeiro link (borda direita do bloco do logo até a borda esquerda do 1º link) e sobra à direita
+        const blocoLogo = document.querySelector('.logotipo-AJBorges').getBoundingClientRect();
+        const caixa = document.querySelector('.header-AJBorges').getBoundingClientRect();
+        const ultimo = lis[lis.length - 1].getBoundingClientRect();
         return {
+          logoAoLink: Math.round(lis[0].getBoundingClientRect().left - blocoLogo.right),
+          sobraDireita: Math.round(caixa.right - parseFloat(getComputedStyle(document.querySelector('.header-AJBorges')).paddingRight) - ultimo.right),
+          logoX: Math.round(logo.getBoundingClientRect().left), link1: `${Math.round(lis[0].getBoundingClientRect().left)},${Math.round(lis[0].getBoundingClientRect().top)}`,
           links: lis.length, linhas: tops.size, alturaHeader: Math.round(header.getBoundingClientRect().height),
           posicao: getComputedStyle(header).position, logo: Math.round(logo.getBoundingClientRect().height),
           fonte: getComputedStyle(lis[0].querySelector('a')).fontSize, rolagemH: document.documentElement.scrollWidth > window.innerWidth,
           linkQuebrado: quebrados, cobre
         };
       });
-      linhas.push(`${pag.padEnd(21)} ${String(w).padStart(4)}px  links=${m.links} linhas=${m.linhas} header=${m.alturaHeader}px ${m.posicao.padEnd(8)} logo=${m.logo}px fonte=${m.fonte} rolagemH=${m.rolagemH ? 'SIM' : 'não'} cobre=${m.cobre ? 'SIM' : 'não'} quebra2l=${m.linkQuebrado}`);
+      linhas.push(`${pag.padEnd(21)} ${String(w).padStart(4)}px  links=${m.links} linhas=${m.linhas} header=${m.alturaHeader}px ${m.posicao.padEnd(8)} logo=${m.logo}px fonte=${m.fonte} rolagemH=${m.rolagemH ? 'SIM' : 'não'} cobre=${m.cobre ? 'SIM' : 'não'} quebra2l=${m.linkQuebrado} logo→link=${m.logoAoLink}px sobraDir=${m.sobraDireita}px logoX=${m.logoX} link1=${m.link1}`);
     }
   }
   console.log(linhas.join('\n'));

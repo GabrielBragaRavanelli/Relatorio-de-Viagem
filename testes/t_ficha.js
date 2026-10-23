@@ -1,5 +1,5 @@
 // Simulação da ficha do motorista: placa principal obrigatória, KM Chegada, 2º trecho obrigatório
-// com placa secundária, média de combustível amarrada à placa (ARLA fora), revisão e envio
+// com placa secundária, média de combustível amarrada à placa (só diesel; média ARLA à parte), revisão e envio
 const { abrir } = require('./harness');
 
 (async () => {
@@ -27,7 +27,9 @@ const { abrir } = require('./harness');
     const porPlaca = document.getElementById('ml-media-por-placa');
     return {
       valorUnico: vis(valor) ? valor.textContent.trim().replace(/\s+/g, ' ') + ' | ' + document.getElementById('ml-media-base-geral').textContent.trim().replace(/\s+/g, ' ') : '(oculto)',
-      porPlaca: vis(porPlaca) ? Array.from(porPlaca.querySelectorAll('.media-placa')).map(m => m.innerText.replace(/\s+/g, ' ')) : '(oculto)'
+      porPlaca: vis(porPlaca) ? Array.from(porPlaca.querySelectorAll('.media-placa')).map(m => m.innerText.replace(/\s+/g, ' ')) : '(oculto)',
+      mediaArla: Array.from(document.querySelectorAll('#ml-media-arla .media-arla-linha')).map(l => l.textContent.trim().replace(/\s+/g, ' ')),
+      despesaTotal: document.getElementById('ml-indicador-despesa-total')?.textContent.trim()
     };
   });
   const linhaAbast = async (i, comb, placa, litros, valor = '10000') => {
@@ -173,7 +175,8 @@ const { abrir } = require('./harness');
     km2: await page.evaluate(() => [document.querySelector('#km-saida-2').value, document.querySelector('#km-chegada-2').value, document.querySelector('#km-saida-2').required])
   };
 
-  // ARLA na média (passo 14): 1.500 km, 2 linhas de diesel (200 L e 100 L) e 1 de ARLA (50 L) = 1.500 ÷ 350 = 4,29
+  // Média só diesel: 1.500 km, diesel 200 L + 100 L e ARLA 50 L -> média de combustível 1.500 ÷ 300 = 5,00
+  // e média ARLA 1.500 ÷ 50 = 30,00. Despesa total soma diesel + ARLA (1.200 + 600 + 250 = R$ 2.050,00)
   await page.evaluate(() => localStorage.removeItem('ajborges_relatorio_viagem_ml_draft'));
   await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
   await page.evaluate(() => {
@@ -187,9 +190,10 @@ const { abrir } = require('./harness');
   await digitar('#km-chegada', '101500');
   await page.$eval('#destino-inicial', el => { el.value = 'Marília - SP'; el.dispatchEvent(new Event('input', { bubbles: true })); });
   await digitar('#valor-adiantamento', '0');
-  await linhaAbast(1, 'diesel_s10', null, '200');
-  await linhaAbast(2, 'diesel_s500', null, '100');
-  await linhaAbast(3, 'arla', null, '50');
+  await linhaAbast(1, 'diesel_s10', null, '200', '120000');
+  await linhaAbast(2, 'diesel_s500', null, '100', '60000');
+  r.semArla = await card();
+  await linhaAbast(3, 'arla', null, '50', '25000');
   r.mediaComArla = await card();
   r.mediaComArlaEnvio = await tentarEnviar();
   r.mediaComArlaRevisao = await page.$eval('#revisar-detalhes-viagem', el => (el.innerText.match(/Média[^\n]*\n[^\n]*/g) || []).map(t => t.replace(/\n/g, ': ')));
@@ -197,8 +201,8 @@ const { abrir } = require('./harness');
   await new Promise(res => setTimeout(res, 600));
   r.mediaComArlaPayload = await page.evaluate(() => window.__payload && { media_km_l: window.__payload.media_km_l, mediaPrincipal: window.__payload.dados_completos.mediaPrincipal });
 
-  // Duas placas: cada placa soma as suas linhas, inclusive ARLA.
-  // Principal 1.000 km ÷ (150 diesel + 50 ARLA) = 5,00; secundária 900 km ÷ (200 diesel + 25 ARLA) = 4,00
+  // Duas placas: cada placa só com as suas linhas. Principal 1.000 km: diesel 150 -> 6,67; ARLA 50 -> 20,00.
+  // Secundária 900 km: diesel 200 -> 4,50; ARLA 25 -> 36,00
   await page.evaluate(() => localStorage.removeItem('ajborges_relatorio_viagem_ml_draft'));
   await page.goto(`${base}/HTML/relatorio-viagem.html?novo=true`, { waitUntil: 'load' });
   await digitar('#placas', 'ABC1D23');
