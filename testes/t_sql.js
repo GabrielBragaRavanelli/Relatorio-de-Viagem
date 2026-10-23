@@ -1,4 +1,4 @@
-// Roda supabase/sql/referencia_fichas_atual.sql + passo9 + passo11 + passo12 + passo13 + passo13b num Postgres em WASM
+// Roda supabase/sql/referencia_fichas_atual.sql + passo9 + passo11 + passo12 + passo13 + passo13b + passo14 + passo15 num Postgres em WASM
 // (PGlite), com auth.uid()/auth.jwt()/is_admin() simulados, e confere o trigger do motorista e da gestão.
 // As conferências do passo 12 e do passo 13 (depois do commit) também rodam, bloco a bloco, como estão no arquivo.
 const fs = require('fs');
@@ -88,6 +88,21 @@ async function conferencias(db, sql, prefixo) {
   await db.exec(ateCommit(p14));
   await db.exec(ateCommit(p14));
   r.conferenciasPasso14 = await conferencias(db, p14, '3');
+  // Passo 15 (Viana pelo destino da linha) depois do 14, duas vezes
+  const p15 = ler('supabase/sql/passo15_viana_destino.sql');
+  await db.exec(ateCommit(p15));
+  await db.exec(ateCommit(p15));
+  r.conferenciasPasso15 = await conferencias(db, p15, '2');
+  r.limparFretesPasso15 = (await db.query(`select
+      public._limpar_fretes($1::jsonb, null, 'rodotrem', null, null) sem_especial,
+      public._limpar_fretes($1::jsonb, null, 'carreta_rodotrem', 11.5, null) carreta_especial`, [JSON.stringify([
+        { cliente: 'alimenticio', origem: 'Marília - SP', destino: 'viana/es', valor: '10.000,00', veiculo: 'rodotrem' },
+        { cliente: 'alimenticio', origem: 'Viana - ES', destino: 'Cravinhos - SP', valor: '10.000,00', veiculo: 'rodotrem' },
+        { cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Viana/MA', valor: '10.000,00', veiculo: 'rodotrem' },
+        { cliente: 'alimenticio', origem: 'Marília - SP', destino: 'Viana - ES', valor: '10.000,00', veiculo: 'carreta' },
+        { cliente: 'shopee', origem: 'A', destino: 'Viana - ES', valor: '1.000,00' },
+        { cliente: 'mercado_livre', origem: 'A', destino: 'Viana - ES', valor: '1.000,00' }])])).rows
+    .map(x => Object.fromEntries(Object.entries(x).map(([k, v]) => [k, v.map(f => `${f.destino}/${f.veiculo || '-'}=${f.comissao}`).join(' ; ')])));
   r.perfilDepoisDasConferencias = (await db.query(`select tipo_veiculo, comissao_alim_carreta, comissao_alim_rodotrem from public.perfis`)).rows[0];
   r.limparFretesDuasVersoes = (await db.query(`select pg_get_function_identity_arguments(oid) args from pg_proc where proname = '_limpar_fretes' order by 1`)).rows.map(x => x.args);
 
@@ -149,13 +164,14 @@ async function conferencias(db, sql, prefixo) {
   r.motoristaUpdate = await tentar('def-5g67', { kmSaida: '100000', kmEntrada: '101000', placaSecundaria: '', kmSaida2: '200000', kmEntrada2: '200800', abastecimentos: [] });
   r.motoristaUpdateLinha = await linha();
 
-  // Passo 13 no UPDATE: o perfil é lido também aqui (rodotrem com especial 10,5 vale só na linha rodotrem)
+  // Passo 13 no UPDATE: o perfil é lido também aqui (rodotrem com especial 10,5 vale só na linha rodotrem).
+  // Desde o passo 15 o Viana (ES) é o destino da linha (com o especial, o Viana não muda nada)
   await db.exec(`reset teste.uid`);
   await db.exec(`update public.perfis set tipo_veiculo = 'rodotrem', comissao_alim_rodotrem = 10.5`);
   await db.exec(`select set_config('teste.uid', '11111111-1111-1111-1111-111111111111', false)`);
   const fretesRodo = [
-    { data: '01/10/2026', cliente: 'alimenticio', origem: 'Viana/ES', destino: 'B', valor: '10.000,00', veiculo: 'rodotrem', descarga: 'R$ 150,5' },
-    { data: '02/10/2026', cliente: 'alimenticio', origem: 'Viana/ES', destino: 'B', valor: 10000, veiculo: 'carreta', comissao: '1,00' },
+    { data: '01/10/2026', cliente: 'alimenticio', origem: 'A', destino: 'Viana/ES', valor: '10.000,00', veiculo: 'rodotrem', descarga: 'R$ 150,5' },
+    { data: '02/10/2026', cliente: 'alimenticio', origem: 'A', destino: 'Viana/ES', valor: 10000, veiculo: 'carreta', comissao: '1,00' },
     { data: '03/10/2026', cliente: 'shopee', origem: 'A', destino: 'B', valor: '1.234,56' },
     { data: '04/10/2026', cliente: 'mercado_livre', origem: 'A', destino: 'B', valor: '' },
     { data: '05/10/2026', cliente: 'outro', origem: 'A', destino: 'B', valor: '500,00' },
