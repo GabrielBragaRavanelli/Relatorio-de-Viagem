@@ -2877,6 +2877,12 @@ footer {
     text-align: right !important;
 }
 
+/* Dica "Ex: 312,924" dos litros: menor, para caber inteira na coluna estreita */
+.input-litros-abast-ml::placeholder {
+    font-size: 11px;
+    font-weight: 500;
+}
+
 .input-km-abast-ml {
     font-weight: 600;
     text-align: right !important;

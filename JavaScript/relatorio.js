@@ -1847,6 +1847,31 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
     popularSelectsPostosConvenidos();
 
+    // Litros acima do limite da linha (Diesel S10/S500 ou sem combustível: mais de 1.500 L; ARLA:
+    // mais de 150 L): quase sempre é o número digitado sem a vírgula (312924 em vez de 312,924)
+    const LIMITE_LITROS_DIESEL = 1500;
+    const LIMITE_LITROS_ARLA = 150;
+    const AVISO_LITROS = 'Confira os litros: use vírgula para os decimais (ex.: 312,924).';
+
+    function litrosForaDoLimite(i) {
+        const comb = document.querySelector(`select[name="combustivel_ml_${i}"]`)?.value || '';
+        const litros = parseLitros(document.querySelector(`input[name="litros_ml_${i}"]`)?.value || '');
+        return litros > (comb === 'arla' ? LIMITE_LITROS_ARLA : LIMITE_LITROS_DIESEL);
+    }
+
+    // Marca (ou desmarca) o campo de litros da linha; true = passou do limite
+    function conferirLitrosDaLinha(i) {
+        const input = document.querySelector(`input[name="litros_ml_${i}"]`);
+        if (!input) return false;
+        if (litrosForaDoLimite(i)) {
+            marcarErroCampo(input, AVISO_LITROS);
+            return true;
+        }
+        const aviso = (input.closest('.tabela-litros-wrap') || input).nextElementSibling;
+        if (aviso && aviso.classList.contains('erro-campo-celular') && aviso.textContent.startsWith('Confira os litros')) limparErroCampo(input);
+        return false;
+    }
+
     for (let i = 1; i <= 10; i++) {
         const inputPosto = document.querySelector(`[name="posto_ml_${i}"]`);
         const inputNf = document.querySelector(`input[name="nf_ml_${i}"]`);
@@ -1920,6 +1945,14 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     atualizarListaLinhasAbastPreenchidasPopover();
                 }
             });
+            // Depois da máscara formatar: avisa se passou do limite da linha
+            inputLitros.addEventListener('blur', () => conferirLitrosDaLinha(i));
+            // Trocar o combustível muda o limite (ARLA 150 L) dos litros já digitados
+            if (selectCombustivel) {
+                selectCombustivel.addEventListener('change', () => {
+                    if ((inputLitros.value || '').trim()) conferirLitrosDaLinha(i);
+                });
+            }
         }
 
         // Lixeira na coluna de numeração: "Remover" a linha de abastecimento (da 2ª em diante)
@@ -3389,6 +3422,8 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                 if (valor && ab.valor) valor.value = ab.valor;
                 if (litros && ab.litros) litros.value = ab.litros;
                 definirCamposNovosAbast(i, ab);
+                // Litros acima do limite (provável falta da vírgula) já aparecem marcados ao abrir
+                if (ab.litros) conferirLitrosDaLinha(i);
             });
         }
 
@@ -4347,10 +4382,11 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
         caixa.innerHTML = html;
     }
 
-    // Aviso logo abaixo do campo (some quando o campo é corrigido)
+    // Aviso logo abaixo do campo (some quando o campo é corrigido). Nos litros do abastecimento
+    // o aviso fica embaixo do campo com o "L" (tabela-litros-wrap)
     function marcarErroCampo(el, mensagem) {
         if (!el) return;
-        const ancora = el.closest('.input-wrapper') || el;
+        const ancora = el.closest('.input-wrapper, .tabela-litros-wrap') || el;
         let aviso = ancora.nextElementSibling;
         if (!aviso || !aviso.classList.contains('erro-campo-celular')) {
             aviso = document.createElement('small');
@@ -4364,7 +4400,7 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
 
     function limparErroCampo(el) {
         if (!el) return;
-        const ancora = el.closest('.input-wrapper') || el;
+        const ancora = el.closest('.input-wrapper, .tabela-litros-wrap') || el;
         const aviso = ancora.nextElementSibling;
         if (aviso && aviso.classList.contains('erro-campo-celular')) aviso.remove();
         el.removeAttribute('aria-invalid');
@@ -4461,6 +4497,16 @@ ajbAoAutenticar(['motorista', 'admin', 'diretoria'], 'Login.html', (usuarioSessa
                     return falharValidacao(selPlaca, 'Escolha a placa');
                 }
             }
+        }
+
+        // Litros acima do limite da linha (provável falta da vírgula): o motorista não envia;
+        // a gestão só vê o aviso nos campos e pode salvar
+        for (let i = 1; i <= 10; i++) {
+            const litros = document.querySelector(`input[name="litros_ml_${i}"]`);
+            if (!litros || !linhaEmUso(litros) || !litrosForaDoLimite(i)) continue;
+            const mensagem = `Confira os litros do abastecimento ${i}: use vírgula para os decimais (ex.: 312,924).`;
+            if (!modoAdmin) return falharValidacao(litros, mensagem);
+            conferirLitrosDaLinha(i);
         }
 
         // Outras despesas 2 e 3: tipo e valor andam juntos (os dois vazios = linha ignorada)
